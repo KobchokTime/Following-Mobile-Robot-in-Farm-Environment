@@ -6,11 +6,11 @@ Update this file at the end of every session. The full history of actions is in
 
 ## Current
 
-- **Current owner:** none
-- **Status:** ready
+- **Current owner:** Claude Code
+- **Status:** in-progress
 - **Branch:** `integration/robot-thesis-desk`
-- **Files being edited:** none
-- **Last updated:** 2026-10-16 by Codex
+- **Files being edited:** AGENT_LOG.md, HANDOFF.md (smoke tests under Xvfb; no source edits planned)
+- **Last updated:** 2026-10-16 by Claude Code
 
 ## Collaboration note — 2026-10-16
 
