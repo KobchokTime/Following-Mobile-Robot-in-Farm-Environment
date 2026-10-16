@@ -33,3 +33,6 @@ YDLidar-SDK/
 *.mp4
 *.bag
 *.db3
+
+# Shared editor settings for Thesis Desk are intentionally tracked
+!tools/thesis_desk/.vscode/
