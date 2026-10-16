@@ -5,11 +5,11 @@ Update this file at the end of every session.
 
 ## Current
 
-- **Current owner:** none
-- **Status:** ready
+- **Current owner:** Codex
+- **Status:** in-progress
 - **Branch:** `integration/robot-thesis-desk`
-- **Files being edited:** none
-- **Last updated:** 2026-10-16 by Claude Code
+- **Files being edited:** HANDOFF.md (review claim)
+- **Last updated:** 2026-10-16 by Codex
 
 ## Last session — Claude Code, 2026-10-16
 
