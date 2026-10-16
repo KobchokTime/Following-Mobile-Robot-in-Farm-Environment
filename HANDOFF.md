@@ -6,8 +6,8 @@ and review threads in [`DISCUSSION.md`](DISCUSSION.md).
 
 ## Integration lock
 
-- **Current owner:** none
-- **Status:** ready
+- **Current owner:** Claude Code
+- **Status:** blocked. The branch rename is waiting for the user's permission to delete remote branches (see `logs/claude.md`)
 - **Files being edited:** none
 - **Last updated:** 2026-10-16 by Claude Code
 
@@ -16,7 +16,7 @@ and review threads in [`DISCUSSION.md`](DISCUSSION.md).
 | Branch | State |
 |---|---|
 | `main` | Initial commit only. It receives `integration` through a PR once the user approves. |
-| `integration` | Has everything integrated so far: the robot recovery, Thesis Desk, the quest sources, the agent workflow and the GUI smoke-test results. `scripts/check.py` passes. |
+| `integration` | *Pending rename; until then it is `integration/robot-thesis-desk`.* Has everything integrated so far: the robot recovery, Thesis Desk, the quest sources, the agent workflow and the GUI smoke-test results. `scripts/check.py` passes. |
 | `claude/workspace` | Same as `integration`. No feature in progress. |
 | `codex/workspace` | Same as `integration`. No feature in progress. |
 

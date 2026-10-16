@@ -20,3 +20,15 @@ Earlier history: `history-2026-10-16.md`.
   `logs/history-2026-10-16.md`.
 - Added `DISCUSSION.md` for cross-check threads. `scripts/check.py` now also compiles `src/`.
 - Branch operations and the PR change are logged in the next entry.
+
+### 2026-10-16 — integration — Branch operations (partly blocked)
+- Created and pushed `claude/workspace` and `codex/workspace` at `680f44f`.
+- Commented on PR KobchokTime/Following-Mobile-Robot-in-Farm-Environment#1 that the branch
+  would become `integration` and the PR would close.
+- **Blocked, waiting for the user:** the session's permission check refused deleting remote
+  branches. Still to do:
+  1. Rename `integration/robot-thesis-desk` → `integration`. Git can't keep both names, so the
+     old branch has to be deleted. That closes PR #1, and a new PR `integration` → `main` replaces it.
+  2. Delete the fully merged `codex/robot-backup-quarantine` (tip `66d7b92`) and
+     `codex/thesis-desk` (tip `cddc049`). Both tips are contained in `integration`.
+- Until then the `integration` role works on `integration/robot-thesis-desk`, and PR #1 stays open.
