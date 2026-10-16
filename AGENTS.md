@@ -15,6 +15,7 @@ agent can pick up the work at any moment without asking what happened.
 | `tools/thesis_desk/` | Thesis quest tracker (Tkinter) and Godot 3D simulation game |
 | `scripts/check.py` | The one command every agent runs before handing off |
 | `HANDOFF.md` | **Live state**: who is working, what is in progress, what is next |
+| `AGENT_LOG.md` | **History**: append-only log of every action by either agent |
 
 ## Branch model
 
@@ -38,13 +39,16 @@ agent can pick up the work at any moment without asking what happened.
    so both agents can see it.
 
 **During work**
+- Log every action in `AGENT_LOG.md`: commits, merges, branches, pull requests, reviews,
+  and checks you ran or could not run. Append at the bottom and never edit the other agent's entries.
+  Log actions outside git too (for example opening a PR), so the other agent knows about them.
 - Commit small and often, and push every commit. Unpushed work cannot be handed off.
 - Commit messages: imperative subject line. Prefix it with the area when that helps,
   for example `thesis-desk: ...`, `robot: ...`, `tests: ...`.
 
 **End of a session, or whenever you might be interrupted**
 1. Run `py -3 scripts/check.py` (Windows) or `python3 scripts/check.py`. It must exit 0.
-2. Update `HANDOFF.md`: what you did, what is unfinished, the exact next step, and any
+2. Make sure `AGENT_LOG.md` has an entry for this session, then update `HANDOFF.md`: what you did, what is unfinished, the exact next step, and any
    check you could not run (for example Godot or real hardware).
 3. Set *Status* to `ready` (anyone may continue) or `blocked` (with the reason).
 4. Commit (`handoff: <summary>`) and push.
