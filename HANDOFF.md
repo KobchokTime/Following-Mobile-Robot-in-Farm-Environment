@@ -5,42 +5,39 @@ Update this file at the end of every session.
 
 ## Current
 
-- **Current owner:** Codex
-- **Status:** in-progress
+- **Current owner:** none
+- **Status:** ready
 - **Branch:** `integration/robot-thesis-desk`
-- **Files being edited:** HANDOFF.md; eight quest-source files; Thesis Desk seed data
+- **Files being edited:** none
 - **Last updated:** 2026-10-16 by Codex
 
-## Last session — Claude Code, 2026-10-16
+## Last session — Codex, 2026-10-16
 
 Done:
-- Created `integration/robot-thesis-desk` from `main` and merged
-  `codex/robot-backup-quarantine` and `codex/thesis-desk` into it (merge commits, history kept).
-- Resolved the only conflict, `README.md`. It keeps the recovery README and adds a Thesis Desk section.
-- Added `AGENTS.md`, `CLAUDE.md`, `HANDOFF.md` and `scripts/check.py`.
-- Un-ignored `tools/thesis_desk/.vscode/`, which the robot branch's `.vscode/` rule would otherwise hide.
-- `scripts/check.py`: compile passes, `thesis_data.json` is valid (18 tasks), 8/8 tests pass.
-
-Not verified (needs the Windows machine):
-- Thesis Desk Tkinter app and the Godot game were not launched. The cloud container has no display or Godot.
+- Added the eight quest source files referenced by `tools/thesis_desk/thesis_data.json`.
+  Sanitized a local robot IP and a machine-specific Python path from the copied notes.
+- Reset `thesis_data.json` game state to the default office scene, centered player, no test
+  runs, and zero simulation XP so local smoke-test history is not shipped as seed data.
+- Verified `py -3 scripts/check.py`: compilation passes, all 18 tasks are valid, and 8/8
+  tests pass with no missing-source warnings.
+- Verified Thesis Desk loads all 18 tasks.
+- Verified the Godot 3D project imports and runs headless without script errors. Launched
+  `run_3d_game.bat` from a disposable copy; Windows showed a running `Thesis Quest 3D (DEBUG)`
+  window. Visual interaction could not be inspected through the available UI surface.
+- Attempted `run_thesis_tracker.bat`; it exited successfully but no targetable Tkinter window
+  remained visible, so its visual smoke test is unverified.
+- Pushed the source and seed-data update as `c76b49e` (`thesis-desk: add quest reference sources`).
 
 ## Open items
 
-1. **Missing quest sources (needs Codex or the user on Windows).** `thesis_data.json` cites
-   8 files that exist only on the local machine. Commit them so the quest links work.
-   `scripts/check.py` lists them as `[WARN]`:
-   - `docs/EXECUTION_WORKFLOW.md`
-   - `docs/MOTION_SAFETY_GATE.md`
-   - `config/motor_wheel_calibration.md`
-   - `experiments/camera/2026-09-20_camera_only_start.md`
-   - `experiments/hardware/2026-09-20_connected_runtime_validation.md`
-   - `experiments/identity/README.md`
-   - `experiments/orientation/README.md`
-   - `src/following_robot/target_identity.py`
-2. **Smoke-test on Windows (Codex).** Run `run_thesis_tracker.bat` and `run_3d_game.bat` from
-   this branch and note the result here.
-3. **Merge to `main`.** Only once the user approves.
+1. Run an interactive visual play-through of the 3D game and confirm controls/gameplay on
+   Windows. The engine launch and scene startup passed, but visual interaction was not
+   inspected in this session.
+2. Recheck the Tkinter tracker window if it is needed; the batch process returned exit code
+   0, but the window was not available for visual inspection.
+3. Merge to `main` only when the user approves.
 
 ## Next step
 
-Codex: pull this branch, do open items 1 and 2, then update this file.
+Claude: pull `integration/robot-thesis-desk`, review the committed quest-source and seed-data
+changes, then perform an interactive 3D play-through on a GUI-capable machine.
