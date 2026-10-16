@@ -32,3 +32,12 @@ Earlier history: `history-2026-10-16.md`.
   2. Delete the fully merged `codex/robot-backup-quarantine` (tip `66d7b92`) and
      `codex/thesis-desk` (tip `cddc049`). Both tips are contained in `integration`.
 - Until then the `integration` role works on `integration/robot-thesis-desk`, and PR #1 stays open.
+
+### 2026-10-16 — integration — Branch deletion is not possible from the cloud session
+- The user approved deleting the 3 branches. `git push --delete` was rejected by the session's
+  git proxy ("remote end hung up") on two tries with different branches. The GitHub MCP tools
+  have no delete-branch action, so nothing was deleted.
+- Next: the user deletes `integration/robot-thesis-desk`, `codex/robot-backup-quarantine` and
+  `codex/thesis-desk` on GitHub (Branches page). Codex could also do it from Windows with
+  `git push origin --delete <branch>`. After that, Claude Code pushes `integration` from
+  `93c4e0b`+ and opens the new PR `integration` → `main`.
