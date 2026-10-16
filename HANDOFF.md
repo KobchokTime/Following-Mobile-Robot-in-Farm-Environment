@@ -8,7 +8,7 @@ Update this file at the end of every session.
 - **Current owner:** Codex
 - **Status:** in-progress
 - **Branch:** `integration/robot-thesis-desk`
-- **Files being edited:** HANDOFF.md; eight quest-source files listed under Open items
+- **Files being edited:** HANDOFF.md; eight quest-source files; Thesis Desk seed data
 - **Last updated:** 2026-10-16 by Codex
 
 ## Last session — Claude Code, 2026-10-16
