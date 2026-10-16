@@ -1,60 +1,112 @@
 # Agent Guide (Codex + Claude Code)
 
-This repository is worked on by **Codex** and **Claude Code**, sometimes one after the
-other on the same day. Both read this file (`CLAUDE.md` points here). Follow it so either
-agent can pick up the work at any moment without asking what happened.
+This repository is worked on by **Codex** and **Claude Code**. Both read this file
+(`CLAUDE.md` points here). Follow it so either agent can pick up the work at any moment,
+and so each one can see and re-check what the other did.
 
 ## Repository map
 
 | Path | What it is |
 |---|---|
-| `ros2_yolo_ws/scripts/` | Recovered ROS 2 robot code: YOLO detection, LiDAR fusion, Follow-Stop controller, ZLAC motor bridge |
+| `ros2_yolo_ws/scripts/`, `src/following_robot/` | Robot code: YOLO detection, LiDAR fusion, target identity, Follow-Stop controller, ZLAC motor bridge |
 | `yolov8n_openvino_model/` | OpenVINO export of YOLOv8n |
-| `tests/` | Offline tests with ROS/message stubs (no hardware) |
-| `quarantine/BACKUP_AUDIT.md` | What was recovered from the backup, what was excluded and why |
 | `tools/thesis_desk/` | Thesis quest tracker (Tkinter) and Godot 3D simulation game |
-| `scripts/check.py` | The one command every agent runs before handing off |
-| `HANDOFF.md` | **Live state**: who is working, what is in progress, what is next |
-| `AGENT_LOG.md` | **History**: append-only log of every action by either agent |
+| `docs/`, `experiments/`, `config/` | Protocols, safety gates, experiment evidence, calibration notes |
+| `tests/`, `scripts/check.py` | Offline tests and the one check every agent runs before merging |
+| `quarantine/BACKUP_AUDIT.md` | What was recovered from the backup, what was excluded and why |
+| `agents/roles/` | Role definitions shared by both agents (see *Roles*) |
+| `logs/claude.md`, `logs/codex.md` | Append-only action log, one per agent |
+| `HANDOFF.md` | Live state of the `integration` branch and both workspaces |
+| `DISCUSSION.md` | Cross-check threads between Claude and Codex |
 
-## Branch model
+## Branches
 
-- `main` stays stable. Merge to it only when the user asks.
-- `integration/robot-thesis-desk` is the shared working branch. Both agents start here.
-- Feature work goes on a short-lived branch cut from the integration branch:
-  - Codex: `codex/<topic>`
-  - Claude Code: `claude/<topic>`
-- Merge back into the integration branch with a merge commit (`--no-ff`). Never rebase,
-  amend or force-push a branch the other agent may have pulled.
-- Always `git fetch origin` and `git pull` before starting. The other agent may have pushed.
+There are four long-lived branches:
 
-## Handoff protocol
+| Branch | Owner | Purpose |
+|---|---|---|
+| `main` | User | The main, stable line. Only `integration` merges into it, through a PR the user approves. |
+| `claude/workspace` | Claude Code | Claude's base for developing features. |
+| `codex/workspace` | Codex | Codex's base for developing features. |
+| `integration` | Both | Where features from both workspaces are combined and tested, and where Claude and Codex discuss and re-check each other's work. |
 
-**Start of a session**
-1. `git fetch origin && git checkout integration/robot-thesis-desk && git pull`
-2. Read `HANDOFF.md`. If *Current owner* is the other agent and *Status* is `in-progress`,
-   do not touch the files listed under *Files being edited*. Ask the user first.
-3. Set *Current owner* to yourself, *Status* to `in-progress`, commit
-   (`handoff: claim <topic>`) and push. This is the lock. It lives in git, not on disk,
-   so both agents can see it.
+```
+claude/<role>/<topic> ──► claude/workspace ──┐
+                                             ├──► integration ──(user approves)──► main
+codex/<role>/<topic>  ──► codex/workspace  ──┘
+```
 
-**During work**
-- Log every action in `AGENT_LOG.md`: commits, merges, branches, pull requests, reviews,
-  and checks you ran or could not run. Append at the bottom and never edit the other agent's entries.
-  Log actions outside git too (for example opening a PR), so the other agent knows about them.
-- Commit small and often, and push every commit. Unpushed work cannot be handed off.
-- Commit messages: imperative subject line. Prefix it with the area when that helps,
-  for example `thesis-desk: ...`, `robot: ...`, `tests: ...`.
+Rules:
+- Feature branches are short-lived. Name them `<agent>/<role>/<topic>`, cut them from your own
+  workspace, and merge them back into it with `--no-ff`.
+- Never commit to the other agent's workspace or its feature branches. Leave feedback in
+  `DISCUSSION.md` on `integration` instead.
+- Start every session by syncing: `git fetch origin`, then merge `origin/integration` into
+  your workspace, so you build on what the other agent already integrated.
+- Merge commits only. Never rebase, amend or force-push a shared branch.
 
-**End of a session, or whenever you might be interrupted**
-1. Run `py -3 scripts/check.py` (Windows) or `python3 scripts/check.py`. It must exit 0.
-2. Make sure `AGENT_LOG.md` has an entry for this session, then update `HANDOFF.md`: what you did, what is unfinished, the exact next step, and any
-   check you could not run (for example Godot or real hardware).
-3. Set *Status* to `ready` (anyone may continue) or `blocked` (with the reason).
-4. Commit (`handoff: <summary>`) and push.
+## Models
 
-If a session ends without step 3, the next agent treats the claim as stale when the last
-`handoff:` commit is more than 24 hours old, and notes that it took over.
+| Where | Claude Code | Codex |
+|---|---|---|
+| `integration` (combine, test, cross-check) | **Claude Opus 5.5**. The `integration` role agent in `.claude/agents/integration.md` sets it. | **Sol 6**, set in Codex's own config. Codex fills in the exact model ID; see `HANDOFF.md`. |
+| Workspaces | The session's default model | The session's default model |
+
+## Roles
+
+Each agent splits its work by role. Every role has its own file in `agents/roles/`, which gives
+its scope (the paths it may change), its checks, and its definition of done. Both agents use
+the same role names, so a feature from either side is reviewed against the same rules.
+
+| Role | Scope | File |
+|---|---|---|
+| `robot` | `ros2_yolo_ws/`, `src/following_robot/`, `yolov8n_openvino_model/` | `agents/roles/robot.md` |
+| `thesis-desk` | `tools/thesis_desk/` | `agents/roles/thesis-desk.md` |
+| `research` | `docs/`, `experiments/`, `config/` | `agents/roles/research.md` |
+| `qa` | `tests/`, `scripts/` | `agents/roles/qa.md` |
+| `integration` | Merging into `integration`, cross-review, `HANDOFF.md`, `DISCUSSION.md` | `agents/roles/integration.md` |
+
+- **Claude Code**: each role is a subagent in `.claude/agents/<role>.md`. Delegate to the
+  matching subagent, or follow its role file yourself.
+- **Codex**: before working as a role, read `agents/roles/<role>.md` and stay within its scope.
+- A change that needs more than one role is split into one feature branch per role.
+
+## Workflow
+
+**1. Develop (in your workspace)**
+1. Sync your workspace with `integration` (see *Branches*).
+2. Cut `<agent>/<role>/<topic>` from your workspace. Work within the role's scope.
+3. Run `py -3 scripts/check.py` (Windows) or `python3 scripts/check.py`. It must exit 0.
+4. Merge the feature into your workspace (`--no-ff`) and push. Log it in `logs/<agent>.md`.
+
+**2. Integrate (on `integration`, with the integration model)**
+1. Read `HANDOFF.md`. If the other agent holds the integration lock (*Status* `in-progress`),
+   wait or ask the user. Otherwise claim it: set yourself as owner and commit
+   `handoff: claim <topic>`, then push.
+2. Merge your workspace into `integration` (`--no-ff`). Run `scripts/check.py`.
+3. Open a thread in `DISCUSSION.md` asking the other agent to review it. Say what changed, how
+   you tested it, and what you are unsure about.
+4. Update `HANDOFF.md`, release the lock (`ready`), then push.
+
+**3. Cross-check (the other agent, on `integration`)**
+1. Review the diff of every thread marked `open` for you. Re-run `scripts/check.py` and any
+   relevant manual checks.
+2. Reply in the thread with `agree`, `change requested` (with reasons), or `question`.
+   Fix problems in your own workspace, never in the other agent's.
+3. A thread is `resolved` only when both agents agree. `integration` may go to `main` only
+   when no thread is `open` and the user approves.
+
+**Logging (always)**
+- Log every action in your own `logs/<agent>.md`: commits, merges, branches, pull requests,
+  reviews, discussions and checks you ran or could not run. Include actions outside git,
+  such as opening a PR. Append at the bottom. Each agent edits only its own log, so logs never
+  conflict when branches merge. `logs/history-2026-10-16.md` is the shared log from before this split.
+- Entry format: `### YYYY-MM-DD — <role> — <short title>` then bullets: what, where
+  (branch / commit / PR), result, and follow-ups.
+- `HANDOFF.md` and `DISCUSSION.md` are edited **only on `integration`**.
+
+If a lock is older than 24 hours with no new `handoff:` commit, treat it as stale, note that
+you took over, and continue.
 
 ## Safety rules (do not break)
 
@@ -69,7 +121,8 @@ If a session ends without step 3, the next agent treats the claim as stale when 
 
 - Codex usually runs on the user's Windows machine. It can run Godot (`tools/thesis_desk/.tools/godot/`,
   not in git) and Tkinter, and it can see local files that are not in the repo.
-- Claude Code may run in a headless Linux cloud container. It cannot open GUI apps or
-  Windows paths. Anything only on the Windows machine has to be committed before Claude can use it.
+- Claude Code may run in a headless Linux cloud container. It can smoke-test GUI apps under Xvfb
+  (see `logs/history-2026-10-16.md`), but it cannot reach Windows paths. Anything that exists only
+  on the Windows machine has to be committed before Claude can use it.
 - Real ROS graph, camera, LiDAR, motor and E-stop checks happen only on the robot's
   Ubuntu/ROS 2 system, by the user.

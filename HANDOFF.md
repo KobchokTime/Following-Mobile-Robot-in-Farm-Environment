@@ -1,51 +1,42 @@
 # Handoff
 
-Live state shared by Codex and Claude Code. The protocol is in [`AGENTS.md`](AGENTS.md).
-Update this file at the end of every session. The full history of actions is in
-[`AGENT_LOG.md`](AGENT_LOG.md).
+Live state of the shared work. Edit this file **only on `integration`**. The rules are in
+[`AGENTS.md`](AGENTS.md). Action history lives in `logs/claude.md` and `logs/codex.md`,
+and review threads in [`DISCUSSION.md`](DISCUSSION.md).
 
-## Current
+## Integration lock
 
-- **Current owner:** Claude Code
-- **Status:** in-progress
-- **Branch:** `integration/robot-thesis-desk`
-- **Files being edited:** AGENTS.md, HANDOFF.md, AGENT_LOG.md, CLAUDE.md, README.md, new agent role files; branches are being renamed
+- **Current owner:** none
+- **Status:** ready
+- **Files being edited:** none
 - **Last updated:** 2026-10-16 by Claude Code
 
-## Collaboration note — 2026-10-16
+## Branches
 
-- User explicitly asked that every action be logged so Claude can follow the work. This is now a repository-wide rule in `AGENTS.md`; append every action to `AGENT_LOG.md`, and keep this handoff current with status, results, blockers, and next steps.
+| Branch | State |
+|---|---|
+| `main` | Initial commit only. It receives `integration` through a PR once the user approves. |
+| `integration` | Has everything integrated so far: the robot recovery, Thesis Desk, the quest sources, the agent workflow and the GUI smoke-test results. `scripts/check.py` passes. |
+| `claude/workspace` | Same as `integration`. No feature in progress. |
+| `codex/workspace` | Same as `integration`. No feature in progress. |
 
-## Last session — Codex, 2026-10-16
+## Models on `integration`
 
-Done:
-- Added the eight quest source files referenced by `tools/thesis_desk/thesis_data.json`.
-  Sanitized a local robot IP and a machine-specific Python path from the copied notes.
-- Reset `thesis_data.json` game state to the default office scene, centered player, no test
-  runs, and zero simulation XP so local smoke-test history is not shipped as seed data.
-- Verified `py -3 scripts/check.py`: compilation passes, all 18 tasks are valid, and 8/8
-  tests pass with no missing-source warnings.
-- Verified Thesis Desk loads all 18 tasks.
-- Verified the Godot 3D project imports and runs headless without script errors. Launched
-  `run_3d_game.bat` from a disposable copy; Windows showed a running `Thesis Quest 3D (DEBUG)`
-  window. Visual interaction could not be inspected through the available UI surface.
-- Attempted `run_thesis_tracker.bat`; it exited successfully but no targetable Tkinter window
-  remained visible, so its visual smoke test is unverified.
-- Pushed the source and seed-data update as `c76b49e` (`thesis-desk: add quest reference sources`).
+- Claude Code: Claude Opus 5.5, through the `.claude/agents/integration.md` subagent (`model: opus`).
+- Codex: **Sol 6**. *Action for Codex:* set the exact model ID in your own config, then
+  confirm it in `DISCUSSION.md` thread T1.
 
 ## Open items
 
-1. ~~3D game play-through~~ Done by Claude Code under Xvfb: it loads, moves, shows the journal,
-   handles interaction and the Test Field. See the 2026-10-16 GUI smoke-test entry in `AGENT_LOG.md`.
-2. ~~Tkinter tracker window~~ Done by Claude Code under Xvfb. The window renders.
-3. Optional UI fixes found during the smoke test, owned by the game author:
-   - The Research Desk dialog ignores ESC and persists across the scene switch.
+1. **T1** in `DISCUSSION.md`: Codex reviews the branch restructure and role setup.
+2. Optional UI fixes for the `thesis-desk` role, found in the Xvfb smoke test:
+   - The Research Desk dialog ignores ESC and stays open after switching to Test Field.
    - The tracker's top bar overflows a 1440 px wide screen.
-4. Merge to `main` only when the user approves. Draft PR
-   KobchokTime/Following-Mobile-Robot-in-Farm-Environment#1 is open for it.
+3. Not yet verified: rendering on the user's real Windows GPU, and the real robot checks
+   (ROS graph, camera, LiDAR, motor, E-stop).
+4. `integration` → `main`: needs every thread resolved and the user's approval.
 
 ## Next step
 
-The user decides: fix the two UI issues from item 3 first (Codex), or mark PR
-KobchokTime/Following-Mobile-Robot-in-Farm-Environment#1 ready and merge as is.
-A quick look on the real Windows GPU is still worth doing before a demo.
+Codex: sync `codex/workspace` with `integration` and review T1 on `integration` using Sol 6.
+Then decide with the user whether to take open item 2 as `codex/thesis-desk/<topic>`.
