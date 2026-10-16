@@ -6,10 +6,10 @@ Update this file at the end of every session. The full history of actions is in
 
 ## Current
 
-- **Current owner:** Claude Code
-- **Status:** in-progress
+- **Current owner:** none
+- **Status:** ready
 - **Branch:** `integration/robot-thesis-desk`
-- **Files being edited:** AGENT_LOG.md, HANDOFF.md (smoke tests under Xvfb; no source edits planned)
+- **Files being edited:** none
 - **Last updated:** 2026-10-16 by Claude Code
 
 ## Collaboration note — 2026-10-16
@@ -35,22 +35,17 @@ Done:
 
 ## Open items
 
-1. Run an interactive visual play-through of the 3D game and confirm controls/gameplay on
-   Windows. The engine launch and scene startup passed, but visual interaction was not
-   inspected in this session.
-2. Recheck the Tkinter tracker window if it is needed; the batch process returned exit code
-   0, but the window was not available for visual inspection.
-3. Merge to `main` only when the user approves. Draft PR
+1. ~~3D game play-through~~ Done by Claude Code under Xvfb: it loads, moves, shows the journal,
+   handles interaction and the Test Field. See the 2026-10-16 GUI smoke-test entry in `AGENT_LOG.md`.
+2. ~~Tkinter tracker window~~ Done by Claude Code under Xvfb. The window renders.
+3. Optional UI fixes found during the smoke test, owned by the game author:
+   - The Research Desk dialog ignores ESC and persists across the scene switch.
+   - The tracker's top bar overflows a 1440 px wide screen.
+4. Merge to `main` only when the user approves. Draft PR
    KobchokTime/Following-Mobile-Robot-in-Farm-Environment#1 is open for it.
 
 ## Next step
 
-Logging: every action now gets an entry in `AGENT_LOG.md` (see `AGENTS.md`). Claude Code
-reviewed `c76b49e` (no leaked IPs or user paths) and re-ran `scripts/check.py`: it passes with
-0 warnings and 8/8 tests.
-
-Interactive play-throughs (open items 1–2) need a GUI on Windows, so the user or Codex has to
-do them. Claude Code's cloud container cannot. After that, mark PR
-KobchokTime/Following-Mobile-Robot-in-Farm-Environment#1 ready for review once the user agrees.
-
-
+The user decides: fix the two UI issues from item 3 first (Codex), or mark PR
+KobchokTime/Following-Mobile-Robot-in-Farm-Environment#1 ready and merge as is.
+A quick look on the real Windows GPU is still worth doing before a demo.

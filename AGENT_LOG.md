@@ -57,3 +57,25 @@ Rules (also in `AGENTS.md`):
 - Local push initially rejected because of Claude concurrent commits; no remote work was overwritten. This session’s final log and merge are pending push.
 - Merged Claude commits into the local shared branch; resolved the `AGENTS.md` overlap by keeping Claude's more complete append-only log rules. Final validation and push are next.
 - Required check passed: `py -3 scripts/check.py` (18 tasks; 8/8 tests). `git diff --cached --check` found no whitespace errors; push follows this merge commit.
+
+### 2026-10-16 — Claude Code — GUI smoke tests under a virtual display
+- Claimed the handoff (`handoff: claim GUI smoke tests under virtual display`). Ran everything
+  from a disposable copy of `tools/thesis_desk/`, so no repo files were changed by the apps.
+- Environment: cloud Linux, Xvfb 1440x900 / 1280x720, Mesa llvmpipe (OpenGL 4.5), Python 3.12
+  with `python3-tk`, official `Godot_v4.7.2-stable_linux.x86_64`, `xdotool` for input.
+- **Tkinter tracker (`app.py`)**: PASS. The window opens and stays alive, and the Thai text renders.
+  The Player Hub shows the office map, 0/7 chapters, active quest 1, 210 XP and side quests 7/8.
+- **Godot 3D game**: PASS.
+  - `--headless --import` exits 0. The run has 0 `SCRIPT ERROR` or parse errors; the only
+    warnings are audio and V-Sync from the virtual display.
+  - Verified: the office scene loads, WASD moves the player and camera, ESC opens the Quest
+    Journal with 7 Main Quest chapters from `thesis_data.json`, E at the Research Desk opens
+    its dialog, and the TEST FIELD button loads the field (4 plots, path junctions, simulated
+    YOLO webcam view `person 1.00`). The HUD shows `DISARMED` and `MOVE 0`.
+- Findings (not fixed; small UI issues for the game owner to decide):
+  1. The Research Desk dialog does not close with ESC and stays on screen after switching
+     to Test Field. Only `รับทราบ` closes it.
+  2. The tracker's top bar is wider than a 1440 px screen, so the right-hand buttons
+     (`Office`, stats) are cut off.
+- Not verified: Windows-specific launchers (`.bat`) and the rendering on the user's GPU.
+  `scripts/check.py`: PASS (0 warnings, 8/8 tests).
