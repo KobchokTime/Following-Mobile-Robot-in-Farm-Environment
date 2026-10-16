@@ -1,7 +1,8 @@
 # Handoff
 
 Live state shared by Codex and Claude Code. The protocol is in [`AGENTS.md`](AGENTS.md).
-Update this file at the end of every session.
+Update this file at the end of every session. The full history of actions is in
+[`AGENT_LOG.md`](AGENT_LOG.md).
 
 ## Current
 
@@ -13,7 +14,7 @@ Update this file at the end of every session.
 
 ## Collaboration note — 2026-10-16
 
-- User requested that all work be logged for Claude. This applies to every session: keep this handoff updated with actions, results, unresolved items, and the next step; push the record to the shared branch.
+- User explicitly asked that every action be logged so Claude can follow the work. This is now a repository-wide rule in `AGENTS.md`; append every action to `AGENT_LOG.md`, and keep this handoff current with status, results, blockers, and next steps.
 
 ## Last session — Codex, 2026-10-16
 
@@ -39,9 +40,17 @@ Done:
    inspected in this session.
 2. Recheck the Tkinter tracker window if it is needed; the batch process returned exit code
    0, but the window was not available for visual inspection.
-3. Merge to `main` only when the user approves.
+3. Merge to `main` only when the user approves. Draft PR
+   KobchokTime/Following-Mobile-Robot-in-Farm-Environment#1 is open for it.
 
 ## Next step
 
-Claude: pull `integration/robot-thesis-desk`, review the committed quest-source and seed-data
-changes, then perform an interactive 3D play-through on a GUI-capable machine.
+Logging: every action now gets an entry in `AGENT_LOG.md` (see `AGENTS.md`). Claude Code
+reviewed `c76b49e` (no leaked IPs or user paths) and re-ran `scripts/check.py`: it passes with
+0 warnings and 8/8 tests.
+
+Interactive play-throughs (open items 1–2) need a GUI on Windows, so the user or Codex has to
+do them. Claude Code's cloud container cannot. After that, mark PR
+KobchokTime/Following-Mobile-Robot-in-Farm-Environment#1 ready for review once the user agrees.
+
+
