@@ -21,3 +21,12 @@ The suite validates Python syntax, expected ROS topic wiring, the recovered CSV,
 the OpenVINO export, and Follow-Stop controller behavior using safe message/ROS stubs.
 Real ROS graph, camera, LiDAR, serial motor, and emergency-stop tests must still run
 on the target Ubuntu/ROS 2 system before hardware operation.
+
+## Thesis Desk
+
+A local desktop quest tracker and Godot simulation prototype for managing the research workflow is available in [`tools/thesis_desk/`](tools/thesis_desk/README.md). Its robot tests are simulations and do not issue hardware commands.
+
+## Working with AI agents
+
+Claude Code and Codex share this repository. Read [`AGENTS.md`](AGENTS.md) for the rules and
+[`HANDOFF.md`](HANDOFF.md) for the current state before starting work.
