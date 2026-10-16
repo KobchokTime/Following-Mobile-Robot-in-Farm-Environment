@@ -38,6 +38,7 @@ agent can pick up the work at any moment without asking what happened.
    so both agents can see it.
 
 **During work**
+- Keep `HANDOFF.md` current as work progresses. Log meaningful changes, decisions, checks and results, blockers, and the exact next step so the other agent can continue without relying on chat history.
 - Commit small and often, and push every commit. Unpushed work cannot be handed off.
 - Commit messages: imperative subject line. Prefix it with the area when that helps,
   for example `thesis-desk: ...`, `robot: ...`, `tests: ...`.

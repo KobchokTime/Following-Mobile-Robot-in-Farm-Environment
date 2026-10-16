@@ -11,6 +11,10 @@ Update this file at the end of every session.
 - **Files being edited:** none
 - **Last updated:** 2026-10-16 by Codex
 
+## Collaboration note — 2026-10-16
+
+- User requested that all work be logged for Claude. This applies to every session: keep this handoff updated with actions, results, unresolved items, and the next step; push the record to the shared branch.
+
 ## Last session — Codex, 2026-10-16
 
 Done:
