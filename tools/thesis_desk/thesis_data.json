@@ -315,118 +315,12 @@
       "Range": "",
       "Drive": ""
     },
-    "scene": "field",
+    "scene": "office",
     "player": {
-      "x": 0.24000000000000002,
+      "x": 0.5,
       "y": 0.78
     },
-    "test_runs": [
-      {
-        "type": "camera",
-        "summary": "Camera simulation: target frame 1280×720 · detection stable · 30 FPS (ตัวอย่างจำลอง)",
-        "scene": "field",
-        "date": "2026-10-08",
-        "source": "SIMULATION ONLY"
-      },
-      {
-        "type": "camera",
-        "summary": "Camera simulation: target frame 1280×720 · detection stable · 30 FPS (ตัวอย่างจำลอง)",
-        "scene": "field",
-        "date": "2026-10-08",
-        "source": "SIMULATION ONLY"
-      },
-      {
-        "type": "camera",
-        "summary": "Camera simulation: target frame 1280×720 · detection stable · 30 FPS (ตัวอย่างจำลอง)",
-        "scene": "field",
-        "date": "2026-10-08",
-        "source": "SIMULATION ONLY"
-      },
-      {
-        "type": "camera",
-        "summary": "Camera simulation: target frame 1280×720 · detection stable · 30 FPS (ตัวอย่างจำลอง)",
-        "scene": "field",
-        "date": "2026-10-08",
-        "source": "SIMULATION ONLY"
-      },
-      {
-        "type": "camera",
-        "summary": "Camera simulation: target frame 1280×720 · detection stable · 30 FPS (ตัวอย่างจำลอง)",
-        "scene": "field",
-        "date": "2026-10-08",
-        "source": "SIMULATION ONLY"
-      },
-      {
-        "type": "motor",
-        "summary": "Motor simulation: left/right RPM response matched · command output to hardware = none",
-        "scene": "field",
-        "date": "2026-10-08",
-        "source": "SIMULATION ONLY"
-      },
-      {
-        "type": "motor",
-        "summary": "Motor simulation: left/right RPM response matched · command output to hardware = none",
-        "scene": "field",
-        "date": "2026-10-08",
-        "source": "SIMULATION ONLY"
-      },
-      {
-        "type": "motor",
-        "summary": "Motor simulation: left/right RPM response matched · command output to hardware = none",
-        "scene": "field",
-        "date": "2026-10-08",
-        "source": "SIMULATION ONLY"
-      },
-      {
-        "type": "motor",
-        "summary": "Motor simulation: left/right RPM response matched · command output to hardware = none",
-        "scene": "field",
-        "date": "2026-10-08",
-        "source": "SIMULATION ONLY"
-      },
-      {
-        "type": "motor",
-        "summary": "Motor simulation: left/right RPM response matched · command output to hardware = none",
-        "scene": "field",
-        "date": "2026-10-08",
-        "source": "SIMULATION ONLY"
-      },
-      {
-        "type": "motor",
-        "summary": "Motor simulation: left/right RPM response matched · command output to hardware = none",
-        "scene": "field",
-        "date": "2026-10-08",
-        "source": "SIMULATION ONLY"
-      },
-      {
-        "type": "motor",
-        "summary": "Motor simulation: left/right RPM response matched · command output to hardware = none",
-        "scene": "field",
-        "date": "2026-10-08",
-        "source": "SIMULATION ONLY"
-      },
-      {
-        "type": "run",
-        "summary": "Robot run simulation: completed 8 m virtual lane · 2 turns · 0 collisions",
-        "scene": "field",
-        "date": "2026-10-08",
-        "source": "SIMULATION ONLY"
-      },
-      {
-        "type": "tracking",
-        "summary": "Tracking simulation: target lost then reacquired · virtual stop event recorded",
-        "scene": "field",
-        "date": "2026-10-08",
-        "source": "SIMULATION ONLY"
-      },
-      {
-        "type": "run",
-        "summary": "Robot run simulation: completed 8 m virtual lane · 2 turns · 0 collisions",
-        "scene": "field",
-        "date": "2026-10-08",
-        "source": "SIMULATION ONLY"
-      }
-    ],
-    "simulation_xp": 30
+    "test_runs": [],
+    "simulation_xp": 0
   }
 }
