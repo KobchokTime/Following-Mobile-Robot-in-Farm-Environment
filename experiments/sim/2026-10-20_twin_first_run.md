@@ -51,3 +51,19 @@ the controller's set-point is 0.5 m.
   bearing to a LiDAR angle. This is a `robot` role change, and re-running the twin will show the
   effect.
 - Measure the wheel radius and track width on the robot, then update `sim/twin/world.py`.
+
+## Cross-check in Gazebo (same day)
+
+The same scenarios were re-run in Ignition Gazebo (Fortress), headless and with the GUI, using
+`sim/gazebo/`. This time `/scan` came from Gazebo's `gpu_lidar` (mounted at 180°), the poses came
+from Gazebo, and everything ran on simulation time. The robot nodes and the bridge model were the
+same.
+
+| Scenario | Bridge | Travelled m (twin → Gazebo) | Median gap m | Max bearing ° | Turned | Stop latency s |
+|---|---|---|---|---|---|---|
+| straight | current | 5.92 → 5.96 | 1.67 → 1.63 | 0 | no | – |
+| curve_left | diff_drive | 3.32 → 3.29 | 1.19 → 1.19 | 50 → 50 | no | – |
+| target_loss | current | 5.88 → 5.92 | 1.70 → 1.67 | 0 | no | 1.00 → 1.00 |
+
+The two simulators agree to within 0.05 m, so findings 1–4 do not depend on the kinematic
+model. Videos: run `sim/gazebo/record_video.sh <scenario> <bridge>`.
