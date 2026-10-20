@@ -48,9 +48,10 @@ class Processes:
         self.procs.append(proc)
         return proc
 
-    def start_robot_nodes(self) -> None:
+    def start_robot_nodes(self, ros_args: Sequence[str] = ()) -> None:
+        extra = ["--ros-args", *ros_args] if ros_args else []
         for name, path in ROBOT_NODES.items():
-            self.start(name, [sys.executable, str(path)], SCRIPTS)
+            self.start(name, [sys.executable, str(path), *extra], SCRIPTS)
 
     def stop(self) -> None:
         for p in reversed(self.procs):

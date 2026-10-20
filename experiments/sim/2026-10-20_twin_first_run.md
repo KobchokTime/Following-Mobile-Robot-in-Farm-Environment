@@ -19,7 +19,7 @@ Reproduce with `docker run --rm -v "$PWD/sim_runs:/repo/sim_runs" following-robo
 | target_loss | current | 5.88 | 1.70 | 0.92 | 0 | no | 1.00 |
 | crossing | current | 5.92 | 1.67 | 0.88 | 0 | no | – |
 
-There was no contact with any person in any run. "Gap" is the distance from the robot to the target's surface;
+The table shows 7 of the 10 runs. The `diff_drive` rows left out (`stop_and_go`, `target_loss`, `crossing`) follow the `straight`/`diff_drive` pattern. All 10 are in `sim_runs/summary.json` and the CI artifact. There was no contact with any person in any run. "Gap" is the distance from the robot to the target's surface;
 the controller's set-point is 0.5 m.
 
 ## Findings
@@ -35,7 +35,8 @@ the controller's set-point is 0.5 m.
 2. **The current drive bridge ignores `angular.z`** (`MAIN/Control/zlac_joystick_bridge.py`,
    "not using angular.z yet"). With that bridge the robot cannot turn at all.
 3. **Following lags at walking speed.** The controller is proportional-only. At 0.3 m/s the gap
-   settles near 2.0 m with the current bridge and near 1.0 m with `diff_drive`, against a 0.5 m set-point.
+   grows to about 2.0 m while the target walks with the current bridge (median over the whole run 1.67 m,
+   including the start and the final stop), and to about 1.0 m with `diff_drive`, against a 0.5 m set-point.
    The current bridge maps `linear.x` at 40 RPM per unit, which with a 0.085 m wheel is 0.36 m/s
    per 1.0 commanded, so the command is not in m/s.
 4. **Target loss behaves as intended.** When the detector went blind, the robot stopped after
@@ -50,3 +51,19 @@ the controller's set-point is 0.5 m.
   bearing to a LiDAR angle. This is a `robot` role change, and re-running the twin will show the
   effect.
 - Measure the wheel radius and track width on the robot, then update `sim/twin/world.py`.
+
+## Cross-check in Gazebo (same day)
+
+The same scenarios were re-run in Ignition Gazebo (Fortress), headless and with the GUI, using
+`sim/gazebo/`. This time `/scan` came from Gazebo's `gpu_lidar` (mounted at 180°), the poses came
+from Gazebo, and everything ran on simulation time. The robot nodes and the bridge model were the
+same.
+
+| Scenario | Bridge | Travelled m (twin → Gazebo) | Median gap m | Max bearing ° | Turned | Stop latency s |
+|---|---|---|---|---|---|---|
+| straight | current | 5.92 → 5.96 | 1.67 → 1.63 | 0 | no | – |
+| curve_left | diff_drive | 3.32 → 3.29 | 1.19 → 1.19 | 50 → 50 | no | – |
+| target_loss | current | 5.88 → 5.92 | 1.70 → 1.67 | 0 | no | 1.00 → 1.00 |
+
+The two simulators agree to within 0.05 m, so findings 1–4 do not depend on the kinematic
+model. Videos: run `sim/gazebo/record_video.sh <scenario> <bridge>`.
