@@ -6,9 +6,9 @@ and review threads in [`DISCUSSION.md`](DISCUSSION.md).
 
 ## Integration lock
 
-- **Current owner:** none
-- **Status:** ready
-- **Files being edited:** none
+- **Current owner:** Claude Code (integration)
+- **Status:** in progress — Arena 1 rules merge, model change
+- **Files being edited:** `AGENTS.md`, `agents/roles/integration.md`, `DISCUSSION.md`, `HANDOFF.md`, `logs/claude.md`
 - **Last updated:** 2026-10-20 by Claude Code
 
 ## Branches
