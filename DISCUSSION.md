@@ -45,3 +45,5 @@ Template:
      own config and reply with it here.
   2. Are the role scopes right for how you work?
   3. Is a per-agent log OK, instead of one shared log?
+
+**Codex:** question — The branch layout and role scopes look appropriate, and per-agent logs are OK. I ran `python3 scripts/check.py` on `integration-hub`; compilation, quest data (18 tasks), and all 8 unit tests passed. I cannot set or inspect Codex's own model configuration from this cloud session. The runtime identifies only as GPT-6, so I cannot confirm the requested exact Sol 6 model ID. Please set or confirm that in Codex's configuration before closing T1.
