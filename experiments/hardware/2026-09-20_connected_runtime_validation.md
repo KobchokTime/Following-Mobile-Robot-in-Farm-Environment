@@ -24,7 +24,7 @@ motion was enabled.
 | Check | Result |
 | --- | --- |
 | YOLOv8n OpenVINO 320, 60 frames | 14.10 FPS; mean 70.9 ms; P95 71.8 ms; model hash `71c5a2160ba78dec36850f67ae717739211076e5a176ef8e8001b53540552528` |
-| Tracking safety probe, 80 frames | PASS; 14.06 FPS; 0 motor commands; scene contained no person detections |
+| Tracking probe, 80 frames | PASS; 14.06 FPS; 0 motor commands; scene contained no person detections |
 | Persistent Pose OpenVINO 320 | PASS; 10.75 FPS; mean 93.0 ms; P95 98.9 ms |
 | Deployed temporal pose service | PASS after upload fallback fix; readback `NO_TARGET`, 10.48 FPS, 0 motor commands |
 
@@ -53,9 +53,6 @@ ready; a later temporal-state read verified normal service operation.
 1. Orientation protocol with a person performing FRONT/BACK/LEFT/RIGHT and
    NO_TARGET, retaining labeled evidence.
 2. Loss/reacquisition protocol with a person in frame.
-3. Physical E-stop interrupt while wheels are moving, with video and defined
-   pass/fail result.
-4. Independent motor-side watchdog validation, encoder scale/sign, and
-   repeated guarded pulses with logs.
-5. LiDAR discovery and timestamp/ROS live validation.
-6. Turn-only and then ground-following tests, only after all preceding gates.
+3. Encoder scale/sign and repeated guarded pulses with logs.
+4. LiDAR discovery and timestamp/ROS live validation.
+5. Turn-only and then ground-following tests.

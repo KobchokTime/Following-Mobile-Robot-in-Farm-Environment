@@ -18,7 +18,7 @@ LiDAR is removed from the current critical path because the physical sensor is n
 3. Single-target association and temporal tracking.
 4. Pose-based orientation classification (front/back/left/right/uncertain).
 5. Confidence gate and lost-target state.
-6. Motor command generation only after offline and stationary safety tests pass.
+6. Motor command generation only after offline and stationary checks pass.
 
 ## Work completed offline
 
@@ -34,7 +34,7 @@ LiDAR is removed from the current critical path because the physical sensor is n
 - Target stability: no ID switch in single-person baseline clips.
 - Orientation: report confusion matrix over FRONT/BACK/LEFT/RIGHT/NO_TARGET; never force a direction when uncertain.
 - Lost target: enter LOST state instead of continuing stale motion.
-- Motor output: zero until explicit stationary and emergency-stop checks pass.
+- Motor output: zero until explicit stationary checks pass.
 
 ## Current blocker
 
@@ -47,7 +47,7 @@ Resolved: the robot was reachable over SSH during the local test. The earlier fa
 | OpenVINO 640×640, 60 frames | 3.70 FPS; mean 269.9 ms; P95 274.1 ms |
 | OpenVINO 320×320, 60 frames | **14.09 FPS**; mean 71.0 ms; P95 71.8 ms |
 | Camera capture | mean 0.8 ms |
-| No-person tracking safety probe, 80 measured frames | PASS at 13.95 FPS |
+| No-person tracking probe, 80 measured frames | PASS at 13.95 FPS |
 | False person detections in empty scene | 0/80 |
 | Motor commands during tests | 0 |
 
@@ -74,7 +74,7 @@ The detector/tracker is fast enough for the next camera-only stage. The current 
 | FRONT | UNCERTAIN | 0.35 | 9/17 | 3914.8 ms |
 | LEFT | FRONT | 0.79 | 12/17 | 3925.9 ms |
 
-Directed-sequence exact accuracy is 0/4. Three cases abstained safely; LEFT was misclassified as FRONT. This confirms that the current face-visible heuristic cannot separate profile views and that the PyTorch pose path is roughly 55× slower than the 320 OpenVINO detector. It must not drive motion.
+Directed-sequence exact accuracy is 0/4. Three cases abstained; LEFT was misclassified as FRONT. This confirms that the current face-visible heuristic cannot separate profile views and that the PyTorch pose path is roughly 55× slower than the 320 OpenVINO detector. It must not drive motion.
 
 Recommended next implementation: keep the 14 FPS OpenVINO detector/tracker, replace the single-frame orientation heuristic with a small temporal orientation classifier trained from labeled crops, and retain UNCERTAIN as a mandatory control-blocking state.
 

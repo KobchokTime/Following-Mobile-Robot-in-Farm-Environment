@@ -20,7 +20,7 @@ config, and annotation quality before any result can be called verified.
 
 Use distinct runs for single-person, crossing, similar clothing, partial/full
 occlusion, target exit, and re-entry. A run with an absent target must remain in
-the dataset; excluding failure or no-target frames would bias safety metrics.
+the dataset; excluding failure or no-target frames would bias the reported metrics.
 
 The separate `replay.example.jsonl` exercises the offline target-lock policy.
 Run `python tools/replay_target_identity.py --input

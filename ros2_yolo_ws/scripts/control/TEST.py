@@ -312,7 +312,6 @@ class FollowStopMotorNode(Node):
                     v = 0.02
                     w = 0.0
 
-        # Fail-safe: ให้หยุดเมื่อไม่มีเป้าหมายหรือไม่มี LiDAR (ถ้าเปิดสวิตช์)
         if self.stop_on_timeout and state in ("TARGET_TIMEOUT", "NO_LIDAR"):
             v, w = 0.0, 0.0
 

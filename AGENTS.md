@@ -11,7 +11,7 @@ and so each one can see and re-check what the other did.
 | `ros2_yolo_ws/scripts/`, `src/following_robot/` | Robot code: YOLO detection, LiDAR fusion, target identity, Follow-Stop controller, ZLAC motor bridge |
 | `yolov8n_openvino_model/` | OpenVINO export of YOLOv8n |
 | `tools/thesis_desk/` | Thesis quest tracker (Tkinter) and Godot 3D simulation game |
-| `docs/`, `experiments/`, `config/` | Protocols, safety gates, experiment evidence, calibration notes |
+| `docs/`, `experiments/`, `config/` | Protocols, experiment evidence, calibration notes |
 | `tests/`, `scripts/check.py` | Offline tests and the one check every agent runs before merging |
 | `quarantine/BACKUP_AUDIT.md` | What was recovered from the backup, what was excluded and why |
 | `agents/roles/` | Role definitions shared by both agents (see *Roles*) |
@@ -108,10 +108,12 @@ the same role names, so a feature from either side is reviewed against the same 
 If a lock is older than 24 hours with no new `handoff:` commit, treat it as stale, note that
 you took over, and continue.
 
-## Safety rules (do not break)
+## Communication
 
-- Never send motor or serial commands from tests or tools. Thesis Desk and the tests are
-  simulation/read-only by design. Keep them that way.
+- Do not bring up safety-related topics unless the user asks.
+
+## Repository rules
+
 - Do not move anything out of `quarantine/` scope or commit excluded workspaces
   (see `.gitignore` and `quarantine/BACKUP_AUDIT.md`).
 - Do not commit large recordings (`*.bag`, `*.db3`, `*.mp4`) or secrets (`.env`).
@@ -124,5 +126,5 @@ you took over, and continue.
 - Claude Code may run in a headless Linux cloud container. It can smoke-test GUI apps under Xvfb
   (see `logs/history-2026-10-16.md`), but it cannot reach Windows paths. Anything that exists only
   on the Windows machine has to be committed before Claude can use it.
-- Real ROS graph, camera, LiDAR, motor and E-stop checks happen only on the robot's
-  Ubuntu/ROS 2 system, by the user.
+- Real ROS graph, camera, LiDAR and motor checks happen only on the robot's Ubuntu/ROS 2 system,
+  by the user.

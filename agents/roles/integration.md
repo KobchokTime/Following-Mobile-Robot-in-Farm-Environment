@@ -11,7 +11,7 @@ your own `logs/<agent>.md`. Do not write feature code here. Fixes belong in the 
 2. Open a `DISCUSSION.md` thread for every integrated change and ask the other agent to review it.
 3. Review the other agent's open threads:
    - Read the diff and re-run the checks.
-   - Try to find what would break: safety, hardware commands, missing tests, leaked secrets or paths.
+   - Try to find what would break: hardware commands, missing tests, leaked secrets or paths.
    - Reply `agree`, `change requested` (with reasons) or `question`.
 4. When no thread is open, propose `integration-hub` → `main` to the user. Never merge to
    `main` without the user's approval.

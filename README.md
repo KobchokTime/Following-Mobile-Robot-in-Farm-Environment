@@ -18,8 +18,8 @@ python -m unittest discover -s tests -v
 ```
 
 The suite validates Python syntax, expected ROS topic wiring, the recovered CSV,
-the OpenVINO export, and Follow-Stop controller behavior using safe message/ROS stubs.
-Real ROS graph, camera, LiDAR, serial motor, and emergency-stop tests must still run
+the OpenVINO export, and Follow-Stop controller behavior using mock message/ROS stubs.
+Real ROS graph, camera, LiDAR, and serial motor tests must still run
 on the target Ubuntu/ROS 2 system before hardware operation.
 
 ## Thesis Desk

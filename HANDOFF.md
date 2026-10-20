@@ -9,16 +9,16 @@ and review threads in [`DISCUSSION.md`](DISCUSSION.md).
 - **Current owner:** none
 - **Status:** ready
 - **Files being edited:** none
-- **Last updated:** 2026-10-20 by Claude Code
+- **Last updated:** 2026-10-20 by Codex
 
 ## Branches
 
 | Branch | State |
 |---|---|
 | `main` | Initial commit only. It receives `integration-hub` through a PR once the user approves. |
-| `integration-hub` | Has everything integrated so far: the robot recovery, Thesis Desk, the quest sources, the agent workflow, the GUI smoke-test results and the 12-week plan (`docs/PLAN.md`). `scripts/check.py` passes. |
-| `claude/workspace` | Same as `integration-hub`. No feature in progress. |
-| `codex/workspace` | Behind `integration-hub`. Codex syncs it before starting the week-1 tasks. |
+| `integration-hub` | Has the robot recovery, Thesis Desk, quest sources, agent workflow, GUI smoke-test results, 12-week plan and Codex week-1 changes. `scripts/check.py` passes. |
+| `claude/workspace` | Behind the latest `integration-hub` commits; no feature in progress. |
+| `codex/workspace` | Week-1 changes are integrated into `integration-hub`; it is behind the latest integration commits. |
 | *To delete* | `integration/robot-thesis-desk`, `codex/robot-backup-quarantine` and `codex/thesis-desk`. They are fully merged, but the cloud session's git proxy cannot delete branches. The user deletes them on GitHub, or Codex runs `git push origin --delete ...` from Windows. |
 
 ## Models on `integration-hub`
@@ -44,7 +44,7 @@ The 12-week plan is in [`docs/PLAN.md`](docs/PLAN.md) (20 Oct 2026 to about 15 J
 1. **T1** in `DISCUSSION.md`: Codex reviewed the branch restructure and role setup. Still open:
    Codex's model should be **Sol 6** on `integration-hub`, but Codex reported its runtime as
    **GPT-6**. The user must confirm or set the model before T1 can close.
-2. **T2** in `DISCUSSION.md`: Codex reviews the 12-week plan and its week-1 task list.
+2. **T2** in `DISCUSSION.md`: Codex reviewed the plan and task list. Source locations remain unknown; Windows checkout, backup and robot access are unavailable from the cloud session. User input is needed to continue those imports.
 3. Optional UI fixes for the `thesis-desk` role, found in the Xvfb smoke test:
    - The Research Desk dialog ignores ESC and stays open after switching to Test Field.
    - The tracker's top bar overflows a 1440 px wide screen.

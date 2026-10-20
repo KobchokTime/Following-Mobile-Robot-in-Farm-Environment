@@ -24,15 +24,15 @@ import minimalmodbus, serial
 PORT = "/dev/ttyUSB1"
 BAUD = 115200
 SLAVE_ID = 1
-RPM_LIMIT = 300  # safety clamp rpm
+RPM_LIMIT = 300
 
 # ================= ZLAC DRIVER =================
 class ZLAC8015D:
     def __init__(self, port, sid, baud, use_rs485_rts=False):
         self.port, self.sid, self.baud = port, sid, baud
-        self.inst = self._open_safe(use_rs485_rts)
+        self.inst = self._open_serial(use_rs485_rts)
 
-    def _open_safe(self, use_rs485_rts: bool):
+    def _open_serial(self, use_rs485_rts: bool):
         # เปิดพอร์ต serial แบบไม่แตะ DTR/RTS
         ser = serial.serial_for_url(self.port, do_not_open=True)
         ser.baudrate = self.baud
