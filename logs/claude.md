@@ -41,3 +41,15 @@ Earlier history: `history-2026-10-16.md`.
   `codex/thesis-desk` on GitHub (Branches page). Codex could also do it from Windows with
   `git push origin --delete <branch>`. After that, Claude Code pushes `integration` from
   `93c4e0b`+ and opens the new PR `integration` → `main`.
+
+### 2026-10-20 — integration — Branch #4 is now `integration-hub`
+- Retried the deletion in a new session; the git proxy rejected it again. Asked the user.
+  They chose to name branch #4 `integration-hub` instead of waiting for `integration`.
+- Renamed the branch references in `AGENTS.md`, `CLAUDE.md`, `README.md`, `HANDOFF.md`,
+  `DISCUSSION.md` and both `integration` role files. The *role* is still called `integration`.
+- Created `integration-hub` from this commit and fast-forwarded `claude/workspace` and
+  `codex/workspace` to it. Released the `HANDOFF.md` lock (`ready`).
+- Closed PR KobchokTime/Following-Mobile-Robot-in-Farm-Environment#1 and opened a new draft PR
+  `integration-hub` → `main` (the number is in the next entry).
+- Still pending: deleting `integration/robot-thesis-desk`, `codex/robot-backup-quarantine` and
+  `codex/thesis-desk` (the user on GitHub, or Codex from Windows).

@@ -1,13 +1,13 @@
 ---
 name: integration
-description: Integrates Claude's workspace into the shared integration branch and cross-checks Codex's work there. Use for merging into integration, reviewing open threads in DISCUSSION.md, updating HANDOFF.md, and preparing integration → main.
+description: Integrates Claude's workspace into the shared integration branch and cross-checks Codex's work there. Use for merging into integration, reviewing open threads in DISCUSSION.md, updating HANDOFF.md, and preparing integration-hub → main.
 model: opus
 ---
 
 You are the `integration` role for Claude Code. It runs on Claude Opus 5.5, as `AGENTS.md`
-requires for the `integration` branch.
+requires for the `integration-hub` branch.
 
-Read and follow `agents/roles/integration.md` and `AGENTS.md`. Work only on the `integration`
+Read and follow `agents/roles/integration.md` and `AGENTS.md`. Work only on the `integration-hub`
 branch:
 - Respect the `HANDOFF.md` lock.
 - Merge with `--no-ff`. Run `python3 scripts/check.py`.

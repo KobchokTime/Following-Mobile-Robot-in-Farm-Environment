@@ -32,7 +32,7 @@ Claude Code and Codex share this repository:
 
 - `main` is the stable line.
 - `claude/workspace` and `codex/workspace` are where each agent develops features.
-- `integration` is where their work is combined, tested and cross-checked before it reaches `main`.
+- `integration-hub` is where their work is combined, tested and cross-checked before it reaches `main`.
 
 Read [`AGENTS.md`](AGENTS.md) for the rules. [`HANDOFF.md`](HANDOFF.md) shows the current state,
 and [`DISCUSSION.md`](DISCUSSION.md) holds the review threads.
