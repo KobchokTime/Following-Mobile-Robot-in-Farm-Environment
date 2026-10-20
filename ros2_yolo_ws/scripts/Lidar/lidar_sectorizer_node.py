@@ -16,8 +16,9 @@ class LidarSectorizer(Node):
         # Parameters
         # ----------------------------
         self.declare_parameter('num_sectors', 9)
-        self.declare_parameter('fov_min_deg', -15.0)
-        self.declare_parameter('fov_max_deg', 15.0)
+        # Match the 70° horizontal camera FOV used by ros2_yolo_live.py.
+        self.declare_parameter('fov_min_deg', -35.0)
+        self.declare_parameter('fov_max_deg', 35.0)
         self.declare_parameter('angle_offset_deg', 180.0)  # ใช้ 180° ถ้าติด LiDAR กลับด้าน
 
         self.N = int(self.get_parameter('num_sectors').value)
@@ -88,6 +89,14 @@ class LidarSectorizer(Node):
             else:
                 dists.append(float(np.median(sector_data)))
                 vars_.append(float(np.var(sector_data)))
+
+        # The scan sectors above are ordered by increasing ROS bearing (right to
+        # left). Camera sectors are ordered by increasing image x (left to right),
+        # so reverse all three arrays to make each published index refer to the
+        # same direction as /target_centroid_sector.
+        dists.reverse()
+        vars_.reverse()
+        mids.reverse()
 
         # Publish
         msg_d = Float32MultiArray()

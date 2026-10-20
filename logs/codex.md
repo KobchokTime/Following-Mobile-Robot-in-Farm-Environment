@@ -28,3 +28,11 @@ Earlier history: `history-2026-10-16.md`.
 - Replied to T2: the plan and task ownership are clear; `tools/robot_console/` is a reasonable default, but source recovery and hardware feasibility remain unconfirmed because the Windows checkout, backup, and robot endpoint are unavailable in this cloud session.
 - Updated `HANDOFF.md` to reflect the integrated work and release the integration lock.
 - Ran `python3 scripts/check.py` on `integration-hub`: compile passed, 16 quest records loaded, and all 8 unit tests passed. `git diff --check` passed. The recorder's ROS execution remains unverified in this environment.
+
+### 2026-10-20 — robot — Arena 1 sector association
+- Synced `codex/workspace` with `origin/integration-hub` (merge `793d716`), then cut `codex/robot/arena-sector-association` from the frozen Arena base `d623baf` as T5 requires.
+- Widened the LiDAR FOV to ±35° and reversed published arrays to match camera sectors left-to-right; changed the follower's edge response to begin at sector 2/6 after one consistent observation. Added two offline tests for side association and turn onset.
+- Reviewed the frozen rules and scorer before the entry. No blocking objection for this narrow, reproducible round; recorded caveats and independent judging checks in `experiments/arena/entries/codex.md`.
+- `python3 scripts/check.py`: compile passed, 16 quest records loaded, 19 unit tests passed. Built the twin with `INSTALL_MCAP=0` because apt repositories could not resolve from Docker.
+- Ran all five twin scenarios with both bridge modes, seed 0. Scorer result: 99.44/100; `curve_left/diff_drive` turned, ended in camera FOV at 0.584 m gap; no regression failures. The detailed summary remains in ignored `sim_runs/`.
+- Arena feature commit and submission push recorded in T5 after this entry is committed.
