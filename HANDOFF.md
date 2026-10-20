@@ -16,16 +16,17 @@ and review threads in [`DISCUSSION.md`](DISCUSSION.md).
 | Branch | State |
 |---|---|
 | `main` | Initial commit only. It receives `integration-hub` through a PR once the user approves. |
-| `integration-hub` | Has everything integrated so far: the robot recovery, Thesis Desk, the quest sources, the agent workflow, the GUI smoke-test results and the 12-week plan (`docs/PLAN.md`). `scripts/check.py` passes. |
-| `claude/workspace` | Same as `integration-hub`. No feature in progress. |
-| `codex/workspace` | Behind `integration-hub`. Codex syncs it before starting the week-1 tasks. |
+| `integration-hub` | Has the robot recovery, Thesis Desk, quest sources, agent workflow, GUI smoke-test results, 12-week plan, Codex week-1 changes, the offline twin (`sim/`, twin CI, first simulated findings; merge `18c2303`), the Gazebo 3D twin (`sim/gazebo/`, `Dockerfile.gazebo`, `gazebo` CI job, cross-check; merge `cef985f`) and the frozen Arena 1 rules, scorer and baseline (merge `d623baf`). `scripts/check.py` passes. |
+| `claude/workspace` | Arena 1 spec (`0d4ee2f`) merged into `integration-hub`; behind the latest integration commits. Claude's arena entry goes on `claude/robot/arena-sector-association`. |
+| `codex/workspace` | Week-1 changes are integrated into `integration-hub`; it is behind the latest integration commits. |
 | *To delete* | `integration/robot-thesis-desk`, `codex/robot-backup-quarantine` and `codex/thesis-desk`. They are fully merged, but the cloud session's git proxy cannot delete branches. The user deletes them on GitHub, or Codex runs `git push origin --delete ...` from Windows. |
 
 ## Models on `integration-hub`
 
 - Claude Code: Claude Opus 5.5, through the `.claude/agents/integration.md` subagent (`model: opus`).
-- Codex: **Sol 6**. *Action for Codex:* set the exact model ID in your own config, then
-  confirm it in `DISCUSSION.md` thread T1.
+- Codex: **GPT-6 Astra** (changed from Sol 6 on 2026-10-20, on the user's instruction to adjust as
+  appropriate; Arena WebDev/Code mid-October 2026: Astra #2, Sol #8). *Action for Codex:* set the
+  exact model ID in your own config, then confirm it in `DISCUSSION.md` thread T1.
 
 ## Plan
 
@@ -42,15 +43,26 @@ The 12-week plan is in [`docs/PLAN.md`](docs/PLAN.md) (20 Oct 2026 to about 15 J
 ## Open items
 
 1. **T1** in `DISCUSSION.md`: Codex reviewed the branch restructure and role setup. Still open:
-   Codex's model should be **Sol 6** on `integration-hub`, but Codex reported its runtime as
-   **GPT-6**. The user must confirm or set the model before T1 can close.
-2. **T2** in `DISCUSSION.md`: Codex reviews the 12-week plan and its week-1 task list.
+   Codex's model on `integration-hub` is now **GPT-6 Astra** (was Sol 6). Codex reported its runtime
+   only as **GPT-6**; Codex must set GPT-6 Astra and confirm the exact model ID before T1 can close.
+2. **T2** in `DISCUSSION.md`: Codex reviewed the plan and task list. Source locations remain unknown; Windows checkout, backup and robot access are unavailable from the cloud session. User input is needed to continue those imports.
 3. Optional UI fixes for the `thesis-desk` role, found in the Xvfb smoke test:
    - The Research Desk dialog ignores ESC and stays open after switching to Test Field.
    - The tracker's top bar overflows a 1440 px wide screen.
 4. Not yet verified: rendering on the user's real Windows GPU, and the real robot checks
    (ROS graph, camera, LiDAR, motor). There is no physical E-stop to check (see *Plan*).
-5. `integration-hub` → `main` (draft PR KobchokTime/Following-Mobile-Robot-in-Farm-Environment#2): needs every thread resolved and the user's approval.
+5. **T3** in `DISCUSSION.md`: the offline twin and first simulated findings (sector mismatch between
+   camera and LiDAR, bridge ignores `angular.z`, proportional lag, 1.0 s stop on target loss).
+   Codex re-runs the twin, checks the analysis and answers the robot questions. GitHub Actions
+   run 39385504387 (`twin.yml` on `claude/workspace`) was in progress at merge time; check its result.
+6. **T4** in `DISCUSSION.md`: the Gazebo 3D twin and its cross-check against the kinematic twin.
+   Codex builds `Dockerfile.gazebo`, runs `curve_left`/`diff_drive` (GUI via WSLg if possible),
+   judges the field layout and reviews the `sim/twin/world.py` refactor. The new `gazebo` CI job had
+   not reported at merge time; check its result.
+7. **T5** in `DISCUSSION.md`: Arena 1, sector association. Rules, scorer and baseline frozen in
+   `d623baf`. Codex reviews the rules for fairness, then builds its entry. Claude submits separately.
+   - Claude submitted `929096d`; waiting for Codex's entry.
+8. `integration-hub` → `main` (draft PR KobchokTime/Following-Mobile-Robot-in-Farm-Environment#2): needs every thread resolved and the user's approval.
 
 ## Codex — week 1 tasks
 
@@ -75,11 +87,19 @@ Sync `codex/workspace` with `integration-hub` first. Read `docs/PLAN.md` and rep
    11–12 from the plan and move 13 back to Main Quest, per `docs/PLAN.md`.
 6. Log everything in `logs/codex.md`. Integrate through `integration-hub` with a `DISCUSSION.md`
    thread for Claude to cross-check.
+7. **Arena 1** (T5): review `experiments/arena/2026-10-20_sector-association.md` and
+   `sim/arena/score_entry.py` for fairness, then fix the sector mismatch on
+   `codex/robot/arena-sector-association`, branched from `integration-hub` at `d623baf`. Post the
+   commit SHA in T5. Do not read `claude/robot/arena-sector-association` until both entries are in.
 
 ## Claude — in parallel
 
-- Replay harness for recorded rosbags (role `robot` / `qa`).
-- Docker image (Ubuntu 22.04, ROS 2 Humble, OpenVINO) with fake camera, LiDAR and ZLAC drivers.
-- CI that runs `scripts/check.py` and the replay tests on every PR.
-- Gazebo world: differential-drive robot with camera and 2D LiDAR in a farm scene with walking people.
-- Robot-day #1 checklist (role `research`).
+- [x] Replay harness for recorded rosbags (`sim/replay/replay_bag.py`, role `robot` / `qa`).
+- [x] Docker image (Ubuntu 22.04, ROS 2 Humble) with fake camera/YOLO, LiDAR and ZLAC drivers
+  (`sim/`, see `sim/README.md`). It runs the unmodified perception → fusion → controller chain.
+- [x] CI that runs `scripts/check.py`, the twin and the replay smoke check (`.github/workflows/twin.yml`).
+- [x] Gazebo world: differential-drive robot with 2D LiDAR (`gpu_lidar`) in a farm scene with crop
+  beds, a headland and walking people (`sim/gazebo/`). **Done** with Ignition Gazebo Fortress from
+  the Docker Hub image `osrf/ros:humble-desktop-full`, because `packages.ros.org` is blocked in
+  Claude's cloud session. The camera is emulated, not rendered. Review in T4.
+- [ ] Robot-day #1 checklist (role `research`).

@@ -1,0 +1,14 @@
+# Offline twin with Ignition Gazebo (Fortress) for 3D visualisation and a gpu_lidar.
+# Build from the repository root:
+#   docker build -f sim/docker/Dockerfile.gazebo -t following-robot-twin-gz .
+FROM osrf/ros:humble-desktop-full
+
+WORKDIR /repo
+COPY ros2_yolo_ws/scripts ros2_yolo_ws/scripts
+COPY sim sim
+COPY tests tests
+COPY scripts scripts
+
+COPY sim/docker/entrypoint.sh /entrypoint.sh
+ENTRYPOINT ["/entrypoint.sh"]
+CMD ["python3", "-m", "sim.gazebo.run_gazebo", "--scenario", "straight", "--out", "/repo/sim_runs"]

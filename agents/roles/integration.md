@@ -1,7 +1,7 @@
 # Role: integration
 
 **Branch:** `integration-hub` only.
-**Model:** Claude Code uses Claude Opus 5.5. Codex uses Sol 6 (see `AGENTS.md` → *Models*).
+**Model:** Claude Code uses Claude Opus 5.5. Codex uses GPT-6 Astra (see `AGENTS.md` → *Models*).
 
 **Scope (may change):** merge commits into `integration-hub`, `HANDOFF.md`, `DISCUSSION.md`, and
 your own `logs/<agent>.md`. Do not write feature code here. Fixes belong in the author's workspace.

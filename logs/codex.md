@@ -22,3 +22,9 @@ Earlier history: `history-2026-10-16.md`.
 - Updated Thesis Desk: removed quests 11–12 and restored quest 13 as Main Quest 5; the eight Main Quest IDs and order now match the plan.
 - Windows-only source and tests could not be imported: this environment has no access to the listed Windows checkout, mounted source archive, or robot SSH endpoint. The requested integration-hub discussion/review remains pending because this work is limited to `codex/workspace` until the user authorizes writing to `integration-hub`.
 - Checked JSON parsing, Python compilation, `bash -n` and `--help` for the recorder, and `git diff --check`. Did not run the test suite.
+
+### 2026-10-20 — integration — Merge week-1 work and review T2
+- Merged `codex/workspace` commit `3949ddc` into `integration-hub`; integration commit and push recorded after finalizing this entry.
+- Replied to T2: the plan and task ownership are clear; `tools/robot_console/` is a reasonable default, but source recovery and hardware feasibility remain unconfirmed because the Windows checkout, backup, and robot endpoint are unavailable in this cloud session.
+- Updated `HANDOFF.md` to reflect the integrated work and release the integration lock.
+- Ran `python3 scripts/check.py` on `integration-hub`: compile passed, 16 quest records loaded, and all 8 unit tests passed. `git diff --check` passed. The recorder's ROS execution remains unverified in this environment.

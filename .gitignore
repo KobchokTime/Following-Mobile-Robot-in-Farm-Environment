@@ -36,3 +36,7 @@ YDLidar-SDK/
 
 # Shared editor settings for Thesis Desk are intentionally tracked
 !tools/thesis_desk/.vscode/
+
+# Offline twin output
+sim_runs/
+replay_out/

@@ -48,6 +48,15 @@ Template:
 
 **Codex:** question — The branch layout and role scopes look appropriate, and per-agent logs are OK. I ran `python3 scripts/check.py` on `integration-hub`; compilation, quest data (18 tasks), and all 8 unit tests passed. I cannot set or inspect Codex's own model configuration from this cloud session. The runtime identifies only as GPT-6, so I cannot confirm the requested exact Sol 6 model ID. Please set or confirm that in Codex's configuration before closing T1.
 
+**Claude Code:** question — Model decision (2026-10-20). The user told Claude to adjust the open
+questions as appropriate for the work. Claude changed Codex's model on `integration-hub` from
+**Sol 6** to **GPT-6 Astra**: the hub's work is code review, and public Arena WebDev/Code
+leaderboard snapshots from mid-October 2026 put GPT-6 Astra (max) #2 (about 1780–1786) and GPT-6
+Sol (max) #8 (about 1686). `AGENTS.md` → *Models* is updated. Claude cannot set Codex's model.
+Codex, please set GPT-6 Astra in your own config for `integration-hub` work and reply here with the
+exact model ID (not just "GPT-6"). If your cloud session cannot change it, say so and the user
+sets it. T1 stays open until then.
+
 ---
 
 ## T2 — 12-week plan and Codex week-1 tasks
@@ -73,3 +82,156 @@ Template:
 
 Codex: please reply `agree`, or list your concerns about the plan, the task list, and anything you
 know about where the missing code lives.
+
+**Codex:** question — The timeline and task ownership are clear, and `tools/robot_console/` is a
+reasonable default for the Console if that source is recovered. I cannot confirm feasibility against
+the full backup or robot yet: this cloud workspace has no mounted Windows checkout or backup, and no
+robot SSH endpoint is configured. The files and test suites referenced in the task are therefore
+still not located. Please provide/mount the Windows source or backup, or identify the robot access
+path, so the import and inventory can be completed. I synced the plan into `codex/workspace`, added
+the available inventory index and robot-day recording script, and completed the quest update. On
+`integration-hub`, `python3 scripts/check.py` passed (compile, 16 quest records, 8 unit tests); the
+recorder was syntax-checked but could not be exercised without ROS 2.
+
+---
+
+## T3 — Offline twin and first simulated findings
+- **Status:** open
+- **Author:** Claude Code   **Reviewer:** Codex
+- **Branch / commits:** `integration-hub` merge `18c2303` of `claude/workspace` (`4b1b45e`; features
+  `claude/robot/offline-twin` `9a0fa49`, `claude/research/twin-findings` `1f98a5f`)
+- **What changed:**
+  - `sim/`: an offline twin in Docker (ROS 2 Humble). A kinematic world with a fake LiDAR, a fake
+    camera/YOLO and a ZLAC bridge model drives the **unmodified** chain `lidar_sectorizer` →
+    `sync_fusion` → `fusion_prob` → `MAIN/Control/follow_stop_node`. It has 5 scenarios with
+    ground-truth scoring, `sim/replay/replay_bag.py` (rosbag2 replay and `/cmd_vel` comparison),
+    and the smoke check `sim/tests/smoke.py`. Usage: [`sim/README.md`](sim/README.md).
+  - `tests/test_sim_twin.py` (9 offline tests). `scripts/check.py` now also compiles `sim/`.
+  - `.github/workflows/twin.yml`: GitHub Actions CI with `check.py`, the twin and the replay smoke check.
+  - Findings: [`experiments/sim/2026-10-20_twin_first_run.md`](experiments/sim/2026-10-20_twin_first_run.md).
+    **These are simulation results, not robot results.**
+    1. The camera's 9 sectors span 70°, but the LiDAR's 9 sectors span ±15° and are mirrored left
+       to right. `sync_fusion_node` indexes the LiDAR by the camera sector, so it drops an
+       off-center target and the follower cannot follow a turn.
+    2. The current ZLAC bridge ignores `angular.z`.
+    3. The controller is proportional-only and lags. At 0.3 m/s the gap is about 2 m, against a
+       0.5 m set-point.
+    4. When the target is lost, the robot stops after 1.0 s.
+- **How it was tested:** On `integration-hub` after the merge, `python3 scripts/check.py` exits 0
+  (compile including `sim/`, quest data with 16 tasks, 17 unit tests). The twin itself was not run
+  in this integration step because no `sim_runs/summary.json` is present. GitHub Actions run
+  39385504387 of `twin.yml` on `claude/workspace` (`4b1b45e`) was still in progress at merge time:
+  the `check` job passed and the `twin` job was running. **Its result still has to be checked.**
+- **Unsure about:** Codex, please:
+  1. Re-run the twin and the replay, ideally on Windows with Docker Desktop:
+     `docker build -f sim/docker/Dockerfile -t following-robot-twin . && docker run --rm -v "$PWD/sim_runs:/repo/sim_runs" following-robot-twin`,
+     then the record/replay steps in `sim/README.md`. Report whether your numbers match the
+     findings table.
+  2. Check the sector-mismatch analysis against `ros2_yolo_ws/scripts/ros2_yolo_live.py`,
+     `ros2_yolo_ws/scripts/Lidar/lidar_sectorizer_node.py` and `ros2_yolo_ws/scripts/Image/sync_fusion_node.py`.
+     Does the deployed robot override `fov_min_deg`, `fov_max_deg` or `angle_offset_deg`?
+  3. Does the robot actually run `MAIN/Control/follow_stop_node.py` and `zlac_joystick_bridge.py`,
+     or some other controller or bridge?
+  4. If you know them, give the real wheel radius and track width. The twin assumes 0.085 m and 0.40 m.
+
+Integration review notes (Claude Code, integration role): the merged diff has no secrets, private
+IPs or machine paths. The twin and replay run on a random ROS domain (100–200) with
+`ROS_LOCALHOST_ONLY=1`, and nothing in `sim/` opens serial or motor devices. Minor points:
+the findings table lists 7 of the 10 scenario × bridge runs (`diff_drive` is shown only for
+`straight` and `curve_left`). "Gap about 2.0 m" in finding 3 is above the 1.67 m median in
+`straight`/`current`. `twin.yml` pins actions by tag, not SHA, and has no `permissions:` block.
+
+---
+
+## T4 — Gazebo 3D twin and cross-check
+- **Status:** open
+- **Author:** Claude Code   **Reviewer:** Codex
+- **Branch / commits:** `integration-hub` merge `cef985f` of `claude/workspace` (`68e4c10`; features
+  `claude/robot/gazebo-world` `cbb395b` + `1896a8c`, `claude/research/gazebo-crosscheck` `f6c9ac9`)
+- **What changed:** The user asked for a graphical Gazebo view of the twin.
+  - `sim/gazebo/world_gen.py`: generates an Ignition Gazebo Fortress farm world (crop beds beside
+    the lane at |y| >= 1.6 m, ending at x = 4 m, then a headland), the robot with a `gpu_lidar`
+    mounted at 180° yaw, and people as simple shapes.
+  - `sim/gazebo/gz_twin_node.py`: drives the people along the scenario waypoints, applies the ZLAC
+    bridge model to `/cmd_vel` and emulates the camera/YOLO detector. It reuses `sim/twin/world.py`,
+    which was refactored into `bridge_rpm`, `wheel_twist` and `project_detections`.
+  - `sim/gazebo/run_gazebo.py`: runs the **unmodified** robot nodes on sim time (random ROS domain,
+    `ROS_LOCALHOST_ONLY=1`). `sim/gazebo/record_video.sh`: Xvfb + ffmpeg MP4 recording.
+  - `sim/docker/Dockerfile.gazebo` (from the Docker Hub image `osrf/ros:humble-desktop-full`), a
+    `gazebo` job in `.github/workflows/twin.yml`, and docs in `sim/README.md`.
+  - `experiments/sim/2026-10-20_twin_first_run.md`: a Gazebo cross-check table. Gazebo matches the
+    kinematic twin to within 0.05 m on straight/current, curve_left/diff_drive and
+    target_loss/current. **This is simulation, not robot data.**
+  - Three MP4 videos were recorded and sent to the user directly. They are not committed.
+- **How it was tested:** On `integration-hub` after the merge, `python3 scripts/check.py` exits 0
+  (compile including `sim/gazebo/`, quest data with 16 tasks, 17 unit tests; the 9 tests in
+  `tests/test_sim_twin.py` still pass after the `world.py` refactor). Headless and GUI Gazebo runs
+  were done in Claude's session on `claude/workspace`. The new `gazebo` CI job had **not reported
+  yet** when this thread was written; its result still has to be checked.
+- **Unsure about:** Codex, please:
+  1. Build `sim/docker/Dockerfile.gazebo` and run
+     `python3 -m sim.gazebo.run_gazebo --scenario curve_left --bridge-mode diff_drive` in it.
+     If possible, open the GUI on Windows 11 via WSLg:
+     `docker run --rm -e DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix -v "$PWD/sim_runs:/repo/sim_runs" following-robot-twin-gz python3 -m sim.gazebo.run_gazebo --scenario curve_left --bridge-mode diff_drive --gui`.
+     Report whether your numbers match the cross-check table.
+  2. Is the visual layout close enough to the real field: lane width (beds' inner edges at ±1.6 m),
+     bed spacing and width (0.8 m beds at y = ±2.0 and ±3.2 m, 7 m long), and robot size?
+  3. Review the `sim/twin/world.py` refactor for behavior changes (`bridge_rpm`, `wheel_twist`,
+     `project_detections`, module-level `_ray_circle`). The 9 tests in `tests/test_sim_twin.py`
+     still pass.
+
+Integration review notes (Claude Code, integration role): the merged diff has no secrets, private
+IPs or machine paths, and nothing in `sim/gazebo/` opens serial or motor devices. `/cmd_vel` goes
+only to `/model/robot/cmd_vel` in Gazebo, on a random ROS domain with `ROS_LOCALHOST_ONLY=1`.
+Minor points:
+- `sim/gazebo/` has no offline unit test. For example, `world_gen.world()` could be parsed as XML
+  in `check.py` without Gazebo.
+- `Dockerfile.gazebo` uses the moving tag `osrf/ros:humble-desktop-full`, not a digest, so CI
+  results may drift.
+- Headless `gpu_lidar` on GitHub's GPU-less runners depends on software rendering. The `gazebo` job
+  is the first test of this.
+- In the cross-check, curve_left/diff_drive still shows "Turned: no" in both simulators. That is
+  consistent with finding 1 (sector mismatch), not a Gazebo fault.
+
+---
+
+## T5 — Arena 1: sector association
+- **Status:** open
+- **Author:** Claude Code   **Reviewer:** Codex
+- **Branch / commits:** `integration-hub` merge `d623baf` of `claude/workspace` (`0d4ee2f`; feature
+  `claude/research/arena-spec` `7578bd0`). Entry branches: `claude/robot/arena-sector-association`
+  and `codex/robot/arena-sector-association`, both from `integration-hub` at `d623baf`.
+- **What changed:** The user asked for an internal arena to learn which agent to route which work to.
+  Round 1: both agents independently fix the camera/LiDAR sector mismatch (finding 1 in T3), scored
+  by the twin. Rules: [`experiments/arena/2026-10-20_sector-association.md`](experiments/arena/2026-10-20_sector-association.md).
+  Scorer: `sim/arena/score_entry.py`. Baseline: `experiments/arena/baseline_2026-10-20.json`.
+  The rules, scorer and baseline were frozen in commit `d623baf` on `integration-hub`, before any entry
+  was written.
+- **How it was tested:** `python3 scripts/check.py` exits 0 after the merge (compile, 16 quest tasks,
+  17 unit tests). `python3 -m sim.arena.score_entry /nonexistent/entry.json` imports and parses its
+  arguments, then stops with `FileNotFoundError` (no friendly message, but no import error).
+  Scoring the baseline against itself gives **42.04 / 100**, matching the rules file.
+- **Unsure about:** Codex, please:
+  1. Review the rules and scorer for fairness **before** you start. Objections are allowed until you
+     submit. If the rules change, Claude's entry is re-scored under the new rules. Claude wrote the
+     twin, the rules and the scorer, so check them with that in mind.
+  2. Build your entry on `codex/robot/arena-sector-association`, branched from `integration-hub` at
+     `d623baf`.
+  3. Post your entry's commit SHA here when you submit.
+
+  Claude will submit its entry on `claude/robot/arena-sector-association` and will not read Codex's
+  branch before both entries are in (or 2026-10-27, per rule 4).
+
+Integration review notes (Claude Code, integration role), for item 1:
+- The scope check uses `git diff --name-only`, which reports only the new path of a rename. A file
+  moved from `sim/` into `tests/` would not be caught. `--no-renames` would close this.
+- Rule 3 (do not change `zlac_joystick_bridge.py`) is not enforced by the scorer: the bridge lives
+  under `ros2_yolo_ws/scripts/MAIN/Control/`, an allowed path. The judge must check it by hand.
+- `ALLOWED_PREFIXES` allows all of `logs/`, while the rules say only your own `logs/<agent>.md`.
+- The task score uses one seed (seed 0) of one scenario. An entry tuned to that run could overfit.
+- No hardware commands, secrets, private IPs or machine paths in the merged files; the scorer only
+  reads JSON and runs `git diff`.
+
+**Claude Code:** submission — branch `claude/robot/arena-sector-association` @ `929096d` (from `d623baf`). Self-reported score 99.42/100 (curve_left/diff_drive turned, target in FOV, final gap 0.59 m; no regressions; scope check clean). Write-up: `experiments/arena/entries/claude.md` on that branch. Not merged until judged. Codex: per rule 4, please submit your entry before reading this branch; the judge re-runs the scorer on both.
+
+**Claude Code (integration):** independent scope check — `929096d` descends from `d623baf` (`git merge-base --is-ancestor` passes; one commit). `git diff --name-only --no-renames d623baf 929096d` lists 6 paths, all allowed: `experiments/arena/entries/claude.md`, `logs/claude.md`, `ros2_yolo_ws/scripts/Image/fusion_prob_node.py`, `ros2_yolo_ws/scripts/Image/sync_fusion_node.py`, `ros2_yolo_ws/scripts/Lidar/lidar_sectorizer_node.py`, `tests/test_sector_association.py`. `MAIN/Control/zlac_joystick_bridge.py` is not touched (rule 3). The added lines contain no machine paths, private IPs, secrets, serial devices or `cmd_vel` publishers. Branch not merged.
