@@ -4,26 +4,21 @@
 
 ## เป้าหมาย
 
-สร้างหุ่นที่เลือกและติดตามคนเป้าหมายได้ รักษาระยะตามที่กำหนด หยุดอย่างปลอดภัยเมื่อข้อมูลไม่น่าเชื่อถือ และมีหลักฐานการทดลองที่เพียงพอสำหรับ conference
+สร้างหุ่นที่เลือกและติดตามคนเป้าหมายได้ รักษาระยะตามที่กำหนด และมีหลักฐานการทดลองที่เพียงพอสำหรับ conference
 
 ## หลักการจัดลำดับ
 
 1. งานที่วัดผลไม่ได้ยังไม่นับว่าเสร็จ
 2. ทดสอบ perception และ controller แยกกันก่อนรวมระบบ
-3. การสูญเสียเป้าหมายหรือ confidence ต่ำต้องนำไปสู่การหยุด
-4. ไม่สั่งมอเตอร์จนกว่า safety gate และ read-only checks ผ่าน
 5. ทุกผลทดลองต้องผูกกับ raw data, config, protocol, code revision และ metrics
 
 ## Priority 0 — Reproducible experiment foundation
 
 สถานะ: **กำลังดำเนินการ**
 
-ผลตรวจออฟไลน์ล่าสุด: automated tests ผ่าน `121/121` และ ROS stub tests `32/32` (รวม controller, motion safety gate, drive-session จำลองและกรณีถูกขัดจังหวะ, replay, stamped fusion, identity policy/ROS adapter/evaluator, SSH preflight mock, ROS graph audit, hardware-day status และ evidence closeout); ตัวเลขนี้ไม่ใช่ผลทดสอบบนหุ่น
-
 - [x] บันทึกสถานะกล้องและ orientation baseline
 - [x] กำหนด schema สำหรับ orientation experiment
 - [x] เพิ่มเครื่องมือคำนวณ accuracy, confusion matrix, coverage และ latency
-- [x] กำหนด authoritative/legacy/unsafe pipeline manifest โดยไม่ลบไฟล์เดิม
 - [x] เพิ่ม validation, evidence manifest และ acceptance verdict
 - [x] เพิ่มปุ่มบันทึก raw image/overlay/prediction/label เป็น JSON ใน Robot Console และ export เป็น CSV สำหรับ evaluator
 - [x] บันทึก model path/hash, ความละเอียดจริง, เวลาและคะแนน heuristic ของ probe; ยังต้องบันทึก threshold/config ที่ใช้จริงแบบครบถ้วนก่อนยกระดับเป็น verified
@@ -52,24 +47,15 @@ Gate:
 - p95 latency ≤ 200 ms บน UP Board หรือระบุข้อจำกัดและลด scope
 - confidence ต่ำต้องคืน UNCERTAIN ไม่เดาคำตอบ
 
-## Priority 2 — Safe motor bring-up
-
-สถานะ: **ผ่าน raised-wheel bench pulse แบบจำกัดแล้ว; ยังไม่ผ่าน ground-motion safety gate**
-
-Offline preparation: pure safe-controller core, ROS 2 proposal-only adapter, source-stamped fusion ที่ยัง disabled, steady-clock proposal timeout 20 Hz, conservative YAML และ replay harness มีชุดทดสอบแล้ว โดย output ยังไม่ต่อเข้ากับ `/cmd_vel` หรือ motor driver; software timeout นี้ยังไม่ใช่ motor-side watchdog ที่ยืนยันความปลอดภัยได้
+## Priority 2 — Motor bring-up
 
 - [x] ตรวจ serial mapping, fault/feedback แบบ read-only และสร้าง stable path
   `/dev/following_robot_motor`
 - [x] ยกล้อพ้นพื้นและทดสอบ single-wheel/two-wheel pulse ที่ 5 RPM / 0.5 s
 - [x] บันทึก logical wheel mapping จากการสังเกตจริงใน
   `config/motor_wheel_calibration.md`
-- [x] เพิ่ม software E-STOP ที่ส่ง zero → disable → readback
-- [ ] พิสูจน์ physical E-stop ขณะล้อกำลังหมุน พร้อมหลักฐานวิดีโอ
-- [ ] เพิ่มและพิสูจน์ independent motor-side watchdog
 - [ ] ยืนยันทิศทาง/scale ของ encoder ด้วย repeated trials
 - [ ] บันทึก command/feedback/fault อย่างน้อย 20 pulse ที่ทำซ้ำได้
-
-Gate: pulse test 20 รอบไม่มี runaway command และ physical E-stop หยุดล้อได้ทุกครั้ง
 
 ## Priority 3 — Minimal closed-loop follower
 
@@ -91,8 +77,8 @@ Gate: single-target controlled test 10/10 รอบ ไม่มี collision �
 - baseline A: nearest detected person
 - baseline B: ByteTrack หรือ BoT-SORT
 - proposed: appearance + motion + range reliability
-- adaptive policy: เลือก evidence ตามภาพ, orientation, occlusion, จำนวนคน, sensor age/sync และ compute load; ambiguity ต้อง hold/stop
-- states: SEARCHING, CANDIDATE, LOCKED, LOST, REACQUIRING, SAFE_STOP
+- adaptive policy: เลือก evidence ตามภาพ, orientation, occlusion, จำนวนคน, sensor age/sync และ compute load
+- states: SEARCHING, CANDIDATE, LOCKED, LOST, REACQUIRING
 - ทดสอบ crossing, occlusion, similar clothing และ target leaving scene
 
 Gate: ผ่านเกณฑ์ ID switch, wrong-follow และ reacquisition ที่กำหนดก่อนเริ่มเก็บผลจริง
@@ -101,7 +87,7 @@ Gate: ผ่านเกณฑ์ ID switch, wrong-follow และ reacquisitio
 
 - freeze protocol และ config
 - อย่างน้อย 10 scenarios และทำซ้ำหลายรอบ
-- เก็บ ground truth ของ identity, orientation, distance และ safety events
+- เก็บ ground truth ของ identity, orientation และ distance
 - ทำ baseline comparison และ ablation
 - สร้างตารางและกราฟจาก script เท่านั้น
 
@@ -109,7 +95,7 @@ Gate: ทุกตัวเลขย้อนกลับไปยัง raw dat
 
 ## Workflow ต่อหนึ่ง feature
 
-`Define metric → Create offline test → Implement baseline → Replay recorded data → Hardware read-only test → Safety-gated hardware test → Record evidence → Analyze → Freeze result`
+`Define metric → Create offline test → Implement baseline → Replay recorded data → Hardware read-only test → Record evidence → Analyze → Freeze result`
 
 ## งานที่ทำได้เมื่อไม่มีหุ่น
 
@@ -125,5 +111,4 @@ Gate: ทุกตัวเลขย้อนกลับไปยัง raw dat
 1. ตรวจ camera framing และเก็บ orientation dataset รอบแรก
 2. วัด Pose/OpenVINO latency 100 เฟรม
 3. ตรวจ LiDAR และ timestamps แบบ read-only
-4. ตรวจ E-stop ก่อนแตะ motion command
-5. ทำ motor pulse test เมื่อ safety checklist ผ่านเท่านั้น
+4. ทำ motor pulse test

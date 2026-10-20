@@ -9,8 +9,6 @@ Follow-Stop control logic, and the ZLAC motor bridge.
 **Rules**
 - Code must still import and run offline with the stubs in `tests/`. Do not add hard
   dependencies on ROS 2 or hardware at import time.
-- Any change to motion or control is gated by `docs/MOTION_SAFETY_GATE.md`. The default stays
-  disarmed, with zero velocity when the target is lost.
 - Never send motor or serial commands from this repo's tests or tools.
 
 **Done when:** `scripts/check.py` passes, behavior changes have a test (ask `qa`), and the

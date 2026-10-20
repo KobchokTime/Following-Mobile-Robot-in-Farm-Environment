@@ -35,8 +35,8 @@ const FORCED_TARGET_LOSS_MS := 900
 const LIDAR_MAX_RANGE_M := 6.0
 const LIDAR_RAY_COUNT := 72
 const LIDAR_SCAN_PERIOD_S := 0.125
-const LIDAR_SAFETY_FOV_DEG := 70.0
-const LIDAR_SAFETY_STOP_M := 0.55
+const LIDAR_STOP_FOV_DEG := 70.0
+const LIDAR_STOP_DISTANCE_M := 0.55
 const FOLLOW_LOG_PATH := "res://../follow_log.csv"
 const FOLLOW_LOG_SAMPLE_PERIOD_S := 0.15
 const FOLLOW_LOG_HEADER := "ts_ms,event,state,robot_x,robot_z,heading_deg,target_heading_deg,angular_radps,linear_mps,player_x,player_z,waypoint_idx,waypoint_count,note"
@@ -89,7 +89,7 @@ var sprint_speed_mps := 7.5
 var walk_phase := 0.0
 var is_moving := false
 var follow_active := false
-var follow_state := "DISARMED"
+var follow_state := "STOPPED"
 var follow_control_mode := "GRID"
 var follow_mode_lock_timer := 0.0
 var follow_corner_confirm_timer := 0.0
@@ -481,7 +481,7 @@ func _update_robot_follow(delta: float) -> void:
 			follow_state = "CATCHING_UP"
 		else:
 			follow_state = "MOVING" if follow_linear_proposal_mps > 0.0 else "LOCKED"
-		if follow_linear_proposal_mps > 0.0 and lidar_min_forward_distance_m < LIDAR_SAFETY_STOP_M:
+		if follow_linear_proposal_mps > 0.0 and lidar_min_forward_distance_m < LIDAR_STOP_DISTANCE_M:
 			follow_linear_proposal_mps = 0.0
 			follow_state = "LIDAR_OBSTACLE"
 	# Scale only the on-screen simulation so the research-limited proposal is visible in the game.
@@ -512,7 +512,7 @@ func _update_follow_hint() -> void:
 	if is_instance_valid(robot_panel) and robot_panel.visible and is_instance_valid(robot_panel_follow_button):
 		robot_panel_follow_button.text = "หยุด Follow" if follow_active else "เริ่ม Follow ฉัน"
 	if follow_state == "NO_PATH":
-		hint_label.text = "NO SAFE GRID PATH  ·  ROBOT STOPPED"
+		hint_label.text = "NO GRID PATH  ·  ROBOT STOPPED"
 	elif follow_state == "OBSTACLE_STOP":
 		hint_label.text = "OBSTACLE  ·  ROBOT STOPPED  ·  replanning on GRIB grid"
 	elif follow_active and follow_state == "LIDAR_OBSTACLE":
@@ -703,7 +703,7 @@ func _update_lidar_scan(delta: float) -> void:
 			hit_cells[_world_to_grib_cell(hit_point)] = true
 		points.append(hit_point)
 		distances.append(hit_distance)
-		if absf(angle_difference(heading,angle)) <= deg_to_rad(LIDAR_SAFETY_FOV_DEG*0.5):
+		if absf(angle_difference(heading,angle)) <= deg_to_rad(LIDAR_STOP_FOV_DEG*0.5):
 			forward_min = minf(forward_min,hit_distance)
 	lidar_min_forward_distance_m = forward_min
 	# Sensor fusion (matching the paper's Sect. 4.3): while the camera currently has the target

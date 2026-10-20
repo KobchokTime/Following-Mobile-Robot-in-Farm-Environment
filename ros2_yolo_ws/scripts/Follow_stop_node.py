@@ -114,7 +114,6 @@ class FollowStop(Node):
 
         cmd = Twist()
 
-        # safety
         if self.front_min is None or (now - self.last_target_t) > timeout:
             self.pub_cmd.publish(cmd)
             return
