@@ -59,3 +59,19 @@ Earlier history: `history-2026-10-16.md`.
 - Opened draft PR KobchokTime/Following-Mobile-Robot-in-Farm-Environment#2: `integration-hub` → `main`.
   Its checklist: Codex reviews T1 and confirms the Sol 6 model ID, the leftover branches get
   deleted, optional thesis-desk UI fixes, and the user approves.
+
+### 2026-10-20 — research — 12-week plan agreed with the user
+- Planned with the user, Thai time 10:30–11:30:
+  - 1–3 months, about 2 robot days per month (dates unknown).
+  - Ground-motion follower is in scope.
+  - The user decided: no physical E-stop, motor-side watchdog, safety bridge or speed limit in this
+    project. Safety comes from an isolated field and several spotters. The existing
+    "target lost → stop" logic stays as follower behavior.
+  - No RTX GPU, so Gazebo instead of Isaac Sim.
+  - Offline twin = rosbag record/replay + Docker with fake drivers + Gazebo.
+- Wrote `docs/PLAN.md` on `claude/research/plan`, branched from `claude/workspace`
+  (after syncing `integration-hub` in `4ab4721`).
+- Found that the code the docs reference but the repo lacks (Robot Console, `motion_safety.py`,
+  121 tests) was never committed. `quarantine/BACKUP_AUDIT.md` says `dashboard/` is a
+  separate repo on the Windows machine, and the backup also holds videos and ROS bags. This
+  became Codex's week-1 task in `HANDOFF.md`.
