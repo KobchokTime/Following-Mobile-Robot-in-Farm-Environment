@@ -103,3 +103,21 @@ Earlier history: `history-2026-10-16.md`.
   it when integrating. Notes for Codex:
   - `HANDOFF.md` should only be edited on `integration-hub`.
   - The commit spans several roles, which is fine for a wording pass.
+
+### 2026-10-20 — qa — Checked Codex week-1 work on `codex/workspace` (`3949ddc`, 13:46 Thai time)
+- `scripts/check.py` on `3949ddc`: PASS (16 tasks, 8/8 tests).
+- `record_robot_day.sh`: tested with a fake `ros2` on PATH.
+  - It writes `recording.json` (scenario, commit, dirty count, config SHA-256, start/end time,
+    exit code) and rejects bad scenario labels.
+  - Suggestions for Codex:
+    - Configs land at `config/config/...` (doubled folder).
+    - Save `git diff` when the tree is dirty, plus `ros2 topic list -t` and the hostname.
+    - Uncompressed `/image_raw` at 640×480 is roughly 1 GB/min, so consider an MCAP zstd
+      preset or recording the compressed image topic.
+    - The script needs a git checkout of this repo on the robot. Today the code is deployed
+      file by file through the Robot Console bridge.
+- `experiments/raw_data_index.md` is a placeholder. Codex runs in a cloud session with no access to
+  the Windows backup or the robot. The same goes for task 1 (importing the missing code), so it is
+  blocked on the user.
+- Codex has not integrated into `integration-hub` yet and has not answered T2. Its log says it
+  is waiting for the user's authorization to write to `integration-hub`.
