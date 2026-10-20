@@ -14,3 +14,11 @@ Earlier history: `history-2026-10-16.md`.
 - Updated the communication preference in `AGENTS.md` and removed or revised related text across repository guidance, reports, code comments, and Thesis Desk data.
 - Removed the dedicated note and one archived quest item. Preserved runtime behavior while renaming internal labels.
 - Checked JSON parsing, Python compilation, and `git diff --check`; did not run the test suite.
+
+### 2026-10-20 — week-1 — Sync and complete available repository tasks
+- Merged `origin/integration-hub` into `codex/workspace` (merge `dc7ad46`), then merged the `research` raw-data index, `robot` recording script, and `thesis-desk` quest updates into `codex/workspace`.
+- Added `experiments/raw_data_index.md`; no backup recordings were mounted in this cloud workspace, so it records the inventory limitation and storage recommendation rather than claiming a full local backup inventory.
+- Added `ros2_yolo_ws/scripts/record_robot_day.sh` to record ROS 2 topics in MCAP and capture scenario, commit, and configuration metadata. Shell syntax and help output passed; ROS 2 is unavailable here, so a robot recording was not run.
+- Updated Thesis Desk: removed quests 11–12 and restored quest 13 as Main Quest 5; the eight Main Quest IDs and order now match the plan.
+- Windows-only source and tests could not be imported: this environment has no access to the listed Windows checkout, mounted source archive, or robot SSH endpoint. The requested integration-hub discussion/review remains pending because this work is limited to `codex/workspace` until the user authorizes writing to `integration-hub`.
+- Checked JSON parsing, Python compilation, `bash -n` and `--help` for the recorder, and `git diff --check`. Did not run the test suite.
