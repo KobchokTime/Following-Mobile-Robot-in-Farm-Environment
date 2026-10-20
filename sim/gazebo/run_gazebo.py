@@ -74,7 +74,7 @@ def run_one(name: str, bridge_mode: str, out_root: Path, gui: bool, seed: int, c
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--scenario", default="straight", help=f"one of {sorted(SCENARIOS)} or 'all'")
+    ap.add_argument("--scenario", default="straight", help=f"comma-separated names from {sorted(SCENARIOS)}, or 'all'")
     ap.add_argument("--bridge-mode", default="current", choices=["current", "diff_drive"])
     ap.add_argument("--out", default="sim_runs", type=Path)
     ap.add_argument("--gui", action="store_true", help="open the Gazebo window (needs $DISPLAY)")
@@ -82,7 +82,7 @@ def main() -> int:
     ap.add_argument("--camera-pose", default="-3.5 -5.5 4.5 0 0.5 0.75",
                     help="GUI camera 'x y z roll pitch yaw'")
     args = ap.parse_args()
-    names = sorted(SCENARIOS) if args.scenario == "all" else [args.scenario]
+    names = sorted(SCENARIOS) if args.scenario == "all" else args.scenario.split(",")
     results = [run_one(n, args.bridge_mode, args.out, args.gui, args.seed, args.camera_pose) for n in names]
     (args.out / "summary_gazebo.json").write_text(json.dumps(results, indent=2) + "\n", encoding="utf-8")
     for r in results:

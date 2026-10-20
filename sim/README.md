@@ -38,6 +38,30 @@ docker run --rm -v "$PWD/sim_runs:/repo/sim_runs" following-robot-twin \
 If `packages.ros.org` is unreachable, build with `--build-arg INSTALL_MCAP=0`. Everything still
 works, except replaying MCAP bags.
 
+## 3D view in Gazebo
+
+The same scenarios also run in **Ignition Gazebo (Fortress)**:
+- The LiDAR is Gazebo's own `gpu_lidar`, mounted at 180° like the real one.
+- The poses come from Gazebo.
+- Everything runs on simulation time.
+- The robot nodes and the ZLAC bridge model are the same as above.
+- People are simple shapes. Gazebo's walking-person models need Fuel, which may be offline.
+
+```bash
+docker build -f sim/docker/Dockerfile.gazebo -t following-robot-twin-gz .
+# headless: scores only
+docker run --rm -v "$PWD/sim_runs:/repo/sim_runs" following-robot-twin-gz \
+  python3 -m sim.gazebo.run_gazebo --scenario curve_left --bridge-mode diff_drive --out /repo/sim_runs
+# open the Gazebo window (Linux desktop or Windows 11 WSLg: pass your display through)
+docker run --rm -e DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix -v "$PWD/sim_runs:/repo/sim_runs" \
+  following-robot-twin-gz python3 -m sim.gazebo.run_gazebo --scenario straight --gui --out /repo/sim_runs
+# record an MP4 on a headless Linux host (needs Xvfb and ffmpeg on the host)
+sim/gazebo/record_video.sh curve_left diff_drive sim_runs
+```
+
+Results go to `sim_runs/<scenario>_<bridge>_gazebo/` with the same `state.jsonl` and `score.json`
+format as the kinematic twin, so the two simulators can be compared directly.
+
 ## Scenarios (`sim/twin/scenarios.py`)
 
 | Name | What happens |

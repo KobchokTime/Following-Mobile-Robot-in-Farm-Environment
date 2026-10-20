@@ -7,8 +7,9 @@ The world has a soil field with crop beds, the robot and the people of the scena
 - People are a cylinder body plus a sphere head (radius `PERSON_RADIUS_M`), driven along
   the scenario waypoints by `gz_twin_node.py`. They have no collision, so they never push
   the robot. The LiDAR still sees them because `gpu_lidar` hits visuals.
-- Crop beds sit beside the walking lane (|y| >= 1.4 m). They are outside the LiDAR
-  sectorizer's ±15 deg window along the lane.
+- Crop beds sit beside the walking lane (|y| >= 1.6 m) and end at x = 4 m, so the curve
+  scenario turns in the open headland. They are outside the LiDAR sectorizer's ±15 deg
+  window along the lane.
 """
 
 from __future__ import annotations
@@ -43,12 +44,12 @@ def crop_beds() -> str:
     beds = []
     for i, y in enumerate((-3.2, -2.0, 2.0, 3.2)):
         beds.append(f"""
-  <model name="bed_{i}"><static>true</static><pose>5 {y} 0.1 0 0 0</pose><link name="l">
-    <visual name="soil"><geometry><box><size>14 0.8 0.2</size></box></geometry>
+  <model name="bed_{i}"><static>true</static><pose>0.5 {y} 0.1 0 0 0</pose><link name="l">
+    <visual name="soil"><geometry><box><size>7 0.8 0.2</size></box></geometry>
       <material><diffuse>0.35 0.22 0.12 1</diffuse><ambient>0.35 0.22 0.12 1</ambient></material></visual>""")
-        for k in range(14):
+        for k in range(7):
             beds.append(f"""
-    <visual name="plant_{k}"><pose>{-6.5 + k} 0 0.25 0 0 0</pose><geometry><sphere><radius>0.25</radius></sphere></geometry>
+    <visual name="plant_{k}"><pose>{-3 + k} 0 0.25 0 0 0</pose><geometry><sphere><radius>0.25</radius></sphere></geometry>
       <material><diffuse>0.2 0.6 0.2 1</diffuse><ambient>0.2 0.6 0.2 1</ambient></material></visual>""")
         beds.append("</link></model>")
     return "".join(beds)
@@ -83,6 +84,7 @@ def robot() -> str:
 def gui(camera_pose: str) -> str:
     return f"""
   <gui fullscreen="0">
+    <window><width>1280</width><height>720</height></window>
     <plugin filename="GzScene3D" name="3D View">
       <ignition-gui><title>3D View</title><property type="bool" key="showTitleBar">false</property>
         <property type="string" key="state">docked</property></ignition-gui>
