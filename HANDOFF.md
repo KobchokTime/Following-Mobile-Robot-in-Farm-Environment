@@ -9,15 +9,15 @@ and review threads in [`DISCUSSION.md`](DISCUSSION.md).
 - **Current owner:** none
 - **Status:** ready
 - **Files being edited:** none
-- **Last updated:** 2026-10-20 by Codex
+- **Last updated:** 2026-10-20 by Claude Code
 
 ## Branches
 
 | Branch | State |
 |---|---|
 | `main` | Initial commit only. It receives `integration-hub` through a PR once the user approves. |
-| `integration-hub` | Has the robot recovery, Thesis Desk, quest sources, agent workflow, GUI smoke-test results, 12-week plan and Codex week-1 changes. `scripts/check.py` passes. |
-| `claude/workspace` | Behind the latest `integration-hub` commits; no feature in progress. |
+| `integration-hub` | Has the robot recovery, Thesis Desk, quest sources, agent workflow, GUI smoke-test results, 12-week plan, Codex week-1 changes and the offline twin (`sim/`, twin CI, first simulated findings; merge `18c2303`). `scripts/check.py` passes. |
+| `claude/workspace` | Offline twin (`4b1b45e`) merged into `integration-hub`; behind the latest integration commits. No feature in progress. |
 | `codex/workspace` | Week-1 changes are integrated into `integration-hub`; it is behind the latest integration commits. |
 | *To delete* | `integration/robot-thesis-desk`, `codex/robot-backup-quarantine` and `codex/thesis-desk`. They are fully merged, but the cloud session's git proxy cannot delete branches. The user deletes them on GitHub, or Codex runs `git push origin --delete ...` from Windows. |
 
@@ -50,7 +50,11 @@ The 12-week plan is in [`docs/PLAN.md`](docs/PLAN.md) (20 Oct 2026 to about 15 J
    - The tracker's top bar overflows a 1440 px wide screen.
 4. Not yet verified: rendering on the user's real Windows GPU, and the real robot checks
    (ROS graph, camera, LiDAR, motor). There is no physical E-stop to check (see *Plan*).
-5. `integration-hub` → `main` (draft PR KobchokTime/Following-Mobile-Robot-in-Farm-Environment#2): needs every thread resolved and the user's approval.
+5. **T3** in `DISCUSSION.md`: the offline twin and first simulated findings (sector mismatch between
+   camera and LiDAR, bridge ignores `angular.z`, proportional lag, 1.0 s stop on target loss).
+   Codex re-runs the twin, checks the analysis and answers the robot questions. GitHub Actions
+   run 39385504387 (`twin.yml` on `claude/workspace`) was in progress at merge time; check its result.
+6. `integration-hub` → `main` (draft PR KobchokTime/Following-Mobile-Robot-in-Farm-Environment#2): needs every thread resolved and the user's approval.
 
 ## Codex — week 1 tasks
 
@@ -78,8 +82,11 @@ Sync `codex/workspace` with `integration-hub` first. Read `docs/PLAN.md` and rep
 
 ## Claude — in parallel
 
-- Replay harness for recorded rosbags (role `robot` / `qa`).
-- Docker image (Ubuntu 22.04, ROS 2 Humble, OpenVINO) with fake camera, LiDAR and ZLAC drivers.
-- CI that runs `scripts/check.py` and the replay tests on every PR.
-- Gazebo world: differential-drive robot with camera and 2D LiDAR in a farm scene with walking people.
-- Robot-day #1 checklist (role `research`).
+- [x] Replay harness for recorded rosbags (`sim/replay/replay_bag.py`, role `robot` / `qa`).
+- [x] Docker image (Ubuntu 22.04, ROS 2 Humble) with fake camera/YOLO, LiDAR and ZLAC drivers
+  (`sim/`, see `sim/README.md`). It runs the unmodified perception → fusion → controller chain.
+- [x] CI that runs `scripts/check.py`, the twin and the replay smoke check (`.github/workflows/twin.yml`).
+- [ ] Gazebo world: differential-drive robot with camera and 2D LiDAR in a farm scene with walking
+  people. **Deferred:** `packages.ros.org` and the Gazebo apt server are blocked in Claude's cloud
+  session. The kinematic twin covers levels 1–2 of the plan for now.
+- [ ] Robot-day #1 checklist (role `research`).
