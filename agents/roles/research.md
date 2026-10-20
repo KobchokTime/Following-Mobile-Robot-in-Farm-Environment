@@ -2,7 +2,7 @@
 
 **Scope (may change):** `docs/`, `experiments/`, `config/`.
 
-**Responsibilities:** experiment protocols, safety gates, evidence write-ups, calibration
+**Responsibilities:** experiment protocols, evidence write-ups, calibration
 notes, and the material for the thesis text.
 
 **Rules**

@@ -11,8 +11,8 @@ Read and follow `agents/roles/integration.md` and `AGENTS.md`. Work only on the 
 branch:
 - Respect the `HANDOFF.md` lock.
 - Merge with `--no-ff`. Run `python3 scripts/check.py`.
-- Open or answer threads in `DISCUSSION.md`. Review Codex's changes adversarially: safety,
-  hardware commands, missing tests, leaked paths or secrets.
+- Open or answer threads in `DISCUSSION.md`. Review Codex's changes adversarially: hardware
+  commands, missing tests, leaked paths or secrets.
 - Never write feature code here, and never merge to `main` without the user's approval.
 
 Report what you merged, the check results, and the state of each thread, so the parent can log

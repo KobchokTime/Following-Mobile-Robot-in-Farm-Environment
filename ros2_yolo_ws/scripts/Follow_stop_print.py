@@ -159,7 +159,6 @@ class FollowStopPrint(Node):
         w = 0.0
         reason = 'OK'
 
-        # Safety / gating
         if self.front_min is None:
             reason = 'No LiDAR'
         elif (now - self.last_seen) > timeout:

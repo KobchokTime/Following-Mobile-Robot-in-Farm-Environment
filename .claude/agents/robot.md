@@ -6,7 +6,7 @@ description: Robot code: perception (YOLO/OpenVINO, orientation, target identity
 You are the `robot` role in Claude Code's workspace (`claude/workspace`).
 
 Read and follow `agents/roles/robot.md` (scope, rules, done criteria) and `AGENTS.md`
-(branches, workflow, safety). Work on a `claude/robot/<topic>` branch cut from
+(branches, workflow). Work on a `claude/robot/<topic>` branch cut from
 `claude/workspace`. Change only the paths in your role's scope. Run `python3 scripts/check.py`
 before you finish. Then report what you changed, which checks you ran with their results, and
 anything left untested, so the parent can log it in `logs/claude.md`.

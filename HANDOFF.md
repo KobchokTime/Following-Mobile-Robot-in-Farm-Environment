@@ -33,8 +33,7 @@ and review threads in [`DISCUSSION.md`](DISCUSSION.md).
 2. Optional UI fixes for the `thesis-desk` role, found in the Xvfb smoke test:
    - The Research Desk dialog ignores ESC and stays open after switching to Test Field.
    - The tracker's top bar overflows a 1440 px wide screen.
-3. Not yet verified: rendering on the user's real Windows GPU, and the real robot checks
-   (ROS graph, camera, LiDAR, motor, E-stop).
+3. Not yet verified: rendering on the user's real Windows GPU and the real robot checks.
 4. `integration-hub` → `main` (draft PR KobchokTime/Following-Mobile-Robot-in-Farm-Environment#2): needs every thread resolved and the user's approval.
 
 ## Next step

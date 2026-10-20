@@ -3,12 +3,12 @@
 This is not a verified person re-identification system. Embedding cosine scores
 are uncalibrated; the thresholds below are conservative example policy values,
 not measured probabilities. A caller must explicitly enroll one visible person
-and must independently enforce obstacle, stale-sensor, and motion safety rules.
+and must independently enforce obstacle and stale-sensor handling.
 
 Only a LOCKED result with a non-None ``target`` authorizes use of that detection.
 Every other result means stop. Track IDs are deliberately ignored: a tracker ID
 can switch at a crossing. Ambiguity or missing evidence never picks another person.
-After SAFE_STOP, a new explicit enrollment is required. A single impostor with
+After STOP_LATCHED, a new explicit enrollment is required. A single impostor with
 near-identical appearance and plausible position cannot be distinguished by
 these inputs; this module must not be presented as an identity guarantee.
 """
@@ -31,7 +31,7 @@ class LockState(str, Enum):
     LOCKED = "LOCKED"
     LOST = "LOST"
     REACQUIRING = "REACQUIRING"
-    SAFE_STOP = "SAFE_STOP"
+    STOP_LATCHED = "STOP_LATCHED"
 
 
 @dataclass(frozen=True)
@@ -102,7 +102,7 @@ class TargetIdentityLock:
     ``enroll`` accepts only the observation selected by the operator, not a
     list of people. Call ``update`` once per new frame with all detected people.
     On loss, motion is withheld immediately; reacquisition takes consecutive
-    unambiguous matches. ``SAFE_STOP`` is latched until ``enroll`` is called.
+    unambiguous matches. ``STOP_LATCHED`` is latched until ``enroll`` is called.
     """
 
     def __init__(self, config: LockConfig = LockConfig()) -> None:
@@ -128,16 +128,16 @@ class TargetIdentityLock:
         return self._result("explicit_enrollment")
 
     def update(self, detections: Sequence[PersonDetection], now_s: float) -> LockResult:
-        """Associate one new frame; output a target only when safely LOCKED."""
+        """Associate one new frame; output a target only in the LOCKED state."""
         self._validate_time(now_s)
         if self._last_frame_s is not None and now_s <= self._last_frame_s:
             raise ValueError("frame time must increase")
         self._last_frame_s = now_s
-        if self.state in (LockState.SEARCHING, LockState.SAFE_STOP):
+        if self.state in (LockState.SEARCHING, LockState.STOP_LATCHED):
             return self._result("explicit_enrollment_required")
         assert self._last is not None and self._template is not None and self._last_lock_s is not None
         if now_s - self._last_lock_s > self.config.lost_timeout_s:
-            self.state = LockState.SAFE_STOP
+            self.state = LockState.STOP_LATCHED
             return self._result("target_timeout")
 
         eligible = []
@@ -188,11 +188,11 @@ class TargetIdentityLock:
             return LockResult(self.state, match, "lock_confirmed")
         return self._result("confirmation_pending")
 
-    def safe_stop(self) -> LockResult:
-        """Latch a manual safe stop; only explicit re-enrollment clears it."""
-        self.state = LockState.SAFE_STOP
+    def latch_stop(self) -> LockResult:
+        """Latch a manual stop; only explicit re-enrollment clears it."""
+        self.state = LockState.STOP_LATCHED
         self._confirmations = 0
-        return self._result("manual_safe_stop")
+        return self._result("manual_stop")
 
     def _result(self, reason: str) -> LockResult:
         return LockResult(self.state, None, reason)

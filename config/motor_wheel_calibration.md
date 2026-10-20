@@ -23,5 +23,4 @@ The operator reported that the corrected raised-wheel pulse produced the
 expected physical wheel and direction. This validates only the logical-left
 bench mapping at 5 RPM for 0.5 s. The operator subsequently reported that the
 logical-right wheel was also correct. It does not validate two-wheel motion,
-encoder accuracy, braking distance, the physical E-stop under motion, or
-operation with wheels on the ground.
+encoder accuracy, braking distance, or operation with wheels on the ground.
