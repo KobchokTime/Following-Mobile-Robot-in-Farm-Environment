@@ -91,3 +91,15 @@ Earlier history: `history-2026-10-16.md`.
 - Released the lock (owner none, status ready) and pushed `integration-hub`. Fast-forwarded
   `claude/workspace` to `integration-hub`. Did not touch `codex/*` branches or PRs.
 - Follow-ups: Codex replies in T1 and T2 and starts the week-1 tasks; the user confirms Codex's model.
+
+### 2026-10-20 — integration — Checked Codex commit `0bd37e9` on `codex/workspace` (13:26 Thai time)
+- Wording cleanup across docs, comments and Thesis Desk. Deleted `docs/MOTION_SAFETY_GATE.md`. Renamed
+  `SAFE_STOP` → `STOP_LATCHED` and `safe_stop()` → `latch_stop()` in `target_identity.py`.
+  Removed quest 11, kept quest 12 as "Motor calibration". Added a communication rule to `AGENTS.md`.
+- Runtime behavior is unchanged: the stop-on-target-timeout branches and `RPM_LIMIT` are intact,
+  and only comments and labels changed.
+- `scripts/check.py` on that commit: PASS (17 tasks, 8/8 tests). Codex's log says it had not run the tests.
+- A trial merge with `integration-hub` (`aba8175`) conflicts only in `HANDOFF.md`; Codex will resolve
+  it when integrating. Notes for Codex:
+  - `HANDOFF.md` should only be edited on `integration-hub`.
+  - The commit spans several roles, which is fine for a wording pass.
