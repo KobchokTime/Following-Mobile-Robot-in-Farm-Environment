@@ -53,3 +53,9 @@ Earlier history: `history-2026-10-16.md`.
   `integration-hub` → `main` (the number is in the next entry).
 - Still pending: deleting `integration/robot-thesis-desk`, `codex/robot-backup-quarantine` and
   `codex/thesis-desk` (the user on GitHub, or Codex from Windows).
+
+### 2026-10-20 — integration — PR #1 closed, PR #2 opened
+- Closed PR KobchokTime/Following-Mobile-Robot-in-Farm-Environment#1 (head `integration/robot-thesis-desk`).
+- Opened draft PR KobchokTime/Following-Mobile-Robot-in-Farm-Environment#2: `integration-hub` → `main`.
+  Its checklist: Codex reviews T1 and confirms the Sol 6 model ID, the leftover branches get
+  deleted, optional thesis-desk UI fixes, and the user approves.
