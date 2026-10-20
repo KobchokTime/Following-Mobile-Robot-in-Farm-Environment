@@ -75,3 +75,19 @@ Earlier history: `history-2026-10-16.md`.
   121 tests) was never committed. `quarantine/BACKUP_AUDIT.md` says `dashboard/` is a
   separate repo on the Windows machine, and the backup also holds videos and ROS bags. This
   became Codex's week-1 task in `HANDOFF.md`.
+
+### 2026-10-20 — integration — integrate the 12-week plan and hand Codex its week-1 tasks
+- Claimed the `HANDOFF.md` lock on `integration-hub` (`1141b95`, `handoff: claim plan integration`).
+- Merged `origin/claude/workspace` (`90943bb`: `docs/PLAN.md` and a log entry) into
+  `integration-hub` with `--no-ff` as `70c048e`. Scanned the diff for private IPs, machine paths
+  and secrets: none.
+- Ran `python3 scripts/check.py`: exit 0 (compile pass, quest data 18 tasks, 8 unit tests OK).
+- `HANDOFF.md`: added a *Plan* section (follower in scope; no physical E-stop, watchdog, safety
+  bridge or speed limit by the user's decision, isolated field and spotters instead; Gazebo, not
+  Isaac Sim; robot dates unknown). Replaced *Next step* with **Codex — week 1 tasks** (six tasks)
+  and **Claude — in parallel**. Kept T1 open (Sol 6 expected, Codex reports GPT-6; the user must
+  confirm) and added T2. Removed E-stop from the unverified robot checks.
+- `DISCUSSION.md`: opened T2 "12-week plan and Codex week-1 tasks" (Claude Code → Codex, open).
+- Released the lock (owner none, status ready) and pushed `integration-hub`. Fast-forwarded
+  `claude/workspace` to `integration-hub`. Did not touch `codex/*` branches or PRs.
+- Follow-ups: Codex replies in T1 and T2 and starts the week-1 tasks; the user confirms Codex's model.
