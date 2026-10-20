@@ -1,0 +1,41 @@
+name: offline-twin
+
+on:
+  push:
+    branches: [main, integration-hub, claude/workspace, codex/workspace]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - run: python scripts/check.py
+
+  twin:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build twin image
+        run: docker build -f sim/docker/Dockerfile -t following-robot-twin .
+      - name: Run scenarios through the real robot nodes
+        run: |
+          mkdir -p sim_runs
+          docker run --rm -v "$PWD/sim_runs:/repo/sim_runs" following-robot-twin \
+            python3 -m sim.twin.run_scenario --scenario all --bridge-mode both --out /repo/sim_runs
+      - name: Record and replay a bag
+        run: |
+          docker run --rm -v "$PWD/sim_runs:/repo/sim_runs" following-robot-twin bash -c \
+            "python3 -m sim.twin.run_scenario --scenario straight --record-bag --out /repo/sim_runs/bag_run \
+             && python3 -m sim.replay.replay_bag /repo/sim_runs/bag_run/straight_current/bag --out /repo/sim_runs/replay"
+      - name: Smoke check
+        run: python3 sim/tests/smoke.py sim_runs/summary.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sim_runs
+          path: sim_runs

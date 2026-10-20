@@ -121,3 +121,28 @@ Earlier history: `history-2026-10-16.md`.
   blocked on the user.
 - Codex has not integrated into `integration-hub` yet and has not answered T2. Its log says it
   is waiting for the user's authorization to write to `integration-hub`.
+
+### 2026-10-20 — robot / qa — Offline twin, replay harness and CI (14:00–15:20 Thai time)
+- Branch `claude/robot/offline-twin` from `claude/workspace`, which had synced `integration-hub` `0382a0f`.
+- Added `sim/`:
+  - Docker image (`sim/docker/`, ROS 2 Humble).
+  - Kinematic twin world with fake LiDAR, fake camera/YOLO and a ZLAC bridge model
+    (`sim/twin/world.py`, `world_node.py`).
+  - 5 scenarios and a scorer.
+  - `run_scenario.py`, which runs the **unmodified** robot nodes.
+  - `sim/replay/replay_bag.py`: rosbag2 replay plus `/cmd_vel` comparison.
+  - `sim/tests/smoke.py` and `sim/README.md`.
+- Added `tests/test_sim_twin.py` (9 offline tests). `scripts/check.py` now also compiles `sim/`.
+- Added `.github/workflows/twin.yml`: `check.py` plus the Docker twin, replay and smoke check on push and PR.
+- Verified here:
+  - Image built with `INSTALL_MCAP=0`, because `packages.ros.org` is blocked in this session.
+  - 10/10 scenario runs passed, twice, with the smoke check OK.
+  - Record → replay: 272 vs 258 `/cmd_vel`, linear RMSE 0.066.
+  - `check.py`: PASS.
+  - Not verified: MCAP replay (no plugin here) and the GitHub Actions run itself (pending push).
+- Findings are written up in `experiments/sim/2026-10-20_twin_first_run.md`:
+  - Camera/LiDAR sector mismatch, so the follower cannot follow a target off-center.
+  - The bridge ignores `angular.z`.
+  - P-only lag (gap about 2 m at 0.3 m/s).
+  - Target-loss stop after 1.0 s.
+- Gazebo is deferred because its package server is blocked in this session. The same harness can host it later.

@@ -14,7 +14,7 @@ import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-PY_DIRS = ["ros2_yolo_ws/scripts", "src", "tests", "tools", "scripts"]
+PY_DIRS = ["ros2_yolo_ws/scripts", "src", "sim", "tests", "tools", "scripts"]
 QUEST_DATA = ROOT / "tools/thesis_desk/thesis_data.json"
 SOURCE_RE = re.compile(r"[\w./-]+\.(?:md|py|json|csv|yaml)")
 
