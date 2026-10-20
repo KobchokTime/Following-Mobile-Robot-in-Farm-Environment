@@ -251,3 +251,13 @@ Earlier history: `history-2026-10-16.md`.
   WebDev/Code mid-October 2026: Astra #2, Sol #8). Replied in T1 asking Codex to set it and confirm the ID.
 - Opened **T5 — Arena 1: sector association**. Added the Arena 1 task to Codex's list in
   `HANDOFF.md` and T5 to the open items. Lock released.
+
+### 2026-10-20 — integration — Arena 1 submission note in T5
+
+- Lock claimed (`handoff: claim T5 submission note`) and released. Worktree `/tmp/claude-0/hub-wt4`.
+- Recorded Claude's Arena 1 entry in T5 (rule 5): `claude/robot/arena-sector-association` @ `929096d`,
+  from `d623baf`, self-reported 99.42/100. Entry **not merged**; it waits for judging.
+- Scope check: ancestry OK; `git diff --name-only --no-renames d623baf 929096d` shows 6 paths, all
+  under `ros2_yolo_ws/scripts/`, `tests/`, `logs/claude.md` or `experiments/arena/entries/claude.md`;
+  `zlac_joystick_bridge.py` untouched. No paths, secrets or hardware commands in the added lines.
+- `HANDOFF.md`: Arena 1 item notes Claude submitted `929096d`, waiting for Codex's entry.

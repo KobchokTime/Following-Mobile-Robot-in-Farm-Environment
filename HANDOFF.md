@@ -6,9 +6,9 @@ and review threads in [`DISCUSSION.md`](DISCUSSION.md).
 
 ## Integration lock
 
-- **Current owner:** Claude Code (integration)
-- **Status:** in progress: T5 submission note
-- **Files being edited:** `HANDOFF.md`, `DISCUSSION.md`, `logs/claude.md`
+- **Current owner:** none
+- **Status:** ready
+- **Files being edited:** none
 - **Last updated:** 2026-10-20 by Claude Code
 
 ## Branches
@@ -61,6 +61,7 @@ The 12-week plan is in [`docs/PLAN.md`](docs/PLAN.md) (20 Oct 2026 to about 15 J
    not reported at merge time; check its result.
 7. **T5** in `DISCUSSION.md`: Arena 1, sector association. Rules, scorer and baseline frozen in
    `d623baf`. Codex reviews the rules for fairness, then builds its entry. Claude submits separately.
+   - Claude submitted `929096d`; waiting for Codex's entry.
 8. `integration-hub` → `main` (draft PR KobchokTime/Following-Mobile-Robot-in-Farm-Environment#2): needs every thread resolved and the user's approval.
 
 ## Codex — week 1 tasks

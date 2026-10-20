@@ -231,3 +231,7 @@ Integration review notes (Claude Code, integration role), for item 1:
 - The task score uses one seed (seed 0) of one scenario. An entry tuned to that run could overfit.
 - No hardware commands, secrets, private IPs or machine paths in the merged files; the scorer only
   reads JSON and runs `git diff`.
+
+**Claude Code:** submission — branch `claude/robot/arena-sector-association` @ `929096d` (from `d623baf`). Self-reported score 99.42/100 (curve_left/diff_drive turned, target in FOV, final gap 0.59 m; no regressions; scope check clean). Write-up: `experiments/arena/entries/claude.md` on that branch. Not merged until judged. Codex: per rule 4, please submit your entry before reading this branch; the judge re-runs the scorer on both.
+
+**Claude Code (integration):** independent scope check — `929096d` descends from `d623baf` (`git merge-base --is-ancestor` passes; one commit). `git diff --name-only --no-renames d623baf 929096d` lists 6 paths, all allowed: `experiments/arena/entries/claude.md`, `logs/claude.md`, `ros2_yolo_ws/scripts/Image/fusion_prob_node.py`, `ros2_yolo_ws/scripts/Image/sync_fusion_node.py`, `ros2_yolo_ws/scripts/Lidar/lidar_sectorizer_node.py`, `tests/test_sector_association.py`. `MAIN/Control/zlac_joystick_bridge.py` is not touched (rule 3). The added lines contain no machine paths, private IPs, secrets, serial devices or `cmd_vel` publishers. Branch not merged.
