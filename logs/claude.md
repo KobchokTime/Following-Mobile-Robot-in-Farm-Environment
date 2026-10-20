@@ -185,3 +185,23 @@ Earlier history: `history-2026-10-16.md`.
   - Run 39385709202: `integration-hub` `29e00f9`, PR KobchokTime/Following-Mobile-Robot-in-Farm-Environment#2.
 - This confirms that the full Dockerfile (`INSTALL_MCAP=1`) builds on GitHub's runners. That could not
   be checked in Claude's cloud session.
+
+### 2026-10-20 — robot / research — Gazebo 3D twin with video (15:00–15:30 Thai time)
+- User asked for a graphical Gazebo view. `packages.ros.org` and Gazebo Fuel are blocked in this
+  session, so I used the Docker Hub image `osrf/ros:humble-desktop-full`, which ships Ignition
+  Gazebo Fortress and `ros_gz_bridge`.
+- Added `sim/gazebo/` on `claude/robot/gazebo-world`:
+  - `world_gen.py`: a farm world with crop beds and a headland, the robot with `gpu_lidar` at 180°,
+    and people as simple shapes.
+  - `gz_twin_node.py`: drives the people, models the ZLAC bridge and emulates the detector, reusing
+    `sim/twin/world.py`, which was refactored into `bridge_rpm` / `wheel_twist` / `project_detections`.
+  - `run_gazebo.py`: runs the unmodified robot nodes on sim time.
+  - `record_video.sh`: Xvfb + ffmpeg recording.
+- Also added `sim/docker/Dockerfile.gazebo` and a `gazebo` job in `twin.yml`.
+- Verified here:
+  - Headless and GUI runs both work.
+  - 3 videos recorded (straight/current, curve_left/diff_drive, target_loss/current) and sent to the user.
+  - Gazebo scores match the kinematic twin to within 0.05 m.
+  - `check.py` PASS; the 9 twin tests still pass after the refactor.
+- Not verified yet: the new `gazebo` CI job (runs after the push).
+- Cross-check table added to `experiments/sim/2026-10-20_twin_first_run.md` on `claude/research/gazebo-crosscheck`.
