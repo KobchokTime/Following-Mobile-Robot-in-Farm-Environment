@@ -172,23 +172,6 @@
       "depends_on": null
     },
     {
-      "id": 12,
-      "title": "ทำ repeated encoder และ guarded pulse trials",
-      "phase": "Motor calibration",
-      "priority": "สูง",
-      "status": "ติดเงื่อนไข",
-      "due": "",
-      "notes": "ตรวจทิศ/สเกล encoder และเก็บ command/feedback/fault อย่างน้อย 20 pulse โดยล้อยกพ้นพื้น",
-      "source": "docs/EXECUTION_WORKFLOW.md · config/motor_wheel_calibration.md",
-      "quest_type": "Archived",
-      "quest_no": 0,
-      "quest_order": 0,
-      "reward_xp": 100,
-      "quest_goal": "ยืนยัน encoder และ guarded pulse",
-      "depends_on": null,
-      "archived": true
-    },
-    {
       "id": 13,
       "title": "ทดสอบ turn-only และ closed-loop follower",
       "phase": "Robot integration",
@@ -197,13 +180,12 @@
       "due": "",
       "notes": "เริ่ม turn-only ก่อน forward motion และต้องผ่าน controlled test 10/10",
       "source": "docs/EXECUTION_WORKFLOW.md",
-      "quest_type": "Archived",
-      "quest_no": 0,
-      "quest_order": 0,
+      "quest_type": "Main Quest",
+      "quest_no": 5,
+      "quest_order": 5,
       "reward_xp": 100,
       "quest_goal": "ทดสอบ turn-only แล้วจึง follower แบบควบคุม ตามเกณฑ์ 10/10",
-      "depends_on": null,
-      "archived": true
+      "depends_on": 9
     },
     {
       "id": 14,
@@ -215,11 +197,11 @@
       "notes": "freeze protocol/config, ทำซ้ำหลายรอบ, เก็บ ground truth ของ identity/orientation/distance และทำ baseline/ablation; ทุกตัวเลขย้อนถึง raw data ได้",
       "source": "docs/EXECUTION_WORKFLOW.md",
       "quest_type": "Main Quest",
-      "quest_no": 5,
-      "quest_order": 5,
+      "quest_no": 6,
+      "quest_order": 6,
       "reward_xp": 100,
       "quest_goal": "ทำซ้ำอย่างน้อย 10 scenarios พร้อม raw data, ground truth และ baseline/ablation",
-      "depends_on": 9
+      "depends_on": 13
     },
     {
       "id": 15,
@@ -231,8 +213,8 @@
       "notes": "เริ่มจากวิธีทดลองและระบบที่ยืนยันได้ แยกผลบนหุ่นจริง ผลจำลอง และข้อเสนอ offline ให้ชัด; ไม่อ้างผลจากข้อมูล synthetic เป็นผลจริง",
       "source": "docs/EXECUTION_WORKFLOW.md · README.md",
       "quest_type": "Main Quest",
-      "quest_no": 7,
-      "quest_order": 7,
+      "quest_no": 8,
+      "quest_order": 8,
       "reward_xp": 100,
       "quest_goal": "เขียนเล่มจากผลที่ยืนยันได้ พร้อมข้อจำกัดและแหล่งอ้างอิง",
       "depends_on": 18
@@ -279,8 +261,8 @@
       "notes": "ตรวจความครบถ้วนของ raw data, ground truth และ config ก่อนคำนวณ metrics; แยกผลจริงออกจากตัวอย่างและ replay จำลอง",
       "source": "docs/EXECUTION_WORKFLOW.md · experiments/orientation/README.md",
       "quest_type": "Main Quest",
-      "quest_no": 6,
-      "quest_order": 6,
+      "quest_no": 7,
+      "quest_order": 7,
       "reward_xp": 100,
       "quest_goal": "สรุป metrics จากข้อมูลที่ตรวจสอบย้อนกลับไปยัง raw evidence ได้",
       "depends_on": 14

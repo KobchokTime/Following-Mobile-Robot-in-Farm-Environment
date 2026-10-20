@@ -32,12 +32,13 @@ PHASES = [
     "Thesis writing",
 ]
 
-MAIN_QUEST_IDS = [6, 7, 8, 9, 14, 18, 15]
+MAIN_QUEST_IDS = [6, 7, 8, 9, 13, 14, 18, 15]
 MAIN_QUEST_GOALS = {
     6: "เก็บผล orientation ซ้ำหลายสภาพ และประเมินตามเกณฑ์ที่กำหนด",
     7: "พิสูจน์ว่าระบบหยุดเมื่อ target หายและกลับมาจับได้",
     8: "สร้าง identity ground truth จากสถานการณ์จริง ไม่ใช้ข้อมูล synthetic แทนผลจริง",
     9: "เปรียบเทียบ baseline และวัด wrong-follow, coverage, ID switch, reacquisition",
+    13: "ทดสอบ turn-only และ closed-loop follower ตามเกณฑ์ที่กำหนด",
     14: "ทำซ้ำอย่างน้อย 10 scenarios พร้อม raw data, ground truth และ baseline/ablation",
     18: "สรุป metrics จากข้อมูลที่ตรวจสอบย้อนกลับไปยัง raw evidence ได้",
     15: "เขียนเล่มจากผลที่ยืนยันได้ พร้อมข้อจำกัดและแหล่งอ้างอิง",
@@ -84,15 +85,9 @@ def decorate_quests(data: dict) -> dict:
             task.update({"quest_type": "Side Quest", "quest_no": order, "quest_order": order,
                          "reward_xp": 30, "quest_goal": "งานสนับสนุน ทำเมื่อสะดวก ไม่ขวางเส้นทาง Main Quest",
                          "depends_on": None})
-    # Preserve the original engineering records but keep them out of the game UI.
-    for task_id in (11, 12, 13):
-        task = by_id.get(task_id)
-        if task is not None:
-            task.update({"quest_type": "Archived", "quest_no": 0, "quest_order": 0,
-                         "archived": True, "depends_on": None})
     project = data.setdefault("project", {})
     project["quest_guide"] = {
-        "main_quest": "เส้นเรื่องหลัก 7 ด่าน ด่านถัดไปปลดล็อกเมื่อด่านก่อนหน้าเสร็จ",
+        "main_quest": "เส้นเรื่องหลัก 8 ด่าน ด่านถัดไปปลดล็อกเมื่อด่านก่อนหน้าเสร็จ",
         "side_quest": "งานเสริมและเครื่องมือสนับสนุน ทำแยกได้ ไม่บล็อก Main Quest",
         "main_quest_count": len(MAIN_QUEST_IDS),
     }
@@ -139,7 +134,6 @@ def load_data() -> dict:
         {"id": 8, "title": "เก็บชุดข้อมูล target identity จากสถานการณ์จริง", "phase": "Target tracking & Re-ID", "priority": "สูง", "status": "รอเริ่ม", "due": "", "notes": "ทดสอบ single-person, crossing, เสื้อคล้ายกัน, partial/full occlusion, target ออกจากฉากและกลับเข้าเฟรม; ข้อมูลตัวอย่างปัจจุบันเป็น synthetic", "source": "experiments/identity/README.md · docs/EXECUTION_WORKFLOW.md"},
         {"id": 9, "title": "เปรียบเทียบ baseline การติดตามเป้าหมาย", "phase": "Target tracking & Re-ID", "priority": "กลาง", "status": "รอเริ่ม", "due": "", "notes": "เปรียบเทียบ nearest-person, ByteTrack/BoT-SORT และแนวทาง appearance + motion + range; รายงาน wrong-follow, coverage, ID switch และเวลาหยุด/กลับมาจับเป้าหมาย", "source": "docs/EXECUTION_WORKFLOW.md · experiments/identity/README.md"},
         {"id": 10, "title": "ตรวจ read-only hardware และสถานะ LiDAR", "phase": "Robot integration", "priority": "กลาง", "status": "เสร็จแล้ว", "due": "", "notes": "ตรวจ camera/serial แบบอ่านอย่างเดียวแล้ว; ยังไม่พบ LiDAR ใน USB inventory และยังไม่มี live ROS application graph", "source": "experiments/hardware/2026-09-20_connected_runtime_validation.md"},
-        {"id": 12, "title": "ทำ repeated encoder และ guarded pulse trials", "phase": "Motor calibration", "priority": "สูง", "status": "ติดเงื่อนไข", "due": "", "notes": "ตรวจทิศ/สเกล encoder และเก็บ command/feedback/fault อย่างน้อย 20 pulse โดยล้อยกพ้นพื้น", "source": "docs/EXECUTION_WORKFLOW.md · config/motor_wheel_calibration.md"},
         {"id": 13, "title": "ทดสอบ turn-only และ closed-loop follower", "phase": "Robot integration", "priority": "สูง", "status": "ติดเงื่อนไข", "due": "", "notes": "เริ่ม turn-only ก่อน forward motion และต้องผ่าน controlled test 10/10", "source": "docs/EXECUTION_WORKFLOW.md"},
         {"id": 14, "title": "เตรียม conference experiment อย่างน้อย 10 scenarios", "phase": "Experiments & analysis", "priority": "กลาง", "status": "รอเริ่ม", "due": "", "notes": "freeze protocol/config, ทำซ้ำหลายรอบ, เก็บ ground truth และ events, ทำ baseline/ablation; ทุกตัวเลขต้องย้อนถึง raw data ได้", "source": "docs/EXECUTION_WORKFLOW.md"},
         {"id": 15, "title": "เขียน Methodology, Results และข้อจำกัด", "phase": "Thesis writing", "priority": "กลาง", "status": "รอเริ่ม", "due": "", "notes": "เริ่มจากวิธีทดลองและระบบที่ยืนยันได้ แยกผลบนหุ่นจริง ผลจำลอง และข้อเสนอ offline ให้ชัด; ไม่อ้างผลจากข้อมูล synthetic เป็นผลจริง", "source": "docs/EXECUTION_WORKFLOW.md · README.md"},
