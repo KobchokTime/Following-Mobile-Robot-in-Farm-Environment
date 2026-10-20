@@ -79,6 +79,68 @@ class Detection:
     sector_id: int
 
 
+def bridge_rpm(r: RobotParams, cmd: Tuple[float, float], age_s: Optional[float]) -> Tuple[float, float]:
+    """Wheel RPMs (logical left, logical right) for a /cmd_vel of `age_s` seconds."""
+    if age_s is None or age_s > r.cmd_timeout_s:
+        return 0.0, 0.0
+    lin, ang = cmd
+    if r.bridge_mode == "current":
+        c = max(-r.max_cmd_rpm, min(r.max_cmd_rpm, lin * r.speed_gain))
+        return c, c  # angular.z is ignored by the current bridge
+    if r.bridge_mode == "diff_drive":
+        to_rpm = 60.0 / (2.0 * math.pi * r.wheel_radius_m)
+        left = (lin - ang * r.track_width_m / 2.0) * to_rpm
+        right = (lin + ang * r.track_width_m / 2.0) * to_rpm
+        scale = max(1.0, abs(left) / r.max_cmd_rpm, abs(right) / r.max_cmd_rpm)
+        return left / scale, right / scale
+    raise ValueError(f"unknown bridge_mode {r.bridge_mode!r}")
+
+
+def wheel_twist(r: RobotParams, rpm_left: float, rpm_right: float) -> Tuple[float, float]:
+    """Body (v m/s, w rad/s) for the given wheel RPMs."""
+    k = 2.0 * math.pi * r.wheel_radius_m / 60.0
+    vl, vr = rpm_left * k, rpm_right * k
+    return (vl + vr) / 2.0, (vr - vl) / r.track_width_m
+
+
+def _ray_circle(angle: float, cx: float, cy: float, r: float) -> Optional[float]:
+    dx, dy = math.cos(angle), math.sin(angle)
+    b = dx * cx + dy * cy
+    disc = b * b - (cx * cx + cy * cy - r * r)
+    if disc < 0:
+        return None
+    t = b - math.sqrt(disc)
+    return t if t > 0 else None
+
+
+def project_detections(people: Dict[str, Tuple[float, float]], s: "SensorParams",
+                       rng: random.Random) -> List["Detection"]:
+    """What ros2_yolo_live.py would publish for people at robot-frame positions."""
+    f = (s.image_width / 2.0) / math.tan(math.radians(s.camera_hfov_deg) / 2.0)
+    out = []
+    for name, (px, py) in people.items():
+        d = math.hypot(px, py)
+        if px <= 0 or not (s.detect_range_m[0] <= d <= s.detect_range_m[1]):
+            continue
+        bearing = math.atan2(py, px)
+        if abs(math.degrees(bearing)) > s.camera_hfov_deg / 2.0:
+            continue
+        occluded = False
+        for other, (ox, oy) in people.items():
+            hit = None if other == name else _ray_circle(bearing, ox, oy, PERSON_RADIUS_M)
+            if hit is not None and hit < d - PERSON_RADIUS_M:
+                occluded = True
+        if occluded or (s.detect_dropout and rng.random() < s.detect_dropout):
+            continue
+        cx = s.image_width / 2.0 - f * math.tan(bearing)
+        cy = s.image_height / 2.0 + f * (s.camera_height_m - 0.9) / px
+        cx = int(round(cx + rng.gauss(0.0, s.centroid_noise_px)))
+        cx = max(0, min(s.image_width - 1, cx))
+        sector = max(0, min(s.num_sectors - 1, (cx * s.num_sectors) // s.image_width))
+        out.append(Detection(name, cx, int(round(cy)), sector))
+    return out
+
+
 @dataclass
 class World:
     people: List[Person]
@@ -108,27 +170,12 @@ class World:
 
     def _bridge(self) -> Tuple[float, float]:
         """Wheel RPMs (logical left, logical right) the drive bridge would send."""
-        r = self.robot
-        if self._cmd_t is None or self.t - self._cmd_t > r.cmd_timeout_s:
-            return 0.0, 0.0
-        lin, ang = self._cmd
-        if r.bridge_mode == "current":
-            cmd = max(-r.max_cmd_rpm, min(r.max_cmd_rpm, lin * r.speed_gain))
-            return cmd, cmd  # angular.z is ignored by the current bridge
-        if r.bridge_mode == "diff_drive":
-            to_rpm = 60.0 / (2.0 * math.pi * r.wheel_radius_m)
-            left = (lin - ang * r.track_width_m / 2.0) * to_rpm
-            right = (lin + ang * r.track_width_m / 2.0) * to_rpm
-            scale = max(1.0, abs(left) / r.max_cmd_rpm, abs(right) / r.max_cmd_rpm)
-            return left / scale, right / scale
-        raise ValueError(f"unknown bridge_mode {r.bridge_mode!r}")
+        age = None if self._cmd_t is None else self.t - self._cmd_t
+        return bridge_rpm(self.robot, self._cmd, age)
 
     def step(self, dt: float) -> None:
         self.rpm_left, self.rpm_right = self._bridge()
-        k = 2.0 * math.pi * self.robot.wheel_radius_m / 60.0
-        vl, vr = self.rpm_left * k, self.rpm_right * k
-        self.v = (vl + vr) / 2.0
-        self.w = (vr - vl) / self.robot.track_width_m
+        self.v, self.w = wheel_twist(self.robot, self.rpm_left, self.rpm_right)
         self.yaw = (self.yaw + self.w * dt + math.pi) % (2.0 * math.pi) - math.pi
         self.x += self.v * math.cos(self.yaw) * dt
         self.y += self.v * math.sin(self.yaw) * dt
@@ -143,16 +190,6 @@ class World:
     def people_robot_frame(self) -> Dict[str, Tuple[float, float]]:
         return {p.name: self._to_robot(*p.position(self.t)) for p in self.people}
 
-    @staticmethod
-    def _ray_circle(angle: float, cx: float, cy: float, r: float) -> Optional[float]:
-        dx, dy = math.cos(angle), math.sin(angle)
-        b = dx * cx + dy * cy
-        disc = b * b - (cx * cx + cy * cy - r * r)
-        if disc < 0:
-            return None
-        t = b - math.sqrt(disc)
-        return t if t > 0 else None
-
     def scan(self) -> List[float]:
         """Ranges in the LiDAR frame, angle_min=-pi, increment 2*pi/rays."""
         s = self.sensors
@@ -163,7 +200,7 @@ class World:
             a_robot = a_lidar + s.lidar_mount_yaw_rad
             best = math.inf
             for px, py in people:
-                hit = self._ray_circle(a_robot, px, py, PERSON_RADIUS_M)
+                hit = _ray_circle(a_robot, px, py, PERSON_RADIUS_M)
                 if hit is not None and hit < best:
                     best = hit
             if math.isfinite(best):
@@ -173,43 +210,10 @@ class World:
             out.append(best)
         return out
 
-    def _occluded(self, name: str, px: float, py: float, others) -> bool:
-        d = math.hypot(px, py)
-        bearing = math.atan2(py, px)
-        for other, (ox, oy) in others.items():
-            if other == name:
-                continue
-            hit = self._ray_circle(bearing, ox, oy, PERSON_RADIUS_M)
-            if hit is not None and hit < d - PERSON_RADIUS_M:
-                return True
-        return False
-
     def detections(self) -> List[Detection]:
-        s = self.sensors
         if any(a <= self.t < b for a, b in self.blackouts):
             return []
-        people = self.people_robot_frame()
-        f = (s.image_width / 2.0) / math.tan(math.radians(s.camera_hfov_deg) / 2.0)
-        out = []
-        for name, (px, py) in people.items():
-            d = math.hypot(px, py)
-            if px <= 0 or not (s.detect_range_m[0] <= d <= s.detect_range_m[1]):
-                continue
-            bearing = math.atan2(py, px)
-            if abs(math.degrees(bearing)) > s.camera_hfov_deg / 2.0:
-                continue
-            if self._occluded(name, px, py, people):
-                continue
-            if s.detect_dropout and self.rng.random() < s.detect_dropout:
-                continue
-            cx = s.image_width / 2.0 - f * math.tan(bearing)
-            cy = s.image_height / 2.0 + f * (s.camera_height_m - 0.9) / px
-            cx = int(round(cx + self.rng.gauss(0.0, s.centroid_noise_px)))
-            cy = int(round(cy))
-            cx = max(0, min(s.image_width - 1, cx))
-            sector = max(0, min(s.num_sectors - 1, (cx * s.num_sectors) // s.image_width))
-            out.append(Detection(name, cx, cy, sector))
-        return out
+        return project_detections(self.people_robot_frame(), self.sensors, self.rng)
 
     def state(self) -> dict:
         people = {}
