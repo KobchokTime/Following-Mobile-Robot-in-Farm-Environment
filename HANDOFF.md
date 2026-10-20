@@ -6,10 +6,10 @@ and review threads in [`DISCUSSION.md`](DISCUSSION.md).
 
 ## Integration lock
 
-- **Current owner:** Codex
-- **Status:** in-progress
-- **Files being edited:** `HANDOFF.md`, `DISCUSSION.md`, `logs/codex.md`
-- **Last updated:** 2026-10-20 by Claude Code
+- **Current owner:** none
+- **Status:** ready
+- **Files being edited:** none
+- **Last updated:** 2026-10-20 by Codex
 
 ## Branches
 
@@ -18,7 +18,7 @@ and review threads in [`DISCUSSION.md`](DISCUSSION.md).
 | `main` | Initial commit only. It receives `integration-hub` through a PR once the user approves. |
 | `integration-hub` | Has the robot recovery, Thesis Desk, quest sources, agent workflow, GUI smoke-test results, 12-week plan, Codex week-1 changes, the offline twin (`sim/`, twin CI, first simulated findings; merge `18c2303`), the Gazebo 3D twin (`sim/gazebo/`, `Dockerfile.gazebo`, `gazebo` CI job, cross-check; merge `cef985f`) and the frozen Arena 1 rules, scorer and baseline (merge `d623baf`). `scripts/check.py` passes. |
 | `claude/workspace` | Arena 1 spec (`0d4ee2f`) merged into `integration-hub`; behind the latest integration commits. Claude's arena entry goes on `claude/robot/arena-sector-association`. |
-| `codex/workspace` | Week-1 changes are integrated into `integration-hub`; it is behind the latest integration commits. |
+| `codex/workspace` | Synced through `integration-hub` `23551e3`; the Arena entry is a separate branch and remains unmerged. |
 | *To delete* | `integration/robot-thesis-desk`, `codex/robot-backup-quarantine` and `codex/thesis-desk`. They are fully merged, but the cloud session's git proxy cannot delete branches. The user deletes them on GitHub, or Codex runs `git push origin --delete ...` from Windows. |
 
 ## Models on `integration-hub`
@@ -60,8 +60,8 @@ The 12-week plan is in [`docs/PLAN.md`](docs/PLAN.md) (20 Oct 2026 to about 15 J
    judges the field layout and reviews the `sim/twin/world.py` refactor. The new `gazebo` CI job had
    not reported at merge time; check its result.
 7. **T5** in `DISCUSSION.md`: Arena 1, sector association. Rules, scorer and baseline frozen in
-   `d623baf`. Codex reviews the rules for fairness, then builds its entry. Claude submits separately.
-   - Claude submitted `929096d`; waiting for Codex's entry.
+   `d623baf`. Both entries are submitted and independently scored by Codex; Codex leads by 0.03 points.
+   - Awaiting the user's judgment before either entry is merged. Gazebo tie-break was not independently run.
 8. `integration-hub` → `main` (draft PR KobchokTime/Following-Mobile-Robot-in-Farm-Environment#2): needs every thread resolved and the user's approval.
 
 ## Codex — week 1 tasks

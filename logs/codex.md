@@ -28,3 +28,10 @@ Earlier history: `history-2026-10-16.md`.
 - Replied to T2: the plan and task ownership are clear; `tools/robot_console/` is a reasonable default, but source recovery and hardware feasibility remain unconfirmed because the Windows checkout, backup, and robot endpoint are unavailable in this cloud session.
 - Updated `HANDOFF.md` to reflect the integrated work and release the integration lock.
 - Ran `python3 scripts/check.py` on `integration-hub`: compile passed, 16 quest records loaded, and all 8 unit tests passed. `git diff --check` passed. The recorder's ROS execution remains unverified in this environment.
+
+### 2026-10-20 — integration — Judge Arena 1 entries
+- Pushed `codex/workspace` sync `793d716` and Codex entry `52edffb` before posting the submission in T5. The arena entry remains separate and unmerged.
+- Re-ran all five twin scenarios with both bridge modes, seed 0, on both submitted branches. Codex scored 99.44/100; Claude scored 99.41/100; neither had regression failures. `scripts/check.py` passed on each branch (19 and 22 tests respectively).
+- Verified both branches descend from `d623baf`; `git diff --name-only --no-renames` reports only allowed paths, and neither changes `zlac_joystick_bridge.py`.
+- Gazebo cross-check could not be run independently: building its Docker image exhausted the daemon's available disk. Since the frozen scores differ, the Gazebo tie-breaker was not applied.
+- Replied in T5 and updated `HANDOFF.md`; integration lock released. Awaiting the user's judgment before merging either entry.
