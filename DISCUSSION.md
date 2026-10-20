@@ -131,3 +131,55 @@ IPs or machine paths. The twin and replay run on a random ROS domain (100–200)
 the findings table lists 7 of the 10 scenario × bridge runs (`diff_drive` is shown only for
 `straight` and `curve_left`). "Gap about 2.0 m" in finding 3 is above the 1.67 m median in
 `straight`/`current`. `twin.yml` pins actions by tag, not SHA, and has no `permissions:` block.
+
+---
+
+## T4 — Gazebo 3D twin and cross-check
+- **Status:** open
+- **Author:** Claude Code   **Reviewer:** Codex
+- **Branch / commits:** `integration-hub` merge `cef985f` of `claude/workspace` (`68e4c10`; features
+  `claude/robot/gazebo-world` `cbb395b` + `1896a8c`, `claude/research/gazebo-crosscheck` `f6c9ac9`)
+- **What changed:** The user asked for a graphical Gazebo view of the twin.
+  - `sim/gazebo/world_gen.py`: generates an Ignition Gazebo Fortress farm world (crop beds beside
+    the lane at |y| >= 1.6 m, ending at x = 4 m, then a headland), the robot with a `gpu_lidar`
+    mounted at 180° yaw, and people as simple shapes.
+  - `sim/gazebo/gz_twin_node.py`: drives the people along the scenario waypoints, applies the ZLAC
+    bridge model to `/cmd_vel` and emulates the camera/YOLO detector. It reuses `sim/twin/world.py`,
+    which was refactored into `bridge_rpm`, `wheel_twist` and `project_detections`.
+  - `sim/gazebo/run_gazebo.py`: runs the **unmodified** robot nodes on sim time (random ROS domain,
+    `ROS_LOCALHOST_ONLY=1`). `sim/gazebo/record_video.sh`: Xvfb + ffmpeg MP4 recording.
+  - `sim/docker/Dockerfile.gazebo` (from the Docker Hub image `osrf/ros:humble-desktop-full`), a
+    `gazebo` job in `.github/workflows/twin.yml`, and docs in `sim/README.md`.
+  - `experiments/sim/2026-10-20_twin_first_run.md`: a Gazebo cross-check table. Gazebo matches the
+    kinematic twin to within 0.05 m on straight/current, curve_left/diff_drive and
+    target_loss/current. **This is simulation, not robot data.**
+  - Three MP4 videos were recorded and sent to the user directly. They are not committed.
+- **How it was tested:** On `integration-hub` after the merge, `python3 scripts/check.py` exits 0
+  (compile including `sim/gazebo/`, quest data with 16 tasks, 17 unit tests; the 9 tests in
+  `tests/test_sim_twin.py` still pass after the `world.py` refactor). Headless and GUI Gazebo runs
+  were done in Claude's session on `claude/workspace`. The new `gazebo` CI job had **not reported
+  yet** when this thread was written; its result still has to be checked.
+- **Unsure about:** Codex, please:
+  1. Build `sim/docker/Dockerfile.gazebo` and run
+     `python3 -m sim.gazebo.run_gazebo --scenario curve_left --bridge-mode diff_drive` in it.
+     If possible, open the GUI on Windows 11 via WSLg:
+     `docker run --rm -e DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix -v "$PWD/sim_runs:/repo/sim_runs" following-robot-twin-gz python3 -m sim.gazebo.run_gazebo --scenario curve_left --bridge-mode diff_drive --gui`.
+     Report whether your numbers match the cross-check table.
+  2. Is the visual layout close enough to the real field: lane width (beds' inner edges at ±1.6 m),
+     bed spacing and width (0.8 m beds at y = ±2.0 and ±3.2 m, 7 m long), and robot size?
+  3. Review the `sim/twin/world.py` refactor for behavior changes (`bridge_rpm`, `wheel_twist`,
+     `project_detections`, module-level `_ray_circle`). The 9 tests in `tests/test_sim_twin.py`
+     still pass.
+
+Integration review notes (Claude Code, integration role): the merged diff has no secrets, private
+IPs or machine paths, and nothing in `sim/gazebo/` opens serial or motor devices. `/cmd_vel` goes
+only to `/model/robot/cmd_vel` in Gazebo, on a random ROS domain with `ROS_LOCALHOST_ONLY=1`.
+Minor points:
+- `sim/gazebo/` has no offline unit test. For example, `world_gen.world()` could be parsed as XML
+  in `check.py` without Gazebo.
+- `Dockerfile.gazebo` uses the moving tag `osrf/ros:humble-desktop-full`, not a digest, so CI
+  results may drift.
+- Headless `gpu_lidar` on GitHub's GPU-less runners depends on software rendering. The `gazebo` job
+  is the first test of this.
+- In the cross-check, curve_left/diff_drive still shows "Turned: no" in both simulators. That is
+  consistent with finding 1 (sector mismatch), not a Gazebo fault.

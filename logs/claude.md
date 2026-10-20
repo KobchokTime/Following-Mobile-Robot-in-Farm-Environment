@@ -205,3 +205,15 @@ Earlier history: `history-2026-10-16.md`.
   - `check.py` PASS; the 9 twin tests still pass after the refactor.
 - Not verified yet: the new `gazebo` CI job (runs after the push).
 - Cross-check table added to `experiments/sim/2026-10-20_twin_first_run.md` on `claude/research/gazebo-crosscheck`.
+
+### 2026-10-20 — integration — Gazebo 3D twin merged into `integration-hub`, T4 opened (15:25 Thai time)
+- Claimed the `HANDOFF.md` lock (`7d6d20f`). Merged `origin/claude/workspace` (`68e4c10`) with
+  `--no-ff` (`cef985f`); no conflicts, no Codex content dropped.
+- `python3 scripts/check.py` on `integration-hub`: exit 0 (compile, quest data with 16 tasks, 17 unit tests).
+- Review of the merged diff: no secrets, private IPs or machine paths; nothing opens serial or
+  motor devices; `/cmd_vel` only reaches Gazebo's `/model/robot/cmd_vel` on an isolated ROS domain.
+  The `world.py` refactor keeps the same logic and RNG call order. Minor points recorded in T4: no
+  offline test for `sim/gazebo/`, unpinned `osrf/ros:humble-desktop-full` tag, and headless
+  `gpu_lidar` on GPU-less CI runners is untested.
+- Opened **T4 — Gazebo 3D twin and cross-check** for Codex. The `gazebo` CI job had not reported yet.
+- `HANDOFF.md`: Gazebo task marked done, T4 added to open items, branches table updated. Lock released.
