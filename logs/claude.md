@@ -59,3 +59,35 @@ Earlier history: `history-2026-10-16.md`.
 - Opened draft PR KobchokTime/Following-Mobile-Robot-in-Farm-Environment#2: `integration-hub` → `main`.
   Its checklist: Codex reviews T1 and confirms the Sol 6 model ID, the leftover branches get
   deleted, optional thesis-desk UI fixes, and the user approves.
+
+### 2026-10-20 — research — 12-week plan agreed with the user
+- Planned with the user, Thai time 10:30–11:30:
+  - 1–3 months, about 2 robot days per month (dates unknown).
+  - Ground-motion follower is in scope.
+  - The user decided: no physical E-stop, motor-side watchdog, safety bridge or speed limit in this
+    project. Safety comes from an isolated field and several spotters. The existing
+    "target lost → stop" logic stays as follower behavior.
+  - No RTX GPU, so Gazebo instead of Isaac Sim.
+  - Offline twin = rosbag record/replay + Docker with fake drivers + Gazebo.
+- Wrote `docs/PLAN.md` on `claude/research/plan`, branched from `claude/workspace`
+  (after syncing `integration-hub` in `4ab4721`).
+- Found that the code the docs reference but the repo lacks (Robot Console, `motion_safety.py`,
+  121 tests) was never committed. `quarantine/BACKUP_AUDIT.md` says `dashboard/` is a
+  separate repo on the Windows machine, and the backup also holds videos and ROS bags. This
+  became Codex's week-1 task in `HANDOFF.md`.
+
+### 2026-10-20 — integration — integrate the 12-week plan and hand Codex its week-1 tasks
+- Claimed the `HANDOFF.md` lock on `integration-hub` (`1141b95`, `handoff: claim plan integration`).
+- Merged `origin/claude/workspace` (`90943bb`: `docs/PLAN.md` and a log entry) into
+  `integration-hub` with `--no-ff` as `70c048e`. Scanned the diff for private IPs, machine paths
+  and secrets: none.
+- Ran `python3 scripts/check.py`: exit 0 (compile pass, quest data 18 tasks, 8 unit tests OK).
+- `HANDOFF.md`: added a *Plan* section (follower in scope; no physical E-stop, watchdog, safety
+  bridge or speed limit by the user's decision, isolated field and spotters instead; Gazebo, not
+  Isaac Sim; robot dates unknown). Replaced *Next step* with **Codex — week 1 tasks** (six tasks)
+  and **Claude — in parallel**. Kept T1 open (Sol 6 expected, Codex reports GPT-6; the user must
+  confirm) and added T2. Removed E-stop from the unverified robot checks.
+- `DISCUSSION.md`: opened T2 "12-week plan and Codex week-1 tasks" (Claude Code → Codex, open).
+- Released the lock (owner none, status ready) and pushed `integration-hub`. Fast-forwarded
+  `claude/workspace` to `integration-hub`. Did not touch `codex/*` branches or PRs.
+- Follow-ups: Codex replies in T1 and T2 and starts the week-1 tasks; the user confirms Codex's model.
