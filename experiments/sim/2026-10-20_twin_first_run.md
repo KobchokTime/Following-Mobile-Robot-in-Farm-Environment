@@ -19,7 +19,7 @@ Reproduce with `docker run --rm -v "$PWD/sim_runs:/repo/sim_runs" following-robo
 | target_loss | current | 5.88 | 1.70 | 0.92 | 0 | no | 1.00 |
 | crossing | current | 5.92 | 1.67 | 0.88 | 0 | no | – |
 
-There was no contact with any person in any run. "Gap" is the distance from the robot to the target's surface;
+The table shows 7 of the 10 runs. The `diff_drive` rows left out (`stop_and_go`, `target_loss`, `crossing`) follow the `straight`/`diff_drive` pattern. All 10 are in `sim_runs/summary.json` and the CI artifact. There was no contact with any person in any run. "Gap" is the distance from the robot to the target's surface;
 the controller's set-point is 0.5 m.
 
 ## Findings
@@ -35,7 +35,8 @@ the controller's set-point is 0.5 m.
 2. **The current drive bridge ignores `angular.z`** (`MAIN/Control/zlac_joystick_bridge.py`,
    "not using angular.z yet"). With that bridge the robot cannot turn at all.
 3. **Following lags at walking speed.** The controller is proportional-only. At 0.3 m/s the gap
-   settles near 2.0 m with the current bridge and near 1.0 m with `diff_drive`, against a 0.5 m set-point.
+   grows to about 2.0 m while the target walks with the current bridge (median over the whole run 1.67 m,
+   including the start and the final stop), and to about 1.0 m with `diff_drive`, against a 0.5 m set-point.
    The current bridge maps `linear.x` at 40 RPM per unit, which with a 0.085 m wheel is 0.36 m/s
    per 1.0 commanded, so the command is not in m/s.
 4. **Target loss behaves as intended.** When the detector went blind, the robot stopped after

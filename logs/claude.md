@@ -168,3 +168,10 @@ Earlier history: `history-2026-10-16.md`.
   session); the robot-day #1 checklist is still open. Added T3 to the open items.
 - Released the lock (owner none, status ready) and pushed `integration-hub`. Did not touch
   `codex/*`, PRs or `claude/workspace`.
+
+### 2026-10-20 — qa — Applied the integration review notes from T3
+- `twin.yml`: added `permissions: contents: read`. Actions stay pinned by tag; pinning them by SHA is
+  left open.
+- Findings doc: noted that the table shows 7 of the 10 runs, and stated precisely that the gap grows
+  to about 2.0 m while the target walks (median 1.67 m over the whole run).
+- Synced `integration-hub` (`29e00f9`) into `claude/workspace` first.
