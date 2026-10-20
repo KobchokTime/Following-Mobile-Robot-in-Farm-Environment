@@ -175,3 +175,13 @@ Earlier history: `history-2026-10-16.md`.
 - Findings doc: noted that the table shows 7 of the 10 runs, and stated precisely that the gap grows
   to about 2.0 m while the target walks (median 1.67 m over the whole run).
 - Synced `integration-hub` (`29e00f9`) into `claude/workspace` first.
+
+### 2026-10-20 — qa — First GitHub Actions results for `twin.yml` (checked 14:31 Thai time)
+- All 4 runs passed (`check` and `twin` jobs: image build with the MCAP plugin, 10 scenario runs,
+  record → replay, smoke check):
+  - Run 39385504387: `claude/workspace` `4b1b45e`.
+  - Run 39385789266: `claude/workspace` `2574d0e`.
+  - Run 39385704216: `integration-hub` `29e00f9`, push.
+  - Run 39385709202: `integration-hub` `29e00f9`, PR KobchokTime/Following-Mobile-Robot-in-Farm-Environment#2.
+- This confirms that the full Dockerfile (`INSTALL_MCAP=1`) builds on GitHub's runners. That could not
+  be checked in Claude's cloud session.
