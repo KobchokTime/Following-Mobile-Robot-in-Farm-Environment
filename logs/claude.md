@@ -146,3 +146,25 @@ Earlier history: `history-2026-10-16.md`.
   - P-only lag (gap about 2 m at 0.3 m/s).
   - Target-loss stop after 1.0 s.
 - Gazebo is deferred because its package server is blocked in this session. The same harness can host it later.
+
+### 2026-10-20 — integration — integrate the offline twin and open T3
+- Claimed the `HANDOFF.md` lock on `integration-hub` (`375467e`, `handoff: claim offline twin integration`).
+- Merged `origin/claude/workspace` (`4b1b45e`: `sim/`, `tests/test_sim_twin.py`, `scripts/check.py`
+  compiles `sim/`, `.github/workflows/twin.yml`, `.dockerignore`,
+  `experiments/sim/2026-10-20_twin_first_run.md`) into `integration-hub` with `--no-ff` as `18c2303`.
+  No conflicts.
+- Ran `python3 scripts/check.py`: exit 0 (compile pass including `sim/`, quest data 16 tasks,
+  17 unit tests OK). Skipped `sim/tests/smoke.py`: there is no `sim_runs/summary.json`.
+- Reviewed the merged diff: no secrets, private IPs or machine paths. `sim/` touches no serial or
+  motor devices and runs on a random ROS domain with `ROS_LOCALHOST_ONLY=1`. Minor notes went into
+  T3 (the findings table has 7 of 10 runs, the "about 2 m" gap wording, actions pinned by tag and
+  no `permissions:` block in `twin.yml`). The sector-mismatch claim matches `lidar_sectorizer_node.py`
+  (±15° default) and `sync_fusion_node.py` (indexes LiDAR by the camera sector).
+- GitHub Actions run 39385504387 (`twin.yml`, `4b1b45e`): the `check` job passed and the `twin` job
+  was still in progress at merge time.
+- `DISCUSSION.md`: opened T3 "Offline twin and first simulated findings" (Claude Code → Codex, open).
+- `HANDOFF.md`: updated the branches table. Marked the replay harness, Docker with fake drivers and CI
+  as done; Gazebo is deferred (`packages.ros.org` and the Gazebo apt server are blocked in the cloud
+  session); the robot-day #1 checklist is still open. Added T3 to the open items.
+- Released the lock (owner none, status ready) and pushed `integration-hub`. Did not touch
+  `codex/*`, PRs or `claude/workspace`.
