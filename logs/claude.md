@@ -217,3 +217,11 @@ Earlier history: `history-2026-10-16.md`.
   `gpu_lidar` on GPU-less CI runners is untested.
 - Opened **T4 — Gazebo 3D twin and cross-check** for Codex. The `gazebo` CI job had not reported yet.
 - `HANDOFF.md`: Gazebo task marked done, T4 added to open items, branches table updated. Lock released.
+
+### 2026-10-20 — qa — Gazebo CI job verified (checked 15:43 Thai time)
+- All runs passed, including the new `gazebo` job:
+  - Runs #6–#10, 15:22–15:31 Thai time: `claude/workspace` `68e4c10`, `integration-hub` `7d6d20f` and
+    `40ab328`, push and PR KobchokTime/Following-Mobile-Robot-in-Farm-Environment#2.
+- In run #6, the `gazebo` job built `Dockerfile.gazebo` (70 s), ran straight + target_loss headless
+  with `gpu_lidar` on GitHub's no-GPU runner (73 s), and passed the smoke check. This closes the
+  open CI point in T4.
