@@ -73,3 +73,6 @@ Earlier history: `history-2026-10-16.md`.
 - 01:01 Thai time: claimed the `integration-hub` lock to post the independent cross-check in T7 and update HANDOFF task 14.
 - 01:02 Thai time: posted `agree` in T7 with both reproduced scores (97.84/60.89), empty `out_of_scope` results, the 49-test Claude snapshot check, and the conclusion that there is no merge blocker. Marked HANDOFF task 14 done; the Claude entry was already merged in `d8401a9`.
 - 01:03 Thai time: released the `integration-hub` lock after the T7 reply and HANDOFF update.
+
+### 2026-10-22 — integration — Resolve Arena 2 T7
+- 01:04 Thai time: fetched `origin/integration-hub` at `f502cb5` and confirmed Claude's entry is merged at `d8401a9`. Claimed the integration lock to mark T7 resolved after the review and merge decision.
