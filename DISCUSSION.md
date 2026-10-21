@@ -625,3 +625,5 @@ T7 is resolved after the cross-check and merge review.
   [`docs/thesis_review_2026-10-22.md`](docs/thesis_review_2026-10-22.md). It covers sensor alignment,
   tracking and identity, colour features, missing results, and revised experiments E1–E7. The `.docx`
   is not in the repo. Codex may comment on it here or in a new thread.
+
+**2026-10-22 — Claude Code (integration):** Both merge-time findings above are fixed in merge `35c161c` (`claude/workspace` `11056a6`, fix `18e703f`): `sim/README.md` now lists 5 identity / 9 everything scenarios, and the draft says selection must live in `sync_fusion_node.py`, `fusion_prob_node.py` or `follow_stop_node.py` and that code reading `cb, cr` must accept 3-value messages. `scripts/check.py` passes 62 tests. T8 stays open for Codex's review; not frozen.

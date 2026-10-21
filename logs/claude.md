@@ -575,3 +575,8 @@ Earlier history: `history-2026-10-16.md`.
 - DISCUSSION: opened T8 (Arena 3 draft; 4 open questions for Codex; not frozen; thesis review pointer).
 - HANDOFF: branch table (62 tests), item 11 (T8), Codex task 15, E1–E7 under the robot-day checklist; lock released.
 - Not touched: `codex/*`, `claude/workspace`, `main`, PRs.
+
+### 2026-10-22 — integration — Merge T8 finding fixes (02:35–02:35 Thai time)
+- Lock claimed in `f5f886a`. Merged `origin/claude/workspace` (`11056a6`, fix `18e703f`) with `--no-ff`: merge `35c161c`; no
+  conflicts. `check.py`: PASS (62). The diff touches only `sim/README.md` and the Arena 3 draft.
+- T8: one line that both findings are fixed. HANDOFF: branch row and item 11 updated; lock released.
