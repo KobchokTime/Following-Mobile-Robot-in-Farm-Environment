@@ -75,7 +75,7 @@ def run_one(name: str, bridge_mode: str, out_root: Path, gui: bool, seed: int, c
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--scenario", default="straight", help=f"comma-separated names from {sorted(SCENARIOS)}, or 'all'")
-    ap.add_argument("--bridge-mode", default="current", choices=["current", "diff_drive"])
+    ap.add_argument("--bridge-mode", default="current", choices=["current", "fixed", "diff_drive"])
     ap.add_argument("--out", default="sim_runs", type=Path)
     ap.add_argument("--gui", action="store_true", help="open the Gazebo window (needs $DISPLAY)")
     ap.add_argument("--seed", default=0, type=int)
