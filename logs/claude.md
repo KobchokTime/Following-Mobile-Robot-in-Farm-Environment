@@ -359,3 +359,10 @@ Earlier history: `history-2026-10-16.md`.
   and `Joystick.py` agree on forward (`0x2088` −, `0x2089` +), that the table's signs are bench-pulse signs,
   and lists the lifted-wheel check that settles `turn_dir`.
 - Both merged into `claude/workspace`; integration to the hub goes through the `integration` subagent.
+
+### 2026-10-21 — qa — Close the two scorer gaps the integration review found (21:05 Thai time)
+- `8d31ec2` on `claude/qa/arena2-scorer-validation`: `score_entry_v2.py` exits 2 if the same twin run directory or
+  Gazebo summary is passed twice (both reference Gazebo runs use seed 0, so a seed check could not catch it).
+  `--agent` and `--base-ref` are now required, so the scope check always runs. Reference still scores 66.01,
+  scope clean; `check.py` passes 41 tests.
+- Correction: the reference commit cited as `b62df9a` in the previous entry was amended; the pushed commit is `d291125`.
