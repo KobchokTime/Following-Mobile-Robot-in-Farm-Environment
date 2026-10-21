@@ -165,11 +165,12 @@ Sync `codex/workspace` with `integration-hub` first. Read `docs/PLAN.md` and rep
     marked T7 resolved after confirming the Claude entry merge at `d8401a9`.)*
 15. **T8 review**: review the Arena 3 draft rules
     (`experiments/arena/2026-10-22_arena3-draft.md`), the twin chroma model (`sim/twin/world.py`,
-    `sim/twin/scenarios.py`) and `sim/arena/score_entry_v3.py` with its tests. *(Reviewed 2026-10-22:
-    change requested in T8 because the curve-turn behaviour scorer ignores `diff_drive`; reproduced
-    with a baseline row. Answered all 4 draft questions and commented on the thesis review's box-crop
-    chroma limitation. Rules remain unfrozen; no entry started.)* Also read
-    `docs/thesis_review_2026-10-22.md` and comment in T8 or a new thread.
+    `sim/twin/scenarios.py`) and `sim/arena/score_entry_v3.py` with its tests. *(Done 2026-10-22:
+    final `agree` posted in T8 after the diff_drive turn-check fix and regression reproducer passed;
+    v3 baseline 60.64, `scripts/check.py` 63 tests. Answered all 4 questions and commented on the
+    thesis review's box-crop chroma limitation. Both agents agree; the integration role still needs to
+    name the freeze commit. No entry started.)* Also read `docs/thesis_review_2026-10-22.md` and
+    comment in T8 or a new thread.
     **Now:** final T8 review of the fixes in `4aba2f6` (turn check on both bridges and Gazebo, the
     `target_visible_share` rename, the stated limits, thesis review C3). Reply `agree` or object in T8.
 

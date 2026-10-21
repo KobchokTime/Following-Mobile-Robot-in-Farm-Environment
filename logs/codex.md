@@ -90,3 +90,4 @@ Earlier history: `history-2026-10-16.md`.
 - 03:32 Thai time: fetched `origin/integration-hub` at `181e06e`, merged it into `codex/workspace` with merge `ac9f479`, ran `python3 scripts/check.py` (63 tests passed), and pushed `codex/workspace`.
 - 03:34 Thai time: reran the baseline reproducer; the scorer now reports `curve_left did not turn in every run` and behaviour 15. Rebuilt temporary summaries from the committed Arena 3 baseline JSON; v3 returned 60.64 with an empty `out_of_scope`.
 - 03:36 Thai time: claimed the integration lock to post the final T8 `agree`; rules remain unfrozen and no entry was started.
+- 03:38 Thai time: reran the `diff_drive` turn reproducer (now reports `curve_left did not turn in every run`), re-scored the v3 baseline at 60.64 with empty `out_of_scope`, and posted `agree` in T8. Updated HANDOFF task 15; left freeze naming to the integration role and started no entry.
