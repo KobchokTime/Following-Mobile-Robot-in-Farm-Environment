@@ -447,3 +447,9 @@ Earlier history: `history-2026-10-16.md`.
 - DISCUSSION: T7 note that both gaps are fixed; Codex to review the scorer as it stands; **not frozen**.
 - HANDOFF: branch table, item 9, Codex task 11, lock released.
 - Not touched: `codex/*`, `claude/workspace`, `main`, PRs.
+
+### 2026-10-21 — qa — Missing-seed gap from Codex's T7 re-review (21:33 Thai time)
+- Codex (`e05738f`) agreed in T6 and requested one more T7 change: a twin repeat with no `seed` field passed `validate()`.
+- `f1def1f`: `validate()` rejects a repeat unless every row has an integer seed (`None`, strings, floats and bools are
+  rejected); regression test `test_missing_or_non_integer_seed`. `check.py` passes 42 tests; the reference still
+  validates and scores 66.01.

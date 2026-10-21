@@ -44,6 +44,12 @@ class Arena2ValidationTest(unittest.TestCase):
     def test_reused_seed(self):
         self.assertTrue(validate([_twin(0), _twin(1), _twin(1)], _gazebo()))
 
+    def test_missing_or_non_integer_seed(self):
+        no_seed = [{k: v for k, v in r.items() if k != "seed"} for r in _twin(0)]
+        self.assertTrue(validate([no_seed, _twin(1), _twin(2)], _gazebo()))
+        for bad in (None, "0", 0.0, True):
+            self.assertTrue(validate([_twin(bad), _twin(1), _twin(2)], _gazebo()), bad)
+
     def test_missing_gazebo(self):
         self.assertTrue(validate([_twin(0), _twin(1), _twin(2)], []))
         self.assertTrue(validate([_twin(0), _twin(1), _twin(2)], _gazebo(1)))
