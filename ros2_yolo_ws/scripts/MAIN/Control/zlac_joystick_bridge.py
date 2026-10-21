@@ -4,6 +4,7 @@ from rclpy.node import Node
 from geometry_msgs.msg import Twist
 from contextlib import suppress
 import minimalmodbus
+import math
 import time
 
 # ================= CONFIG =================
@@ -37,6 +38,9 @@ def wheel_commands(linear, angular, speed_gain=SPEED_GAIN, max_cmd=MAX_CMD, trac
     (0x2088 drives the physical right wheel). With angular = 0 the result is the same as
     before this change.
     """
+    if not (math.isfinite(linear) and math.isfinite(angular)):
+        return 0.0, 0.0  # a NaN/inf command stops the wheels instead of crashing the write loop
+    turn_dir = 1.0 if turn_dir >= 0 else -1.0
     turn = turn_dir * angular * track_width / 2.0 if use_angular else 0.0
     left = forward_dir * (linear - turn) * speed_gain
     right = forward_dir * (linear + turn) * speed_gain
