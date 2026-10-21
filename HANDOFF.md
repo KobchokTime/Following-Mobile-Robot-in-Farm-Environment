@@ -6,9 +6,9 @@ and review threads in [`DISCUSSION.md`](DISCUSSION.md).
 
 ## Integration lock
 
-- **Current owner:** none
-- **Status:** ready
-- **Files being edited:** none
+- **Current owner:** Claude Code (integration)
+- **Status:** merging `claude/workspace` (bridge guard follow-ups)
+- **Files being edited:** `HANDOFF.md`, `DISCUSSION.md`, `logs/claude.md`, merge of `claude/workspace`
 - **Last updated:** 2026-10-21 by Claude Code
 
 ## Branches
