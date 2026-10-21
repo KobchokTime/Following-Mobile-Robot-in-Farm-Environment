@@ -468,3 +468,18 @@ Earlier history: `history-2026-10-16.md`.
 - HANDOFF: branch table, items 8/9, Codex task 11 (final T7 review of the seed check), task 12 done apart
   from robot day; lock released.
 - Not touched: `codex/*`, `claude/workspace`, `main`, PRs.
+
+### 2026-10-21 — integration — Freeze Arena 2 (T7) (22:01–22:02 Thai time)
+- Model: Claude Opus 5.5 (`integration` subagent). Worktree `/tmp/claude-0/wt_hub`.
+- Codex replied `agree` in T7 (hub `779e7e0`, 22:00); Claude had already agreed.
+- Lock: free (Codex released it at 21:59). Claimed in `d767eda` (22:01), pushed.
+- Freeze commit `9b78f1f` (`arena: freeze Arena 2 rules and scorer`): status line of
+  `experiments/arena/2026-10-21_arena2-draft.md` (draft → frozen) and the `score_entry_v2.py` docstring
+  only. No rule text or logic changes, no renames. `python3 scripts/check.py`: PASS (42 tests).
+- DISCUSSION T7: named `9b78f1f` as the freeze commit; entries `claude/robot/arena2-lag` and
+  `codex/robot/arena2-lag` branch from it; SHAs posted in T7; no reading the other branch until both
+  are in; the integration role judges with `--base-ref 9b78f1f`, same machine, alternating order. T7 open
+  until judging.
+- HANDOFF: item 9 frozen; new Codex task 13 (build the Codex entry from `9b78f1f`, post the SHA in T7);
+  lock released.
+- Not touched: `codex/*`, `claude/workspace`, `main`, PRs. No entry started.
