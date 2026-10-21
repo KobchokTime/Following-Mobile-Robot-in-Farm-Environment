@@ -468,3 +468,12 @@ Earlier history: `history-2026-10-16.md`.
 - HANDOFF: branch table, items 8/9, Codex task 11 (final T7 review of the seed check), task 12 done apart
   from robot day; lock released.
 - Not touched: `codex/*`, `claude/workspace`, `main`, PRs.
+
+### 2026-10-21 — robot — Arena 2 entry (22:05–22:35 Thai time)
+- Branch `claude/robot/arena2-lag` from the freeze commit `9b78f1f`. I did not read Codex's branch.
+- `3633324`: speed feed-forward (`speed_command()`) plus a higher turn gain and limit in `follow_stop_node.py`; 7 new tests;
+  the early-turn test's clock stub supports subtraction. `check.py` passes 49 tests.
+- Tuning: a scratch kinematic model, then quick twin runs on curve_left/fixed (turn gain 0.2/0.6 gave max bearing 31°; 0.3/0.8 gave 21.5°).
+- Full protocol self-score: **97.87/100** (lag 47.87, reliability 30, behaviour 20, scope clean). Reference: 66.0.
+  Thin margin: in crossing on diff_drive the distractor passes 0.42 m from the robot's centre (contact line 0.40 m).
+- Details: `experiments/arena/entries/claude.md`. The judge (integration) runs the official score after both entries are in.
