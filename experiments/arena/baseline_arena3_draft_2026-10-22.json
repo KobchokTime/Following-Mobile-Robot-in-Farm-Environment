@@ -7,7 +7,7 @@
    "points": 16.5,
    "runs": 21,
    "passed": 6,
-   "mean_tracked_share": 0.396,
+   "mean_visible_share": 0.396,
    "passed_per_scenario": {
     "crossing": "3/3",
     "side_by_side": "0/5",
@@ -59,7 +59,7 @@
     "contact": false,
     "max_abs_rpm": 40.0,
     "turned": true,
-    "target_tracked_share": 1.0,
+    "target_visible_share": 1.0,
     "min_other_range_m": 0.5814299550008691
    },
    {
@@ -84,7 +84,7 @@
     "contact": false,
     "max_abs_rpm": 40.0,
     "turned": true,
-    "target_tracked_share": 1.0,
+    "target_visible_share": 1.0,
     "min_other_range_m": 0.45762270918153475
    },
    {
@@ -109,7 +109,7 @@
     "contact": false,
     "max_abs_rpm": 40.0,
     "turned": true,
-    "target_tracked_share": 1.0
+    "target_visible_share": 1.0
    },
    {
     "scenario": "curve_left",
@@ -133,7 +133,7 @@
     "contact": false,
     "max_abs_rpm": 40.0,
     "turned": true,
-    "target_tracked_share": 1.0
+    "target_visible_share": 1.0
    },
    {
     "scenario": "head_on",
@@ -157,7 +157,7 @@
     "contact": false,
     "max_abs_rpm": 40.0,
     "turned": true,
-    "target_tracked_share": 1.0,
+    "target_visible_share": 1.0,
     "min_other_range_m": 0.7203501478459942
    },
    {
@@ -182,7 +182,7 @@
     "contact": false,
     "max_abs_rpm": 40.0,
     "turned": true,
-    "target_tracked_share": 1.0,
+    "target_visible_share": 1.0,
     "min_other_range_m": 0.7139361858454827
    },
    {
@@ -207,7 +207,7 @@
     "contact": true,
     "max_abs_rpm": 40.0,
     "turned": true,
-    "target_tracked_share": 0.0,
+    "target_visible_share": 0.0,
     "min_other_range_m": 0.5792008244110315
    },
    {
@@ -232,7 +232,7 @@
     "contact": true,
     "max_abs_rpm": 40.0,
     "turned": true,
-    "target_tracked_share": 0.013745704467353952,
+    "target_visible_share": 0.013745704467353952,
     "min_other_range_m": 0.564304327672477
    },
    {
@@ -257,7 +257,7 @@
     "contact": true,
     "max_abs_rpm": 40.0,
     "turned": true,
-    "target_tracked_share": 0.0,
+    "target_visible_share": 0.0,
     "min_other_range_m": 0.587699768622568
    },
    {
@@ -282,7 +282,7 @@
     "contact": true,
     "max_abs_rpm": 40.0,
     "turned": true,
-    "target_tracked_share": 0.006872852233676976,
+    "target_visible_share": 0.006872852233676976,
     "min_other_range_m": 0.5574749644032119
    },
    {
@@ -307,7 +307,7 @@
     "contact": false,
     "max_abs_rpm": 40.0,
     "turned": true,
-    "target_tracked_share": 0.3985239852398524,
+    "target_visible_share": 0.3985239852398524,
     "min_other_range_m": 0.45821210200304163
    },
    {
@@ -332,7 +332,7 @@
     "contact": false,
     "max_abs_rpm": 40.0,
     "turned": true,
-    "target_tracked_share": 0.3837638376383764,
+    "target_visible_share": 0.3837638376383764,
     "min_other_range_m": 0.5192125631876642
    },
    {
@@ -357,7 +357,7 @@
     "contact": false,
     "max_abs_rpm": 40.0,
     "turned": false,
-    "target_tracked_share": 1.0
+    "target_visible_share": 1.0
    },
    {
     "scenario": "stop_and_go",
@@ -381,7 +381,7 @@
     "contact": false,
     "max_abs_rpm": 40.0,
     "turned": false,
-    "target_tracked_share": 1.0
+    "target_visible_share": 1.0
    },
    {
     "scenario": "straight",
@@ -405,7 +405,7 @@
     "contact": false,
     "max_abs_rpm": 40.0,
     "turned": false,
-    "target_tracked_share": 1.0
+    "target_visible_share": 1.0
    },
    {
     "scenario": "straight",
@@ -429,7 +429,7 @@
     "contact": false,
     "max_abs_rpm": 40.0,
     "turned": false,
-    "target_tracked_share": 1.0
+    "target_visible_share": 1.0
    },
    {
     "scenario": "target_loss",
@@ -453,7 +453,7 @@
     "contact": false,
     "max_abs_rpm": 40.0,
     "turned": false,
-    "target_tracked_share": 1.0,
+    "target_visible_share": 1.0,
     "blackout_start_s": 10.1,
     "stop_latency_s": 1.0,
     "distance_during_blackout_m": 0.3560471674068433
@@ -480,7 +480,7 @@
     "contact": false,
     "max_abs_rpm": 40.0,
     "turned": false,
-    "target_tracked_share": 1.0,
+    "target_visible_share": 1.0,
     "blackout_start_s": 10.1,
     "stop_latency_s": 1.0,
     "distance_during_blackout_m": 0.3084801332286149
@@ -509,7 +509,7 @@
     "contact": false,
     "max_abs_rpm": 40.0,
     "turned": true,
-    "target_tracked_share": 1.0,
+    "target_visible_share": 1.0,
     "min_other_range_m": 0.5431101161940051
    },
    {
@@ -534,7 +534,7 @@
     "contact": false,
     "max_abs_rpm": 40.0,
     "turned": true,
-    "target_tracked_share": 1.0,
+    "target_visible_share": 1.0,
     "min_other_range_m": 0.4849694905036485
    },
    {
@@ -559,7 +559,7 @@
     "contact": false,
     "max_abs_rpm": 40.0,
     "turned": true,
-    "target_tracked_share": 1.0
+    "target_visible_share": 1.0
    },
    {
     "scenario": "curve_left",
@@ -583,7 +583,7 @@
     "contact": false,
     "max_abs_rpm": 40.0,
     "turned": true,
-    "target_tracked_share": 1.0
+    "target_visible_share": 1.0
    },
    {
     "scenario": "head_on",
@@ -607,7 +607,7 @@
     "contact": false,
     "max_abs_rpm": 40.0,
     "turned": true,
-    "target_tracked_share": 1.0,
+    "target_visible_share": 1.0,
     "min_other_range_m": 0.7232758737248984
    },
    {
@@ -632,7 +632,7 @@
     "contact": false,
     "max_abs_rpm": 40.0,
     "turned": true,
-    "target_tracked_share": 1.0,
+    "target_visible_share": 1.0,
     "min_other_range_m": 0.7036316336332562
    },
    {
@@ -657,7 +657,7 @@
     "contact": false,
     "max_abs_rpm": 40.0,
     "turned": true,
-    "target_tracked_share": 0.2027491408934708,
+    "target_visible_share": 0.2027491408934708,
     "min_other_range_m": 0.5738951117548504
    },
    {
@@ -682,7 +682,7 @@
     "contact": true,
     "max_abs_rpm": 40.0,
     "turned": true,
-    "target_tracked_share": 0.0,
+    "target_visible_share": 0.0,
     "min_other_range_m": 0.5373500876051177
    },
    {
@@ -707,7 +707,7 @@
     "contact": true,
     "max_abs_rpm": 40.0,
     "turned": true,
-    "target_tracked_share": 0.003436426116838488,
+    "target_visible_share": 0.003436426116838488,
     "min_other_range_m": 0.5662828455139048
    },
    {
@@ -732,7 +732,7 @@
     "contact": true,
     "max_abs_rpm": 40.0,
     "turned": true,
-    "target_tracked_share": 0.0,
+    "target_visible_share": 0.0,
     "min_other_range_m": 0.5173648048801989
    },
    {
@@ -757,7 +757,7 @@
     "contact": false,
     "max_abs_rpm": 40.0,
     "turned": true,
-    "target_tracked_share": 0.4022140221402214,
+    "target_visible_share": 0.4022140221402214,
     "min_other_range_m": 0.4382966226871079
    },
    {
@@ -782,7 +782,7 @@
     "contact": false,
     "max_abs_rpm": 40.0,
     "turned": true,
-    "target_tracked_share": 0.3874538745387454,
+    "target_visible_share": 0.3874538745387454,
     "min_other_range_m": 0.48480491813821314
    },
    {
@@ -807,7 +807,7 @@
     "contact": false,
     "max_abs_rpm": 40.0,
     "turned": false,
-    "target_tracked_share": 1.0
+    "target_visible_share": 1.0
    },
    {
     "scenario": "stop_and_go",
@@ -831,7 +831,7 @@
     "contact": false,
     "max_abs_rpm": 40.0,
     "turned": false,
-    "target_tracked_share": 1.0
+    "target_visible_share": 1.0
    },
    {
     "scenario": "straight",
@@ -855,7 +855,7 @@
     "contact": false,
     "max_abs_rpm": 40.0,
     "turned": false,
-    "target_tracked_share": 1.0
+    "target_visible_share": 1.0
    },
    {
     "scenario": "straight",
@@ -879,7 +879,7 @@
     "contact": false,
     "max_abs_rpm": 40.0,
     "turned": false,
-    "target_tracked_share": 1.0
+    "target_visible_share": 1.0
    },
    {
     "scenario": "target_loss",
@@ -903,7 +903,7 @@
     "contact": false,
     "max_abs_rpm": 40.0,
     "turned": false,
-    "target_tracked_share": 1.0,
+    "target_visible_share": 1.0,
     "blackout_start_s": 10.1,
     "stop_latency_s": 1.0,
     "distance_during_blackout_m": 0.3560471674068433
@@ -930,7 +930,7 @@
     "contact": false,
     "max_abs_rpm": 40.0,
     "turned": false,
-    "target_tracked_share": 1.0,
+    "target_visible_share": 1.0,
     "blackout_start_s": 10.1,
     "stop_latency_s": 1.0,
     "distance_during_blackout_m": 0.3318712229505294
@@ -959,7 +959,7 @@
     "contact": false,
     "max_abs_rpm": 40.0,
     "turned": true,
-    "target_tracked_share": 1.0,
+    "target_visible_share": 1.0,
     "min_other_range_m": 0.5601980632466942
    },
    {
@@ -984,7 +984,7 @@
     "contact": false,
     "max_abs_rpm": 40.0,
     "turned": true,
-    "target_tracked_share": 1.0,
+    "target_visible_share": 1.0,
     "min_other_range_m": 0.45540627362896907
    },
    {
@@ -1009,7 +1009,7 @@
     "contact": false,
     "max_abs_rpm": 40.0,
     "turned": true,
-    "target_tracked_share": 1.0
+    "target_visible_share": 1.0
    },
    {
     "scenario": "curve_left",
@@ -1033,7 +1033,7 @@
     "contact": false,
     "max_abs_rpm": 40.0,
     "turned": true,
-    "target_tracked_share": 1.0
+    "target_visible_share": 1.0
    },
    {
     "scenario": "head_on",
@@ -1057,7 +1057,7 @@
     "contact": false,
     "max_abs_rpm": 40.0,
     "turned": true,
-    "target_tracked_share": 1.0,
+    "target_visible_share": 1.0,
     "min_other_range_m": 0.7227208558403188
    },
    {
@@ -1082,7 +1082,7 @@
     "contact": false,
     "max_abs_rpm": 40.0,
     "turned": true,
-    "target_tracked_share": 1.0,
+    "target_visible_share": 1.0,
     "min_other_range_m": 0.7110684767382507
    },
    {
@@ -1107,7 +1107,7 @@
     "contact": true,
     "max_abs_rpm": 40.0,
     "turned": true,
-    "target_tracked_share": 0.0,
+    "target_visible_share": 0.0,
     "min_other_range_m": 0.5853657176150107
    },
    {
@@ -1132,7 +1132,7 @@
     "contact": true,
     "max_abs_rpm": 40.0,
     "turned": true,
-    "target_tracked_share": 0.0,
+    "target_visible_share": 0.0,
     "min_other_range_m": 0.5563151366401027
    },
    {
@@ -1157,7 +1157,7 @@
     "contact": true,
     "max_abs_rpm": 40.0,
     "turned": true,
-    "target_tracked_share": 0.0,
+    "target_visible_share": 0.0,
     "min_other_range_m": 0.5834202825925852
    },
    {
@@ -1182,7 +1182,7 @@
     "contact": true,
     "max_abs_rpm": 40.0,
     "turned": true,
-    "target_tracked_share": 0.0,
+    "target_visible_share": 0.0,
     "min_other_range_m": 0.556186209588459
    },
    {
@@ -1207,7 +1207,7 @@
     "contact": false,
     "max_abs_rpm": 40.0,
     "turned": true,
-    "target_tracked_share": 0.42066420664206644,
+    "target_visible_share": 0.42066420664206644,
     "min_other_range_m": 0.47601167317028015
    },
    {
@@ -1232,7 +1232,7 @@
     "contact": false,
     "max_abs_rpm": 40.0,
     "turned": true,
-    "target_tracked_share": 0.39114391143911437,
+    "target_visible_share": 0.39114391143911437,
     "min_other_range_m": 0.510394225230923
    },
    {
@@ -1257,7 +1257,7 @@
     "contact": false,
     "max_abs_rpm": 40.0,
     "turned": false,
-    "target_tracked_share": 1.0
+    "target_visible_share": 1.0
    },
    {
     "scenario": "stop_and_go",
@@ -1281,7 +1281,7 @@
     "contact": false,
     "max_abs_rpm": 40.0,
     "turned": false,
-    "target_tracked_share": 1.0
+    "target_visible_share": 1.0
    },
    {
     "scenario": "straight",
@@ -1305,7 +1305,7 @@
     "contact": false,
     "max_abs_rpm": 40.0,
     "turned": false,
-    "target_tracked_share": 1.0
+    "target_visible_share": 1.0
    },
    {
     "scenario": "straight",
@@ -1329,7 +1329,7 @@
     "contact": false,
     "max_abs_rpm": 40.0,
     "turned": false,
-    "target_tracked_share": 1.0
+    "target_visible_share": 1.0
    },
    {
     "scenario": "target_loss",
@@ -1353,7 +1353,7 @@
     "contact": false,
     "max_abs_rpm": 40.0,
     "turned": false,
-    "target_tracked_share": 1.0,
+    "target_visible_share": 1.0,
     "blackout_start_s": 10.1,
     "stop_latency_s": 1.0,
     "distance_during_blackout_m": 0.3560471674068433
@@ -1380,7 +1380,7 @@
     "contact": false,
     "max_abs_rpm": 40.0,
     "turned": false,
-    "target_tracked_share": 1.0,
+    "target_visible_share": 1.0,
     "blackout_start_s": 10.1,
     "stop_latency_s": 1.0,
     "distance_during_blackout_m": 0.3442669261257259
@@ -1411,7 +1411,7 @@
    "contact": false,
    "max_abs_rpm": 40.0,
    "turned": true,
-   "target_tracked_share": 1.0
+   "target_visible_share": 1.0
   },
   {
    "scenario": "side_by_side",
@@ -1436,7 +1436,7 @@
    "contact": true,
    "max_abs_rpm": 40.0,
    "turned": true,
-   "target_tracked_share": 0.0,
+   "target_visible_share": 0.0,
    "min_other_range_m": 0.5465826731260766
   },
   {
@@ -1462,7 +1462,7 @@
    "contact": false,
    "max_abs_rpm": 40.0,
    "turned": true,
-   "target_tracked_share": 0.07241379310344828,
+   "target_visible_share": 0.07241379310344828,
    "min_other_range_m": 0.5366750095967618
   },
   {
@@ -1488,7 +1488,7 @@
    "contact": false,
    "max_abs_rpm": 40.0,
    "turned": true,
-   "target_tracked_share": 0.3888888888888889,
+   "target_visible_share": 0.3888888888888889,
    "min_other_range_m": 0.4920222144072706
   },
   {
@@ -1514,7 +1514,7 @@
    "contact": false,
    "max_abs_rpm": 40.0,
    "turned": true,
-   "target_tracked_share": 1.0
+   "target_visible_share": 1.0
   },
   {
    "scenario": "side_by_side",
@@ -1539,7 +1539,7 @@
    "contact": false,
    "max_abs_rpm": 40.0,
    "turned": true,
-   "target_tracked_share": 0.07241379310344828,
+   "target_visible_share": 0.07241379310344828,
    "min_other_range_m": 0.5345756310382777
   },
   {
@@ -1565,7 +1565,7 @@
    "contact": true,
    "max_abs_rpm": 40.0,
    "turned": true,
-   "target_tracked_share": 0.0,
+   "target_visible_share": 0.0,
    "min_other_range_m": 0.5355309079951452
   },
   {
@@ -1591,7 +1591,7 @@
    "contact": false,
    "max_abs_rpm": 40.0,
    "turned": true,
-   "target_tracked_share": 0.362962962962963,
+   "target_visible_share": 0.362962962962963,
    "min_other_range_m": 0.49416988916054383
   }
  ]

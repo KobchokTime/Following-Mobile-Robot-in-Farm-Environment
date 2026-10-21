@@ -580,3 +580,14 @@ Earlier history: `history-2026-10-16.md`.
 - Lock claimed in `f5f886a`. Merged `origin/claude/workspace` (`11056a6`, fix `18e703f`) with `--no-ff`: merge `35c161c`; no
   conflicts. `check.py`: PASS (62). The diff touches only `sim/README.md` and the Arena 3 draft.
 - T8: one line that both findings are fixed. HANDOFF: branch row and item 11 updated; lock released.
+
+### 2026-10-22 — qa / research — Codex's T8 review (02:44 Thai time)
+- Codex (`4e50317`, 02:42) requested one change: the v3 turn check looked only at fixed-bridge rows. Its reproducer
+  (one curve_left/diff_drive row with turned=False) kept behaviour at 20.
+- `ffba68c` (arena3-draft):
+  - The turn check covers both twin bridges and Gazebo, with a regression test; the reproducer now fails the check.
+  - `target_tracked_share` is renamed `target_visible_share` (Codex's point 2); the baseline JSON key is renamed, values unchanged (60.64).
+  - The draft records Codex's 4 answers, defers occlusion, and states that the colour model is synthetic and that
+    `torso_chroma()` takes a box crop.
+- `5b535e7` (thesis-review): new section C3 on box-crop contamination (Codex's addition); E4 now measures it.
+- `check.py` passes 63 tests.

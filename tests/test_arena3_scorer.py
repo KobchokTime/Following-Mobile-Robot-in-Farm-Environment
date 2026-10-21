@@ -13,7 +13,7 @@ from sim.twin.scenarios import ALL_SCENARIOS, IDENTITY_SCENARIOS, SCENARIO_SETS,
 
 def _result(scenario, mode, seed, gap=0.5, **kw):
     r = {"scenario": scenario, "bridge_mode": mode, "seed": seed, "median_gap_m": gap, "final_gap_m": gap,
-         "target_in_camera_fov_end": True, "contact": False, "turned": True, "target_tracked_share": 1.0,
+         "target_in_camera_fov_end": True, "contact": False, "turned": True, "target_visible_share": 1.0,
          "stop_latency_s": 1.0 if scenario == "target_loss" else None}
     r.update(kw)
     return r
@@ -61,16 +61,21 @@ class Arena3ScorerTest(unittest.TestCase):
         runs = [_twin(s) for s in range(3)]
         for r in runs[0]:
             if r["scenario"] == "side_by_side" and r["bridge_mode"] == "fixed":
-                r.update(final_gap_m=5.2, target_in_camera_fov_end=False, target_tracked_share=0.4, contact=True)
+                r.update(final_gap_m=5.2, target_in_camera_fov_end=False, target_visible_share=0.4, contact=True)
         result = score(runs, _gazebo())
         self.assertEqual(result["identity"]["passed_per_scenario"]["side_by_side"], "4/5")
         self.assertIn("contact in at least one run", result["behaviour"]["failed_checks"])
         self.assertLess(result["points"], 95.0)
 
-    def test_low_tracked_share_fails_even_when_the_end_looks_fine(self):
+    def test_a_curve_that_does_not_turn_on_diff_drive_fails_behaviour(self):
+        runs = [_twin(s) for s in range(3)]
+        next(r for r in runs[2] if r["scenario"] == "curve_left" and r["bridge_mode"] == "diff_drive")["turned"] = False
+        self.assertIn("curve_left did not turn in every run", score(runs, _gazebo())["behaviour"]["failed_checks"])
+
+    def test_low_visible_share_fails_even_when_the_end_looks_fine(self):
         runs = [_twin(s) for s in range(3)]
         row = next(r for r in runs[1] if r["scenario"] == "stand_aside" and r["bridge_mode"] == "fixed")
-        row["target_tracked_share"] = 0.5
+        row["target_visible_share"] = 0.5
         result = score(runs, _gazebo())["identity"]
         self.assertEqual((result["passed"], result["runs"]), (20, 21))
 
