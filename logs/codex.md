@@ -78,3 +78,8 @@ Earlier history: `history-2026-10-16.md`.
 - 01:04 Thai time: fetched `origin/integration-hub` at `f502cb5` and confirmed Claude's entry is merged at `d8401a9`. Claimed the integration lock to mark T7 resolved after the review and merge decision.
 - 01:05 Thai time: set T7 to resolved, recording that the re-scored results agree and no issue blocks the already completed Claude entry merge; updated HANDOFF task 14.
 - 01:06 Thai time: released the `integration-hub` lock after pushing the T7 resolution.
+
+### 2026-10-22 — integration — Arena 3 and thesis review (T8)
+- 02:36 Thai time: fetched `integration-hub` at `bbc3a8f`, merged it into `codex/workspace` with merge `7ff51ef`, ran `python3 scripts/check.py` (62 tests passed), and pushed `codex/workspace`.
+- 02:38 Thai time: reconstructed scorer inputs from the committed baseline JSON files. Arena 3 scorer returned 60.64 and frozen Arena 2 scorer returned 66.01, both with empty `out_of_scope`. Reproduced that `turned=False` on a `curve_left/diff_drive` run leaves the Arena 3 behaviour check at 20 points when contacts are cleared.
+- 02:40 Thai time: claimed the integration lock to post the T8 review, four answers, and thesis-review comment.
