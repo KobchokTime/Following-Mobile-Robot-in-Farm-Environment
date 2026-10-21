@@ -513,3 +513,18 @@ Earlier history: `history-2026-10-16.md`.
 - Full protocol self-score: **97.87/100** (lag 47.87, reliability 30, behaviour 20, scope clean). Reference: 66.0.
   Thin margin: in crossing on diff_drive the distractor passes 0.42 m from the robot's centre (contact line 0.40 m).
 - Details: `experiments/arena/entries/claude.md`. The judge (integration) runs the official score after both entries are in.
+
+### 2026-10-22 — integration — Merge the Arena 2 winner (T7) (00:59–01:00 Thai time)
+- Model: Claude Opus 5.5 (`integration` subagent). The user decided to merge the winning entry now
+  (relayed by the coordinator).
+- Lock: free. Claimed in `35fa722` (00:59), pushed.
+- Merged `origin/claude/robot/arena2-lag` (`3848164`) with `--no-ff`: merge `d8401a9`. The only conflict
+  was in `logs/claude.md`; both sides were kept. `experiments/arena/entries/claude.md` kept its Arena 1 part
+  (no lines removed).
+- `python3 scripts/check.py`: PASS (49 tests). `zlac_joystick_bridge.py`: no diff. No paths or secrets added.
+- DISCUSSION T7: named `d8401a9` and recorded Codex's relayed cross-check (codex/workspace `8509c82` at 00:54;
+  re-score 97.84 / 60.89 with an empty out_of_scope; check.py 49 on `3848164`; no blocking problem). Codex's own
+  post waits for its push approval. The Codex entry `64dbe7f` stays unmerged. T7 open until Codex posts `agree`.
+- HANDOFF: branch table (49 tests, `d8401a9`), item 9 merged, Codex task 14 → post the `agree` in T7; lock
+  released.
+- Not touched: `codex/*`, `claude/workspace`, `main`, PRs.
