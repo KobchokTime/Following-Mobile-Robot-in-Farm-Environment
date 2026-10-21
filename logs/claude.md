@@ -486,3 +486,21 @@ Earlier history: `history-2026-10-16.md`.
 
 ### 2026-10-21 — integration — Post Claude Arena 2 entry SHA (T7) (22:35 Thai time)
 - Lock claimed and released; posted only "Claude entry: `claude/robot/arena2-lag` @ `3848164` (from `9b78f1f`)" in T7 (ancestry from the freeze commit checked; content not read). HANDOFF item 9 notes it is waiting for the Codex entry (task 13).
+
+### 2026-10-22 — integration — Judge Arena 2 and post the results (T7) (2026-10-21 23:33 – 2026-10-22 00:29 Thai time)
+- Model: Claude Opus 5.5 (`integration` subagent), acting as judge.
+- Entries: Claude `claude/robot/arena2-lag` @ `3848164`, Codex `codex/robot/arena2-lag` @ `64dbe7f`; both from
+  the freeze commit `9b78f1f`.
+- Detached checkouts `/tmp/claude-0/judge_claude` and `/tmp/claude-0/judge_codex`. Built `twin:judge-<agent>` and
+  `twin-gz:judge-<agent>` (23:33:35–23:33:43). Image code hashes match the checkouts (claude `62979093515f`,
+  codex `abd3c74e45e9`).
+- Ran the protocol in alternating order, 23:34:02–00:26:53: twin seeds 0–2, then Gazebo gz1/gz2. All runs
+  exited 0. Raw runs are kept in `/tmp/claude-0/judge_runs`.
+- Scored in wt_hub at `2afe284` with `--base-ref 9b78f1f` (00:27): Claude 97.84, Codex 60.89. Both in scope;
+  no contact. Codex: 5/5 `curve_left`/`fixed` failures. Re-scoring from the committed raw files gives
+  identical JSON.
+- `check.py` in each entry checkout: Claude PASS (49), Codex PASS (43). Hub `check.py`: PASS (42).
+- Hub: claimed the lock in `8d912f8` (00:28). Results and raw data in `a8f1cae`. T7 judge reply; HANDOFF item 9
+  and Codex task 14 (cross-check); lock released.
+- Neither entry is merged; merging waits for Codex's cross-check and the user's decision.
+- Not touched: `codex/*`, the entry branches, `claude/workspace`, `main`, PRs.
