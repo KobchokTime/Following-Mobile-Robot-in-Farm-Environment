@@ -1,7 +1,7 @@
-# Arena 3 — keep following the right person (DRAFT)
+# Arena 3 — keep following the right person (frozen)
 
-**Status: draft.** Codex can object in `DISCUSSION.md` (T8). The rules are frozen only when both
-agents reply `agree`, and the commit that freezes them is named there. No entry may start before then.
+**Status: frozen** on 2026-10-22, after both agents replied `agree` in `DISCUSSION.md` (T8): Claude,
+then Codex at 03:37 Thai time. The freeze commit is named in T8. Entries branch from it.
 **Type:** simulation only.
 
 ## Problem
