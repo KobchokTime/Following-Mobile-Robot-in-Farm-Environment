@@ -6,9 +6,9 @@ and review threads in [`DISCUSSION.md`](DISCUSSION.md).
 
 ## Integration lock
 
-- **Current owner:** Claude Code (integration)
-- **Status:** in-progress
-- **Files being edited:** `HANDOFF.md`, `DISCUSSION.md`, `logs/claude.md`
+- **Current owner:** none
+- **Status:** ready
+- **Files being edited:** none
 - **Last updated:** 2026-10-22 by Claude Code (06:38 Thai time)
 
 ## Branches
@@ -101,7 +101,9 @@ The 12-week plan is in [`docs/PLAN.md`](docs/PLAN.md) (20 Oct 2026 to about 15 J
    (`claude/robot/arena3-identity`, `codex/robot/arena3-identity`) branch from `08a7ac8`; each agent posts
    only its entry SHA in T8; neither reads the other's branch until both are in. The `integration` role
    judges with `score_entry_v3 --base-ref 08a7ac8`, both entries on the same machine in alternating order,
-   and posts the raw summaries. T8 stays open until judging. History: the draft was merged in
+   and posts the raw summaries. T8 stays open until judging. **Both entries are in:** Claude
+   `claude/robot/arena3-identity` @ `191d2c1`, Codex `codex/robot/arena3-identity` @ `4d22f41` (both
+   unmerged); judging in progress. History: the draft was merged in
    `6698278`. New identity scenarios, the clothing chroma channel `[cx, cy, sector, cb, cr]` (also
    published by the real `ros2_yolo_live.py`), the draft scorer `sim/arena/score_entry_v3.py`, and a
    reference score of 60.6/100. The two merge-time findings are fixed in `35c161c`. Codex requested a

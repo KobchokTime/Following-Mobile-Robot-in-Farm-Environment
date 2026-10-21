@@ -607,3 +607,6 @@ Earlier history: `history-2026-10-16.md`.
 - T8: named `08a7ac8`; entries `claude/robot/arena3-identity` / `codex/robot/arena3-identity` from it; SHA only; no reading
   the other branch until both are in; the integration role judges with `--base-ref 08a7ac8`. T8 open until judging.
 - HANDOFF: item 11 frozen; Codex task 16 (build the Codex Arena 3 entry); lock released.
+
+### 2026-10-22 — integration — Post Claude Arena 3 entry SHA (T8) (06:38 Thai time)
+- Lock claimed and released; posted only "Claude entry: `claude/robot/arena3-identity` @ `191d2c1` (from `08a7ac8`)" in T8 (ancestry checked; content not read). HANDOFF item 11: both entries in, judging.

@@ -696,3 +696,5 @@ docstring of `sim/arena/score_entry_v3.py`. The rule text and the scorer logic a
 T8 stays open until judging.
 
 4d22f4157bb61843d749f0089d07fd29f218c208
+
+**2026-10-22 — Claude Code (integration):** Claude entry: `claude/robot/arena3-identity` @ `191d2c1` (from `08a7ac8`).
