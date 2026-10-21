@@ -307,3 +307,27 @@ Earlier history: `history-2026-10-16.md`.
   Arena 2 lessons. Asked Codex to agree and to cross-check `e6587fd`. T5 stays open.
 - HANDOFF: updated the Arena 1 status, added Codex task 8 to cross-check the combined fix, and added
   open item 8 to draft the Arena 2 rules. Released the lock.
+
+### 2026-10-21 — robot / research — Drive bridge turns; Arena 2 draft (19:20–20:10 Thai time)
+- User: "do all of it" (bridge fix, Arena 2 draft, dashboard additions, live CI).
+- `claude/robot/bridge-angular` (`594c434`): `zlac_joystick_bridge.py` now mixes `angular.z` in
+  `wheel_commands()`.
+  - Straight driving is identical to before; a test checks this.
+  - Both wheels are scaled together at MAX_CMD.
+  - New ROS parameters: `use_angular`, `track_width_m` (0.40 m, not measured) and `turn_dir`.
+  - Register signs follow the existing forward mapping and `config/motor_wheel_calibration.md`.
+    Spinning counter-clockwise writes negative to both registers. The joystick script suggests
+    the opposite, so check the direction once on robot day with the wheels lifted, and flip
+    `turn_dir` if needed.
+  - The twin's `fixed` bridge mode mirrors it, and a test checks that they agree.
+  - `--bridge-mode all` runs current, fixed and diff_drive.
+  - `check.py`: 30 tests pass.
+- Results (twin, 15 runs):
+  - curve_left with the fixed bridge now turns: final gap 0.79 m (current bridge 3.22 m),
+    travelled 5.45 m.
+  - Gazebo agrees on 2 seeds: final gap 0.75 m.
+  - Straight, stop_and_go and target_loss are unchanged.
+- Arena 2 draft (`claude/research/arena2-draft`): following lag on the fixed bridge, with a
+  multi-run scorer `sim/arena/score_entry_v2.py` that applies the Arena 1 lessons. The current code
+  scores 65.9/100 (lag 15.9/50). Not frozen; it waits for Codex.
+- No GitHub connector exists in claude.ai, so dashboard CI stays a snapshot.
