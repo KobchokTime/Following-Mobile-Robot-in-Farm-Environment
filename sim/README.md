@@ -38,9 +38,9 @@ docker run --rm -v "$PWD/sim_runs:/repo/sim_runs" following-robot-twin \
 Scenario sets for `--scenario`:
 
 - `all`: the 5 Arena 2 scenarios.
-- `identity`: `crossing` plus the 3 scenarios with a second person (`side_by_side`, `head_on`,
-  `stand_aside`).
-- `everything`: all 8 scenarios.
+- `identity`: `crossing` plus the 4 scenarios with a second person (`side_by_side`,
+  `side_by_side_same`, `head_on`, `stand_aside`).
+- `everything`: all 9 scenarios.
 
 `--bridge-mode turning` runs the `fixed` and `diff_drive` bridges.
 
