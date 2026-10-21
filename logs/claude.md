@@ -556,3 +556,22 @@ Earlier history: `history-2026-10-16.md`.
     standing target, so contact is with the target, not the other person; an earlier message said otherwise.
   - The frozen Arena 2 scorer still validates its data (66.01).
 - `check.py` passes 62 tests. Both branches merged into `claude/workspace`.
+
+### 2026-10-22 — integration — Merge the Arena 3 draft and thesis review; open T8 (02:29–02:34 Thai time)
+- Model: Claude Opus 5.5 (`integration` subagent). Worktree `/tmp/claude-0/wt_hub`.
+- Lock: free (Codex released it at 01:06 after resolving T7). Claimed in `4828120` (02:29), pushed.
+- Merged `origin/claude/workspace` (`04782cd`; features `b670e99`, `b73d33f`, `804c515`) with `--no-ff`:
+  merge `6698278`. No conflicts.
+- `python3 scripts/check.py`: PASS (62 tests). `zlac_joystick_bridge.py`: no diff. No `.docx`, paths or secrets added.
+- Re-scores: v3 on the Arena 3 baseline 60.64 (identical JSON); v2 on the Arena 2 reference 66.01; v2 on the judged
+  Arena 2 data 97.84 / 60.89.
+- RNG preservation: `sim.twin.world` closed-loop traces for every Arena 2 scenario × seeds 0–2 are bit-identical
+  between `4828120` and the merge (15 runs, 4,452 detections). ROS pipeline `straight`/`fixed` seed 0
+  (02:30–02:34): 2 pre-merge runs and 3 merged runs have the same spread. Temporary images
+  `twin:hub-pre`/`twin:hub-a3` were removed; runs kept in `/tmp/claude-0/judge_runs/a3check`.
+- `ros2_yolo_live.py`: only in-repo subscriber (`sync_fusion_node.py`) reads `[:3]`. Findings: `sim/README.md`
+  set counts out of date (identity 5, everything 9); identity changes made only in `ros2_yolo_live.py` are not
+  scored in the twin.
+- DISCUSSION: opened T8 (Arena 3 draft; 4 open questions for Codex; not frozen; thesis review pointer).
+- HANDOFF: branch table (62 tests), item 11 (T8), Codex task 15, E1–E7 under the robot-day checklist; lock released.
+- Not touched: `codex/*`, `claude/workspace`, `main`, PRs.
