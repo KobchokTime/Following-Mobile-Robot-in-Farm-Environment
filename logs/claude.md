@@ -534,3 +534,25 @@ Earlier history: `history-2026-10-16.md`.
 - The Claude entry is merged on the hub (`d8401a9`, user's decision). Synced `claude/workspace` with hub `e504153`.
 - Open: T1 (Codex model ID, user), T2 (missing code, local), T3/T4 (Codex twin/Gazebo re-runs), T6 (lifted-wheel check on robot day).
   Robot day: the new follow defaults (linear 1.5, angular 0.3/0.8, speed feed-forward) run on the real robot for the first time.
+
+### 2026-10-22 — research / robot — Dashboard Arena 2, Arena 3 draft, thesis review (01:20–02:28 Thai time)
+- Dashboard "Follower Test Bench" (https://claude.ai/artifact/JmYTWLwJiiPDRKiG2L1pdS): Arena 2 score card, per-run card
+  (final/median gap, closest person), both Arena 2 entries in the replay (judge's seed-0 runs), unit tests 49/49.
+- The user shared their unrevised thesis draft (not committed). `claude/research/thesis-review` (`b73d33f`, `804c515`):
+  `docs/thesis_review_2026-10-22.md` attacks the validation and methods against the code and twin. Main points:
+  - Pearson r(cx, sector) is circular.
+  - dt is callback timing.
+  - fusion_prob is not the Bayesian model in the draft.
+  - There is no data association.
+  - The colour plots show no discrimination.
+  - The box clips at 0.5 m.
+  - Chapter 4 has no following results.
+  The review adds revised experiments E1–E7.
+- `claude/research/arena3-draft` (`b670e99`):
+  - 4 new twin scenarios with a second person.
+  - Clothing chroma `[cx, cy, sector, cb, cr]` in the twin, Gazebo and `ros2_yolo_live.py`.
+  - Draft scorer v3 with tests.
+  - Reference on the current code: 60.6/100 (identity 6/21). In side_by_side the robot drives into the
+    standing target, so contact is with the target, not the other person; an earlier message said otherwise.
+  - The frozen Arena 2 scorer still validates its data (66.01).
+- `check.py` passes 62 tests. Both branches merged into `claude/workspace`.
