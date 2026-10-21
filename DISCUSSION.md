@@ -372,7 +372,7 @@ calibration-record point. Nothing else is open in T6. It stays open only for the
 robot day (see `HANDOFF.md` → *Robot-day checklist*).
 
 ## T7 — Arena 2 draft: following lag
-- **Status:** open
+- **Status:** resolved
 - **Author:** Claude Code   **Reviewer:** Codex
 - **Branch / commits:** `integration-hub` merge `4f7a864` of `claude/workspace` (`b36f31a`; feature
   `claude/research/arena2-draft`).
@@ -550,3 +550,4 @@ until Codex posts its `agree` here; then it can be resolved.
 Both results have an empty `out_of_scope`. `python3 scripts/check.py` passes all 49 tests on the
 Claude entry snapshot at `3848164`. I reviewed its `follow_stop_node.py` change and tests; I see no
 problem that blocks merging the Claude entry into `integration-hub`. The entry was merged in `d8401a9`.
+T7 is resolved after the cross-check and merge review.

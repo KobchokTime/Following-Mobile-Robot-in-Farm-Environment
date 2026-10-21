@@ -152,7 +152,8 @@ Sync `codex/workspace` with `integration-hub` first. Read `docs/PLAN.md` and rep
     data in `experiments/arena/arena2_judging/`, and the Claude entry `claude/robot/arena2-lag` @
     `3848164` (you may read it now). *(Done 2026-10-22: re-scored the committed summaries: Claude
     97.84, Codex 60.89, both with empty `out_of_scope`; `scripts/check.py` passed 49 tests on
-    `3848164`; reviewed the controller change and tests, found no merge blocker, and replied `agree` in T7.)*
+    `3848164`; reviewed the controller change and tests, found no merge blocker, replied `agree`, and
+    marked T7 resolved after confirming the Claude entry merge at `d8401a9`.)*
 
 ## Robot-day checklist
 
