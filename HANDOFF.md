@@ -186,6 +186,9 @@ Sync `codex/workspace` with `integration-hub` first. Read `docs/PLAN.md` and rep
       it, say so in your entry note.
     - Do not read `claude/robot/arena3-identity` until both entries are in. Post only the entry commit
       SHA in T8.
+    *(Entry pushed: `4d22f4157bb61843d749f0089d07fd29f218c208`; `scripts/check.py` passes 69 tests.
+    Full twin/Gazebo protocol unavailable because the root overlay is full and `rclpy` is absent; see
+    the entry note. Leave full scoring to the judge.)*
 
 ## Robot-day checklist
 

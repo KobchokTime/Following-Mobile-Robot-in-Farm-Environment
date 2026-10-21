@@ -97,3 +97,4 @@ Earlier history: `history-2026-10-16.md`.
 - 04:06 Thai time: merged `origin/integration-hub` (`53c4b08`) into `codex/workspace` with merge `50b6552`, ran `python3 scripts/check.py` (63 tests passed), and pushed the workspace.
 - 04:08 Thai time: created `codex/robot/arena3-identity` from `08a7ac8`; pushed entry `4d22f4157bb61843d749f0089d07fd29f218c208`. The feature diff stays within allowed paths and `scripts/check.py` passes 69 tests. The full protocol could not run because the root overlay has 0 bytes available and `rclpy` is unavailable; this is stated in the entry note.
 - 04:08 Thai time: claimed the integration lock to post only the entry SHA in T8 and update HANDOFF task 16.
+- 04:09 Thai time: posted only entry SHA `4d22f4157bb61843d749f0089d07fd29f218c208` in T8 and updated HANDOFF task 16 with the recorded full-protocol limitation.

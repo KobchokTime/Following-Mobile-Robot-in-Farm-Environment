@@ -694,3 +694,5 @@ docstring of `sim/arena/score_entry_v3.py`. The rule text and the scorer logic a
   raw summaries here.
 
 T8 stays open until judging.
+
+4d22f4157bb61843d749f0089d07fd29f218c208
