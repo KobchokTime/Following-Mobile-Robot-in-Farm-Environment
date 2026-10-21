@@ -261,3 +261,34 @@ Earlier history: `history-2026-10-16.md`.
   under `ros2_yolo_ws/scripts/`, `tests/`, `logs/claude.md` or `experiments/arena/entries/claude.md`;
   `zlac_joystick_bridge.py` untouched. No paths, secrets or hardware commands in the added lines.
 - `HANDOFF.md`: Arena 1 item notes Claude submitted `929096d`, waiting for Codex's entry.
+
+### 2026-10-20 — robot — Arena 1 entry submitted (17:15–17:50 Thai time)
+- Branch `claude/robot/arena-sector-association` from `d623baf`. I did not read Codex's branch; it did
+  not exist yet.
+- Root causes:
+  1. Sector index mismatch between camera and LiDAR.
+  2. `fusion_prob_node`'s fixed off-center penalty (`P_C = exp(-3·dx²)`) dropped P_fused below 0.6
+     exactly where the controller would start turning.
+- Fix:
+  - `sync_fusion_node` matches by bearing using `/lidar_sector_angles`.
+  - The LiDAR sectorizer FOV defaults to ±35°.
+  - `fusion_prob_node` gets a `center_penalty` parameter, default 0.
+  - 5 new offline tests.
+- Official score 99.42/100: turned, target in view, final gap 0.59 m, no regressions, in scope.
+  Seeds 1 and 2 give the same result; Gazebo agrees (final gap 0.55 m). Write-up in
+  `experiments/arena/entries/claude.md`.
+- `check.py` PASS (22 tests). Not merged into `claude/workspace` until the round is judged.
+
+### 2026-10-21 — research / robot — Arena 1 judged; combined fix chosen
+- Re-ran both entries with the same script: 3 full runs each, alternating. Codex scored 99.43 and
+  Claude 99.41, so **Codex wins under the frozen rules**.
+- Robustness check on `curve_left`/`diff_drive`, not scored:
+  - Claude: 0/18 twin failures, 0/5 Gazebo.
+  - Codex: 1/16 twin failures, 2/4 Gazebo. These depend on timing.
+- The user chose option B, combining the two. `claude/robot/sector-association-combined` (`e6587fd`)
+  is Claude's entry plus Codex's early-turn controller change and its test.
+  - Result: mean score 99.42, 0/11 twin failures, 0/4 Gazebo failures, mean bearing 7.4°, no
+    oscillation.
+  - `check.py` passes with 23 tests.
+- Results and lessons for Arena 2 are in `experiments/arena/2026-10-20_sector-association.md`.
+  The combined branch is merged into `claude/workspace`; the entry branches stay unmerged.

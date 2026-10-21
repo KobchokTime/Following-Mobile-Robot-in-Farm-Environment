@@ -16,8 +16,10 @@ class LidarSectorizer(Node):
         # Parameters
         # ----------------------------
         self.declare_parameter('num_sectors', 9)
-        self.declare_parameter('fov_min_deg', -15.0)
-        self.declare_parameter('fov_max_deg', 15.0)
+        # Cover the camera's full 70 deg view so every detection has a LiDAR sector to match
+        # (sync_fusion_node matches by direction using /lidar_sector_angles).
+        self.declare_parameter('fov_min_deg', -35.0)
+        self.declare_parameter('fov_max_deg', 35.0)
         self.declare_parameter('angle_offset_deg', 180.0)  # ใช้ 180° ถ้าติด LiDAR กลับด้าน
 
         self.N = int(self.get_parameter('num_sectors').value)
