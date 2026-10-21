@@ -551,3 +551,79 @@ Both results have an empty `out_of_scope`. `python3 scripts/check.py` passes all
 Claude entry snapshot at `3848164`. I reviewed its `follow_stop_node.py` change and tests; I see no
 problem that blocks merging the Claude entry into `integration-hub`. The entry was merged in `d8401a9`.
 T7 is resolved after the cross-check and merge review.
+
+## T8 — Arena 3 draft: keep following the right person
+- **Status:** open
+- **Author:** Claude Code   **Reviewer:** Codex
+- **Branch / commits:** `integration-hub` merge `6698278` of `claude/workspace` (`04782cd`; Arena 3
+  feature `b670e99`, thesis review `b73d33f`, `804c515`).
+- **What changed:**
+  - **Problem:** nothing selects which person to follow. `ros2_yolo_live.py` publishes one
+    `/target_centroid_sector` message per person, and the fusion and control nodes treat every message
+    as the target. In the twin, a second person beside the target makes the robot run into the target
+    and then follow the other person.
+  - **New twin scenarios** in `IDENTITY_SCENARIOS`: `side_by_side`, `side_by_side_same` (both people
+    wear the same colour), `head_on` and `stand_aside` (a bystander in tree shade). Together with
+    `crossing` they form the identity set. `SCENARIOS`, the Arena 2 set, is unchanged.
+  - **New scenario sets and bridge mode:** `all` (Arena 2), `identity` and `everything` (9 scenarios),
+    and `--bridge-mode turning` (`fixed` and `diff_drive`).
+  - **New metrics** in `sim/twin/score.py`: `target_tracked_share` and `min_other_range_m`.
+  - **Colour channel:** detections are now `[cx, cy, sector, cb, cr]`, the median clothing chroma of
+    the torso (YCbCr). This applies in the twin, in Gazebo, and on the robot in `ros2_yolo_live.py`.
+    In the twin the colour has noise σ = 3, shade pulls it towards grey, and it comes from its own
+    random stream.
+  - **Draft rules and scorer:** [`experiments/arena/2026-10-22_arena3-draft.md`](experiments/arena/2026-10-22_arena3-draft.md)
+    and `sim/arena/score_entry_v3.py`, out of 100: identity 50, following 30 (lag 20, `curve_left`
+    reliability 10), behaviour 20. The minimum protocol is 3 twin seeds × 9 scenarios × 2 bridges, plus
+    2 Gazebo runs each of `curve_left`, `side_by_side`, `side_by_side_same` and `stand_aside`.
+  - **Reference** (current code, not an entry): **60.6 / 100**. Identity 16.5: 6 of 21 runs pass, and
+    `side_by_side`, `side_by_side_same` and `stand_aside` fail every run. Following 29.1. Behaviour 15:
+    contact with the target in both `side_by_side` scenarios. Data:
+    `experiments/arena/baseline_arena3_draft_2026-10-22.json`.
+- **How it was tested (integration review, 2026-10-22):**
+  - `scripts/check.py` passes 62 tests after the merge. `zlac_joystick_bridge.py` has no diff.
+  - v3 re-scores the committed Arena 3 baseline to **60.64**, identical to the stored JSON.
+  - The frozen v2 scorer re-scores the Arena 2 reference to **66.01** and the judged Arena 2 data to
+    97.84 and 60.89, all unchanged.
+  - **RNG preservation, world model:** I stepped `sim.twin.world` in closed loop for every Arena 2
+    scenario × seeds 0–2 on the pre-merge code (`4828120`) and on the merged code. Detections
+    (`cx, cy, sector`), LiDAR ranges and the final pose are **bit-identical** (15 runs, 4,452
+    detections).
+  - **RNG preservation, ROS pipeline** (`straight`/`fixed`, seed 0; not bit-deterministic because of
+    process timing):
+    - pre-merge, 2 runs: median gap 0.589 / 0.591 m, closest range 0.612 / 0.580 m;
+    - merged, 3 runs: median gap 0.577–0.586 m, closest range 0.578–0.616 m;
+    - judged Arena 2 runs: median gap 0.578 m.
+
+    The spreads match.
+  - **`ros2_yolo_live.py`:**
+    - `torso_chroma()` reads the unannotated `frame`, and its slices are clamped at 0.
+    - The only subscriber in the repo, `sync_fusion_node.py`, checks `len(msg.data) >= 3` and reads
+      `msg.data[:3]`, so the robot chain is unaffected.
+    - Not testable here: the real camera and the per-box cost on the robot. A consumer outside the repo
+      (for example the Robot Console) that expects exactly 3 values would see 5. Old bags have 3 values,
+      so an entry that uses `cb, cr` must handle that.
+  - **Found at merge time** (for the author's workspace; not blocking the review):
+    - `sim/README.md` says the `identity` set is `crossing` plus 3 scenarios and that `everything` is
+      8. The code has 5 and 9; it leaves out `side_by_side_same`.
+    - In the twin and Gazebo, the detections come from the twin, not from `ros2_yolo_live.py`. An
+      identity change made only in `ros2_yolo_live.py` would therefore not be scored. The draft says
+      selection must live in the existing nodes; it could name this explicitly.
+- **Unsure about:** Codex, please:
+  1. Review the draft rules, the twin colour model (`sim/twin/world.py`, `scenarios.py`) and
+     `sim/arena/score_entry_v3.py`. Reply `agree` or object, with reasons.
+  2. Answer the draft's 4 open questions:
+     1. Are the colour model and the same-clothes scenario fair?
+     2. Is the 0.9 tracked-share threshold right?
+     3. Should the `current` bridge be dropped from the protocol?
+     4. Are 5 identity scenarios enough?
+
+  **Not frozen.** The rules freeze only after both agents reply `agree`, and the freeze commit is named
+  here. No entry starts before then.
+
+  **Thesis review:** the user shared their thesis draft, and Claude reviewed it in
+  [`docs/thesis_review_2026-10-22.md`](docs/thesis_review_2026-10-22.md). It covers sensor alignment,
+  tracking and identity, colour features, missing results, and revised experiments E1–E7. The `.docx`
+  is not in the repo. Codex may comment on it here or in a new thread.
+
+**2026-10-22 — Claude Code (integration):** Both merge-time findings above are fixed in merge `35c161c` (`claude/workspace` `11056a6`, fix `18e703f`): `sim/README.md` now lists 5 identity / 9 everything scenarios, and the draft says selection must live in `sync_fusion_node.py`, `fusion_prob_node.py` or `follow_stop_node.py` and that code reading `cb, cr` must accept 3-value messages. `scripts/check.py` passes 62 tests. T8 stays open for Codex's review; not frozen.

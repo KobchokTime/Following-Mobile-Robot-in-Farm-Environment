@@ -23,7 +23,7 @@ import time
 from pathlib import Path
 
 from sim.twin.pipeline import ROOT, Processes, isolated_env
-from sim.twin.scenarios import SCENARIOS
+from sim.twin.scenarios import ALL_SCENARIOS, SCENARIO_SETS
 from sim.twin.score import load, score
 
 from .world_gen import world
@@ -45,7 +45,7 @@ def run_one(name: str, bridge_mode: str, out_root: Path, gui: bool, seed: int, c
     (out / "world.sdf").write_text(world(name, camera_pose), encoding="utf-8")
     env = dict(isolated_env(), IGN_PARTITION=f"twin{os.getpid()}")
     sim_time = ["-p", "use_sim_time:=true"]
-    people = [p[0] for p in SCENARIOS[name]["people"]]
+    people = [p[0] for p in ALL_SCENARIOS[name]["people"]]
     procs = Processes(out, env)
     try:
         gz = ["ign", "gazebo", "-r", str(out / "world.sdf")]
@@ -61,20 +61,20 @@ def run_one(name: str, bridge_mode: str, out_root: Path, gui: bool, seed: int, c
                  "-p", f"scenario:={name}", "-p", f"bridge_mode:={bridge_mode}", "-p", f"seed:={seed}",
                  "-p", f"log_path:={out / 'state.jsonl'}"],
                 cwd=str(ROOT), env=env, stdout=log, stderr=subprocess.STDOUT,
-                timeout=SCENARIOS[name]["duration_s"] * 8 + 120)
+                timeout=ALL_SCENARIOS[name]["duration_s"] * 8 + 120)
         if twin.returncode != 0:
             raise RuntimeError(f"gz_twin_node exited with {twin.returncode}; see {out / 'gz_twin.log'}")
     finally:
         procs.stop()
     result = {"scenario": name, "bridge_mode": bridge_mode, "simulator": "gazebo", "seed": seed,
-              "doc": SCENARIOS[name]["doc"], **score(load(out / "state.jsonl"))}
+              "doc": ALL_SCENARIOS[name]["doc"], **score(load(out / "state.jsonl"))}
     (out / "score.json").write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
     return result
 
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--scenario", default="straight", help=f"comma-separated names from {sorted(SCENARIOS)}, or 'all'")
+    ap.add_argument("--scenario", default="straight", help=f"comma-separated names from {sorted(ALL_SCENARIOS)}, or a set: {sorted(SCENARIO_SETS)}")
     ap.add_argument("--bridge-mode", default="current", choices=["current", "fixed", "diff_drive"])
     ap.add_argument("--out", default="sim_runs", type=Path)
     ap.add_argument("--gui", action="store_true", help="open the Gazebo window (needs $DISPLAY)")
@@ -82,7 +82,7 @@ def main() -> int:
     ap.add_argument("--camera-pose", default="-3.5 -5.5 4.5 0 0.5 0.75",
                     help="GUI camera 'x y z roll pitch yaw'")
     args = ap.parse_args()
-    names = sorted(SCENARIOS) if args.scenario == "all" else args.scenario.split(",")
+    names = SCENARIO_SETS.get(args.scenario) or args.scenario.split(",")
     results = [run_one(n, args.bridge_mode, args.out, args.gui, args.seed, args.camera_pose) for n in names]
     (args.out / "summary_gazebo.json").write_text(json.dumps(results, indent=2) + "\n", encoding="utf-8")
     for r in results:

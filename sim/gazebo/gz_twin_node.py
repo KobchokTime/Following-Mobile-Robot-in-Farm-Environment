@@ -27,8 +27,8 @@ from rclpy.node import Node
 from std_msgs.msg import Int32MultiArray, String
 from tf2_msgs.msg import TFMessage
 
-from sim.twin.scenarios import SCENARIOS
-from sim.twin.world import Person, RobotParams, SensorParams, bridge_rpm, project_detections, wheel_twist
+from sim.twin.scenarios import ALL_SCENARIOS, make_people
+from sim.twin.world import RobotParams, SensorParams, bridge_rpm, observe_clothing, project_detections, wheel_twist
 
 CONTROL_HZ = 50.0
 SENSOR_HZ = 10.0
@@ -43,12 +43,13 @@ class GzTwinNode(Node):
         self.declare_parameter("log_path", "")
         self.declare_parameter("seed", 0)
         name = str(self.get_parameter("scenario").value)
-        self.spec = SCENARIOS[name]
-        self.people = [Person(n, list(wp), is_target=t) for n, t, wp in self.spec["people"]]
+        self.spec = ALL_SCENARIOS[name]
+        self.people = make_people(self.spec)
         self.blackouts = self.spec.get("blackouts", ())
         self.robot = RobotParams(bridge_mode=str(self.get_parameter("bridge_mode").value))
         self.sensors = SensorParams()
         self.rng = random.Random(int(self.get_parameter("seed").value))
+        self.color_rng = random.Random(int(self.get_parameter("seed").value) + 7919)
         log_path = str(self.get_parameter("log_path").value)
         self.log = open(log_path, "w", encoding="utf-8") if log_path else None
 
@@ -139,9 +140,11 @@ class GzTwinNode(Node):
         blackout = any(a <= t < b for a, b in self.blackouts)
         rel = self.robot_frame()
         if not blackout:
-            for det in project_detections(rel, self.sensors, self.rng):
+            chroma = observe_clothing(self.people, {p.name: self.poses[p.name][0] for p in self.people},
+                                      self.spec.get("shade", ()), self.sensors.chroma_noise, self.color_rng)
+            for det in project_detections(rel, self.sensors, self.rng, chroma):
                 self.pub_centroid.publish(Int32MultiArray(data=[det.cx, det.cy]))
-                self.pub_sector.publish(Int32MultiArray(data=[det.cx, det.cy, det.sector_id]))
+                self.pub_sector.publish(Int32MultiArray(data=[det.cx, det.cy, det.sector_id, det.cb, det.cr]))
 
         rx, ry, ryaw = self.poses["robot"]
         state = {

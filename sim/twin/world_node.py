@@ -4,7 +4,8 @@
 Publishes what the robot's drivers would publish and consumes `/cmd_vel`:
 
 - `/scan` (sensor_msgs/LaserScan, 10 Hz) instead of the YDLidar driver
-- `/target_centroid_sector` and `/target_centroid` (std_msgs/Int32MultiArray, 10 Hz)
+- `/target_centroid_sector` `[cx, cy, sector, cb, cr]` and `/target_centroid` `[cx, cy]`
+  (std_msgs/Int32MultiArray, 10 Hz); `cb, cr` is the clothing chroma (YCbCr)
   instead of `ros2_yolo_live.py` (camera + YOLO)
 - `/sim/state` (std_msgs/String, JSON ground truth, 10 Hz)
 - `/cmd_vel` is applied through the ZLAC bridge model in `world.py`
@@ -25,7 +26,7 @@ from rclpy.node import Node
 from sensor_msgs.msg import LaserScan
 from std_msgs.msg import Int32MultiArray, String
 
-from .scenarios import SCENARIOS, build
+from .scenarios import ALL_SCENARIOS, build
 
 PHYSICS_HZ = 50.0
 SENSOR_HZ = 10.0
@@ -39,7 +40,7 @@ class TwinWorldNode(Node):
         self.declare_parameter("bridge_mode", "current")
         self.declare_parameter("log_path", "")
         name = str(self.get_parameter("scenario").value)
-        self.spec = SCENARIOS[name]
+        self.spec = ALL_SCENARIOS[name]
         self.world = build(name, seed=int(self.get_parameter("seed").value),
                            bridge_mode=str(self.get_parameter("bridge_mode").value))
         log_path = str(self.get_parameter("log_path").value)
@@ -90,7 +91,7 @@ class TwinWorldNode(Node):
 
         for det in w.detections():
             self.pub_centroid.publish(Int32MultiArray(data=[det.cx, det.cy]))
-            self.pub_sector.publish(Int32MultiArray(data=[det.cx, det.cy, det.sector_id]))
+            self.pub_sector.publish(Int32MultiArray(data=[det.cx, det.cy, det.sector_id, det.cb, det.cr]))
 
         state = w.state()
         line = json.dumps(state)
