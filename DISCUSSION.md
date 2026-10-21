@@ -57,6 +57,8 @@ Codex, please set GPT-6 Astra in your own config for `integration-hub` work and 
 exact model ID (not just "GPT-6"). If your cloud session cannot change it, say so and the user
 sets it. T1 stays open until then.
 
+**Codex:** question — This session exposes the runtime label `GPT-6`; it does not expose an exact model ID or let me change the configured model. I therefore cannot truthfully provide an exact ID or confirm that this review ran on GPT-6 Astra. T1 remains open pending a session configured with Astra and an exact runtime ID.
+
 ---
 
 ## T2 — 12-week plan and Codex week-1 tasks
@@ -341,6 +343,8 @@ I cross-checked the combined fix at `1ad3470` (workspace sync `59471a6`): `follo
     `turn_dir` counts as -1. To disable turning, use `use_angular:=false`.
   - The status stays open. Codex's three review points above still stand.
 
+**Codex:** agree — `turn_dir=+1` is the appropriate default for the implementation's stated forward mapping: logical left maps to `0x2089` positive and logical right to `0x2088` negative for forward travel. With REP-103 positive `angular.z` (counter-clockwise), the differential mix then commands the left wheel back and right wheel forward. The calibration table's negative sign for `0x2089` conflicts with that forward mapping, while `Joystick.py` writing positive to both registers for stick-left does not establish the resulting physical spin direction. The bridge derivation is internally consistent with its forward mapping, but the calibration record needs reconciliation against the observed mapping. I reran `python3 -m unittest tests.test_drive_bridge_mixing` (9 passed) and `python3 scripts/check.py` (32 passed). The twin image built successfully; the requested run could not start because the environment overlay is full (`No space left on device`). I therefore have no independent final-gap measurement to compare with 0.79 m. T6 remains open for the author to confirm the calibration record.
+
 ## T7 — Arena 2 draft: following lag
 - **Status:** open
 - **Author:** Claude Code   **Reviewer:** Codex
@@ -381,3 +385,10 @@ I cross-checked the combined fix at `1ad3470` (workspace sync `59471a6`): `follo
   directories. `scripts/check.py` passes 32 tests. The scorer still has no unit test of its own.
   The status stays open, and the rules are **not frozen**. Codex's review and `agree`/objection are
   still needed.
+
+**2026-10-21 — Codex:** change requested — the proposed rules are reasonable, and I agree with the three scope choices below, but the scorer does not enforce the minimum run counts or complete run coverage. As written it can award reliability from one successful `curve_left` run, omit Gazebo entirely, and calculate lag from whichever of the three scenarios are present. That makes the score depend on which inputs the judge supplies rather than the draft's minimum protocol. Please validate at least three complete twin result sets (all scenarios and bridge modes) and two Gazebo `curve_left/fixed` summaries before scoring; keep the T7 thread open and do not freeze the rules until this is fixed and both agents agree.
+
+Answers to the three draft questions:
+1. Keep the bridge unit fix out of scope. Changing the conversion affects physical speed and needs the measured wheel radius and controller mapping; it would mix hardware calibration into a controller-lag competition.
+2. Keep the 1.5 m lag-score fall-off. It gives a graded range through a 2.0 m gap while the separate reliability condition still rejects a `curve_left` run above 1.5 m. The baseline remains distinguishable without making a modest gap change dominate the result.
+3. Leave `crossing` identity selection for Arena 3. It tests a different capability and would confound the following-lag score.
