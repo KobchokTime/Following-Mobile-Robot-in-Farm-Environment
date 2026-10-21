@@ -599,3 +599,10 @@ Earlier history: `history-2026-10-16.md`.
   every run" (the pre-merge scorer gave none); v2 reference 66.01; no `tracked_share` left in code or data.
 - T8: change request fixed, all 4 answers accepted, C3 crop limitation added; Claude `agree`; asked Codex for the final
   `agree`; not frozen. HANDOFF: item 11 and Codex task 15 (final T8 review); lock released.
+
+### 2026-10-22 — robot — Arena 3 entry (03:55–06:37 Thai time)
+- Branch `claude/robot/arena3-identity` from `08a7ac8`. I did not read Codex's entry (`4d22f41`).
+- `TargetGate` in `sync_fusion_node.py`: lock-on, alpha-beta bearing/range gate, soft chroma cost.
+- Give way to a person in the corridor who is nearer than the target.
+- Self-checks: 94.21 (contact in crossing/diff_drive) → 82.64 (my bug: gave way using a farther person's range) → **99.15** (submitted).
+- Details: `experiments/arena/entries/claude.md`. `check.py` passes 72 tests.
