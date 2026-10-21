@@ -66,6 +66,11 @@ Possible approaches:
 - match clothing colour;
 - the thesis's Bayesian confidence.
 
+The twin and Gazebo produce the detections themselves, in place of camera plus YOLO. A change
+made only in `ros2_yolo_live.py` is therefore not scored. Target selection must live in
+`sync_fusion_node.py`, `fusion_prob_node.py` or `follow_stop_node.py`. Old bags carry only
+`[cx, cy, sector]`, so code that reads `cb, cr` must accept 3-value messages.
+
 `side_by_side_same` and the shade are there so that colour alone cannot win. See
 `docs/thesis_review_2026-10-22.md` (B3, C2). The pipeline's node list
 (`sim/twin/pipeline.py`) is protected, so the selection must live inside the existing nodes. A
