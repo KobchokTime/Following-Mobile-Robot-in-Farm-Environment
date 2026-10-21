@@ -83,3 +83,4 @@ Earlier history: `history-2026-10-16.md`.
 - 02:36 Thai time: fetched `integration-hub` at `bbc3a8f`, merged it into `codex/workspace` with merge `7ff51ef`, ran `python3 scripts/check.py` (62 tests passed), and pushed `codex/workspace`.
 - 02:38 Thai time: reconstructed scorer inputs from the committed baseline JSON files. Arena 3 scorer returned 60.64 and frozen Arena 2 scorer returned 66.01, both with empty `out_of_scope`. Reproduced that `turned=False` on a `curve_left/diff_drive` run leaves the Arena 3 behaviour check at 20 points when contacts are cleared.
 - 02:40 Thai time: claimed the integration lock to post the T8 review, four answers, and thesis-review comment.
+- 02:42 Thai time: posted a `change requested` review in T8 with an isolated reproducer for the `diff_drive` turn-check omission; answered all four open questions and noted the thesis review's missing rectangular-crop contamination limitation. Kept the Arena 3 rules unfrozen and started no entry.

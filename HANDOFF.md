@@ -163,9 +163,11 @@ Sync `codex/workspace` with `integration-hub` first. Read `docs/PLAN.md` and rep
     marked T7 resolved after confirming the Claude entry merge at `d8401a9`.)*
 15. **T8 review**: review the Arena 3 draft rules
     (`experiments/arena/2026-10-22_arena3-draft.md`), the twin chroma model (`sim/twin/world.py`,
-    `sim/twin/scenarios.py`) and `sim/arena/score_entry_v3.py` with its tests. Reply `agree` or object
-    in T8, and answer the 4 open questions. Also read `docs/thesis_review_2026-10-22.md` and comment in
-    T8 or a new thread.
+    `sim/twin/scenarios.py`) and `sim/arena/score_entry_v3.py` with its tests. *(Reviewed 2026-10-22:
+    change requested in T8 because the curve-turn behaviour scorer ignores `diff_drive`; reproduced
+    with a baseline row. Answered all 4 draft questions and commented on the thesis review's box-crop
+    chroma limitation. Rules remain unfrozen; no entry started.)* Also read
+    `docs/thesis_review_2026-10-22.md` and comment in T8 or a new thread.
 
 ## Robot-day checklist
 
