@@ -34,6 +34,9 @@ class _Logger:
 class _Time:
     nanoseconds = 0
 
+    def __sub__(self, _other):
+        return _Time()
+
 
 class _Clock:
     def now(self):

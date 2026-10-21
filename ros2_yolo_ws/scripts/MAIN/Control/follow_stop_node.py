@@ -3,7 +3,34 @@ import rclpy
 from rclpy.node import Node
 from std_msgs.msg import Float32MultiArray
 from geometry_msgs.msg import Twist
-from math import isfinite
+from math import exp, isfinite
+
+
+def speed_command(error_dist, speed_ff, dt, linear_gain, tolerance, max_linear_speed,
+                  ff_gain, ff_max, ff_decay_s):
+    """Linear command and the updated speed feed-forward, both in /cmd_vel linear.x units.
+
+    The feed-forward learns the command that keeps pace with a walking target (an integral of the
+    gap error), so the gap settles near the set-point instead of where P-only control balances.
+    It only grows while the target is farther than the set-point and bleeds off quickly once the
+    robot is closer, so a target that stops does not get run into.
+    """
+    dt = max(0.0, min(dt, 0.5))
+    if error_dist > 0.0:
+        speed_ff = min(ff_max, speed_ff + ff_gain * error_dist * dt)
+    elif ff_decay_s > 0.0:
+        speed_ff *= exp(-dt / ff_decay_s)
+    else:
+        speed_ff = 0.0
+
+    if error_dist < -tolerance:
+        linear_x = linear_gain * error_dist
+    elif error_dist <= tolerance:
+        linear_x = speed_ff
+    else:
+        linear_x = linear_gain * error_dist + speed_ff
+    linear_x = max(min(linear_x, max_linear_speed), -max_linear_speed)
+    return linear_x, speed_ff
 
 class FollowStopNode(Node):
     def __init__(self):
@@ -15,8 +42,12 @@ class FollowStopNode(Node):
         self.declare_parameter('p_fused_threshold', 0.6)
 
         # motion
-        self.declare_parameter('linear_gain', 0.55)
+        self.declare_parameter('linear_gain', 1.5)
         self.declare_parameter('max_linear_speed', 3.5)
+        # speed feed-forward (Arena 2): learns the command that keeps pace with the target
+        self.declare_parameter('speed_ff_gain', 1.0)      # per (m · s)
+        self.declare_parameter('speed_ff_max', 1.0)       # the bridge saturates at 1.0 (40 RPM)
+        self.declare_parameter('speed_ff_decay_s', 0.3)   # time constant once closer than the set-point
 
         # init dist
         self.declare_parameter('init_dist_min', 0.5)
@@ -26,8 +57,8 @@ class FollowStopNode(Node):
         self.declare_parameter('center_sector', 4)        # sector กลาง
         self.declare_parameter('front_band_radius', 1)    # 4±1 = [3,5] = กลาง
         self.declare_parameter('wide_front_radius', 1)    # 4±1 = [3,5]; sector 2/6 starts a turn
-        self.declare_parameter('angular_gain', 0.10)
-        self.declare_parameter('angular_limit', 0.25)
+        self.declare_parameter('angular_gain', 0.3)
+        self.declare_parameter('angular_limit', 0.8)
         self.declare_parameter('edge_consistency', 1)     # หมุนเมื่อเป้าหมายเริ่มออกจากแถบกลาง
 
         # ---------- Load ----------
@@ -36,6 +67,9 @@ class FollowStopNode(Node):
         self.p_fused_threshold = float(self.get_parameter('p_fused_threshold').value)
         self.linear_gain       = float(self.get_parameter('linear_gain').value)
         self.max_linear_speed  = float(self.get_parameter('max_linear_speed').value)
+        self.speed_ff_gain     = float(self.get_parameter('speed_ff_gain').value)
+        self.speed_ff_max      = float(self.get_parameter('speed_ff_max').value)
+        self.speed_ff_decay_s  = float(self.get_parameter('speed_ff_decay_s').value)
         self.init_dist_min     = float(self.get_parameter('init_dist_min').value)
         self.init_dist_max     = float(self.get_parameter('init_dist_max').value)
 
@@ -51,6 +85,8 @@ class FollowStopNode(Node):
         self.last_good_cmd = Twist()
         self.last_good_time = self.get_clock().now()
         self.p_buffer      = []
+        self.speed_ff      = 0.0
+        self.last_ctrl_time = None
 
         # Bayesian sector prior
         self.prev_sector   = None
@@ -99,19 +135,18 @@ class FollowStopNode(Node):
                 self.get_logger().info(f"[HOLD] Low conf {P_fused_smooth:.2f} → keep last cmd")
             else:
                 self.publish_stop()
+                self.speed_ff = 0.0
+                self.last_ctrl_time = None
                 self.get_logger().info(f"[STOP] P_fused={P_fused_smooth:.2f} (low confidence)")
             return
 
-        # ---------- Distance control ----------
+        # ---------- Distance control (P + speed feed-forward) ----------
         error_dist = dist - self.target_distance
-        if abs(error_dist) <= self.tolerance:
-            linear_x = 0.0
-        else:
-            dynamic_gain = self.linear_gain * max(
-                0.3, min(1.0, abs(error_dist) / self.target_distance)
-            )
-            linear_x = dynamic_gain * error_dist
-            linear_x = max(min(linear_x, self.max_linear_speed), -self.max_linear_speed)
+        dt = 0.0 if self.last_ctrl_time is None else (now - self.last_ctrl_time).nanoseconds / 1e9
+        self.last_ctrl_time = now
+        linear_x, self.speed_ff = speed_command(
+            error_dist, self.speed_ff, dt, self.linear_gain, self.tolerance, self.max_linear_speed,
+            self.speed_ff_gain, self.speed_ff_max, self.speed_ff_decay_s)
 
         # ---------- Angular control (Bayesian / previous sector) ----------
         center = self.center_sector
@@ -160,7 +195,7 @@ class FollowStopNode(Node):
         self.get_logger().info(
             f"[MOVE] dist={dist:.2f}m (err={error_dist:+.2f}) "
             f"sec_prev={self.prev_sector} sec_now={sector} "
-            f"P={P_fused_smooth:.2f} edge_cnt={self.edge_counter} "
+            f"P={P_fused_smooth:.2f} edge_cnt={self.edge_counter} ff={self.speed_ff:.2f} "
             f"→ v=({linear_x:.2f}, {angular_z:.2f})"
         )
 
