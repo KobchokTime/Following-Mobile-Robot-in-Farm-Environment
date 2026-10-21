@@ -9,7 +9,7 @@ and review threads in [`DISCUSSION.md`](DISCUSSION.md).
 - **Current owner:** none
 - **Status:** ready
 - **Files being edited:** none
-- **Last updated:** 2026-10-21 by Claude Code (22:35 Thai time)
+- **Last updated:** 2026-10-22 by Claude Code (00:29 Thai time)
 
 ## Branches
 
@@ -18,7 +18,7 @@ and review threads in [`DISCUSSION.md`](DISCUSSION.md).
 | `main` | Initial commit only. It receives `integration-hub` through a PR once the user approves. |
 | `integration-hub` | Has the robot recovery, Thesis Desk, quest sources, agent workflow, GUI smoke-test results, 12-week plan, Codex week-1 changes, the offline twin (`sim/`, twin CI, first simulated findings; merge `18c2303`), the Gazebo 3D twin (`sim/gazebo/`, `Dockerfile.gazebo`, `gazebo` CI job, cross-check; merge `cef985f`), the frozen Arena 1 rules, scorer and baseline (merge `d623baf`) the Arena 1 results plus the combined sector-association fix `e6587fd` (merge `4652571`), the drive bridge forwarding `angular.z` plus the Arena 2 draft (merge `4f7a864`, T6/T7), the bridge guard follow-ups (non-finite guard, `turn_dir` as a sign only, Arena 2 entry scope; merge `9f55d17`), and the Arena 2 scorer validation, full-protocol reference (66.0/100) and calibration reconciliation (merge `ecc55ca`, T6/T7), and the scorer gap fixes (duplicate inputs rejected, `--agent`/`--base-ref` required; merge `da04d16`), and the integer seed check (merge `8c77425`). Arena 2 rules and scorer frozen in `9b78f1f` (T7). `scripts/check.py` passes (42 tests). |
 | `claude/workspace` | Merged into `integration-hub` at `8c77425` (`abcbb9c`: integer seed check for T7). Before that at `da04d16` (`3b2cad5`: scorer gap fixes). Before that at `ecc55ca` (`16ac740`: Arena 2 scorer validation and calibration reconciliation). Before that at `9f55d17` (`0b934e3`: bridge guard follow-ups), and before that at `4f7a864` (`b36f31a`: bridge `angular.z`, Arena 2 draft), and before that at `7d400bb`, including the Arena 1 results and the combined fix `e6587fd`. The entry branch `claude/robot/arena-sector-association` (`929096d`) stays unmerged, for the record. |
-| `codex/workspace` | Synced through `integration-hub` `e2a63cb` (workspace merge `5d24c3a`); the original Arena entry remains separate and unmerged. |
+| `codex/workspace` | Synced through `integration-hub` `00a0584` (workspace merge `d2d0351`); the original Arena entry remains separate and unmerged. |
 | *To delete* | `integration/robot-thesis-desk`, `codex/robot-backup-quarantine` and `codex/thesis-desk`. They are fully merged, but the cloud session's git proxy cannot delete branches. The user deletes them on GitHub, or Codex runs `git push origin --delete ...` from Windows. |
 
 ## Models on `integration-hub`
@@ -76,9 +76,13 @@ The 12-week plan is in [`docs/PLAN.md`](docs/PLAN.md) (20 Oct 2026 to about 15 J
    on 2026-10-21 after both agents agreed (Codex at 22:00 Thai time). Entries
    (`claude/robot/arena2-lag`, `codex/robot/arena2-lag`) branch from `9b78f1f`; each agent posts its
    entry SHA in T7; neither reads the other's branch until both are in. The `integration` role judges
-   with `--base-ref 9b78f1f`, both entries on the same machine in alternating order. T7 stays open
-   until judging. Claude entry: `claude/robot/arena2-lag` @ `3848164` (unmerged); waiting for the
-   Codex entry (Codex task 13). History: the draft was merged in
+   with `--base-ref 9b78f1f`, both entries on the same machine in alternating order.
+   **Judged 2026-10-22** (results `experiments/arena/2026-10-21_arena2-results.md`, commit `a8f1cae`):
+   the Claude entry (`3848164`) wins by the frozen score, 97.84 to 60.89 for Codex (`64dbe7f`). All
+   5 Codex `curve_left`/`fixed` runs lost the target. Claude's margins are thinner: closest person
+   range 0.455 m against 0.630 m, and final gaps below the set-point. Neither entry is merged; merging
+   the winner waits for Codex's cross-check (Codex task 14) and the user's decision. T7 stays open.
+   History: the draft was merged in
    `4f7a864`. The scorer's entry scope was tightened to `entries/<agent>.md` in `9f55d17`. Codex's
    change request (enforce minimum runs and coverage) is addressed in `ecc55ca`: `validate()` exits 2
    without a score on an incomplete input set; 9 new tests. New reference on the full protocol:
@@ -139,7 +143,11 @@ Sync `codex/workspace` with `integration-hub` first. Read `docs/PLAN.md` and rep
 13. **Arena 2 entry** (T7): build the Codex Arena 2 entry on `codex/robot/arena2-lag`, branched from the
     freeze commit `9b78f1f`. Stay within the allowed paths in
     `experiments/arena/2026-10-21_arena2-draft.md`, do not read `claude/robot/arena2-lag` until both
-    entries are in, and post the entry commit SHA in T7.
+    entries are in, and post the entry commit SHA in T7. *(Done: pushed `64dbe7f4a823d3662a4a5c36ea160b2b049bdea9`; full self-score unavailable because Docker storage is full, so judging is pending.)* *(Judged 2026-10-22: 60.89.)*
+14. **Arena 2 cross-check** (T7): cross-check `experiments/arena/2026-10-21_arena2-results.md`, the raw
+    data in `experiments/arena/arena2_judging/`, and the Claude entry `claude/robot/arena2-lag` @
+    `3848164` (you may read it now). Re-score from the committed files if you can. Reply `agree` or
+    object in T7.
 
 ## Robot-day checklist
 

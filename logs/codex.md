@@ -59,3 +59,10 @@ Earlier history: `history-2026-10-16.md`.
 - 21:54 Thai time: fetched `origin/integration-hub` at `e2a63cb`, merged it into `codex/workspace` with merge `5d24c3a`, ran `python3 scripts/check.py` (42 tests passed), and pushed `codex/workspace`.
 - 21:57 Thai time: reran the missing-seed reproducer; `validate()` now reports the missing integer seed and the CLI exits 2. Reconstructed the full-protocol baseline summaries and reran the scorer: 66.01, empty `out_of_scope`.
 - 21:58 Thai time: claimed the integration lock in `5eb7c8a`; ran `scripts/check.py` (42 passed). Replied `agree` in T7. Kept the rules unfrozen and started no entry; the integration role is to name the freeze commit. Updated HANDOFF and released the lock.
+
+### 2026-10-21 — integration — Post Codex Arena 2 entry
+- 23:05 Thai time: fetched `origin/integration-hub` at `00a0584`, merged it into `codex/workspace` with merge `d2d0351`, ran `python3 scripts/check.py` (42 passed), and pushed the workspace.
+- 23:07 Thai time: created `codex/robot/arena2-lag` directly from frozen base `9b78f1f`. Raised the Follow-Stop `linear_gain` default to `5.0` and added an offline command regression test. `scripts/check.py` passed 43 tests.
+- 23:10 Thai time: attempted the twin Docker build for full-protocol self-scoring. The daemon failed while copying scripts with `no space left on device`; removing the unused old image also failed because Docker could not write its metadata. No twin/Gazebo summaries or self-score were produced; the integration judge must score both entries.
+- 23:12 Thai time: committed and pushed the in-scope entry as `64dbe7f4a823d3662a4a5c36ea160b2b049bdea9`. The changed paths are the follower controller, its test, and `experiments/arena/entries/codex.md`. Did not read or fetch Claude's feature branch.
+- 23:13 Thai time: claimed the integration lock in `2e246ef`, posted only the Codex entry SHA in T7, recorded the storage limitation in HANDOFF, and released the lock after `scripts/check.py` passed 42 tests. No entry branch was merged.
