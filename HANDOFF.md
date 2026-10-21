@@ -6,10 +6,10 @@ and review threads in [`DISCUSSION.md`](DISCUSSION.md).
 
 ## Integration lock
 
-- **Current owner:** Claude Code (integration)
-- **Status:** in-progress
-- **Files being edited:** `experiments/arena/2026-10-22_arena3-draft.md`, `sim/arena/score_entry_v3.py` (freeze), `HANDOFF.md`, `DISCUSSION.md`, `logs/claude.md`
-- **Last updated:** 2026-10-22 by Claude Code (03:53 Thai time)
+- **Current owner:** none
+- **Status:** ready
+- **Files being edited:** none
+- **Last updated:** 2026-10-22 by Claude Code (03:54 Thai time)
 
 ## Branches
 
@@ -96,14 +96,18 @@ The 12-week plan is in [`docs/PLAN.md`](docs/PLAN.md) (20 Oct 2026 to about 15 J
    but found that `validate()` accepted a twin repeat with no seed field. Fixed in `8c77425`: every
    twin row needs an integer seed (regression test added, 42 tests). Codex's final `agree` is in T7.
 10. `integration-hub` → `main` (draft PR KobchokTime/Following-Mobile-Robot-in-Farm-Environment#2): needs every thread resolved and the user's approval.
-11. **T8** in `DISCUSSION.md`: the Arena 3 draft (keep following the right person), merged in
+11. **T8** in `DISCUSSION.md`: Arena 3 (keep following the right person). **Frozen in `08a7ac8`** on
+   2026-10-22 after both agents agreed (Codex at 03:37 Thai time). Entries
+   (`claude/robot/arena3-identity`, `codex/robot/arena3-identity`) branch from `08a7ac8`; each agent posts
+   only its entry SHA in T8; neither reads the other's branch until both are in. The `integration` role
+   judges with `score_entry_v3 --base-ref 08a7ac8`, both entries on the same machine in alternating order,
+   and posts the raw summaries. T8 stays open until judging. History: the draft was merged in
    `6698278`. New identity scenarios, the clothing chroma channel `[cx, cy, sector, cb, cr]` (also
    published by the real `ros2_yolo_live.py`), the draft scorer `sim/arena/score_entry_v3.py`, and a
    reference score of 60.6/100. The two merge-time findings are fixed in `35c161c`. Codex requested a
    change (the turn check ignored `diff_drive`) and answered the 4 questions; fixed in `4aba2f6` (turn check
    on both bridges and Gazebo, metric renamed to `target_visible_share`, limits stated, 63 tests).
-   Claude replied `agree` to the rules as written. **Not frozen** until Codex's final `agree`; the
-   freeze commit is then named in T8. The thesis review (`docs/thesis_review_2026-10-22.md`) now has C3,
+   Both agents replied `agree`. The thesis review (`docs/thesis_review_2026-10-22.md`) now has C3,
    the box-crop limitation.
 
 ## Codex — week 1 tasks
@@ -171,8 +175,17 @@ Sync `codex/workspace` with `integration-hub` first. Read `docs/PLAN.md` and rep
     thesis review's box-crop chroma limitation. Both agents agree; the integration role still needs to
     name the freeze commit. No entry started.)* Also read `docs/thesis_review_2026-10-22.md` and
     comment in T8 or a new thread.
-    **Now:** final T8 review of the fixes in `4aba2f6` (turn check on both bridges and Gazebo, the
-    `target_visible_share` rename, the stated limits, thesis review C3). Reply `agree` or object in T8.
+16. **Arena 3 entry** (T8): build the Codex Arena 3 entry on `codex/robot/arena3-identity`, branched
+    from the freeze commit `08a7ac8`.
+    - Stay within the allowed paths in `experiments/arena/2026-10-22_arena3-draft.md`.
+    - Target selection must live in `sync_fusion_node.py`, `fusion_prob_node.py` or
+      `follow_stop_node.py`; the twin bypasses `ros2_yolo_live.py`.
+    - Detections carry `[cx, cy, sector, cb, cr]` (clothing chroma). Code that reads `cb, cr` must
+      accept old 3-value messages.
+    - The full protocol needs about 30 minutes of twin time plus the Gazebo runs. If your disk cannot run
+      it, say so in your entry note.
+    - Do not read `claude/robot/arena3-identity` until both entries are in. Post only the entry commit
+      SHA in T8.
 
 ## Robot-day checklist
 

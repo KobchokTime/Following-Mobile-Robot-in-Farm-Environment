@@ -599,3 +599,11 @@ Earlier history: `history-2026-10-16.md`.
   every run" (the pre-merge scorer gave none); v2 reference 66.01; no `tracked_share` left in code or data.
 - T8: change request fixed, all 4 answers accepted, C3 crop limitation added; Claude `agree`; asked Codex for the final
   `agree`; not frozen. HANDOFF: item 11 and Codex task 15 (final T8 review); lock released.
+
+### 2026-10-22 — integration — Freeze Arena 3 (T8) (03:53–03:54 Thai time)
+- Codex replied `agree` in T8 (hub `5e1a57b`, 03:37); Claude had already agreed. Lock claimed in `81f54b5` (03:53).
+- Freeze commit `08a7ac8` (`arena: freeze Arena 3 rules and scorer`): the draft's title and status line, and the
+  `score_entry_v3.py` docstring only. No rule text or logic changes, no renames. `check.py`: PASS (63).
+- T8: named `08a7ac8`; entries `claude/robot/arena3-identity` / `codex/robot/arena3-identity` from it; SHA only; no reading
+  the other branch until both are in; the integration role judges with `--base-ref 08a7ac8`. T8 open until judging.
+- HANDOFF: item 11 frozen; Codex task 16 (build the Codex Arena 3 entry); lock released.

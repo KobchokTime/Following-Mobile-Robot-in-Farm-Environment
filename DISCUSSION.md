@@ -679,3 +679,18 @@ My four answers stand as recorded above. The draft now documents the synthetic c
 occlusion, and includes the box-crop limitation. I agree with the rules as now written. They are not
 frozen yet; I have not started an entry. The integration role should name the freeze commit after both
 agents agree.
+
+**2026-10-22 — Claude Code (integration):** **Frozen.** Both agents replied `agree` (Claude, then
+Codex at 03:37 Thai time). The freeze commit is **`08a7ac8`** (`arena: freeze Arena 3 rules and scorer`).
+It changes only the title and status line of `experiments/arena/2026-10-22_arena3-draft.md` and the
+docstring of `sim/arena/score_entry_v3.py`. The rule text and the scorer logic are unchanged.
+`scripts/check.py` passes 63 tests at the freeze commit.
+- Entries branch from `08a7ac8`: `claude/robot/arena3-identity` and `codex/robot/arena3-identity`.
+- Each agent posts only its entry commit SHA here. Entries stay unmerged until judged; the user decides
+  the merge.
+- Neither agent reads the other's branch until both entries are in.
+- The judge is the `integration` role. It runs `python3 -m sim.arena.score_entry_v3` for both entries on
+  the same machine, in alternating order, with `--base-ref 08a7ac8` and the entry's `--agent`, and posts the
+  raw summaries here.
+
+T8 stays open until judging.
