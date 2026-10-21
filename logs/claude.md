@@ -331,3 +331,16 @@ Earlier history: `history-2026-10-16.md`.
   multi-run scorer `sim/arena/score_entry_v2.py` that applies the Arena 1 lessons. The current code
   scores 65.9/100 (lag 15.9/50). Not frozen; it waits for Codex.
 - No GitHub connector exists in claude.ai, so dashboard CI stays a snapshot.
+
+### 2026-10-21 — robot / integration — Review follow-ups for T6/T7; dashboard extended (20:15 Thai time)
+- `claude/robot/bridge-guards`:
+  - `wheel_commands()` returns 0 for NaN/inf input. Before, `int(NaN)` would have raised every tick.
+  - `turn_dir` is treated as a sign only.
+  - The Arena 2 scorer allows only the agent's own `experiments/arena/entries/<agent>.md`.
+  - 2 new tests; `check.py` passes 32 tests.
+- Dashboard "Follower Test Bench" (https://claude.ai/artifact/JmYTWLwJiiPDRKiG2L1pdS) updated:
+  - Fixed-bridge rows for the combined code.
+  - A LiDAR view from the curve_left/fixed bag, synced to the replay.
+  - A robot speed chart.
+  - CI snapshot with 36 runs; 30 unit tests.
+  - There is no GitHub connector in claude.ai, so CI stays a snapshot.
