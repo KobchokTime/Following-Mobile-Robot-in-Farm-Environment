@@ -15,7 +15,10 @@ class FollowStopNode(Node):
         self.declare_parameter('p_fused_threshold', 0.6)
 
         # motion
-        self.declare_parameter('linear_gain', 0.55)
+        # The bridge caps the wheel command at 40 RPM. This gain lets the follower
+        # reach that cap when a moving target starts to pull away, instead of
+        # settling at a large steady-state gap.
+        self.declare_parameter('linear_gain', 5.0)
         self.declare_parameter('max_linear_speed', 3.5)
 
         # init dist

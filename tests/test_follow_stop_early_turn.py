@@ -151,6 +151,15 @@ def _load_follow_stop():
 
 
 class FollowStopEarlyTurnTests(unittest.TestCase):
+    def test_controller_drives_strongly_enough_to_close_gap(self):
+        node = _load_follow_stop().FollowStopNode()
+        message = _Float32MultiArray()
+        message.data = [320.0, 240.0, 0.8, 4.0, 0.9, 0.9, 0.9, 10.0]
+
+        node.cb_fused(message)
+
+        self.assertAlmostEqual(node.pub.messages[-1].linear.x, 0.9)
+
     def test_controller_turns_before_edge_confidence_drops(self):
         node = _load_follow_stop().FollowStopNode()
         publisher = node.pub
