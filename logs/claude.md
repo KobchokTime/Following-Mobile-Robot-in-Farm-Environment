@@ -278,3 +278,17 @@ Earlier history: `history-2026-10-16.md`.
   Seeds 1 and 2 give the same result; Gazebo agrees (final gap 0.55 m). Write-up in
   `experiments/arena/entries/claude.md`.
 - `check.py` PASS (22 tests). Not merged into `claude/workspace` until the round is judged.
+
+### 2026-10-21 — research / robot — Arena 1 judged; combined fix chosen
+- Re-ran both entries with the same script: 3 full runs each, alternating. Codex scored 99.43 and
+  Claude 99.41, so **Codex wins under the frozen rules**.
+- Robustness check on `curve_left`/`diff_drive`, not scored:
+  - Claude: 0/18 twin failures, 0/5 Gazebo.
+  - Codex: 1/16 twin failures, 2/4 Gazebo. These depend on timing.
+- The user chose option B, combining the two. `claude/robot/sector-association-combined` (`e6587fd`)
+  is Claude's entry plus Codex's early-turn controller change and its test.
+  - Result: mean score 99.42, 0/11 twin failures, 0/4 Gazebo failures, mean bearing 7.4°, no
+    oscillation.
+  - `check.py` passes with 23 tests.
+- Results and lessons for Arena 2 are in `experiments/arena/2026-10-20_sector-association.md`.
+  The combined branch is merged into `claude/workspace`; the entry branches stay unmerged.
