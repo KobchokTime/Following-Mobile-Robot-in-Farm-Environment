@@ -6,10 +6,10 @@ and review threads in [`DISCUSSION.md`](DISCUSSION.md).
 
 ## Integration lock
 
-- **Current owner:** none
-- **Status:** ready
-- **Files being edited:** none
-- **Last updated:** 2026-10-20 by Codex
+- **Current owner:** Claude Code (integration)
+- **Status:** in progress — Arena 1 verdict integration (merge `claude/workspace` @ `7d400bb`)
+- **Files being edited:** `HANDOFF.md`, `DISCUSSION.md`, `logs/claude.md` and the merge of `claude/workspace`
+- **Last updated:** 2026-10-21 by Claude Code
 
 ## Branches
 
