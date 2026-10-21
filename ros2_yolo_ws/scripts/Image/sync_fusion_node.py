@@ -25,6 +25,76 @@ def nearest_sector(bearing, sector_angles):
     return min(range(len(sector_angles)), key=lambda i: abs(sector_angles[i] - bearing))
 
 
+def parse_yolo_detection(data):
+    """Return the legacy detection fields and optional clothing chroma."""
+    if len(data) < 3:
+        return None
+    cx, cy, sector_id = data[:3]
+    cb, cr = (data[3], data[4]) if len(data) >= 5 else (None, None)
+    return cx, cy, sector_id, cb, cr
+
+
+class TargetSelector:
+    """Lock onto the initial near, forward person and associate later detections to it."""
+
+    def __init__(self, image_width=640, camera_hfov_deg=70.0,
+                 init_dist_min=0.5, init_dist_max=1.0):
+        self.image_width = image_width
+        self.camera_hfov_deg = camera_hfov_deg
+        self.init_dist_min = init_dist_min
+        self.init_dist_max = init_dist_max
+        self.last_bearing = None
+        self.last_dist = None
+        self.last_time = None
+        self.last_chroma = None
+
+    @staticmethod
+    def _angle_delta(a, b):
+        return math.atan2(math.sin(a - b), math.cos(a - b))
+
+    def consider(self, cx, dist, stamp, cb=None, cr=None):
+        """Accept and remember a target candidate; reject detections of other people."""
+        if not math.isfinite(float(dist)):
+            return False
+        bearing = camera_bearing_rad(cx, self.image_width, self.camera_hfov_deg)
+        chroma = (float(cb), float(cr)) if cb is not None and cr is not None else None
+
+        if self.last_time is None:
+            if not self.init_dist_min <= dist <= self.init_dist_max:
+                return False
+            self._remember(bearing, dist, stamp, chroma)
+            return True
+
+        dt = max(0.0, stamp - self.last_time)
+        # Allow plausible motion between camera callbacks, but don't let a long loss
+        # gradually turn every bystander into a valid association.
+        bearing_gate = min(0.50, 0.15 + 0.8 * dt)
+        range_gate = min(0.75, 0.4 + 0.4 * dt)
+        if abs(self._angle_delta(bearing, self.last_bearing)) > bearing_gate:
+            return False
+        if abs(dist - self.last_dist) > range_gate:
+            return False
+        if self.last_chroma is not None and chroma is not None:
+            color_delta = math.hypot(chroma[0] - self.last_chroma[0],
+                                     chroma[1] - self.last_chroma[1])
+            if color_delta > 45.0:
+                return False
+
+        self._remember(bearing, dist, stamp, chroma)
+        return True
+
+    def _remember(self, bearing, dist, stamp, chroma):
+        self.last_bearing = bearing
+        self.last_dist = float(dist)
+        self.last_time = float(stamp)
+        if chroma is not None:
+            if self.last_chroma is None:
+                self.last_chroma = chroma
+            else:
+                self.last_chroma = tuple(0.8 * old + 0.2 * new
+                                         for old, new in zip(self.last_chroma, chroma))
+
+
 class SyncFusionNode(Node):
     def __init__(self):
         super().__init__('sync_fusion_node')
@@ -46,6 +116,7 @@ class SyncFusionNode(Node):
         self.camera_hfov_deg = float(self.get_parameter('camera_hfov_deg').value)
         self.image_width = int(self.get_parameter('image_width').value)
         self.lidar_angles = []  # centre angle of each LiDAR sector, robot frame, left positive
+        self.target_selector = TargetSelector(self.image_width, self.camera_hfov_deg)
 
         # ---------- buffers ----------
         self.buf_yolo = deque()
@@ -93,11 +164,13 @@ class SyncFusionNode(Node):
 
     def cb_yolo(self, msg):
         t = self.now_sec()
-        if len(msg.data) < 3:
+        detection = parse_yolo_detection(msg.data)
+        if detection is None:
             return
-        cx, cy, sector_id = msg.data[:3]
-        self.buf_yolo.append((t, {'cx': cx, 'cy': cy, 'sector_id': sector_id}))
-        self.try_sync_from_yolo(t, cx, cy, sector_id)
+        cx, cy, sector_id, cb, cr = detection
+        self.buf_yolo.append((t, {'cx': cx, 'cy': cy, 'sector_id': sector_id,
+                                  'cb': cb, 'cr': cr}))
+        self.try_sync_from_yolo(t, cx, cy, sector_id, cb, cr)
 
     def cb_lidar(self, msg):
         t = self.now_sec()
@@ -108,7 +181,7 @@ class SyncFusionNode(Node):
     def cb_angles(self, msg):
         self.lidar_angles = list(msg.data)
 
-    def try_sync_from_yolo(self, ty, cx, cy, sector_id):
+    def try_sync_from_yolo(self, ty, cx, cy, sector_id, cb=None, cr=None):
         if not self.buf_lidar or not self.lidar_angles:
             return
 
@@ -135,6 +208,11 @@ class SyncFusionNode(Node):
         # ✅ skip inf distance
         if not math.isfinite(dist):
             self.get_logger().debug(f"Skip frame: invalid LiDAR dist in sector {sector_id}")
+            return
+
+        if not self.target_selector.consider(cx, dist, ty, cb, cr):
+            self.get_logger().debug(
+                f"Skip non-target detection: cx={cx}, dist={dist:.2f}m, chroma=({cb}, {cr})")
             return
 
         dt_ms = best_dt * 1000.0

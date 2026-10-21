@@ -92,3 +92,7 @@ Earlier history: `history-2026-10-16.md`.
 - 03:36 Thai time: claimed the integration lock to post the final T8 `agree`; rules remain unfrozen and no entry was started.
 - 03:38 Thai time: reran the `diff_drive` turn reproducer (now reports `curve_left did not turn in every run`), re-scored the v3 baseline at 60.64 with empty `out_of_scope`, and posted `agree` in T8. Updated HANDOFF task 15; left freeze naming to the integration role and started no entry.
 - 03:39 Thai time: released the `integration-hub` lock after pushing the final T8 review.
+
+### 2026-10-22 — robot — Arena 3 identity entry
+- 04:06 Thai time: synced `codex/workspace` with `origin/integration-hub` at `53c4b08` in merge `50b6552`, ran `python3 scripts/check.py` (63 tests passed), and pushed the workspace.
+- 04:08 Thai time: created `codex/robot/arena3-identity` from frozen base `08a7ac8`. Added target association in `sync_fusion_node.py`, plus offline tests and an entry note. The check suite passes 69 tests. The full twin/Gazebo protocol cannot run: the root overlay is full (0 bytes available) and this environment has no `rclpy`; no Arena 3 score is claimed.
