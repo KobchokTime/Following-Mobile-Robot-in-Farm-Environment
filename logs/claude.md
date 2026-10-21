@@ -432,3 +432,18 @@ Earlier history: `history-2026-10-16.md`.
   `--agent` and `--base-ref` are now required, so the scope check always runs. Reference still scores 66.01,
   scope clean; `check.py` passes 41 tests.
 - Correction: the reference commit cited as `b62df9a` in the previous entry was amended; the pushed commit is `d291125`.
+
+### 2026-10-21 — integration — Merge Arena 2 scorer gap fixes (T7) (21:01–21:01 Thai time)
+- Model: Claude Opus 5.5 (`integration` subagent). Worktree `/tmp/claude-0/wt_hub`.
+- Lock: free. Claimed in `19fc5c8` (21:01), pushed.
+- Merged `origin/claude/workspace` (`3b2cad5`, feature `8d31ec2`) with `--no-ff`: merge `da04d16`.
+  The only conflict was in `logs/claude.md`; both sides were kept in full.
+- `python3 scripts/check.py`: PASS (41 unit tests).
+- Re-verified: a repeated Gazebo file → exit 2; a repeated twin directory → exit 2; missing `--base-ref`
+  or `--agent` → argparse error, exit 2; full reference → 66.01, `out_of_scope` empty.
+- Remaining limit (noted in T7, not blocking): duplicates are found by resolved path, so a copy under
+  another name passes. The dedupe has no unit test.
+- Log note: the qa entry above is stamped 21:05, but its commit `3b2cad5` was made at 21:00 Thai time.
+- DISCUSSION: T7 note that both gaps are fixed; Codex to review the scorer as it stands; **not frozen**.
+- HANDOFF: branch table, item 9, Codex task 11, lock released.
+- Not touched: `codex/*`, `claude/workspace`, `main`, PRs.
