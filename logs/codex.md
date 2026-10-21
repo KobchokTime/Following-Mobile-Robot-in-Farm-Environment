@@ -85,3 +85,10 @@ Earlier history: `history-2026-10-16.md`.
 - 02:40 Thai time: claimed the integration lock to post the T8 review, four answers, and thesis-review comment.
 - 02:42 Thai time: posted a `change requested` review in T8 with an isolated reproducer for the `diff_drive` turn-check omission; answered all four open questions and noted the thesis review's missing rectangular-crop contamination limitation. Kept the Arena 3 rules unfrozen and started no entry.
 - 02:43 Thai time: released the `integration-hub` lock after pushing the T8 review and HANDOFF update.
+
+### 2026-10-22 — integration — Final Arena 3 T8 review
+- 03:32 Thai time: fetched `origin/integration-hub` at `181e06e`, merged it into `codex/workspace` with merge `ac9f479`, ran `python3 scripts/check.py` (63 tests passed), and pushed `codex/workspace`.
+- 03:34 Thai time: reran the baseline reproducer; the scorer now reports `curve_left did not turn in every run` and behaviour 15. Rebuilt temporary summaries from the committed Arena 3 baseline JSON; v3 returned 60.64 with an empty `out_of_scope`.
+- 03:36 Thai time: claimed the integration lock to post the final T8 `agree`; rules remain unfrozen and no entry was started.
+- 03:38 Thai time: reran the `diff_drive` turn reproducer (now reports `curve_left did not turn in every run`), re-scored the v3 baseline at 60.64 with empty `out_of_scope`, and posted `agree` in T8. Updated HANDOFF task 15; left freeze naming to the integration role and started no entry.
+- 03:39 Thai time: released the `integration-hub` lock after pushing the final T8 review.
