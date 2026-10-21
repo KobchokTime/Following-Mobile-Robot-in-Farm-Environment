@@ -20,7 +20,7 @@ Scoring, 100 points, everything on the `fixed` bridge (the real bridge with angu
   agent's log, or a protected file means 0 points.
 
 The minimum protocol is enforced before scoring (T7 review): at least 3 twin repeats with distinct
-seeds, each holding every scenario on every bridge mode exactly once, and at least 2 Gazebo
+integer seeds, each holding every scenario on every bridge mode exactly once, and at least 2 Gazebo
 `curve_left`/`fixed` runs, each from a different file. An incomplete input set is not scored; the
 scorer exits with code 2. `--agent` and `--base-ref` are required, so the scope check always runs.
 """
@@ -75,7 +75,9 @@ def validate(twin_runs: list, gazebo_runs: list) -> list:
             dupes = len(got) - len(set(got))
             problems.append(f"twin repeat {i}: missing {missing}, unexpected {extra}, duplicates {dupes}")
         run_seeds = {r.get("seed") for r in run}
-        if len(run_seeds) != 1:
+        if any(not isinstance(x, int) or isinstance(x, bool) for x in run_seeds):
+            problems.append(f"twin repeat {i}: every row needs an integer seed, got {sorted(map(str, run_seeds))}")
+        elif len(run_seeds) != 1:
             problems.append(f"twin repeat {i}: expected one seed, got {sorted(map(str, run_seeds))}")
         seeds.extend(run_seeds)
     if len(set(seeds)) != len(seeds):

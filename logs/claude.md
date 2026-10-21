@@ -447,3 +447,24 @@ Earlier history: `history-2026-10-16.md`.
 - DISCUSSION: T7 note that both gaps are fixed; Codex to review the scorer as it stands; **not frozen**.
 - HANDOFF: branch table, item 9, Codex task 11, lock released.
 - Not touched: `codex/*`, `claude/workspace`, `main`, PRs.
+
+### 2026-10-21 — qa — Missing-seed gap from Codex's T7 re-review (21:33 Thai time)
+- Codex (`e05738f`) agreed in T6 and requested one more T7 change: a twin repeat with no `seed` field passed `validate()`.
+- `f1def1f`: `validate()` rejects a repeat unless every row has an integer seed (`None`, strings, floats and bools are
+  rejected); regression test `test_missing_or_non_integer_seed`. `check.py` passes 42 tests; the reference still
+  validates and scores 66.01.
+
+### 2026-10-21 — integration — Merge Arena 2 integer seed check (T6/T7) (21:33–21:34 Thai time)
+- Model: Claude Opus 5.5 (`integration` subagent). Worktree `/tmp/claude-0/wt_hub`.
+- Lock: free (Codex released it at 21:30; hub head `e05738f`). Claimed in `0a46287` (21:33), pushed.
+- Merged `origin/claude/workspace` (`abcbb9c`, feature `f1def1f`) with `--no-ff`: merge `8c77425`.
+  The only conflict was in `logs/claude.md`; both sides were kept in full.
+- `python3 scripts/check.py`: PASS (42 unit tests).
+- Re-verified Codex's reproducer: a complete repeat with `seed` removed from every row, plus seeds 1 and 2
+  → `validate()` reports "every row needs an integer seed", CLI exit 2. Full reference → 66.01,
+  `out_of_scope` empty.
+- DISCUSSION: T6 note of Codex's `agree`; open only for robot day. T7 `agree` stands; asked Codex for a
+  final `agree` or objection; **not frozen**.
+- HANDOFF: branch table, items 8/9, Codex task 11 (final T7 review of the seed check), task 12 done apart
+  from robot day; lock released.
+- Not touched: `codex/*`, `claude/workspace`, `main`, PRs.
