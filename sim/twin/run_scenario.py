@@ -63,14 +63,14 @@ def run_one(name: str, bridge_mode: str, out_root: Path, seed: int, record_bag: 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--scenario", default="all", help=f"one of {sorted(SCENARIOS)} or 'all'")
-    ap.add_argument("--bridge-mode", default="current", choices=["current", "diff_drive", "both"])
+    ap.add_argument("--bridge-mode", default="current", choices=["current", "fixed", "diff_drive", "both", "all"])
     ap.add_argument("--out", default="sim_runs", type=Path)
     ap.add_argument("--seed", default=0, type=int)
     ap.add_argument("--record-bag", action="store_true", help="also record a sqlite3 rosbag2")
     args = ap.parse_args()
 
     names = sorted(SCENARIOS) if args.scenario == "all" else [args.scenario]
-    modes = ["current", "diff_drive"] if args.bridge_mode == "both" else [args.bridge_mode]
+    modes = {"both": ["current", "diff_drive"], "all": ["current", "fixed", "diff_drive"]}.get(args.bridge_mode, [args.bridge_mode])
     results = [run_one(n, m, args.out, args.seed, args.record_bag) for n in names for m in modes]
     (args.out / "summary.json").write_text(json.dumps(results, indent=2) + "\n", encoding="utf-8")
 

@@ -31,7 +31,7 @@ PERSON_RADIUS_M = 0.2
 class RobotParams:
     wheel_radius_m: float = 0.085  # assumption: not measured on the real chassis yet
     track_width_m: float = 0.40  # assumption: not measured on the real chassis yet
-    bridge_mode: str = "current"  # "current" (linear only) or "diff_drive"
+    bridge_mode: str = "current"  # "current" (linear only), "fixed" (bridge with angular.z) or "diff_drive"
     speed_gain: float = 40.0  # zlac_joystick_bridge.py SPEED_GAIN
     max_cmd_rpm: float = 40.0  # zlac_joystick_bridge.py MAX_CMD
     cmd_timeout_s: float = 1.0  # zlac_joystick_bridge.py TIMEOUT
@@ -87,6 +87,13 @@ def bridge_rpm(r: RobotParams, cmd: Tuple[float, float], age_s: Optional[float])
     if r.bridge_mode == "current":
         c = max(-r.max_cmd_rpm, min(r.max_cmd_rpm, lin * r.speed_gain))
         return c, c  # angular.z is ignored by the current bridge
+    if r.bridge_mode == "fixed":
+        # zlac_joystick_bridge.py after angular.z support: same 40-RPM-per-unit gain as "current",
+        # differential mix, both wheels scaled together at max_cmd_rpm (turn_dir = +1).
+        turn = ang * r.track_width_m / 2.0
+        left, right = (lin - turn) * r.speed_gain, (lin + turn) * r.speed_gain
+        scale = max(1.0, abs(left) / r.max_cmd_rpm, abs(right) / r.max_cmd_rpm)
+        return left / scale, right / scale
     if r.bridge_mode == "diff_drive":
         to_rpm = 60.0 / (2.0 * math.pi * r.wheel_radius_m)
         left = (lin - ang * r.track_width_m / 2.0) * to_rpm

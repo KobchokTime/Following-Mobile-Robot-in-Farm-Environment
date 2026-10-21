@@ -20,6 +20,30 @@ FORWARD_DIR = 1.0
 
 TIMEOUT = 1.0  # วินาที: ถ้าไม่ได้ cmd_vel ใหม่เกินนี้ → set vel = 0
 
+# Turning (angular.z). Defaults below; each is also a ROS parameter of the node.
+USE_ANGULAR = True     # False = old behaviour (linear.x only)
+TRACK_WIDTH_M = 0.40   # distance between the wheels; not measured on this chassis yet
+TURN_DIR = 1.0         # set -1.0 if a positive angular.z spins the robot clockwise
+
+
+def wheel_commands(linear, angular, speed_gain=SPEED_GAIN, max_cmd=MAX_CMD, track_width=TRACK_WIDTH_M,
+                   forward_dir=FORWARD_DIR, turn_dir=TURN_DIR, use_angular=USE_ANGULAR):
+    """Return the (0x2088, 0x2089) register values for a /cmd_vel.
+
+    Differential drive, angular.z positive = counter-clockwise (REP-103). Both wheels are
+    scaled down together when one would pass max_cmd, so a turn keeps its shape.
+    Channels and signs follow the forward mapping the joystick-tested bridge already used
+    (forward: 0x2088 negative, 0x2089 positive) and config/motor_wheel_calibration.md
+    (0x2088 drives the physical right wheel). With angular = 0 the result is the same as
+    before this change.
+    """
+    turn = turn_dir * angular * track_width / 2.0 if use_angular else 0.0
+    left = forward_dir * (linear - turn) * speed_gain
+    right = forward_dir * (linear + turn) * speed_gain
+    scale = max(1.0, abs(left) / max_cmd, abs(right) / max_cmd)
+    left, right = left / scale, right / scale
+    return -right, left
+
 # ============== ZLAC DRIVER ===============
 class ZLAC8015D:
     def __init__(self, port, sid, baud):
@@ -65,6 +89,12 @@ class ZLAC8015D:
 class DriveBridge(Node):
     def __init__(self):
         super().__init__('zlac_drive_bridge')
+        self.declare_parameter('use_angular', USE_ANGULAR)
+        self.declare_parameter('track_width_m', TRACK_WIDTH_M)
+        self.declare_parameter('turn_dir', TURN_DIR)
+        self.use_angular = bool(self.get_parameter('use_angular').value)
+        self.track_width = float(self.get_parameter('track_width_m').value)
+        self.turn_dir = float(self.get_parameter('turn_dir').value)
         self.zlac = ZLAC8015D(PORT, SLAVE_ID, BAUD)
         self.zlac.enable_velocity()
 
@@ -79,21 +109,16 @@ class DriveBridge(Node):
 
     def cmd_callback(self, msg: Twist):
         linear = msg.linear.x
-        # ยังไม่ใช้ angular.z เอาให้วิ่งตรงก่อน
-        cmd = FORWARD_DIR * linear * SPEED_GAIN
-
-        # clamp ค่า
-        cmd = max(min(cmd, MAX_CMD), -MAX_CMD)
-
-        # ให้ behavior ตรงกับตอนใช้จอย:
-        # เดินหน้า → ล้อซ้ายติดลบ / ล้อขวาติดบวก
-        self.left  = -cmd
-        self.right =  cmd
+        angular = msg.angular.z
+        # self.left / self.right are the values for registers 0x2088 / 0x2089 (see wheel_commands)
+        self.left, self.right = wheel_commands(
+            linear, angular, track_width=self.track_width,
+            turn_dir=self.turn_dir, use_angular=self.use_angular)
 
         self.last_cmd_time = time.time()
 
         self.get_logger().info(
-            f"[CMD] lin={linear:.2f} → L={self.left:.2f} R={self.right:.2f}"
+            f"[CMD] lin={linear:.2f} ang={angular:.2f} → 0x2088={self.left:.2f} 0x2089={self.right:.2f}"
         )
 
     def update_loop(self):
