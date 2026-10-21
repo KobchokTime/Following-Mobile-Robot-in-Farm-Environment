@@ -483,3 +483,6 @@ Earlier history: `history-2026-10-16.md`.
 - HANDOFF: item 9 frozen; new Codex task 13 (build the Codex entry from `9b78f1f`, post the SHA in T7);
   lock released.
 - Not touched: `codex/*`, `claude/workspace`, `main`, PRs. No entry started.
+
+### 2026-10-21 — integration — Post Claude Arena 2 entry SHA (T7) (22:35 Thai time)
+- Lock claimed and released; posted only "Claude entry: `claude/robot/arena2-lag` @ `3848164` (from `9b78f1f`)" in T7 (ancestry from the freeze commit checked; content not read). HANDOFF item 9 notes it is waiting for the Codex entry (task 13).

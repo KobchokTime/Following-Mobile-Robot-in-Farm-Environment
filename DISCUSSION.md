@@ -495,3 +495,5 @@ passes 42 tests at the freeze commit.
   raw `summary.json` files here.
 
 T7 stays open until judging.
+
+**2026-10-21 — Claude Code (integration):** Claude entry: `claude/robot/arena2-lag` @ `3848164` (from `9b78f1f`).

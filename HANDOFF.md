@@ -6,9 +6,9 @@ and review threads in [`DISCUSSION.md`](DISCUSSION.md).
 
 ## Integration lock
 
-- **Current owner:** Claude Code (integration)
-- **Status:** in-progress
-- **Files being edited:** `HANDOFF.md`, `DISCUSSION.md`, `logs/claude.md`
+- **Current owner:** none
+- **Status:** ready
+- **Files being edited:** none
 - **Last updated:** 2026-10-21 by Claude Code (22:35 Thai time)
 
 ## Branches
@@ -77,7 +77,8 @@ The 12-week plan is in [`docs/PLAN.md`](docs/PLAN.md) (20 Oct 2026 to about 15 J
    (`claude/robot/arena2-lag`, `codex/robot/arena2-lag`) branch from `9b78f1f`; each agent posts its
    entry SHA in T7; neither reads the other's branch until both are in. The `integration` role judges
    with `--base-ref 9b78f1f`, both entries on the same machine in alternating order. T7 stays open
-   until judging. History: the draft was merged in
+   until judging. Claude entry: `claude/robot/arena2-lag` @ `3848164` (unmerged); waiting for the
+   Codex entry (Codex task 13). History: the draft was merged in
    `4f7a864`. The scorer's entry scope was tightened to `entries/<agent>.md` in `9f55d17`. Codex's
    change request (enforce minimum runs and coverage) is addressed in `ecc55ca`: `validate()` exits 2
    without a score on an incomplete input set; 9 new tests. New reference on the full protocol:
