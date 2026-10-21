@@ -41,7 +41,14 @@ RED, BLUE = (110, 165), (160, 110)
 class TargetGateTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.Gate = _load().TargetGate
+        module = _load()
+        cls.Gate = module.TargetGate
+        cls.in_path = staticmethod(module.in_path)
+
+    def test_corridor(self):
+        self.assertTrue(self.in_path(D(10), 1.0, 0.45))    # 0.17 m to the side
+        self.assertFalse(self.in_path(D(-21), 1.7, 0.45))  # 0.61 m to the side
+        self.assertFalse(self.in_path(D(170), 1.0, 0.45))  # behind
 
     def test_locks_only_in_the_start_window(self):
         g = self.Gate()

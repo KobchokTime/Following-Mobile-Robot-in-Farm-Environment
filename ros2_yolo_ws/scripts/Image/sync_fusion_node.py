@@ -25,6 +25,11 @@ def nearest_sector(bearing, sector_angles):
     return min(range(len(sector_angles)), key=lambda i: abs(sector_angles[i] - bearing))
 
 
+def in_path(bearing, rng, half_width_m):
+    """True if a return at (bearing, range) lies ahead within the robot's driving corridor."""
+    return rng * math.cos(bearing) > 0.0 and abs(rng * math.sin(bearing)) <= half_width_m
+
+
 class TargetGate:
     """Keeps one person as the target when several are detected (Arena 3).
 
@@ -120,6 +125,10 @@ class SyncFusionNode(Node):
         # Target gate (Arena 3): publish only the person being followed
         self.declare_parameter('target_gate', True)
         self.declare_parameter('use_chroma', True)
+        # Someone else in the corridor and nearer than the target sets the distance the controller sees
+        self.declare_parameter('path_half_width_m', 0.7)
+        self.declare_parameter('path_hold_s', 0.5)
+        self.declare_parameter('path_margin_m', 0.4)  # treat them as this much nearer, so the robot gives way early
 
         self.max_dt = float(self.get_parameter('max_dt').value)
         self.buffer_sec = float(self.get_parameter('buffer_sec').value)
@@ -131,6 +140,11 @@ class SyncFusionNode(Node):
         self.use_gate = bool(self.get_parameter('target_gate').value)
         self.use_chroma = bool(self.get_parameter('use_chroma').value)
         self.gate = TargetGate()
+        self.path_half_width = float(self.get_parameter('path_half_width_m').value)
+        self.path_hold = float(self.get_parameter('path_hold_s').value)
+        self.path_margin = float(self.get_parameter('path_margin_m').value)
+        self.path_block = None  # (time, range) of the latest other person in the corridor
+        self.last_target = None  # (cx, cy, sector_id) last published for the target
 
         # ---------- buffers ----------
         self.buf_yolo = deque()
@@ -195,6 +209,12 @@ class SyncFusionNode(Node):
     def cb_angles(self, msg):
         self.lidar_angles = list(msg.data)
 
+    def publish_synced(self, cx, cy, dist, sector_id, best_dt):
+        stamp = self.get_clock().now().nanoseconds * 1e-9
+        out = Float32MultiArray()
+        out.data = [float(cx), float(cy), float(dist), float(sector_id), float(best_dt * 1000.0), float(stamp)]
+        self.pub_synced.publish(out)
+
     def try_sync_from_yolo(self, ty, cx, cy, sector_id, chroma=None):
         if not self.buf_lidar or not self.lidar_angles:
             return
@@ -225,19 +245,24 @@ class SyncFusionNode(Node):
             return
 
         if self.use_gate and not self.gate.accept(ty, bearing, dist, chroma):
-            return  # another person, not the one being followed
+            # another person, not the one being followed: remember them only if they are in the way
+            if in_path(bearing, dist, self.path_half_width):
+                self.path_block = (ty, dist)
+                if self.last_target is not None:
+                    # They may hide the target, so give way now instead of waiting to see the target again
+                    cx_t, cy_t, sector_t = self.last_target
+                    self.publish_synced(cx_t, cy_t, max(0.0, dist - self.path_margin), sector_t, best_dt)
+            return
+        if self.path_block is not None and ty - self.path_block[0] <= self.path_hold:
+            dist = min(dist, max(0.0, self.path_block[1] - self.path_margin))  # give way to whoever is in it
 
-        dt_ms = best_dt * 1000.0
-        stamp = self.get_clock().now().nanoseconds * 1e-9
-
-        out = Float32MultiArray()
-        out.data = [float(cx), float(cy), float(dist), float(sector_id), float(dt_ms), float(stamp)]
-        self.pub_synced.publish(out)
+        self.last_target = (cx, cy, sector_id)
+        self.publish_synced(cx, cy, dist, sector_id, best_dt)
 
         self.sync_count += 1
         if self.sync_count % 10 == 0:
             self.get_logger().info(
-                f"[SYNC] cx={cx:.1f}, cy={cy:.1f}, dist={dist:.2f}m, sector={sector_id}, dt={dt_ms:.1f}ms"
+                f"[SYNC] cx={cx:.1f}, cy={cy:.1f}, dist={dist:.2f}m, sector={sector_id}, dt={best_dt * 1000.0:.1f}ms"
             )
 
 
