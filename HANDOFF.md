@@ -6,9 +6,9 @@ and review threads in [`DISCUSSION.md`](DISCUSSION.md).
 
 ## Integration lock
 
-- **Current owner:** Codex
-- **Status:** in-progress
-- **Files being edited:** `DISCUSSION.md`, `HANDOFF.md`, `logs/codex.md`
+- **Current owner:** none
+- **Status:** ready
+- **Files being edited:** none
 - **Last updated:** 2026-10-21 by Codex
 
 ## Branches
@@ -18,7 +18,7 @@ and review threads in [`DISCUSSION.md`](DISCUSSION.md).
 | `main` | Initial commit only. It receives `integration-hub` through a PR once the user approves. |
 | `integration-hub` | Has the robot recovery, Thesis Desk, quest sources, agent workflow, GUI smoke-test results, 12-week plan, Codex week-1 changes, the offline twin (`sim/`, twin CI, first simulated findings; merge `18c2303`), the Gazebo 3D twin (`sim/gazebo/`, `Dockerfile.gazebo`, `gazebo` CI job, cross-check; merge `cef985f`), the frozen Arena 1 rules, scorer and baseline (merge `d623baf`) and the Arena 1 results plus the combined sector-association fix `e6587fd` (merge `4652571`). `scripts/check.py` passes. |
 | `claude/workspace` | Merged into `integration-hub` at `7d400bb`, including the Arena 1 results and the combined fix `e6587fd`. The entry branch `claude/robot/arena-sector-association` (`929096d`) stays unmerged, for the record. |
-| `codex/workspace` | Synced through `integration-hub` `23551e3`; the Arena entry is a separate branch and remains unmerged. |
+| `codex/workspace` | Synced through `integration-hub` `1ad3470` (workspace merge `59471a6`); the original Arena entry remains separate and unmerged. |
 | *To delete* | `integration/robot-thesis-desk`, `codex/robot-backup-quarantine` and `codex/thesis-desk`. They are fully merged, but the cloud session's git proxy cannot delete branches. The user deletes them on GitHub, or Codex runs `git push origin --delete ...` from Windows. |
 
 ## Models on `integration-hub`
@@ -59,12 +59,12 @@ The 12-week plan is in [`docs/PLAN.md`](docs/PLAN.md) (20 Oct 2026 to about 15 J
    Codex builds `Dockerfile.gazebo`, runs `curve_left`/`diff_drive` (GUI via WSLg if possible),
    judges the field layout and reviews the `sim/twin/world.py` refactor. The new `gazebo` CI job had
    not reported at merge time; check its result.
-7. **T5** in `DISCUSSION.md`: Arena 1, sector association. Rules, scorer and baseline frozen in
+7. **T5 — resolved 2026-10-21** in `DISCUSSION.md`: Arena 1, sector association. Rules, scorer and baseline frozen in
    `d623baf`. Both entries are submitted and independently scored by Codex; Codex leads by 0.03 points.
    - **Judged 2026-10-21: Codex won on score** (mean 99.43 vs 99.41 over 3 re-runs each).
    - The user chose to combine the entries. The combined fix (`e6587fd`, Claude's bearing matching
      plus Codex's early turn) is merged to the hub (merge `4652571`). The entry branches stay unmerged.
-   - Waiting for Codex to reply `agree` in T5. Data: `experiments/arena/2026-10-20_sector-association.md`.
+   - Codex agreed after verifying the carried-over code/test and passing 23 tests plus 3 fresh twin runs (seeds 0–2). Data: `experiments/arena/2026-10-20_sector-association.md`.
 8. **Arena 2:** draft the rules using the Arena 1 lessons:
    - Score repeated runs and seeds in both the twin and Gazebo, and deduct points for failures.
    - Make the scorer enforce `--no-renames`, an own-log-only scope and the bridge rule.
