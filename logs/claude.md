@@ -307,3 +307,84 @@ Earlier history: `history-2026-10-16.md`.
   Arena 2 lessons. Asked Codex to agree and to cross-check `e6587fd`. T5 stays open.
 - HANDOFF: updated the Arena 1 status, added Codex task 8 to cross-check the combined fix, and added
   open item 8 to draft the Arena 2 rules. Released the lock.
+
+### 2026-10-21 — robot / research — Drive bridge turns; Arena 2 draft (19:20–20:10 Thai time)
+- User: "do all of it" (bridge fix, Arena 2 draft, dashboard additions, live CI).
+- `claude/robot/bridge-angular` (`594c434`): `zlac_joystick_bridge.py` now mixes `angular.z` in
+  `wheel_commands()`.
+  - Straight driving is identical to before; a test checks this.
+  - Both wheels are scaled together at MAX_CMD.
+  - New ROS parameters: `use_angular`, `track_width_m` (0.40 m, not measured) and `turn_dir`.
+  - Register signs follow the existing forward mapping and `config/motor_wheel_calibration.md`.
+    Spinning counter-clockwise writes negative to both registers. The joystick script suggests
+    the opposite, so check the direction once on robot day with the wheels lifted, and flip
+    `turn_dir` if needed.
+  - The twin's `fixed` bridge mode mirrors it, and a test checks that they agree.
+  - `--bridge-mode all` runs current, fixed and diff_drive.
+  - `check.py`: 30 tests pass.
+- Results (twin, 15 runs):
+  - curve_left with the fixed bridge now turns: final gap 0.79 m (current bridge 3.22 m),
+    travelled 5.45 m.
+  - Gazebo agrees on 2 seeds: final gap 0.75 m.
+  - Straight, stop_and_go and target_loss are unchanged.
+- Arena 2 draft (`claude/research/arena2-draft`): following lag on the fixed bridge, with a
+  multi-run scorer `sim/arena/score_entry_v2.py` that applies the Arena 1 lessons. The current code
+  scores 65.9/100 (lag 15.9/50). Not frozen; it waits for Codex.
+- No GitHub connector exists in claude.ai, so dashboard CI stays a snapshot.
+
+### 2026-10-21 — integration — Merge bridge angular.z and Arena 2 draft; open T6 and T7
+- Model: Claude Opus 5.5 (`integration` subagent). Worktree `/tmp/claude-0/hub-wt6`, removed at the end.
+- Lock: free (last released by Codex). Claimed in `09c8a43` (`handoff: claim bridge fix and Arena 2 draft`), pushed.
+- Merged `origin/claude/workspace` (`b36f31a`) into `integration-hub` with `--no-ff`: merge `4f7a864`.
+  There were no conflicts. `logs/claude.md` merged cleanly with no lines removed, and no Codex files
+  were touched.
+- `python3 scripts/check.py`: PASS (compile, 16 quest tasks, 30 unit tests).
+  `tests.test_drive_bridge_mixing` re-run on its own: 7/7 OK.
+- Bridge review (`zlac_joystick_bridge.py`):
+  - With `angular.z = 0`, the register values are identical to the old code, as floats and after
+    `int()`. Checked over 210,006 `linear.x` values, including the ±40 clamp, ±1e9, 1e300 and -0.0.
+  - `update_loop` timeout-to-zero, the ZLAC driver class, `destroy_node` and `main` are unchanged.
+  - Difference: `linear.x = ±inf` (or a non-finite `angular.z`) now gives NaN, so `int()` raises in
+    `update_loop`. The old code clamped ±inf to ±40. Follow-up for Claude's workspace: add a
+    `math.isfinite` guard.
+  - `track_width_m` and `turn_dir` are not range-checked.
+  - The calibration table's sign column and `Joystick.py`'s stick-left mapping both disagree with
+    the derived counter-clockwise sign. This is raised in T6.
+- Arena 2 scorer: `ALLOWED` admits all of `experiments/arena/entries/`, not only
+  `entries/<agent>.md`. Raised in T7; follow-up for Claude's workspace before the freeze.
+- DISCUSSION: opened T6 (drive bridge forwards angular.z) and T7 (Arena 2 draft: following lag),
+  both open with Codex as reviewer.
+- HANDOFF: added Codex tasks 9 (review T6) and 10 (review T7), a *Robot-day checklist* with the
+  lifted-wheel `turn_dir` check, and open items 8 (T6) and 9 (T7). Updated the branch table.
+  Released the lock.
+- Not touched: `codex/*`, `claude/workspace`, PRs, `main`.
+
+### 2026-10-21 — robot / integration — Review follow-ups for T6/T7; dashboard extended (20:15 Thai time)
+- `claude/robot/bridge-guards`:
+  - `wheel_commands()` returns 0 for NaN/inf input. Before, `int(NaN)` would have raised every tick.
+  - `turn_dir` is treated as a sign only.
+  - The Arena 2 scorer allows only the agent's own `experiments/arena/entries/<agent>.md`.
+  - 2 new tests; `check.py` passes 32 tests.
+- Dashboard "Follower Test Bench" (https://claude.ai/artifact/JmYTWLwJiiPDRKiG2L1pdS) updated:
+  - Fixed-bridge rows for the combined code.
+  - A LiDAR view from the curve_left/fixed bag, synced to the replay.
+  - A robot speed chart.
+  - CI snapshot with 36 runs; 30 unit tests.
+  - There is no GitHub connector in claude.ai, so CI stays a snapshot.
+
+### 2026-10-21 — integration — Merge bridge guard follow-ups (T6/T7)
+- Model: Claude Opus 5.5 (`integration` subagent). Worktree `/tmp/claude-0/hub-wt7`, removed at the end.
+- Lock: free. Claimed in `34503bb` (`handoff: claim bridge guard follow-ups`), pushed.
+- Merged `origin/claude/workspace` (`0b934e3`) with `--no-ff`: merge `9f55d17`. The only conflict
+  was in `logs/claude.md`; both sides were kept in full.
+- `python3 scripts/check.py`: PASS (compile, 16 quest tasks, 32 unit tests).
+- `wheel_commands()` with finite inputs is identical to the reviewed `4f7a864` version: 1,004,818 cases,
+  0 mismatches. These include `angular.z = ±0` over 100,007 `linear.x` values and a
+  `linear`/`angular` grid for `turn_dir`/`forward_dir` = ±1. `use_angular=False` is also identical.
+  NaN/±inf returns `(0, 0)`. Edge case noted in T6: `turn_dir = 0` now counts as +1, where it used to
+  disable turning.
+- `score_entry_v2.py`: `experiments/arena/entries/` was removed from `ALLOWED`; only
+  `entries/<agent>.md` is accepted.
+- DISCUSSION: replied in T6 and T7 that the follow-ups are merged. Both threads stay open for Codex.
+- HANDOFF: updated the branch table, open items 8 and 9 and the test count (32), and released the lock.
+- Not touched: `codex/*`, `claude/workspace`, PRs, `main`.

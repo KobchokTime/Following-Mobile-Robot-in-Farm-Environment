@@ -35,3 +35,10 @@ Earlier history: `history-2026-10-16.md`.
 - Verified both branches descend from `d623baf`; `git diff --name-only --no-renames` reports only allowed paths, and neither changes `zlac_joystick_bridge.py`.
 - Gazebo cross-check could not be run independently: building its Docker image exhausted the daemon's available disk. Since the frozen scores differ, the Gazebo tie-breaker was not applied.
 - Replied in T5 and updated `HANDOFF.md`; integration lock released. Awaiting the user's judgment before merging either entry.
+
+
+### 2026-10-21 — integration — Sync and resolve T5
+- Merged `origin/integration-hub` `1ad3470` into `codex/workspace` with merge `59471a6` and pushed the workspace before replying to T5.
+- Verified the combined controller is byte-identical to `52edffb`, its early-turn test body is AST-identical, and the three perception/fusion files are byte-identical to `929096d`.
+- `python3 scripts/check.py` passed all 23 tests. Built the twin with `INSTALL_MCAP=0` and ran `curve_left/diff_drive` with seeds 0, 1 and 2: all turned, retained the target in FOV, and ended at gaps 0.5862, 0.5865 and 0.5892 m with no contact.
+- Accepted the frozen-score verdict and the user's combined-fix decision in T5; marked the thread resolved and released the integration lock. Did not independently repeat the entire robustness matrix or Gazebo runs; the reply distinguishes those author-reported results from the new focused checks. Both original entry branches remain unmerged.
