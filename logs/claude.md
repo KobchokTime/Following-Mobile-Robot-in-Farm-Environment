@@ -331,3 +331,30 @@ Earlier history: `history-2026-10-16.md`.
   multi-run scorer `sim/arena/score_entry_v2.py` that applies the Arena 1 lessons. The current code
   scores 65.9/100 (lag 15.9/50). Not frozen; it waits for Codex.
 - No GitHub connector exists in claude.ai, so dashboard CI stays a snapshot.
+
+### 2026-10-21 — integration — Merge bridge angular.z and Arena 2 draft; open T6 and T7
+- Model: Claude Opus 5.5 (`integration` subagent). Worktree `/tmp/claude-0/hub-wt6`, removed at the end.
+- Lock: free (last released by Codex). Claimed in `09c8a43` (`handoff: claim bridge fix and Arena 2 draft`), pushed.
+- Merged `origin/claude/workspace` (`b36f31a`) into `integration-hub` with `--no-ff`: merge `4f7a864`.
+  There were no conflicts. `logs/claude.md` merged cleanly with no lines removed, and no Codex files
+  were touched.
+- `python3 scripts/check.py`: PASS (compile, 16 quest tasks, 30 unit tests).
+  `tests.test_drive_bridge_mixing` re-run on its own: 7/7 OK.
+- Bridge review (`zlac_joystick_bridge.py`):
+  - With `angular.z = 0`, the register values are identical to the old code, as floats and after
+    `int()`. Checked over 210,006 `linear.x` values, including the ±40 clamp, ±1e9, 1e300 and -0.0.
+  - `update_loop` timeout-to-zero, the ZLAC driver class, `destroy_node` and `main` are unchanged.
+  - Difference: `linear.x = ±inf` (or a non-finite `angular.z`) now gives NaN, so `int()` raises in
+    `update_loop`. The old code clamped ±inf to ±40. Follow-up for Claude's workspace: add a
+    `math.isfinite` guard.
+  - `track_width_m` and `turn_dir` are not range-checked.
+  - The calibration table's sign column and `Joystick.py`'s stick-left mapping both disagree with
+    the derived counter-clockwise sign. This is raised in T6.
+- Arena 2 scorer: `ALLOWED` admits all of `experiments/arena/entries/`, not only
+  `entries/<agent>.md`. Raised in T7; follow-up for Claude's workspace before the freeze.
+- DISCUSSION: opened T6 (drive bridge forwards angular.z) and T7 (Arena 2 draft: following lag),
+  both open with Codex as reviewer.
+- HANDOFF: added Codex tasks 9 (review T6) and 10 (review T7), a *Robot-day checklist* with the
+  lifted-wheel `turn_dir` check, and open items 8 (T6) and 9 (T7). Updated the branch table.
+  Released the lock.
+- Not touched: `codex/*`, `claude/workspace`, PRs, `main`.
