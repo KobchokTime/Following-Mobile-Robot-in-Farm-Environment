@@ -6,10 +6,10 @@ and review threads in [`DISCUSSION.md`](DISCUSSION.md).
 
 ## Integration lock
 
-- **Current owner:** Codex
-- **Status:** in-progress
-- **Files being edited:** `DISCUSSION.md`, `HANDOFF.md`, `logs/codex.md`
-- **Last updated:** 2026-10-21 by Codex (21:58 Thai time)
+- **Current owner:** none
+- **Status:** ready
+- **Files being edited:** none
+- **Last updated:** 2026-10-21 by Codex (21:59 Thai time)
 
 ## Branches
 
@@ -18,7 +18,7 @@ and review threads in [`DISCUSSION.md`](DISCUSSION.md).
 | `main` | Initial commit only. It receives `integration-hub` through a PR once the user approves. |
 | `integration-hub` | Has the robot recovery, Thesis Desk, quest sources, agent workflow, GUI smoke-test results, 12-week plan, Codex week-1 changes, the offline twin (`sim/`, twin CI, first simulated findings; merge `18c2303`), the Gazebo 3D twin (`sim/gazebo/`, `Dockerfile.gazebo`, `gazebo` CI job, cross-check; merge `cef985f`), the frozen Arena 1 rules, scorer and baseline (merge `d623baf`) the Arena 1 results plus the combined sector-association fix `e6587fd` (merge `4652571`), the drive bridge forwarding `angular.z` plus the Arena 2 draft (merge `4f7a864`, T6/T7), the bridge guard follow-ups (non-finite guard, `turn_dir` as a sign only, Arena 2 entry scope; merge `9f55d17`), and the Arena 2 scorer validation, full-protocol reference (66.0/100) and calibration reconciliation (merge `ecc55ca`, T6/T7), and the scorer gap fixes (duplicate inputs rejected, `--agent`/`--base-ref` required; merge `da04d16`), and the integer seed check (merge `8c77425`). `scripts/check.py` passes (42 tests). |
 | `claude/workspace` | Merged into `integration-hub` at `8c77425` (`abcbb9c`: integer seed check for T7). Before that at `da04d16` (`3b2cad5`: scorer gap fixes). Before that at `ecc55ca` (`16ac740`: Arena 2 scorer validation and calibration reconciliation). Before that at `9f55d17` (`0b934e3`: bridge guard follow-ups), and before that at `4f7a864` (`b36f31a`: bridge `angular.z`, Arena 2 draft), and before that at `7d400bb`, including the Arena 1 results and the combined fix `e6587fd`. The entry branch `claude/robot/arena-sector-association` (`929096d`) stays unmerged, for the record. |
-| `codex/workspace` | Synced through `integration-hub` `2026540` (workspace merge `0853b53`); the original Arena entry remains separate and unmerged. |
+| `codex/workspace` | Synced through `integration-hub` `e2a63cb` (workspace merge `5d24c3a`); the original Arena entry remains separate and unmerged. |
 | *To delete* | `integration/robot-thesis-desk`, `codex/robot-backup-quarantine` and `codex/thesis-desk`. They are fully merged, but the cloud session's git proxy cannot delete branches. The user deletes them on GitHub, or Codex runs `git push origin --delete ...` from Windows. |
 
 ## Models on `integration-hub`
@@ -80,8 +80,8 @@ The 12-week plan is in [`docs/PLAN.md`](docs/PLAN.md) (20 Oct 2026 to about 15 J
    to the rules as written. The two gaps found at merge time are fixed in `da04d16`: repeated inputs
    exit 2, and `--agent`/`--base-ref` are required. Codex reproduced 66.01 and passed all 41 tests,
    but found that `validate()` accepted a twin repeat with no seed field. Fixed in `8c77425`: every
-   twin row needs an integer seed (regression test added, 42 tests). Claude's `agree` stands; Codex's
-   final review is pending. **Not frozen**; the freeze commit is named in T7 only after both agents agree.
+   twin row needs an integer seed (regression test added, 42 tests). Codex's final `agree` is in T7.
+   **Not frozen**; the integration role names the freeze commit in T7. No Arena entry has started.
    The judge is the `integration` role.
 10. `integration-hub` → `main` (draft PR KobchokTime/Following-Mobile-Robot-in-Farm-Environment#2): needs every thread resolved and the user's approval.
 
@@ -128,7 +128,7 @@ Sync `codex/workspace` with `integration-hub` first. Read `docs/PLAN.md` and rep
     rejection of repeated inputs, required `--agent`/`--base-ref`, `tests/test_arena2_scorer.py`, and
     the 66.0 reference. *(Reviewed: objected to missing-seed acceptance; fixed in `8c77425`.)*
     **Now:** final T7 review of the integer seed check in `8c77425` (`validate()` and
-    `test_missing_or_non_integer_seed`). Reply `agree` or object in T7.
+    `test_missing_or_non_integer_seed`). *(Done: `agree`; reproducer now exits 2; 66.01 reference passes.)*
 12. **T6 calibration**: read the reconciliation section in `config/motor_wheel_calibration.md`
     (`ecc55ca`) and confirm in T6 whether it resolves your calibration point. *(Done, apart from robot day:
     Codex agreed the written calibration point is resolved; the lifted-wheel check remains.)*

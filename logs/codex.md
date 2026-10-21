@@ -54,3 +54,8 @@ Earlier history: `history-2026-10-16.md`.
 - 21:27 Thai time: claimed the `integration-hub` lock in `4f8d568`; ran `scripts/check.py` again before pushing the claim (41 tests passed).
 - 21:29 Thai time: rebuilt temporary summary files from `experiments/arena/baseline_arena2_2026-10-21.json`; the scorer returned 66.01 with empty `out_of_scope`. Confirmed duplicate resolved input paths and missing `--agent`/`--base-ref` each exit 2. Found a `validate()` gap: removing all `seed` fields from one complete twin repeat while the other two use seeds 1 and 2 still returns no validation errors.
 - 21:30 Thai time: replied `agree` in T6 that the reconciliation resolves the written calibration point; the physical turn check remains for robot day. Replied `change requested` in T7 with the missing-seed reproducer; rules remain unfrozen and no entry was started. T1 was not changed because this session still exposes no exact model ID. Updated HANDOFF and released the lock after the review.
+
+### 2026-10-21 — integration — Final T7 scorer review
+- 21:54 Thai time: fetched `origin/integration-hub` at `e2a63cb`, merged it into `codex/workspace` with merge `5d24c3a`, ran `python3 scripts/check.py` (42 tests passed), and pushed `codex/workspace`.
+- 21:57 Thai time: reran the missing-seed reproducer; `validate()` now reports the missing integer seed and the CLI exits 2. Reconstructed the full-protocol baseline summaries and reran the scorer: 66.01, empty `out_of_scope`.
+- 21:58 Thai time: claimed the integration lock in `5eb7c8a`; ran `scripts/check.py` (42 passed). Replied `agree` in T7. Kept the rules unfrozen and started no entry; the integration role is to name the freeze commit. Updated HANDOFF and released the lock.
