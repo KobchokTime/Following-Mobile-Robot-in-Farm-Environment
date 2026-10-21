@@ -29,7 +29,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-ALLOWED = ("ros2_yolo_ws/scripts/", "tests/", "experiments/arena/entries/")
+ALLOWED = ("ros2_yolo_ws/scripts/", "tests/")
 PROTECTED = ("ros2_yolo_ws/scripts/MAIN/Control/zlac_joystick_bridge.py",)
 LAG_SCENARIOS = ("straight", "stop_and_go", "curve_left")
 
@@ -44,8 +44,8 @@ def scope(base: str, head: str, agent: str) -> list:
     bad = []
     for line in out.splitlines():
         status, path = line.split("\t", 1)
-        own_log = path == f"logs/{agent}.md"
-        if path in PROTECTED or not (own_log or path.startswith(ALLOWED)):
+        own = path in (f"logs/{agent}.md", f"experiments/arena/entries/{agent}.md")
+        if path in PROTECTED or not (own or path.startswith(ALLOWED)):
             bad.append(f"{status} {path}")
     return bad
 

@@ -78,6 +78,13 @@ class BridgeMixingTest(unittest.TestCase):
         unclamped_ratio = (3.5 - 0.25 * 0.2) / (3.5 + 0.25 * 0.2)
         self.assertAlmostEqual(left / right, unclamped_ratio)
 
+    def test_non_finite_command_stops(self):
+        for lin, ang in ((float("inf"), 0.0), (float("-inf"), 0.0), (float("nan"), 0.0), (0.5, float("nan"))):
+            self.assertEqual(self.b.wheel_commands(lin, ang), (0.0, 0.0))
+
+    def test_turn_dir_is_a_sign_only(self):
+        self.assertEqual(self.b.wheel_commands(0.5, 0.25, turn_dir=2.0), self.b.wheel_commands(0.5, 0.25, turn_dir=1.0))
+
     def test_sim_fixed_mode_matches_the_bridge(self):
         r = RobotParams(bridge_mode="fixed")
         for linear, angular in ((0.5, 0.0), (0.5, 0.25), (0.0, -0.25), (3.5, 0.25), (-0.3, 0.1)):
