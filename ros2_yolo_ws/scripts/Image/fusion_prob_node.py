@@ -39,12 +39,18 @@ class FusionProbNode(Node):
         self.declare_parameter('lidar_weight', 0.3)
         self.declare_parameter('alpha_base', 0.7)
         self.declare_parameter('dt_ref', 0.33)  # ประมาณ 3 Hz (กล้อง)
+        # How much an off-centre target lowers camera confidence: P_C = exp(-k * dx^2).
+        # 0 = none. The previous fixed k=3 dropped P_fused below the controller's threshold
+        # exactly when the target was far enough off-centre for the controller to turn, so the
+        # follower could never turn toward it.
+        self.declare_parameter('center_penalty', 0.0)
 
         self.dist_max = float(self.get_parameter('dist_max').value)
         self.w_c = float(self.get_parameter('camera_weight').value)
         self.w_l = float(self.get_parameter('lidar_weight').value)
         self.alpha_base = float(self.get_parameter('alpha_base').value)
         self.dt_ref = float(self.get_parameter('dt_ref').value)
+        self.center_penalty = float(self.get_parameter('center_penalty').value)
 
         # ---------- Memory ----------
         self.prev_p_fused = 0.5
@@ -75,7 +81,7 @@ class FusionProbNode(Node):
         # ----------------------------------------------------
         frame_w = 640.0
         dx = abs(cx - frame_w / 2) / (frame_w / 2)
-        P_C = math.exp(-3 * dx ** 2)
+        P_C = math.exp(-self.center_penalty * dx ** 2)
 
         # ----------------------------------------------------
         # 2. LiDAR confidence (P_L)
