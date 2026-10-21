@@ -58,6 +58,15 @@ def score(rows: List[dict], target_distance_m: float = 0.5) -> dict:
         "turned": any(abs(r["robot"]["w"]) > 1e-3 for r in rows),
     }
 
+    # Share of the run (after the 3 s start) with the target in the camera's view and within 2 m:
+    # the robot is still following the right person.
+    later = [i for i, r in enumerate(rows) if r["t"] >= 3.0]
+    if later:
+        result["target_tracked_share"] = sum(abs(bearing[i]) <= 35.0 and gap[i] <= 2.0 for i in later) / len(later)
+    others = [n for n in rows[0]["people"] if n != target]
+    if others:
+        result["min_other_range_m"] = min(r["people"][n]["range_m"] for r in rows for n in others)
+
     start = _first(rows, lambda r: r["blackout"])
     if start is not None:
         after = [r for r in rows if r["t"] >= start["t"]]
