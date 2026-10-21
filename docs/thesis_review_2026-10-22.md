@@ -20,7 +20,8 @@ clothing colour in YCbCr. The **evidence** for them is weak, and the **code** do
 2. The "Bayesian tracking module" in chapter 3 does not exist in the code. The node with that role
    is a weighted average with smoothing, and it cannot detect a wrong person.
 3. Nothing selects **which** person to follow. Every detection is sent to the controller. In the
-   twin, a second person beside the target makes the robot follow that person and touch them.
+   twin, a second person beside the target makes the robot run into the target, then follow the
+   other person.
 4. The colour analysis shows only the target, so it says nothing about telling two people apart.
 5. Chapter 4 has no following results: no gap error, no ID-switch count, no success rate.
    Objectives 3–4 and problem statement 3 (multiple people) have no evidence. Chapter 5 is empty.
@@ -92,8 +93,11 @@ detections stop. Either the code must implement the model, or the thesis must de
 
   | Scenario | Result |
   |---|---|
-  | `side_by_side` | Follows the other person and comes within 0.24 m of them; ends 5.2 m from the target. |
+  | `side_by_side` | Mixing the other person's range (about 1.9 m) with the target's (0.8 m) makes the robot speed up and **drive into the standing target** (0.21 m centre to centre at t = 3 s). It then follows the other person and ends 5.2 m from the target. |
   | `stand_aside` | Turns towards a bystander and loses the target. |
+
+  The Arena 3 reference (current code, full protocol) passes 6 of 21 identity runs and scores
+  60.6/100; see `experiments/arena/2026-10-22_arena3-draft.md`.
 
 ### B4. The Kalman filter is reviewed (2.1.2) but not used
 
