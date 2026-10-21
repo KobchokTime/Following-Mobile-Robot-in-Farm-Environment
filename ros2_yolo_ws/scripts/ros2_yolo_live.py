@@ -4,7 +4,27 @@ from sensor_msgs.msg import Image
 from std_msgs.msg import Int32MultiArray
 from cv_bridge import CvBridge
 import cv2
+import numpy as np
 from ultralytics import YOLO
+
+
+def torso_chroma(frame_bgr, x1, y1, x2, y2):
+    """Median clothing chroma (Cb, Cr), 0-255 as in OpenCV's YCrCb, of the box's torso.
+
+    The torso is the middle half of the box width and 20-55 % of its height, which keeps
+    background, head and legs out. Returns (128, 128), neutral grey, for an empty region.
+    """
+    h, w = y2 - y1, x2 - x1
+    roi = frame_bgr[max(0, y1 + int(0.20 * h)):max(0, y1 + int(0.55 * h)),
+                    max(0, x1 + w // 4):max(0, x2 - w // 4)]
+    if roi.size == 0:
+        return 128, 128
+    b, g, r = (roi[..., i].astype(np.float32) for i in range(3))
+    y = 0.299 * r + 0.587 * g + 0.114 * b
+    cb = np.clip((b - y) * 0.564 + 128.0, 0, 255)
+    cr = np.clip((r - y) * 0.713 + 128.0, 0, 255)
+    return int(round(float(np.median(cb)))), int(round(float(np.median(cr))))
+
 
 class YoloROSNode(Node):
     def __init__(self):
@@ -22,7 +42,7 @@ class YoloROSNode(Node):
 
         # Pub เดิม (compat)
         self.centroid_pub = self.create_publisher(Int32MultiArray, '/target_centroid', 10)
-        # Pub ใหม่: [cx, cy, sector_id]
+        # Pub ใหม่: [cx, cy, sector_id, cb, cr]; cb/cr = clothing chroma of the torso (YCbCr)
         self.centroid_sector_pub = self.create_publisher(Int32MultiArray, '/target_centroid_sector', 10)
 
         self.get_logger().info('YOLO Node Started')
@@ -81,7 +101,8 @@ class YoloROSNode(Node):
 
                 # ---- Publish: centroid + sector ----
                 centroid_sector_msg = Int32MultiArray()
-                centroid_sector_msg.data = [cx, cy, sector_id]
+                cb, cr = torso_chroma(frame, x1, y1, x2, y2)
+                centroid_sector_msg.data = [cx, cy, sector_id, cb, cr]
                 self.centroid_sector_pub.publish(centroid_sector_msg)
 
                 # ---- Draw ----

@@ -13,6 +13,10 @@ linear command only, `cmd = clamp(linear_x * 40, +-40)` RPM per wheel, and zero
 after 1 s without a new `/cmd_vel`. A `diff_drive` mode also uses `angular.z`, to
 show what the follower would do once the bridge forwards turning commands.
 
+Each detection also carries the clothing chroma `(Cb, Cr)` that the thesis's appearance model
+uses (YCbCr, 0-255, 128 = grey). It is observed with noise, and shade pulls it towards grey. It
+comes from its own random stream, so adding it does not change any other simulated value.
+
 Frames: x forward, y left, yaw counter-clockwise (ROS REP-103). Image x grows to
 the right, so a person on the robot's left has a small `cx`.
 """
@@ -52,6 +56,7 @@ class SensorParams:
     detect_range_m: Tuple[float, float] = (0.3, 8.0)
     detect_dropout: float = 0.0
     centroid_noise_px: float = 2.0
+    chroma_noise: float = 3.0  # per-frame noise on observed Cb/Cr (0-255 units)
 
 
 @dataclass
@@ -59,6 +64,7 @@ class Person:
     name: str
     waypoints: List[Tuple[float, float, float]]  # (t_s, x_m, y_m), linear in between
     is_target: bool = False
+    clothing: Tuple[float, float] = (128.0, 128.0)  # (Cb, Cr) of the torso in full light
 
     def position(self, t: float) -> Tuple[float, float]:
         pts = self.waypoints
@@ -77,6 +83,24 @@ class Detection:
     cx: int
     cy: int
     sector_id: int
+    cb: int = 128
+    cr: int = 128
+
+
+def shade_factor(x: float, shade: Sequence[Tuple[float, float, float]]) -> float:
+    """Colour saturation at world x: 1.0 in full light, lower in the shade bands (x0, x1, factor)."""
+    return min([f for x0, x1, f in shade if x0 <= x < x1], default=1.0)
+
+
+def observe_clothing(people: Sequence["Person"], world_x: Dict[str, float], shade: Sequence[Tuple[float, float, float]],
+                     noise: float, rng: random.Random) -> Dict[str, Tuple[int, int]]:
+    """Observed (Cb, Cr) per person: shade pulls the chroma towards grey (128), plus noise."""
+    out = {}
+    for p in people:
+        f = shade_factor(world_x[p.name], shade)
+        cb, cr = (128.0 + f * (c - 128.0) + rng.gauss(0.0, noise) for c in p.clothing)
+        out[p.name] = (int(round(max(0.0, min(255.0, cb)))), int(round(max(0.0, min(255.0, cr)))))
+    return out
 
 
 def bridge_rpm(r: RobotParams, cmd: Tuple[float, float], age_s: Optional[float]) -> Tuple[float, float]:
@@ -121,7 +145,7 @@ def _ray_circle(angle: float, cx: float, cy: float, r: float) -> Optional[float]
 
 
 def project_detections(people: Dict[str, Tuple[float, float]], s: "SensorParams",
-                       rng: random.Random) -> List["Detection"]:
+                       rng: random.Random, chroma: Optional[Dict[str, Tuple[int, int]]] = None) -> List["Detection"]:
     """What ros2_yolo_live.py would publish for people at robot-frame positions."""
     f = (s.image_width / 2.0) / math.tan(math.radians(s.camera_hfov_deg) / 2.0)
     out = []
@@ -144,7 +168,8 @@ def project_detections(people: Dict[str, Tuple[float, float]], s: "SensorParams"
         cx = int(round(cx + rng.gauss(0.0, s.centroid_noise_px)))
         cx = max(0, min(s.image_width - 1, cx))
         sector = max(0, min(s.num_sectors - 1, (cx * s.num_sectors) // s.image_width))
-        out.append(Detection(name, cx, int(round(cy)), sector))
+        cb, cr = (chroma or {}).get(name, (128, 128))
+        out.append(Detection(name, cx, int(round(cy)), sector, cb, cr))
     return out
 
 
@@ -154,10 +179,12 @@ class World:
     robot: RobotParams = field(default_factory=RobotParams)
     sensors: SensorParams = field(default_factory=SensorParams)
     blackouts: Sequence[Tuple[float, float]] = ()  # detector blind windows (t_start, t_end)
+    shade: Sequence[Tuple[float, float, float]] = ()  # (x0, x1, saturation factor) bands in world x
     seed: int = 0
 
     def __post_init__(self) -> None:
         self.rng = random.Random(self.seed)
+        self.color_rng = random.Random(self.seed + 7919)  # separate stream: chroma never shifts other noise
         self.t = 0.0
         self.x = 0.0
         self.y = 0.0
@@ -220,7 +247,9 @@ class World:
     def detections(self) -> List[Detection]:
         if any(a <= self.t < b for a, b in self.blackouts):
             return []
-        return project_detections(self.people_robot_frame(), self.sensors, self.rng)
+        chroma = observe_clothing(self.people, {p.name: p.position(self.t)[0] for p in self.people},
+                                  self.shade, self.sensors.chroma_noise, self.color_rng)
+        return project_detections(self.people_robot_frame(), self.sensors, self.rng, chroma)
 
     def state(self) -> dict:
         people = {}

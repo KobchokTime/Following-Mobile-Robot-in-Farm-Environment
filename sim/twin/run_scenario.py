@@ -27,7 +27,7 @@ import time
 from pathlib import Path
 
 from .pipeline import RECORD_TOPICS, ROOT, Processes, isolated_env
-from .scenarios import SCENARIOS
+from .scenarios import ALL_SCENARIOS, SCENARIO_SETS
 from .score import load, score
 
 
@@ -48,29 +48,30 @@ def run_one(name: str, bridge_mode: str, out_root: Path, seed: int, record_bag: 
                  "-p", f"scenario:={name}", "-p", f"seed:={seed}",
                  "-p", f"bridge_mode:={bridge_mode}", "-p", f"log_path:={out / 'state.jsonl'}"],
                 cwd=str(ROOT), env=env, stdout=log, stderr=subprocess.STDOUT,
-                timeout=SCENARIOS[name]["duration_s"] + 60)
+                timeout=ALL_SCENARIOS[name]["duration_s"] + 60)
         if world.returncode != 0:
             raise RuntimeError(f"twin world exited with {world.returncode}; see {out / 'world.log'}")
     finally:
         procs.stop()
 
     result = {"scenario": name, "bridge_mode": bridge_mode, "seed": seed,
-              "doc": SCENARIOS[name]["doc"], **score(load(out / "state.jsonl"))}
+              "doc": ALL_SCENARIOS[name]["doc"], **score(load(out / "state.jsonl"))}
     (out / "score.json").write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
     return result
 
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--scenario", default="all", help=f"one of {sorted(SCENARIOS)} or 'all'")
-    ap.add_argument("--bridge-mode", default="current", choices=["current", "fixed", "diff_drive", "both", "all"])
+    ap.add_argument("--scenario", default="all", help=f"one of {sorted(ALL_SCENARIOS)}, or a set: {sorted(SCENARIO_SETS)}")
+    ap.add_argument("--bridge-mode", default="current", choices=["current", "fixed", "diff_drive", "both", "turning", "all"])
     ap.add_argument("--out", default="sim_runs", type=Path)
     ap.add_argument("--seed", default=0, type=int)
     ap.add_argument("--record-bag", action="store_true", help="also record a sqlite3 rosbag2")
     args = ap.parse_args()
 
-    names = sorted(SCENARIOS) if args.scenario == "all" else [args.scenario]
-    modes = {"both": ["current", "diff_drive"], "all": ["current", "fixed", "diff_drive"]}.get(args.bridge_mode, [args.bridge_mode])
+    names = SCENARIO_SETS.get(args.scenario, [args.scenario])
+    modes = {"both": ["current", "diff_drive"], "turning": ["fixed", "diff_drive"],
+             "all": ["current", "fixed", "diff_drive"]}.get(args.bridge_mode, [args.bridge_mode])
     results = [run_one(n, m, args.out, args.seed, args.record_bag) for n in names for m in modes]
     (args.out / "summary.json").write_text(json.dumps(results, indent=2) + "\n", encoding="utf-8")
 

@@ -35,6 +35,15 @@ docker run --rm -v "$PWD/sim_runs:/repo/sim_runs" following-robot-twin \
   python3 -m sim.twin.run_scenario --scenario curve_left --bridge-mode diff_drive --out /repo/sim_runs
 ```
 
+Scenario sets for `--scenario`:
+
+- `all`: the 5 Arena 2 scenarios.
+- `identity`: `crossing` plus the 3 scenarios with a second person (`side_by_side`, `head_on`,
+  `stand_aside`).
+- `everything`: all 8 scenarios.
+
+`--bridge-mode turning` runs the `fixed` and `diff_drive` bridges.
+
 If `packages.ros.org` is unreachable, build with `--build-arg INSTALL_MCAP=0`. Everything still
 works, except replaying MCAP bags.
 
