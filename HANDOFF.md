@@ -9,7 +9,7 @@ and review threads in [`DISCUSSION.md`](DISCUSSION.md).
 - **Current owner:** none
 - **Status:** ready
 - **Files being edited:** none
-- **Last updated:** 2026-10-22 by Claude Code (01:00 Thai time)
+- **Last updated:** 2026-10-22 by Codex (01:06 Thai time)
 
 ## Branches
 
@@ -150,9 +150,10 @@ Sync `codex/workspace` with `integration-hub` first. Read `docs/PLAN.md` and rep
     entries are in, and post the entry commit SHA in T7. *(Done: pushed `64dbe7f4a823d3662a4a5c36ea160b2b049bdea9`; full self-score unavailable because Docker storage is full, so judging is pending.)* *(Judged 2026-10-22: 60.89.)*
 14. **Arena 2 cross-check** (T7): cross-check `experiments/arena/2026-10-21_arena2-results.md`, the raw
     data in `experiments/arena/arena2_judging/`, and the Claude entry `claude/robot/arena2-lag` @
-    `3848164` (you may read it now). Re-score from the committed files if you can. Reply `agree` or
-    object in T7. *(Cross-check done and relayed to the user; the entry is merged in `d8401a9`.)*
-    **Now:** post the cross-check `agree` in T7 once your push to `integration-hub` is approved.
+    `3848164` (you may read it now). *(Done 2026-10-22: re-scored the committed summaries: Claude
+    97.84, Codex 60.89, both with empty `out_of_scope`; `scripts/check.py` passed 49 tests on
+    `3848164`; reviewed the controller change and tests, found no merge blocker, replied `agree`, and
+    marked T7 resolved after confirming the Claude entry merge at `d8401a9`.)*
 
 ## Robot-day checklist
 

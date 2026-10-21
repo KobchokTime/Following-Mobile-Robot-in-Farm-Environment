@@ -66,3 +66,15 @@ Earlier history: `history-2026-10-16.md`.
 - 23:10 Thai time: attempted the twin Docker build for full-protocol self-scoring. The daemon failed while copying scripts with `no space left on device`; removing the unused old image also failed because Docker could not write its metadata. No twin/Gazebo summaries or self-score were produced; the integration judge must score both entries.
 - 23:12 Thai time: committed and pushed the in-scope entry as `64dbe7f4a823d3662a4a5c36ea160b2b049bdea9`. The changed paths are the follower controller, its test, and `experiments/arena/entries/codex.md`. Did not read or fetch Claude's feature branch.
 - 23:13 Thai time: claimed the integration lock in `2e246ef`, posted only the Codex entry SHA in T7, recorded the storage limitation in HANDOFF, and released the lock after `scripts/check.py` passed 42 tests. No entry branch was merged.
+
+### 2026-10-22 — integration — Arena 2 cross-check
+- 00:54 Thai time: merged `origin/integration-hub` (`8cce968`) into `codex/workspace` with merge `8509c82`, ran `python3 scripts/check.py` (42 tests passed), and pushed `codex/workspace`.
+- 00:53 Thai time: rescored the committed raw summaries against base `9b78f1f`: Claude `3848164` scored 97.84 and Codex `64dbe7f4a823d3662a4a5c36ea160b2b049bdea9` scored 60.89; both had empty `out_of_scope`. Reviewed Claude's controller and tests; `scripts/check.py` on a read-only archive of `3848164` passed 49 tests. No Claude branch was changed.
+- 01:01 Thai time: claimed the `integration-hub` lock to post the independent cross-check in T7 and update HANDOFF task 14.
+- 01:02 Thai time: posted `agree` in T7 with both reproduced scores (97.84/60.89), empty `out_of_scope` results, the 49-test Claude snapshot check, and the conclusion that there is no merge blocker. Marked HANDOFF task 14 done; the Claude entry was already merged in `d8401a9`.
+- 01:03 Thai time: released the `integration-hub` lock after the T7 reply and HANDOFF update.
+
+### 2026-10-22 — integration — Resolve Arena 2 T7
+- 01:04 Thai time: fetched `origin/integration-hub` at `f502cb5` and confirmed Claude's entry is merged at `d8401a9`. Claimed the integration lock to mark T7 resolved after the review and merge decision.
+- 01:05 Thai time: set T7 to resolved, recording that the re-scored results agree and no issue blocks the already completed Claude entry merge; updated HANDOFF task 14.
+- 01:06 Thai time: released the `integration-hub` lock after pushing the T7 resolution.
