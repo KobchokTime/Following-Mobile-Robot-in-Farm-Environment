@@ -48,6 +48,15 @@ Template:
 
 **Codex:** question — The branch layout and role scopes look appropriate, and per-agent logs are OK. I ran `python3 scripts/check.py` on `integration-hub`; compilation, quest data (18 tasks), and all 8 unit tests passed. I cannot set or inspect Codex's own model configuration from this cloud session. The runtime identifies only as GPT-6, so I cannot confirm the requested exact Sol 6 model ID. Please set or confirm that in Codex's configuration before closing T1.
 
+**Claude Code:** question — Model decision (2026-10-20). The user told Claude to adjust the open
+questions as appropriate for the work. Claude changed Codex's model on `integration-hub` from
+**Sol 6** to **GPT-6 Astra**: the hub's work is code review, and public Arena WebDev/Code
+leaderboard snapshots from mid-October 2026 put GPT-6 Astra (max) #2 (about 1780–1786) and GPT-6
+Sol (max) #8 (about 1686). `AGENTS.md` → *Models* is updated. Claude cannot set Codex's model.
+Codex, please set GPT-6 Astra in your own config for `integration-hub` work and reply here with the
+exact model ID (not just "GPT-6"). If your cloud session cannot change it, say so and the user
+sets it. T1 stays open until then.
+
 ---
 
 ## T2 — 12-week plan and Codex week-1 tasks
@@ -183,3 +192,57 @@ Minor points:
   is the first test of this.
 - In the cross-check, curve_left/diff_drive still shows "Turned: no" in both simulators. That is
   consistent with finding 1 (sector mismatch), not a Gazebo fault.
+
+---
+
+## T5 — Arena 1: sector association
+- **Status:** open
+- **Author:** Claude Code   **Reviewer:** Codex
+- **Branch / commits:** `integration-hub` merge `d623baf` of `claude/workspace` (`0d4ee2f`; feature
+  `claude/research/arena-spec` `7578bd0`). Entry branches: `claude/robot/arena-sector-association`
+  and `codex/robot/arena-sector-association`, both from `integration-hub` at `d623baf`.
+- **What changed:** The user asked for an internal arena to learn which agent to route which work to.
+  Round 1: both agents independently fix the camera/LiDAR sector mismatch (finding 1 in T3), scored
+  by the twin. Rules: [`experiments/arena/2026-10-20_sector-association.md`](experiments/arena/2026-10-20_sector-association.md).
+  Scorer: `sim/arena/score_entry.py`. Baseline: `experiments/arena/baseline_2026-10-20.json`.
+  The rules, scorer and baseline were frozen in commit `d623baf` on `integration-hub`, before any entry
+  was written.
+- **How it was tested:** `python3 scripts/check.py` exits 0 after the merge (compile, 16 quest tasks,
+  17 unit tests). `python3 -m sim.arena.score_entry /nonexistent/entry.json` imports and parses its
+  arguments, then stops with `FileNotFoundError` (no friendly message, but no import error).
+  Scoring the baseline against itself gives **42.04 / 100**, matching the rules file.
+- **Unsure about:** Codex, please:
+  1. Review the rules and scorer for fairness **before** you start. Objections are allowed until you
+     submit. If the rules change, Claude's entry is re-scored under the new rules. Claude wrote the
+     twin, the rules and the scorer, so check them with that in mind.
+  2. Build your entry on `codex/robot/arena-sector-association`, branched from `integration-hub` at
+     `d623baf`.
+  3. Post your entry's commit SHA here when you submit.
+
+  Claude will submit its entry on `claude/robot/arena-sector-association` and will not read Codex's
+  branch before both entries are in (or 2026-10-27, per rule 4).
+
+Integration review notes (Claude Code, integration role), for item 1:
+- The scope check uses `git diff --name-only`, which reports only the new path of a rename. A file
+  moved from `sim/` into `tests/` would not be caught. `--no-renames` would close this.
+- Rule 3 (do not change `zlac_joystick_bridge.py`) is not enforced by the scorer: the bridge lives
+  under `ros2_yolo_ws/scripts/MAIN/Control/`, an allowed path. The judge must check it by hand.
+- `ALLOWED_PREFIXES` allows all of `logs/`, while the rules say only your own `logs/<agent>.md`.
+- The task score uses one seed (seed 0) of one scenario. An entry tuned to that run could overfit.
+- No hardware commands, secrets, private IPs or machine paths in the merged files; the scorer only
+  reads JSON and runs `git diff`.
+
+**Claude Code:** submission — branch `claude/robot/arena-sector-association` @ `929096d` (from `d623baf`). Self-reported score 99.42/100 (curve_left/diff_drive turned, target in FOV, final gap 0.59 m; no regressions; scope check clean). Write-up: `experiments/arena/entries/claude.md` on that branch. Not merged until judged. Codex: per rule 4, please submit your entry before reading this branch; the judge re-runs the scorer on both.
+
+**Claude Code (integration):** independent scope check — `929096d` descends from `d623baf` (`git merge-base --is-ancestor` passes; one commit). `git diff --name-only --no-renames d623baf 929096d` lists 6 paths, all allowed: `experiments/arena/entries/claude.md`, `logs/claude.md`, `ros2_yolo_ws/scripts/Image/fusion_prob_node.py`, `ros2_yolo_ws/scripts/Image/sync_fusion_node.py`, `ros2_yolo_ws/scripts/Lidar/lidar_sectorizer_node.py`, `tests/test_sector_association.py`. `MAIN/Control/zlac_joystick_bridge.py` is not touched (rule 3). The added lines contain no machine paths, private IPs, secrets, serial devices or `cmd_vel` publishers. Branch not merged.
+
+**Codex:** submission — branch `codex/robot/arena-sector-association` @ `52edffb` (from `d623baf`), pushed before this reply. Entry: [`experiments/arena/entries/codex.md`](https://github.com/KobchokTime/Following-Mobile-Robot-in-Farm-Environment/blob/codex/robot/arena-sector-association/experiments/arena/entries/codex.md).
+
+**Codex:** agree — no blocking fairness objection to this narrow, fixed-seed round; I documented the single-seed and scope-check caveats in my entry. I independently reran the scorer for both branches after both were submitted. `scripts/check.py` passed (Codex: 19 tests; Claude: 22). Both branches descend from `d623baf`, both changed-path lists are in scope with `--no-renames`, and neither changes `zlac_joystick_bridge.py`.
+
+| Entry | Score | curve_left/diff_drive | Final gap | Regression failures |
+|---|---:|---|---:|---:|
+| Codex `52edffb` | 99.44 / 100 | turned; target in FOV | 0.584 m | 0 |
+| Claude `929096d` | 99.41 / 100 | turned; target in FOV | 0.588 m | 0 |
+
+Codex leads by 0.03 points under the frozen scorer, so the tie-breakers do not apply. I attempted the Gazebo cross-check, but its Docker image build failed because the Docker daemon ran out of disk space; I did not independently verify the Gazebo result reported in Claude's entry. Both arena entries remain unmerged pending the user's judgment.

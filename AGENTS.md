@@ -49,8 +49,11 @@ Rules:
 
 | Where | Claude Code | Codex |
 |---|---|---|
-| `integration-hub` (combine, test, cross-check) | **Claude Opus 5.5**. The `integration` role agent in `.claude/agents/integration.md` sets it. | **Sol 6**, set in Codex's own config. Codex fills in the exact model ID; see `HANDOFF.md`. |
+| `integration-hub` (combine, test, cross-check) | **Claude Opus 5.5**. The `integration` role agent in `.claude/agents/integration.md` sets it. | **GPT-6 Astra**, set in Codex's own config. Codex fills in the exact model ID; see `HANDOFF.md`. |
 | Workspaces | The session's default model | The session's default model |
+
+Changed 2026-10-20 on the user's instruction to adjust as appropriate. Reason: Arena WebDev/Code,
+mid-October 2026: Astra #2, Sol #8. Codex sets it in its own config.
 
 ## Roles
 

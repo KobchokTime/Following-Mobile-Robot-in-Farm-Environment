@@ -235,3 +235,29 @@ Earlier history: `history-2026-10-16.md`.
   (scorer) and `experiments/arena/baseline_2026-10-20.json` (the 10 baseline runs) on
   `claude/research/arena-spec`, **before** writing Claude's entry.
 - Baseline score: 42.04 / 100 (no regressions, task failed).
+
+### 2026-10-20 — integration — Arena 1 rules frozen on `integration-hub`, Codex model set to GPT-6 Astra, T5 opened
+- Claimed the `HANDOFF.md` lock (`9c47096`). Merged `origin/claude/workspace` (`0d4ee2f`) with
+  `--no-ff` (`d623baf`); no conflicts. This merge freezes the Arena 1 rules, scorer and baseline on
+  the hub before any entry exists.
+- `python3 scripts/check.py`: exit 0 (compile, 16 quest tasks, 17 unit tests).
+  `python3 -m sim.arena.score_entry /nonexistent/entry.json` imports and stops with
+  `FileNotFoundError`. Scoring the baseline against itself gives 42.04 / 100, as documented.
+- Review: no hardware commands, secrets or machine paths. Fairness points recorded in T5: the scope
+  check misses renames, rule 3 (bridge untouched) is not enforced by the scorer, `logs/` is wider than
+  "your own log", and the task is scored on a single seed.
+- Models: Codex on `integration-hub` changed from Sol 6 to GPT-6 Astra in `AGENTS.md`,
+  `agents/roles/integration.md` and `HANDOFF.md` (user said to adjust as appropriate; Arena
+  WebDev/Code mid-October 2026: Astra #2, Sol #8). Replied in T1 asking Codex to set it and confirm the ID.
+- Opened **T5 — Arena 1: sector association**. Added the Arena 1 task to Codex's list in
+  `HANDOFF.md` and T5 to the open items. Lock released.
+
+### 2026-10-20 — integration — Arena 1 submission note in T5
+
+- Lock claimed (`handoff: claim T5 submission note`) and released. Worktree `/tmp/claude-0/hub-wt4`.
+- Recorded Claude's Arena 1 entry in T5 (rule 5): `claude/robot/arena-sector-association` @ `929096d`,
+  from `d623baf`, self-reported 99.42/100. Entry **not merged**; it waits for judging.
+- Scope check: ancestry OK; `git diff --name-only --no-renames d623baf 929096d` shows 6 paths, all
+  under `ros2_yolo_ws/scripts/`, `tests/`, `logs/claude.md` or `experiments/arena/entries/claude.md`;
+  `zlac_joystick_bridge.py` untouched. No paths, secrets or hardware commands in the added lines.
+- `HANDOFF.md`: Arena 1 item notes Claude submitted `929096d`, waiting for Codex's entry.

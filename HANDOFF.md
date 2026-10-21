@@ -9,23 +9,24 @@ and review threads in [`DISCUSSION.md`](DISCUSSION.md).
 - **Current owner:** none
 - **Status:** ready
 - **Files being edited:** none
-- **Last updated:** 2026-10-20 by Claude Code
+- **Last updated:** 2026-10-20 by Codex
 
 ## Branches
 
 | Branch | State |
 |---|---|
 | `main` | Initial commit only. It receives `integration-hub` through a PR once the user approves. |
-| `integration-hub` | Has the robot recovery, Thesis Desk, quest sources, agent workflow, GUI smoke-test results, 12-week plan, Codex week-1 changes, the offline twin (`sim/`, twin CI, first simulated findings; merge `18c2303`) and the Gazebo 3D twin (`sim/gazebo/`, `Dockerfile.gazebo`, `gazebo` CI job, cross-check; merge `cef985f`). `scripts/check.py` passes. |
-| `claude/workspace` | Gazebo twin (`68e4c10`) merged into `integration-hub`; behind the latest integration commits. No feature in progress. |
-| `codex/workspace` | Week-1 changes are integrated into `integration-hub`; it is behind the latest integration commits. |
+| `integration-hub` | Has the robot recovery, Thesis Desk, quest sources, agent workflow, GUI smoke-test results, 12-week plan, Codex week-1 changes, the offline twin (`sim/`, twin CI, first simulated findings; merge `18c2303`), the Gazebo 3D twin (`sim/gazebo/`, `Dockerfile.gazebo`, `gazebo` CI job, cross-check; merge `cef985f`) and the frozen Arena 1 rules, scorer and baseline (merge `d623baf`). `scripts/check.py` passes. |
+| `claude/workspace` | Arena 1 spec (`0d4ee2f`) merged into `integration-hub`; behind the latest integration commits. Claude's arena entry goes on `claude/robot/arena-sector-association`. |
+| `codex/workspace` | Synced through `integration-hub` `23551e3`; the Arena entry is a separate branch and remains unmerged. |
 | *To delete* | `integration/robot-thesis-desk`, `codex/robot-backup-quarantine` and `codex/thesis-desk`. They are fully merged, but the cloud session's git proxy cannot delete branches. The user deletes them on GitHub, or Codex runs `git push origin --delete ...` from Windows. |
 
 ## Models on `integration-hub`
 
 - Claude Code: Claude Opus 5.5, through the `.claude/agents/integration.md` subagent (`model: opus`).
-- Codex: **Sol 6**. *Action for Codex:* set the exact model ID in your own config, then
-  confirm it in `DISCUSSION.md` thread T1.
+- Codex: **GPT-6 Astra** (changed from Sol 6 on 2026-10-20, on the user's instruction to adjust as
+  appropriate; Arena WebDev/Code mid-October 2026: Astra #2, Sol #8). *Action for Codex:* set the
+  exact model ID in your own config, then confirm it in `DISCUSSION.md` thread T1.
 
 ## Plan
 
@@ -42,8 +43,8 @@ The 12-week plan is in [`docs/PLAN.md`](docs/PLAN.md) (20 Oct 2026 to about 15 J
 ## Open items
 
 1. **T1** in `DISCUSSION.md`: Codex reviewed the branch restructure and role setup. Still open:
-   Codex's model should be **Sol 6** on `integration-hub`, but Codex reported its runtime as
-   **GPT-6**. The user must confirm or set the model before T1 can close.
+   Codex's model on `integration-hub` is now **GPT-6 Astra** (was Sol 6). Codex reported its runtime
+   only as **GPT-6**; Codex must set GPT-6 Astra and confirm the exact model ID before T1 can close.
 2. **T2** in `DISCUSSION.md`: Codex reviewed the plan and task list. Source locations remain unknown; Windows checkout, backup and robot access are unavailable from the cloud session. User input is needed to continue those imports.
 3. Optional UI fixes for the `thesis-desk` role, found in the Xvfb smoke test:
    - The Research Desk dialog ignores ESC and stays open after switching to Test Field.
@@ -58,7 +59,10 @@ The 12-week plan is in [`docs/PLAN.md`](docs/PLAN.md) (20 Oct 2026 to about 15 J
    Codex builds `Dockerfile.gazebo`, runs `curve_left`/`diff_drive` (GUI via WSLg if possible),
    judges the field layout and reviews the `sim/twin/world.py` refactor. The new `gazebo` CI job had
    not reported at merge time; check its result.
-7. `integration-hub` → `main` (draft PR KobchokTime/Following-Mobile-Robot-in-Farm-Environment#2): needs every thread resolved and the user's approval.
+7. **T5** in `DISCUSSION.md`: Arena 1, sector association. Rules, scorer and baseline frozen in
+   `d623baf`. Both entries are submitted and independently scored by Codex; Codex leads by 0.03 points.
+   - Awaiting the user's judgment before either entry is merged. Gazebo tie-break was not independently run.
+8. `integration-hub` → `main` (draft PR KobchokTime/Following-Mobile-Robot-in-Farm-Environment#2): needs every thread resolved and the user's approval.
 
 ## Codex — week 1 tasks
 
@@ -83,6 +87,10 @@ Sync `codex/workspace` with `integration-hub` first. Read `docs/PLAN.md` and rep
    11–12 from the plan and move 13 back to Main Quest, per `docs/PLAN.md`.
 6. Log everything in `logs/codex.md`. Integrate through `integration-hub` with a `DISCUSSION.md`
    thread for Claude to cross-check.
+7. **Arena 1** (T5): review `experiments/arena/2026-10-20_sector-association.md` and
+   `sim/arena/score_entry.py` for fairness, then fix the sector mismatch on
+   `codex/robot/arena-sector-association`, branched from `integration-hub` at `d623baf`. Post the
+   commit SHA in T5. Do not read `claude/robot/arena-sector-association` until both entries are in.
 
 ## Claude — in parallel
 
