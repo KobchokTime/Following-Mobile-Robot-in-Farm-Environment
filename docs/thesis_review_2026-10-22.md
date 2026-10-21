@@ -133,7 +133,14 @@ it from chapter 2.
 *Twin* scenarios now cover the first and third case: shade in `stand_aside`, and the same clothes
 in `side_by_side_same`.
 
-### C3. The box-size distance cue (scope 1.2.ii, 1.4) fails at the following distance
+### C3. A box crop is not a person mask (from Codex's review in T8)
+
+The new `torso_chroma()` in `ros2_yolo_live.py` takes the median Cb/Cr of a rectangle inside the
+box. Background between arm and body, an overlapping person, or partial occlusion can all shift
+that median. The twin does not model this contamination. E4 must measure it, not only the
+within-person and between-person distances.
+
+### C4. The box-size distance cue (scope 1.2.ii, 1.4) fails at the following distance
 
 - The C922's vertical field of view is about 43°. With the camera at 1.1 m, it sees only a 0.40 m
   tall slice of the person at 0.5 m, and 0.79 m at 1.0 m.
@@ -186,7 +193,7 @@ days a month.
 | E1 | Do camera and LiDAR agree on the person's direction? | Robot | Tape marks at −30…+30° every 10°, at 1, 2 and 3 m; 10 s per mark | Bearing MAE and bias (°); share of frames where the chosen LiDAR return is within ±0.2 m of the tape distance |
 | E2 | What is the real latency? | Robot (bag) | Detections carry the image stamp (code change) | Capture → detection → `/cmd_vel` (ms), median and p95 |
 | E3 | Does YOLO still see a person at the following distance? | Robot | Person at 0.4, 0.5, 0.75, 1.0, 1.5, 2 and 3 m, facing towards and away; 10 s each | Detection rate; box clipping; sets the set-point |
-| E4 | Does clothing colour separate people, and when not? | Robot (bag) | 2 people × (different, same) clothes × (sun, shade) | Within-person vs between-person CbCr distance; AUC; uses the new `cb, cr` fields |
+| E4 | Does clothing colour separate people, and when not? | Robot (bag) | 2 people × (different, same) clothes × (sun, shade); also with the two people overlapping in the image | Within-person vs between-person CbCr distance; AUC; how far the crop's median moves when another person or background enters the box; uses the new `cb, cr` fields |
 | E5 | Does the robot keep the right person? | Twin (Arena 3), then robot | `side_by_side`, `side_by_side_same`, `stand_aside`, `head_on`, `crossing` | Pass rate, tracked share, ID switches per minute, closest approach |
 | E6 | How well does it follow? | Twin (Arena 2, done), then robot | Straight, stop-and-go, curve; 10–40 m | Median and final gap, success rate, stop latency |
 | E7 | Does each part help? (expected benefit 2) | Twin | Same entry with colour off, KF gating off, LiDAR off | ΔE5 and ΔE6. This is the comparison the thesis claims |
