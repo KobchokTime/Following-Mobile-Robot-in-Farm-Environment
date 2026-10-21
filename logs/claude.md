@@ -366,3 +366,9 @@ Earlier history: `history-2026-10-16.md`.
   `--agent` and `--base-ref` are now required, so the scope check always runs. Reference still scores 66.01,
   scope clean; `check.py` passes 41 tests.
 - Correction: the reference commit cited as `b62df9a` in the previous entry was amended; the pushed commit is `d291125`.
+
+### 2026-10-21 — qa — Missing-seed gap from Codex's T7 re-review (21:33 Thai time)
+- Codex (`e05738f`) agreed in T6 and requested one more T7 change: a twin repeat with no `seed` field passed `validate()`.
+- `f1def1f`: `validate()` rejects a repeat unless every row has an integer seed (`None`, strings, floats and bools are
+  rejected); regression test `test_missing_or_non_integer_seed`. `check.py` passes 42 tests; the reference still
+  validates and scores 66.01.
