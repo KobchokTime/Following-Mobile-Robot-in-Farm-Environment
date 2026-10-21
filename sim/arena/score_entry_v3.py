@@ -12,7 +12,7 @@ Scoring, 100 points, on the `fixed` bridge unless stated:
 - Identity, 50: the identity scenarios (crossing, side_by_side, side_by_side_same, head_on,
   stand_aside), twin and
   Gazebo. 30 × the share of runs that pass (target in view at the end, within 1.5 m, no contact,
-  tracked for at least 90% of the run) + 20 × the mean tracked share.
+  target visible for at least 90% of the run) + 20 × the mean visible share.
 - Following, 30: 20 for lag (as Arena 2: median gap of straight, stop_and_go and curve_left against
   0.5 m, falling to 0 at 1.5 m of error) + 10 × the share of curve_left runs that pass.
 - Behaviour, 20, 5 off per failed check, on both bridges: any contact; target_loss not stopping
@@ -41,7 +41,7 @@ IDENTITY = ("crossing", "side_by_side", "side_by_side_same", "head_on", "stand_a
 LAG_SCENARIOS = ("straight", "stop_and_go", "curve_left")
 GAZEBO_MIN = {"curve_left": 2, "side_by_side": 2, "side_by_side_same": 2, "stand_aside": 2}
 MIN_TWIN_REPEATS = 3
-MIN_TRACKED_SHARE = 0.9
+MIN_VISIBLE_SHARE = 0.9
 
 
 def load(path: Path) -> list:
@@ -90,7 +90,7 @@ def validate(twin_runs: list, gazebo_runs: list) -> list:
 
 def passes(r: dict) -> bool:
     return (bool(r.get("target_in_camera_fov_end")) and r["final_gap_m"] <= 1.5 and not r["contact"]
-            and r.get("target_tracked_share", 0.0) >= MIN_TRACKED_SHARE)
+            and r.get("target_visible_share", 0.0) >= MIN_VISIBLE_SHARE)
 
 
 def score(twin_runs: list, gazebo_runs: list) -> dict:
@@ -99,8 +99,8 @@ def score(twin_runs: list, gazebo_runs: list) -> dict:
 
     ident = [r for r in fixed if r["scenario"] in IDENTITY]
     ident_pass = sum(passes(r) for r in ident)
-    tracked = statistics.fmean(r.get("target_tracked_share", 0.0) for r in ident) if ident else 0.0
-    identity = (30 * ident_pass / len(ident) + 20 * tracked) if ident else 0.0
+    visible = statistics.fmean(r.get("target_visible_share", 0.0) for r in ident) if ident else 0.0
+    identity = (30 * ident_pass / len(ident) + 20 * visible) if ident else 0.0
     per_scenario = {sc: f"{sum(passes(r) for r in ident if r['scenario'] == sc)}/{sum(r['scenario'] == sc for r in ident)}"
                     for sc in IDENTITY}
 
@@ -124,13 +124,14 @@ def score(twin_runs: list, gazebo_runs: list) -> dict:
     if any(r["scenario"] == "target_loss" and (r.get("stop_latency_s") is None or r["stop_latency_s"] > 1.5)
            for r in every):
         checks.append("target_loss did not stop within 1.5 s")
-    if curve and not all(r["turned"] for r in curve):
+    turns = [r for r in every if r["scenario"] == "curve_left"]  # twin on both bridges, plus Gazebo
+    if turns and not all(r["turned"] for r in turns):
         checks.append("curve_left did not turn in every run")
     behaviour = max(0, 20 - 5 * len(checks))
 
     return {"points": round(identity + following + behaviour, 2), "max_points": 100,
             "identity": {"points": round(identity, 2), "runs": len(ident), "passed": ident_pass,
-                         "mean_tracked_share": round(tracked, 3), "passed_per_scenario": per_scenario},
+                         "mean_visible_share": round(visible, 3), "passed_per_scenario": per_scenario},
             "following": {"points": round(following, 2), "mean_median_gap_m": lag_detail,
                           "curve_left_runs": len(curve), "curve_left_failures": curve_fail},
             "behaviour": {"points": behaviour, "failed_checks": checks},
