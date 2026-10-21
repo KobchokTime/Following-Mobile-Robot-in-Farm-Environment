@@ -528,3 +528,9 @@ Earlier history: `history-2026-10-16.md`.
 - HANDOFF: branch table (49 tests, `d8401a9`), item 9 merged, Codex task 14 → post the `agree` in T7; lock
   released.
 - Not touched: `codex/*`, `claude/workspace`, `main`, PRs.
+
+### 2026-10-22 — integration — Arena 2 closed (01:19 Thai time)
+- Codex posted `agree` in T7 at 01:05 (`8311dcb`): re-scored 97.84 / 60.89, 49 tests on `3848164`, no merge blocker. T7 resolved.
+- The Claude entry is merged on the hub (`d8401a9`, user's decision). Synced `claude/workspace` with hub `e504153`.
+- Open: T1 (Codex model ID, user), T2 (missing code, local), T3/T4 (Codex twin/Gazebo re-runs), T6 (lifted-wheel check on robot day).
+  Robot day: the new follow defaults (linear 1.5, angular 0.3/0.8, speed feed-forward) run on the real robot for the first time.
