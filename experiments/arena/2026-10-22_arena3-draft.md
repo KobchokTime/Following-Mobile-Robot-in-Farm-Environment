@@ -88,16 +88,17 @@ new node would not be started.
 
 - **Identity, 50 points.** The identity scenarios, twin and Gazebo together.
   - 30 points × the share of runs that pass.
-  - 20 points × the mean *tracked share*.
+  - 20 points × the mean *visible share*.
   - A run passes when the target is in view at the end, within 1.5 m, there is no contact, and the
-    tracked share is at least 0.9.
-  - *Tracked share* (new in `sim/twin/score.py`) is the share of the run after the 3 s start with
-    the target inside the camera's ±35° and within 2 m.
+    visible share is at least 0.9.
+  - *Visible share* (`target_visible_share`, new in `sim/twin/score.py`) is the share of the run
+    after the 3 s start with the target inside the camera's ±35° and within 2 m. It is ground-truth
+    visibility: it shows that the robot stayed with the target, not what a tracker believed.
 - **Following, 30 points.**
   - Lag, 20 points: the Arena 2 formula scaled to 20, comparing the median gap in `straight`,
     `stop_and_go` and `curve_left` with 0.5 m.
   - Reliability, 10 points × the share of `curve_left` runs that pass.
-- **Behaviour, 20 points**, on both bridges. 5 points off for each failed check:
+- **Behaviour, 20 points**, on both twin bridges and in Gazebo. 5 points off for each failed check:
   - any contact;
   - `target_loss` not stopping within 1.5 s;
   - `curve_left` not turning.
@@ -121,7 +122,7 @@ it.
 
 | Part | Points | Detail |
 |---|---|---|
-| Identity | 16.5 / 50 | 6 of 21 runs pass. crossing 3/3, head_on 3/3; side_by_side 0/5, side_by_side_same 0/5, stand_aside 0/5. Mean tracked share 0.40 |
+| Identity | 16.5 / 50 | 6 of 21 runs pass. crossing 3/3, head_on 3/3; side_by_side 0/5, side_by_side_same 0/5, stand_aside 0/5. Mean visible share 0.40 |
 | Following | 29.1 / 30 | mean median gap: straight 0.57 m, stop_and_go 0.55 m, curve_left 0.57 m; curve_left 0/5 failures |
 | Behaviour | 15 / 20 | contact in `side_by_side` and `side_by_side_same`, with the target, as described above |
 | **Total** | **60.6 / 100** | |
@@ -133,12 +134,34 @@ The failures are the same in the twin and in Gazebo:
 - `side_by_side`: final gap 5.2 m in both Gazebo runs.
 - `stand_aside`: final gap 3.2 m.
 
-## Open questions for Codex (T8)
+## Out of scope for Arena 3
+
+- **Target occlusion.** The target walking behind a bystander is deferred to a later arena. The
+  identity protocol here is a first set, not a complete one.
+- **The colour model is synthetic.** The clothing colours, the noise and the shade factor are not
+  calibrated to the C922. They are a repeatable test condition, not evidence that real clothing
+  is separable; experiment E4 measures that on the robot.
+- **`torso_chroma()` takes a rectangular crop, not a person mask.** Background, an overlapping
+  person or partial occlusion can shift the median Cb/Cr on the robot. The twin does not model this
+  contamination. E4 measures it.
+
+## Open questions for Codex (T8) — answered 2026-10-22
+
+Codex's answers:
+
+1. The colour model is fair as a controlled first benchmark, though it is not camera-calibrated
+   (see *Out of scope* above).
+2. Keep the 0.9 threshold, and name the metric *visible share*. Done.
+3. Drop the `current` bridge.
+4. Five scenarios are a sound first set. Add an occlusion case later, or say it is deferred. It is
+   deferred.
+
+The original questions:
 
 1. **The appearance cue.** The draft now includes `cb, cr`, both in the twin and on the robot,
    because clothing colour is the thesis's own identity feature. Are the twin's colour model (noise
    σ = 3, shade as a saturation factor) and the same-clothes scenario fair?
-2. **Is the 0.9 tracked-share threshold right?** In `head_on` the other person passes close by.
+2. **Is the 0.9 visible-share threshold right?** In `head_on` the other person passes close by.
    A good entry may briefly lose the target from view while it ignores that person.
 3. **Should the `current` bridge be dropped from the protocol?** It saves about a third of the run
    time, and the drive bridge already forwards `angular.z`.
