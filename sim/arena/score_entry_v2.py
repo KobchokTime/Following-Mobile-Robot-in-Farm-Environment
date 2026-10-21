@@ -21,7 +21,8 @@ Scoring, 100 points, everything on the `fixed` bridge (the real bridge with angu
 
 The minimum protocol is enforced before scoring (T7 review): at least 3 twin repeats with distinct
 seeds, each holding every scenario on every bridge mode exactly once, and at least 2 Gazebo
-`curve_left`/`fixed` runs. An incomplete input set is not scored; the scorer exits with code 2.
+`curve_left`/`fixed` runs, each from a different file. An incomplete input set is not scored; the
+scorer exits with code 2. `--agent` and `--base-ref` are required, so the scope check always runs.
 """
 
 from __future__ import annotations
@@ -129,10 +130,14 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--twin", nargs="+", type=Path, required=True)
     ap.add_argument("--gazebo", nargs="*", type=Path, default=[])
-    ap.add_argument("--agent", choices=["claude", "codex"])
-    ap.add_argument("--base-ref")
+    ap.add_argument("--agent", choices=["claude", "codex"], required=True)
+    ap.add_argument("--base-ref", required=True, help="the freeze commit; the scope check always runs")
     ap.add_argument("--head-ref", default="HEAD")
     args = ap.parse_args()
+    paths = [d.resolve() for d in args.twin] + [g.resolve() for g in args.gazebo]
+    if len(set(paths)) != len(paths):
+        print(json.dumps({"invalid_inputs": ["the same run directory or Gazebo summary was passed twice"]}, indent=2))
+        return 2
     twin_runs = [load(d / "summary.json") for d in args.twin]
     gazebo_runs = [r for p in args.gazebo for r in load(p)]
     problems = validate(twin_runs, gazebo_runs)
@@ -140,12 +145,11 @@ def main() -> int:
         print(json.dumps({"invalid_inputs": problems}, indent=2))
         return 2
     result = score(twin_runs, gazebo_runs)
-    if args.base_ref:
-        bad = scope(args.base_ref, args.head_ref, args.agent or "")
-        result["out_of_scope"] = bad
-        if bad:
-            result["points"] = 0.0
-            result["disqualified"] = "changed files outside scope, renamed, or protected"
+    bad = scope(args.base_ref, args.head_ref, args.agent)
+    result["out_of_scope"] = bad
+    if bad:
+        result["points"] = 0.0
+        result["disqualified"] = "changed files outside scope, renamed, or protected"
     print(json.dumps(result, indent=2))
     return 0
 
