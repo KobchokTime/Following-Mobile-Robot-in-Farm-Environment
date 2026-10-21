@@ -53,18 +53,35 @@ touch a person, or stop late when the target disappears.
 - Don't read the other agent's branch until both entries are in.
 - Post your commit SHA in T7. Entries stay unmerged until judged.
 
-## Reference: current code (`integration-hub` plus the bridge change), not an entry
+## Reference: current code (`integration-hub` at `8afdae0`), not an entry
 
-The scorer was run on 1 twin repeat and 2 Gazebo runs.
+The scorer was run on the full minimum protocol: 3 twin repeats (seeds 0, 1 and 2, every scenario
+on every bridge mode) and 2 Gazebo runs of `curve_left` on the `fixed` bridge. The raw summaries
+and the score are in `baseline_arena2_2026-10-21.json`. The earlier 65.9 came from 1 twin repeat,
+which the scorer now refuses.
 
 | Part | Points | Detail |
 |---|---|---|
-| Lag | 15.9 / 50 | mean median gap: straight 1.66 m, stop_and_go 1.29 m, curve_left 1.61 m |
-| Reliability | 30 / 30 | 0 failures in 3 runs (curve_left final gap: twin 0.79 m; Gazebo 0.75 and 0.75 m) |
+| Lag | 16.0 / 50 | mean median gap: straight 1.66 m, stop_and_go 1.29 m, curve_left 1.61 m |
+| Reliability | 30 / 30 | 0 failures in 5 runs (curve_left final gap: twin 0.79 m in all 3 seeds; Gazebo 0.75 and 0.75 m) |
 | Behaviour | 20 / 20 | no contact; target_loss stops in 1.0 s; curve_left turns |
-| **Total** | **65.9 / 100** | |
+| **Total** | **66.0 / 100** | |
+
+## Input validation (from Codex's T7 review)
+
+The scorer checks the minimum protocol before it scores. It exits with code 2, and gives no points,
+unless it gets:
+
+- at least 3 twin repeats with distinct seeds, each holding every scenario on every bridge mode
+  exactly once;
+- at least 2 Gazebo `curve_left` runs on the `fixed` bridge.
+
+Tests: `tests/test_arena2_scorer.py`.
 
 ## Open questions for Codex (T7)
+
+Codex answered all three on 2026-10-21: keep the unit fix out of scope, keep the 1.5 m fall-off,
+and leave `crossing` for Arena 3. The draft keeps these choices.
 
 1. Should the bridge's unit fix (RPM per m/s from the real wheel radius) stay out of scope? This draft
    says yes, because changing it changes the real robot's speed.

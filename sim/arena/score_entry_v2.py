@@ -18,6 +18,11 @@ Scoring, 100 points, everything on the `fixed` bridge (the real bridge with angu
   target_loss stops within 1.5 s in every repeat; curve_left still turns.
 - Scope: any changed file outside the allowed paths, a rename (checked with --no-renames), another
   agent's log, or a protected file means 0 points.
+
+The minimum protocol is enforced before scoring (T7 review): at least 3 twin repeats with distinct
+seeds, each holding every scenario on every bridge mode exactly once, and at least 2 Gazebo
+`curve_left`/`fixed` runs, each from a different file. An incomplete input set is not scored; the
+scorer exits with code 2. `--agent` and `--base-ref` are required, so the scope check always runs.
 """
 
 from __future__ import annotations
@@ -29,9 +34,14 @@ import subprocess
 import sys
 from pathlib import Path
 
+from sim.twin.scenarios import SCENARIOS
+
 ALLOWED = ("ros2_yolo_ws/scripts/", "tests/")
 PROTECTED = ("ros2_yolo_ws/scripts/MAIN/Control/zlac_joystick_bridge.py",)
 LAG_SCENARIOS = ("straight", "stop_and_go", "curve_left")
+BRIDGE_MODES = ("current", "fixed", "diff_drive")
+MIN_TWIN_REPEATS = 3
+MIN_GAZEBO_CURVE_RUNS = 2
 
 
 def load(path: Path) -> list:
@@ -48,6 +58,32 @@ def scope(base: str, head: str, agent: str) -> list:
         if path in PROTECTED or not (own or path.startswith(ALLOWED)):
             bad.append(f"{status} {path}")
     return bad
+
+
+def validate(twin_runs: list, gazebo_runs: list) -> list:
+    """Reasons the inputs fall short of the minimum protocol; empty when they meet it."""
+    problems = []
+    if len(twin_runs) < MIN_TWIN_REPEATS:
+        problems.append(f"{len(twin_runs)} twin repeats, need at least {MIN_TWIN_REPEATS}")
+    want = sorted((sc, m) for sc in SCENARIOS for m in BRIDGE_MODES)
+    seeds = []
+    for i, run in enumerate(twin_runs):
+        got = sorted((r.get("scenario"), r.get("bridge_mode")) for r in run)
+        if got != want:
+            missing = sorted(set(want) - set(got))
+            extra = sorted(set(got) - set(want))
+            dupes = len(got) - len(set(got))
+            problems.append(f"twin repeat {i}: missing {missing}, unexpected {extra}, duplicates {dupes}")
+        run_seeds = {r.get("seed") for r in run}
+        if len(run_seeds) != 1:
+            problems.append(f"twin repeat {i}: expected one seed, got {sorted(map(str, run_seeds))}")
+        seeds.extend(run_seeds)
+    if len(set(seeds)) != len(seeds):
+        problems.append(f"twin repeats reuse a seed: {sorted(map(str, seeds))}")
+    curve = [r for r in gazebo_runs if r.get("scenario") == "curve_left" and r.get("bridge_mode") == "fixed"]
+    if len(curve) < MIN_GAZEBO_CURVE_RUNS:
+        problems.append(f"{len(curve)} Gazebo curve_left/fixed runs, need at least {MIN_GAZEBO_CURVE_RUNS}")
+    return problems
 
 
 def is_failure(r: dict) -> bool:
@@ -94,17 +130,26 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--twin", nargs="+", type=Path, required=True)
     ap.add_argument("--gazebo", nargs="*", type=Path, default=[])
-    ap.add_argument("--agent", choices=["claude", "codex"])
-    ap.add_argument("--base-ref")
+    ap.add_argument("--agent", choices=["claude", "codex"], required=True)
+    ap.add_argument("--base-ref", required=True, help="the freeze commit; the scope check always runs")
     ap.add_argument("--head-ref", default="HEAD")
     args = ap.parse_args()
-    result = score([load(d / "summary.json") for d in args.twin], [r for p in args.gazebo for r in load(p)])
-    if args.base_ref:
-        bad = scope(args.base_ref, args.head_ref, args.agent or "")
-        result["out_of_scope"] = bad
-        if bad:
-            result["points"] = 0.0
-            result["disqualified"] = "changed files outside scope, renamed, or protected"
+    paths = [d.resolve() for d in args.twin] + [g.resolve() for g in args.gazebo]
+    if len(set(paths)) != len(paths):
+        print(json.dumps({"invalid_inputs": ["the same run directory or Gazebo summary was passed twice"]}, indent=2))
+        return 2
+    twin_runs = [load(d / "summary.json") for d in args.twin]
+    gazebo_runs = [r for p in args.gazebo for r in load(p)]
+    problems = validate(twin_runs, gazebo_runs)
+    if problems:
+        print(json.dumps({"invalid_inputs": problems}, indent=2))
+        return 2
+    result = score(twin_runs, gazebo_runs)
+    bad = scope(args.base_ref, args.head_ref, args.agent)
+    result["out_of_scope"] = bad
+    if bad:
+        result["points"] = 0.0
+        result["disqualified"] = "changed files outside scope, renamed, or protected"
     print(json.dumps(result, indent=2))
     return 0
 

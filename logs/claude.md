@@ -388,3 +388,62 @@ Earlier history: `history-2026-10-16.md`.
 - DISCUSSION: replied in T6 and T7 that the follow-ups are merged. Both threads stay open for Codex.
 - HANDOFF: updated the branch table, open items 8 and 9 and the test count (32), and released the lock.
 - Not touched: `codex/*`, `claude/workspace`, PRs, `main`.
+
+### 2026-10-21 — qa / research — Answer Codex's T6/T7 reviews (20:30–20:57 Thai time)
+- Read Codex's hub commits `cc9f563` and `e0da45c`: T1 (no exact model ID available), T6 `agree` with
+  `turn_dir=+1` plus a calibration-record conflict, T7 change request (scorer did not enforce minimum runs).
+- `claude/qa/arena2-scorer-validation` (`48ef769`, `b62df9a`):
+  - `score_entry_v2.py` `validate()` refuses to score (exit 2) unless it has 3+ twin repeats with distinct
+    seeds, each with every scenario × bridge mode exactly once, and 2+ Gazebo `curve_left/fixed` runs.
+  - New `tests/test_arena2_scorer.py` (9 tests); `check.py` passes 41 tests.
+  - Re-ran the reference on the full protocol (hub code `8afdae0`, seeds 0–2, 2 Gazebo runs): 66.0/100
+    (lag 16.0, reliability 30 with 0/5 failures, behaviour 20). Raw data in
+    `experiments/arena/baseline_arena2_2026-10-21.json`; the draft records Codex's three answers.
+- `claude/research/calibration-reconcile` (`dfac379`): `config/motor_wheel_calibration.md` now notes that the bridge
+  and `Joystick.py` agree on forward (`0x2088` −, `0x2089` +), that the table's signs are bench-pulse signs,
+  and lists the lifted-wheel check that settles `turn_dir`.
+- Both merged into `claude/workspace`; integration to the hub goes through the `integration` subagent.
+
+### 2026-10-21 — integration — Merge Arena 2 scorer validation and calibration reconcile (T6/T7) (20:58–21:00 Thai time)
+- Model: Claude Opus 5.5 (`integration` subagent). Worktree `/tmp/claude-0/wt_hub`.
+- Lock: free (Codex released it at 20:22). Claimed in `4df6ccf` (20:58), pushed.
+- Merged `origin/claude/workspace` (`16ac740`) with `--no-ff`: merge `ecc55ca`. The only conflict
+  was in `logs/claude.md`; both sides were kept in full.
+- `python3 scripts/check.py`: PASS (compile, 16 quest tasks, 41 unit tests).
+- Scorer review: `validate()` reproduced. Wrote the twin (seeds 0–2) and Gazebo arrays of
+  `experiments/arena/baseline_arena2_2026-10-21.json` to temp summaries and ran
+  `python3 -m sim.arena.score_entry_v2`: 66.01, identical to the stored score; scope check on an empty
+  diff passes. 2 repeats → exit 2; the same twin directories passed twice → exit 2 (reused seed).
+  Gap: the same Gazebo file passed twice → exit 0 (noted in T7). `--base-ref` stays optional (noted).
+- Calibration review: re-derived the signs from code. Bridge forward `(0x2088, 0x2089)` = (−, +), CCW
+  `angular.z` = (−, −); `Joystick.py` stick forward = (−, +). Matches the reconciliation section.
+- No hardware code changed in this merge; no machine paths or secrets in the added files.
+- Correction: the entry above cites `b62df9a`, which is on no remote branch. The commit in
+  `claude/workspace` is `d291125`. The entry is left as written (append-only).
+- DISCUSSION: T1 note (model setting needs the user; stays open). T6 reply (reconciled; `turn_dir=+1`
+  stays; asked Codex to confirm; open until robot day). T7 `agree` to the rules as written; asked Codex
+  to re-review and reply `agree`; **not frozen**.
+- HANDOFF: branch table, items 8/9, Codex tasks 11–12, lock released.
+- Not touched: `codex/*`, `claude/workspace`, `main`, PRs.
+
+### 2026-10-21 — qa — Close the two scorer gaps the integration review found (21:05 Thai time)
+- `8d31ec2` on `claude/qa/arena2-scorer-validation`: `score_entry_v2.py` exits 2 if the same twin run directory or
+  Gazebo summary is passed twice (both reference Gazebo runs use seed 0, so a seed check could not catch it).
+  `--agent` and `--base-ref` are now required, so the scope check always runs. Reference still scores 66.01,
+  scope clean; `check.py` passes 41 tests.
+- Correction: the reference commit cited as `b62df9a` in the previous entry was amended; the pushed commit is `d291125`.
+
+### 2026-10-21 — integration — Merge Arena 2 scorer gap fixes (T7) (21:01–21:01 Thai time)
+- Model: Claude Opus 5.5 (`integration` subagent). Worktree `/tmp/claude-0/wt_hub`.
+- Lock: free. Claimed in `19fc5c8` (21:01), pushed.
+- Merged `origin/claude/workspace` (`3b2cad5`, feature `8d31ec2`) with `--no-ff`: merge `da04d16`.
+  The only conflict was in `logs/claude.md`; both sides were kept in full.
+- `python3 scripts/check.py`: PASS (41 unit tests).
+- Re-verified: a repeated Gazebo file → exit 2; a repeated twin directory → exit 2; missing `--base-ref`
+  or `--agent` → argparse error, exit 2; full reference → 66.01, `out_of_scope` empty.
+- Remaining limit (noted in T7, not blocking): duplicates are found by resolved path, so a copy under
+  another name passes. The dedupe has no unit test.
+- Log note: the qa entry above is stamped 21:05, but its commit `3b2cad5` was made at 21:00 Thai time.
+- DISCUSSION: T7 note that both gaps are fixed; Codex to review the scorer as it stands; **not frozen**.
+- HANDOFF: branch table, item 9, Codex task 11, lock released.
+- Not touched: `codex/*`, `claude/workspace`, `main`, PRs.
