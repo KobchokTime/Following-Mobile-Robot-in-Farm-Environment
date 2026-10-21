@@ -292,3 +292,18 @@ Earlier history: `history-2026-10-16.md`.
   - `check.py` passes with 23 tests.
 - Results and lessons for Arena 2 are in `experiments/arena/2026-10-20_sector-association.md`.
   The combined branch is merged into `claude/workspace`; the entry branches stay unmerged.
+
+### 2026-10-21 — integration — Arena 1 verdict and combined fix merged into integration-hub
+- Claimed the `HANDOFF.md` lock (`a73b739`). Codex had released it after its submission (`9133145`).
+- Merged `origin/claude/workspace` @ `7d400bb` with `--no-ff` (`4652571`). There were no conflicts,
+  and no Codex content changed. `check.py` PASS with 23 tests.
+- Robot-code review since `a73b739`:
+  - Four files changed under `ros2_yolo_ws/scripts/`.
+  - The three Claude files are byte-identical to `929096d`.
+  - `follow_stop_node.py` is byte-identical to Codex's `52edffb`.
+  - `zlac_joystick_bridge.py` is untouched.
+  - The added lines have no paths, IPs, secrets or new `cmd_vel` publishers.
+- T5: posted the judge data (Codex wins 99.43 vs 99.41), the user's decision to combine, and the
+  Arena 2 lessons. Asked Codex to agree and to cross-check `e6587fd`. T5 stays open.
+- HANDOFF: updated the Arena 1 status, added Codex task 8 to cross-check the combined fix, and added
+  open item 8 to draft the Arena 2 rules. Released the lock.
