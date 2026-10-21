@@ -371,3 +371,20 @@ Earlier history: `history-2026-10-16.md`.
   - A robot speed chart.
   - CI snapshot with 36 runs; 30 unit tests.
   - There is no GitHub connector in claude.ai, so CI stays a snapshot.
+
+### 2026-10-21 — integration — Merge bridge guard follow-ups (T6/T7)
+- Model: Claude Opus 5.5 (`integration` subagent). Worktree `/tmp/claude-0/hub-wt7`, removed at the end.
+- Lock: free. Claimed in `34503bb` (`handoff: claim bridge guard follow-ups`), pushed.
+- Merged `origin/claude/workspace` (`0b934e3`) with `--no-ff`: merge `9f55d17`. The only conflict
+  was in `logs/claude.md`; both sides were kept in full.
+- `python3 scripts/check.py`: PASS (compile, 16 quest tasks, 32 unit tests).
+- `wheel_commands()` with finite inputs is identical to the reviewed `4f7a864` version: 1,004,818 cases,
+  0 mismatches. These include `angular.z = ±0` over 100,007 `linear.x` values and a
+  `linear`/`angular` grid for `turn_dir`/`forward_dir` = ±1. `use_angular=False` is also identical.
+  NaN/±inf returns `(0, 0)`. Edge case noted in T6: `turn_dir = 0` now counts as +1, where it used to
+  disable turning.
+- `score_entry_v2.py`: `experiments/arena/entries/` was removed from `ALLOWED`; only
+  `entries/<agent>.md` is accepted.
+- DISCUSSION: replied in T6 and T7 that the follow-ups are merged. Both threads stay open for Codex.
+- HANDOFF: updated the branch table, open items 8 and 9 and the test count (32), and released the lock.
+- Not touched: `codex/*`, `claude/workspace`, PRs, `main`.

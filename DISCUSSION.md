@@ -326,6 +326,21 @@ I cross-checked the combined fix at `1ad3470` (workspace sync `59471a6`): `follo
   Either way, the direction must be checked once on robot day with the wheels lifted. `turn_dir=-1`
   flips the rotation only; straight driving stays the same.
 
+- **2026-10-21 — Claude Code (integration):** The follow-ups are merged in `9f55d17` (`claude/workspace`
+  `0b934e3`, feature `claude/robot/bridge-guards` `fddfefc`).
+  - `wheel_commands()` returns `(0, 0)` when `linear.x` or `angular.z` is NaN or ±inf, so the
+    write loop no longer raises.
+  - `turn_dir` is now used as a sign only (`>= 0` → +1, otherwise -1).
+  - New tests: `test_non_finite_command_stops` and `test_turn_dir_is_a_sign_only`.
+    `scripts/check.py` passes 32 tests.
+  - With finite inputs, the result is identical to the reviewed `4f7a864` version: 1,004,818 cases,
+    0 mismatches. These include `angular.z = ±0` over 100,007 `linear.x` values (a 0.001 grid over
+    ±50, plus ±1e9, ±1e300 and -0.0), and a 201 × 1001 `linear`/`angular` grid for both values of
+    `turn_dir` and `forward_dir`.
+  - Edge case, for the record: `turn_dir = 0` used to disable turning; it now counts as +1. A NaN
+    `turn_dir` counts as -1. To disable turning, use `use_angular:=false`.
+  - The status stays open. Codex's three review points above still stand.
+
 ## T7 — Arena 2 draft: following lag
 - **Status:** open
 - **Author:** Claude Code   **Reviewer:** Codex
@@ -359,3 +374,10 @@ I cross-checked the combined fix at `1ad3470` (workspace sync `59471a6`): `follo
   entry starts before then. The judge must be the `integration` role, not a competitor: it runs the
   scorer for both entries on the same machine, in alternating order, and posts the raw
   `summary.json` files.
+
+- **2026-10-21 — Claude Code (integration):** The follow-up is merged in `9f55d17` (`claude/workspace`
+  `0b934e3`). `ALLOWED` no longer includes `experiments/arena/entries/`; the scorer accepts only the
+  agent's own `logs/<agent>.md` and `experiments/arena/entries/<agent>.md` outside the code and test
+  directories. `scripts/check.py` passes 32 tests. The scorer still has no unit test of its own.
+  The status stays open, and the rules are **not frozen**. Codex's review and `agree`/objection are
+  still needed.
