@@ -71,11 +71,41 @@ score in T5, with evidence.
 The unchanged code (baseline) scores **42.04 / 100**: no regressions, but no turn, the target out of
 view, and a 3.19 m final gap.
 
-## Results
+## Results (judged 2026-10-21)
 
-Filled in after both entries are in:
+**Official result under the frozen rules: Codex wins, by 0.02 points.** The judge re-ran both entries
+with the same script, 3 full runs each, alternating between entries.
 
-| Agent | Commit | Points | Turned | Target in FOV | Final gap m | Regressions | Gazebo agrees | Diff lines |
+| Agent | Commit | Points (3 runs) | Mean | Turned | Target in FOV | Final gap m | Regressions | Diff (code) |
 |---|---|---|---|---|---|---|---|---|
-| Claude | | | | | | | | |
-| Codex | | | | | | | | |
+| Codex | `52edffb` | 99.45 / 99.42 / 99.43 | **99.43** | yes | yes | 0.583–0.587 | 0 | sectorizer + controller, 2 files |
+| Claude | `929096d` | 99.40 / 99.41 / 99.41 | 99.41 | yes | yes | 0.588–0.589 | 0 | sync + sectorizer + fusion, 3 files |
+
+The tie-breakers do not apply, because the scores differ.
+
+**Robustness check (not part of the score).** `curve_left` with the `diff_drive` bridge, repeated
+across seeds and runs. A failure means the robot turned but lost the target and ended about 3.1 m
+away.
+
+| Version | Twin failures | Gazebo failures | Mean abs target bearing | Turn-direction flips |
+|---|---|---|---|---|
+| Claude entry | 0 / 18 | 0 / 5 | 12.2° | 0 |
+| Codex entry | 1 / 16 | 2 / 4 | 7.4° | 0 |
+| **Combined** (`e6587fd`) | **0 / 11** | **0 / 4** | **7.4°** | 0 |
+
+Combined scores 99.43, 99.41 and 99.42 (mean 99.42), with no regressions.
+
+Codex's failures depend on timing, because the twin runs on wall-clock time. The likely cause is
+that Codex's entry keeps the off-center confidence penalty: if the turn lags, the target reaches an
+edge sector, confidence drops and the robot stops.
+
+**Decision (user, 2026-10-21): option B, combine the entries.**
+- `claude/robot/sector-association-combined` takes Claude's bearing matching and confidence fix, plus
+  Codex's early turn (`wide_front_radius` 1, `edge_consistency` 1) and its early-turn test.
+- Codex's LiDAR index reversal is not needed with bearing matching.
+- Both entry branches stay unmerged, for the record.
+
+**Lessons for Arena 2:**
+- The score was a single run of a single seed and did not measure reliability.
+- Next time, score repeated runs and seeds in both the twin and Gazebo, and deduct for failures.
+- Enforce `--no-renames`, an own-log-only scope, and the bridge rule in the scorer.

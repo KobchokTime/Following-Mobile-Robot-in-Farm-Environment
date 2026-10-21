@@ -12,6 +12,19 @@ from collections import deque
 import math
 
 
+def camera_bearing_rad(cx, image_width, hfov_deg):
+    """Bearing of image column cx in the robot frame (left positive), pinhole model."""
+    f = (image_width / 2.0) / math.tan(math.radians(hfov_deg) / 2.0)
+    return math.atan2(image_width / 2.0 - cx, f)
+
+
+def nearest_sector(bearing, sector_angles):
+    """Index of the LiDAR sector whose centre angle is closest to bearing (radians)."""
+    if not sector_angles:
+        return None
+    return min(range(len(sector_angles)), key=lambda i: abs(sector_angles[i] - bearing))
+
+
 class SyncFusionNode(Node):
     def __init__(self):
         super().__init__('sync_fusion_node')
@@ -21,11 +34,18 @@ class SyncFusionNode(Node):
         self.declare_parameter('buffer_sec', 2.0)
         self.declare_parameter('yolo_topic', '/target_centroid_sector')
         self.declare_parameter('lidar_topic', '/lidar_sector_dists')
+        self.declare_parameter('lidar_angles_topic', '/lidar_sector_angles')
+        # Camera geometry, used to turn a centroid column into a bearing (Image/Camera.py: 70 deg, 640 px)
+        self.declare_parameter('camera_hfov_deg', 70.0)
+        self.declare_parameter('image_width', 640)
 
         self.max_dt = float(self.get_parameter('max_dt').value)
         self.buffer_sec = float(self.get_parameter('buffer_sec').value)
         self.yolo_topic = str(self.get_parameter('yolo_topic').value)
         self.lidar_topic = str(self.get_parameter('lidar_topic').value)
+        self.camera_hfov_deg = float(self.get_parameter('camera_hfov_deg').value)
+        self.image_width = int(self.get_parameter('image_width').value)
+        self.lidar_angles = []  # centre angle of each LiDAR sector, robot frame, left positive
 
         # ---------- buffers ----------
         self.buf_yolo = deque()
@@ -45,6 +65,8 @@ class SyncFusionNode(Node):
             Int32MultiArray, self.yolo_topic, self.cb_yolo, qos_yolo)
         self.sub_lidar = self.create_subscription(
             Float32MultiArray, self.lidar_topic, self.cb_lidar, qos_lidar)
+        self.sub_angles = self.create_subscription(
+            Float32MultiArray, str(self.get_parameter('lidar_angles_topic').value), self.cb_angles, qos_lidar)
 
         # ---------- pub ----------
         self.pub_synced = self.create_publisher(
@@ -83,8 +105,11 @@ class SyncFusionNode(Node):
             return
         self.buf_lidar.append((t, list(msg.data)))
 
+    def cb_angles(self, msg):
+        self.lidar_angles = list(msg.data)
+
     def try_sync_from_yolo(self, ty, cx, cy, sector_id):
-        if not self.buf_lidar:
+        if not self.buf_lidar or not self.lidar_angles:
             return
 
         best = None
@@ -99,9 +124,13 @@ class SyncFusionNode(Node):
             return
 
         tl, lidar_data = best
+        # Match by direction, not by index: camera sectors split the image left to right,
+        # LiDAR sectors split an angle range in the other order and over a different width.
+        bearing = camera_bearing_rad(cx, self.image_width, self.camera_hfov_deg)
+        lidar_sector = nearest_sector(bearing, self.lidar_angles[:len(lidar_data)])
         dist = float('inf')
-        if 0 <= sector_id < len(lidar_data):
-            dist = lidar_data[sector_id]
+        if lidar_sector is not None:
+            dist = lidar_data[lidar_sector]
 
         # ✅ skip inf distance
         if not math.isfinite(dist):

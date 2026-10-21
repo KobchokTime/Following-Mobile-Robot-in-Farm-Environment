@@ -25,10 +25,10 @@ class FollowStopNode(Node):
         # angular / sector logic
         self.declare_parameter('center_sector', 4)        # sector กลาง
         self.declare_parameter('front_band_radius', 1)    # 4±1 = [3,5] = กลาง
-        self.declare_parameter('wide_front_radius', 2)    # 4±2 = [2,6] = ยังถือว่าหน้าตรง
+        self.declare_parameter('wide_front_radius', 1)    # 4±1 = [3,5]; sector 2/6 starts a turn
         self.declare_parameter('angular_gain', 0.10)
         self.declare_parameter('angular_limit', 0.25)
-        self.declare_parameter('edge_consistency', 3)     # ต้องอยู่นอก front หลายเฟรมติดก่อนค่อยหมุน
+        self.declare_parameter('edge_consistency', 1)     # หมุนเมื่อเป้าหมายเริ่มออกจากแถบกลาง
 
         # ---------- Load ----------
         self.target_distance   = float(self.get_parameter('target_distance').value)
