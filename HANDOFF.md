@@ -6,18 +6,18 @@ and review threads in [`DISCUSSION.md`](DISCUSSION.md).
 
 ## Integration lock
 
-- **Current owner:** Claude Code (integration)
-- **Status:** in-progress
-- **Files being edited:** `HANDOFF.md`, `DISCUSSION.md`, `logs/claude.md`; merging `claude/workspace` (`16ac740`)
-- **Last updated:** 2026-10-21 by Claude Code (20:58 Thai time)
+- **Current owner:** none
+- **Status:** ready
+- **Files being edited:** none
+- **Last updated:** 2026-10-21 by Claude Code (21:00 Thai time)
 
 ## Branches
 
 | Branch | State |
 |---|---|
 | `main` | Initial commit only. It receives `integration-hub` through a PR once the user approves. |
-| `integration-hub` | Has the robot recovery, Thesis Desk, quest sources, agent workflow, GUI smoke-test results, 12-week plan, Codex week-1 changes, the offline twin (`sim/`, twin CI, first simulated findings; merge `18c2303`), the Gazebo 3D twin (`sim/gazebo/`, `Dockerfile.gazebo`, `gazebo` CI job, cross-check; merge `cef985f`), the frozen Arena 1 rules, scorer and baseline (merge `d623baf`) the Arena 1 results plus the combined sector-association fix `e6587fd` (merge `4652571`), the drive bridge forwarding `angular.z` plus the Arena 2 draft (merge `4f7a864`, T6/T7), and the bridge guard follow-ups (non-finite guard, `turn_dir` as a sign only, Arena 2 entry scope; merge `9f55d17`). `scripts/check.py` passes (32 tests). |
-| `claude/workspace` | Merged into `integration-hub` at `9f55d17` (`0b934e3`: bridge guard follow-ups for T6/T7). Before that at `4f7a864` (`b36f31a`: bridge `angular.z`, Arena 2 draft), and before that at `7d400bb`, including the Arena 1 results and the combined fix `e6587fd`. The entry branch `claude/robot/arena-sector-association` (`929096d`) stays unmerged, for the record. |
+| `integration-hub` | Has the robot recovery, Thesis Desk, quest sources, agent workflow, GUI smoke-test results, 12-week plan, Codex week-1 changes, the offline twin (`sim/`, twin CI, first simulated findings; merge `18c2303`), the Gazebo 3D twin (`sim/gazebo/`, `Dockerfile.gazebo`, `gazebo` CI job, cross-check; merge `cef985f`), the frozen Arena 1 rules, scorer and baseline (merge `d623baf`) the Arena 1 results plus the combined sector-association fix `e6587fd` (merge `4652571`), the drive bridge forwarding `angular.z` plus the Arena 2 draft (merge `4f7a864`, T6/T7), the bridge guard follow-ups (non-finite guard, `turn_dir` as a sign only, Arena 2 entry scope; merge `9f55d17`), and the Arena 2 scorer validation, full-protocol reference (66.0/100) and calibration reconciliation (merge `ecc55ca`, T6/T7). `scripts/check.py` passes (41 tests). |
+| `claude/workspace` | Merged into `integration-hub` at `ecc55ca` (`16ac740`: Arena 2 scorer validation and calibration reconciliation for T6/T7). Before that at `9f55d17` (`0b934e3`: bridge guard follow-ups), and before that at `4f7a864` (`b36f31a`: bridge `angular.z`, Arena 2 draft), and before that at `7d400bb`, including the Arena 1 results and the combined fix `e6587fd`. The entry branch `claude/robot/arena-sector-association` (`929096d`) stays unmerged, for the record. |
 | `codex/workspace` | Synced through `integration-hub` `8afdae0` (workspace merge `aab2725`); the original Arena entry remains separate and unmerged. |
 | *To delete* | `integration/robot-thesis-desk`, `codex/robot-backup-quarantine` and `codex/thesis-desk`. They are fully merged, but the cloud session's git proxy cannot delete branches. The user deletes them on GitHub, or Codex runs `git push origin --delete ...` from Windows. |
 
@@ -67,15 +67,19 @@ The 12-week plan is in [`docs/PLAN.md`](docs/PLAN.md) (20 Oct 2026 to about 15 J
    - Codex agreed after verifying the carried-over code/test and passing 23 tests plus 3 fresh twin runs (seeds 0–2). Data: `experiments/arena/2026-10-20_sector-association.md`.
 8. **T6** in `DISCUSSION.md`: the drive bridge forwards `angular.z` (merge `4f7a864`; simulation
    only). The non-finite guard and `turn_dir` sign-only follow-ups are merged (`9f55d17`). Codex
-   agrees with default `turn_dir=+1` under the bridge's stated forward mapping; the calibration
-   record conflicts on `0x2089` and needs author reconciliation. Unit tests passed (9 focused, 32
-   full suite). Twin build succeeded but its run could not start because the overlay was full.
-   The direction must be checked on robot day with the wheels lifted (see *Robot-day checklist*).
+   agrees with default `turn_dir=+1` under the bridge's stated forward mapping. The calibration
+   record is reconciled in merge `ecc55ca` (`config/motor_wheel_calibration.md`: the table's signs are
+   bench-pulse signs; the bridge, `Joystick.py` and the 2026-09-20 evidence agree on forward).
+   `turn_dir=+1` stays. Codex confirms whether this resolves its calibration point. The thread stays
+   open until the lifted-wheel check on robot day (see *Robot-day checklist*).
 9. **T7** in `DISCUSSION.md`: the Arena 2 draft (following lag on the `fixed` bridge), merged in
-   `4f7a864`. The scorer's entry scope was tightened to `entries/<agent>.md` in `9f55d17`. Codex
-   requests scorer validation of minimum run counts and complete coverage; answered the three draft
-   questions. **Not frozen.** The judge is the `integration` role; no entry may start before both
-   agents agree and the freeze commit is named.
+   `4f7a864`. The scorer's entry scope was tightened to `entries/<agent>.md` in `9f55d17`. Codex's
+   change request (enforce minimum runs and coverage) is addressed in `ecc55ca`: `validate()` exits 2
+   without a score on an incomplete input set; 9 new tests. New reference on the full protocol:
+   66.0/100 (reproduced at merge time). Claude agrees with Codex's three answers and replied `agree`
+   to the rules as written. Two notes for Codex: repeated Gazebo files are not rejected, and
+   `--base-ref` is optional. **Not frozen** until Codex re-reviews and replies `agree`; the freeze
+   commit is then named in T7. The judge is the `integration` role.
 10. `integration-hub` → `main` (draft PR KobchokTime/Following-Mobile-Robot-in-Farm-Environment#2): needs every thread resolved and the user's approval.
 
 ## Codex — week 1 tasks
@@ -115,7 +119,13 @@ Sync `codex/workspace` with `integration-hub` first. Read `docs/PLAN.md` and rep
    re-run `tests/test_drive_bridge_mixing.py`, and say whether the default `turn_dir` should be +1
    or -1.
 10. **T7 review**: review the Arena 2 draft rules and `sim/arena/score_entry_v2.py`. Object or reply
-    `agree`, and answer the draft's 3 open questions. No entry starts before the freeze.
+    `agree`, and answer the draft's 3 open questions. No entry starts before the freeze. *(Done: change
+    requested, answers given.)*
+11. **T7 re-review**: review the scorer validation merged in `ecc55ca` (`validate()`,
+    `tests/test_arena2_scorer.py`, reference 66.0). Say whether repeated Gazebo files must be rejected
+    before the freeze. Reply `agree` or object in T7.
+12. **T6 calibration**: read the reconciliation section in `config/motor_wheel_calibration.md`
+    (`ecc55ca`) and confirm in T6 whether it resolves your calibration point.
 
 ## Robot-day checklist
 

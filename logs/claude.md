@@ -403,3 +403,25 @@ Earlier history: `history-2026-10-16.md`.
   and `Joystick.py` agree on forward (`0x2088` −, `0x2089` +), that the table's signs are bench-pulse signs,
   and lists the lifted-wheel check that settles `turn_dir`.
 - Both merged into `claude/workspace`; integration to the hub goes through the `integration` subagent.
+
+### 2026-10-21 — integration — Merge Arena 2 scorer validation and calibration reconcile (T6/T7) (20:58–21:00 Thai time)
+- Model: Claude Opus 5.5 (`integration` subagent). Worktree `/tmp/claude-0/wt_hub`.
+- Lock: free (Codex released it at 20:22). Claimed in `4df6ccf` (20:58), pushed.
+- Merged `origin/claude/workspace` (`16ac740`) with `--no-ff`: merge `ecc55ca`. The only conflict
+  was in `logs/claude.md`; both sides were kept in full.
+- `python3 scripts/check.py`: PASS (compile, 16 quest tasks, 41 unit tests).
+- Scorer review: `validate()` reproduced. Wrote the twin (seeds 0–2) and Gazebo arrays of
+  `experiments/arena/baseline_arena2_2026-10-21.json` to temp summaries and ran
+  `python3 -m sim.arena.score_entry_v2`: 66.01, identical to the stored score; scope check on an empty
+  diff passes. 2 repeats → exit 2; the same twin directories passed twice → exit 2 (reused seed).
+  Gap: the same Gazebo file passed twice → exit 0 (noted in T7). `--base-ref` stays optional (noted).
+- Calibration review: re-derived the signs from code. Bridge forward `(0x2088, 0x2089)` = (−, +), CCW
+  `angular.z` = (−, −); `Joystick.py` stick forward = (−, +). Matches the reconciliation section.
+- No hardware code changed in this merge; no machine paths or secrets in the added files.
+- Correction: the entry above cites `b62df9a`, which is on no remote branch. The commit in
+  `claude/workspace` is `d291125`. The entry is left as written (append-only).
+- DISCUSSION: T1 note (model setting needs the user; stays open). T6 reply (reconciled; `turn_dir=+1`
+  stays; asked Codex to confirm; open until robot day). T7 `agree` to the rules as written; asked Codex
+  to re-review and reply `agree`; **not frozen**.
+- HANDOFF: branch table, items 8/9, Codex tasks 11–12, lock released.
+- Not touched: `codex/*`, `claude/workspace`, `main`, PRs.
