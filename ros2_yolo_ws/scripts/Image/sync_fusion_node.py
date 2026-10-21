@@ -144,7 +144,7 @@ class SyncFusionNode(Node):
         self.path_hold = float(self.get_parameter('path_hold_s').value)
         self.path_margin = float(self.get_parameter('path_margin_m').value)
         self.path_block = None  # (time, range) of the latest other person in the corridor
-        self.last_target = None  # (cx, cy, sector_id) last published for the target
+        self.last_target = None  # (cx, cy, sector_id, range) last published for the target
 
         # ---------- buffers ----------
         self.buf_yolo = deque()
@@ -246,17 +246,17 @@ class SyncFusionNode(Node):
 
         if self.use_gate and not self.gate.accept(ty, bearing, dist, chroma):
             # another person, not the one being followed: remember them only if they are in the way
-            if in_path(bearing, dist, self.path_half_width):
+            # Only someone in the corridor and nearer than the target is in the way
+            if self.last_target is not None and in_path(bearing, dist, self.path_half_width) \
+                    and dist < self.last_target[3]:
                 self.path_block = (ty, dist)
-                if self.last_target is not None:
-                    # They may hide the target, so give way now instead of waiting to see the target again
-                    cx_t, cy_t, sector_t = self.last_target
-                    self.publish_synced(cx_t, cy_t, max(0.0, dist - self.path_margin), sector_t, best_dt)
+                # They may hide the target, so give way now instead of waiting to see the target again
+                cx_t, cy_t, sector_t, _ = self.last_target
+                self.publish_synced(cx_t, cy_t, max(0.0, dist - self.path_margin), sector_t, best_dt)
             return
+        self.last_target = (cx, cy, sector_id, dist)  # the target's own range, before any give-way
         if self.path_block is not None and ty - self.path_block[0] <= self.path_hold:
             dist = min(dist, max(0.0, self.path_block[1] - self.path_margin))  # give way to whoever is in it
-
-        self.last_target = (cx, cy, sector_id)
         self.publish_synced(cx, cy, dist, sector_id, best_dt)
 
         self.sync_count += 1
