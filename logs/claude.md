@@ -332,6 +332,33 @@ Earlier history: `history-2026-10-16.md`.
   scores 65.9/100 (lag 15.9/50). Not frozen; it waits for Codex.
 - No GitHub connector exists in claude.ai, so dashboard CI stays a snapshot.
 
+### 2026-10-21 — integration — Merge bridge angular.z and Arena 2 draft; open T6 and T7
+- Model: Claude Opus 5.5 (`integration` subagent). Worktree `/tmp/claude-0/hub-wt6`, removed at the end.
+- Lock: free (last released by Codex). Claimed in `09c8a43` (`handoff: claim bridge fix and Arena 2 draft`), pushed.
+- Merged `origin/claude/workspace` (`b36f31a`) into `integration-hub` with `--no-ff`: merge `4f7a864`.
+  There were no conflicts. `logs/claude.md` merged cleanly with no lines removed, and no Codex files
+  were touched.
+- `python3 scripts/check.py`: PASS (compile, 16 quest tasks, 30 unit tests).
+  `tests.test_drive_bridge_mixing` re-run on its own: 7/7 OK.
+- Bridge review (`zlac_joystick_bridge.py`):
+  - With `angular.z = 0`, the register values are identical to the old code, as floats and after
+    `int()`. Checked over 210,006 `linear.x` values, including the ±40 clamp, ±1e9, 1e300 and -0.0.
+  - `update_loop` timeout-to-zero, the ZLAC driver class, `destroy_node` and `main` are unchanged.
+  - Difference: `linear.x = ±inf` (or a non-finite `angular.z`) now gives NaN, so `int()` raises in
+    `update_loop`. The old code clamped ±inf to ±40. Follow-up for Claude's workspace: add a
+    `math.isfinite` guard.
+  - `track_width_m` and `turn_dir` are not range-checked.
+  - The calibration table's sign column and `Joystick.py`'s stick-left mapping both disagree with
+    the derived counter-clockwise sign. This is raised in T6.
+- Arena 2 scorer: `ALLOWED` admits all of `experiments/arena/entries/`, not only
+  `entries/<agent>.md`. Raised in T7; follow-up for Claude's workspace before the freeze.
+- DISCUSSION: opened T6 (drive bridge forwards angular.z) and T7 (Arena 2 draft: following lag),
+  both open with Codex as reviewer.
+- HANDOFF: added Codex tasks 9 (review T6) and 10 (review T7), a *Robot-day checklist* with the
+  lifted-wheel `turn_dir` check, and open items 8 (T6) and 9 (T7). Updated the branch table.
+  Released the lock.
+- Not touched: `codex/*`, `claude/workspace`, PRs, `main`.
+
 ### 2026-10-21 — robot / integration — Review follow-ups for T6/T7; dashboard extended (20:15 Thai time)
 - `claude/robot/bridge-guards`:
   - `wheel_commands()` returns 0 for NaN/inf input. Before, `int(NaN)` would have raised every tick.
@@ -344,6 +371,23 @@ Earlier history: `history-2026-10-16.md`.
   - A robot speed chart.
   - CI snapshot with 36 runs; 30 unit tests.
   - There is no GitHub connector in claude.ai, so CI stays a snapshot.
+
+### 2026-10-21 — integration — Merge bridge guard follow-ups (T6/T7)
+- Model: Claude Opus 5.5 (`integration` subagent). Worktree `/tmp/claude-0/hub-wt7`, removed at the end.
+- Lock: free. Claimed in `34503bb` (`handoff: claim bridge guard follow-ups`), pushed.
+- Merged `origin/claude/workspace` (`0b934e3`) with `--no-ff`: merge `9f55d17`. The only conflict
+  was in `logs/claude.md`; both sides were kept in full.
+- `python3 scripts/check.py`: PASS (compile, 16 quest tasks, 32 unit tests).
+- `wheel_commands()` with finite inputs is identical to the reviewed `4f7a864` version: 1,004,818 cases,
+  0 mismatches. These include `angular.z = ±0` over 100,007 `linear.x` values and a
+  `linear`/`angular` grid for `turn_dir`/`forward_dir` = ±1. `use_angular=False` is also identical.
+  NaN/±inf returns `(0, 0)`. Edge case noted in T6: `turn_dir = 0` now counts as +1, where it used to
+  disable turning.
+- `score_entry_v2.py`: `experiments/arena/entries/` was removed from `ALLOWED`; only
+  `entries/<agent>.md` is accepted.
+- DISCUSSION: replied in T6 and T7 that the follow-ups are merged. Both threads stay open for Codex.
+- HANDOFF: updated the branch table, open items 8 and 9 and the test count (32), and released the lock.
+- Not touched: `codex/*`, `claude/workspace`, PRs, `main`.
 
 ### 2026-10-21 — qa / research — Answer Codex's T6/T7 reviews (20:30–20:57 Thai time)
 - Read Codex's hub commits `cc9f563` and `e0da45c`: T1 (no exact model ID available), T6 `agree` with
@@ -360,6 +404,28 @@ Earlier history: `history-2026-10-16.md`.
   and lists the lifted-wheel check that settles `turn_dir`.
 - Both merged into `claude/workspace`; integration to the hub goes through the `integration` subagent.
 
+### 2026-10-21 — integration — Merge Arena 2 scorer validation and calibration reconcile (T6/T7) (20:58–21:00 Thai time)
+- Model: Claude Opus 5.5 (`integration` subagent). Worktree `/tmp/claude-0/wt_hub`.
+- Lock: free (Codex released it at 20:22). Claimed in `4df6ccf` (20:58), pushed.
+- Merged `origin/claude/workspace` (`16ac740`) with `--no-ff`: merge `ecc55ca`. The only conflict
+  was in `logs/claude.md`; both sides were kept in full.
+- `python3 scripts/check.py`: PASS (compile, 16 quest tasks, 41 unit tests).
+- Scorer review: `validate()` reproduced. Wrote the twin (seeds 0–2) and Gazebo arrays of
+  `experiments/arena/baseline_arena2_2026-10-21.json` to temp summaries and ran
+  `python3 -m sim.arena.score_entry_v2`: 66.01, identical to the stored score; scope check on an empty
+  diff passes. 2 repeats → exit 2; the same twin directories passed twice → exit 2 (reused seed).
+  Gap: the same Gazebo file passed twice → exit 0 (noted in T7). `--base-ref` stays optional (noted).
+- Calibration review: re-derived the signs from code. Bridge forward `(0x2088, 0x2089)` = (−, +), CCW
+  `angular.z` = (−, −); `Joystick.py` stick forward = (−, +). Matches the reconciliation section.
+- No hardware code changed in this merge; no machine paths or secrets in the added files.
+- Correction: the entry above cites `b62df9a`, which is on no remote branch. The commit in
+  `claude/workspace` is `d291125`. The entry is left as written (append-only).
+- DISCUSSION: T1 note (model setting needs the user; stays open). T6 reply (reconciled; `turn_dir=+1`
+  stays; asked Codex to confirm; open until robot day). T7 `agree` to the rules as written; asked Codex
+  to re-review and reply `agree`; **not frozen**.
+- HANDOFF: branch table, items 8/9, Codex tasks 11–12, lock released.
+- Not touched: `codex/*`, `claude/workspace`, `main`, PRs.
+
 ### 2026-10-21 — qa — Close the two scorer gaps the integration review found (21:05 Thai time)
 - `8d31ec2` on `claude/qa/arena2-scorer-validation`: `score_entry_v2.py` exits 2 if the same twin run directory or
   Gazebo summary is passed twice (both reference Gazebo runs use seed 0, so a seed check could not catch it).
@@ -367,8 +433,98 @@ Earlier history: `history-2026-10-16.md`.
   scope clean; `check.py` passes 41 tests.
 - Correction: the reference commit cited as `b62df9a` in the previous entry was amended; the pushed commit is `d291125`.
 
+### 2026-10-21 — integration — Merge Arena 2 scorer gap fixes (T7) (21:01–21:01 Thai time)
+- Model: Claude Opus 5.5 (`integration` subagent). Worktree `/tmp/claude-0/wt_hub`.
+- Lock: free. Claimed in `19fc5c8` (21:01), pushed.
+- Merged `origin/claude/workspace` (`3b2cad5`, feature `8d31ec2`) with `--no-ff`: merge `da04d16`.
+  The only conflict was in `logs/claude.md`; both sides were kept in full.
+- `python3 scripts/check.py`: PASS (41 unit tests).
+- Re-verified: a repeated Gazebo file → exit 2; a repeated twin directory → exit 2; missing `--base-ref`
+  or `--agent` → argparse error, exit 2; full reference → 66.01, `out_of_scope` empty.
+- Remaining limit (noted in T7, not blocking): duplicates are found by resolved path, so a copy under
+  another name passes. The dedupe has no unit test.
+- Log note: the qa entry above is stamped 21:05, but its commit `3b2cad5` was made at 21:00 Thai time.
+- DISCUSSION: T7 note that both gaps are fixed; Codex to review the scorer as it stands; **not frozen**.
+- HANDOFF: branch table, item 9, Codex task 11, lock released.
+- Not touched: `codex/*`, `claude/workspace`, `main`, PRs.
+
 ### 2026-10-21 — qa — Missing-seed gap from Codex's T7 re-review (21:33 Thai time)
 - Codex (`e05738f`) agreed in T6 and requested one more T7 change: a twin repeat with no `seed` field passed `validate()`.
 - `f1def1f`: `validate()` rejects a repeat unless every row has an integer seed (`None`, strings, floats and bools are
   rejected); regression test `test_missing_or_non_integer_seed`. `check.py` passes 42 tests; the reference still
   validates and scores 66.01.
+
+### 2026-10-21 — integration — Merge Arena 2 integer seed check (T6/T7) (21:33–21:34 Thai time)
+- Model: Claude Opus 5.5 (`integration` subagent). Worktree `/tmp/claude-0/wt_hub`.
+- Lock: free (Codex released it at 21:30; hub head `e05738f`). Claimed in `0a46287` (21:33), pushed.
+- Merged `origin/claude/workspace` (`abcbb9c`, feature `f1def1f`) with `--no-ff`: merge `8c77425`.
+  The only conflict was in `logs/claude.md`; both sides were kept in full.
+- `python3 scripts/check.py`: PASS (42 unit tests).
+- Re-verified Codex's reproducer: a complete repeat with `seed` removed from every row, plus seeds 1 and 2
+  → `validate()` reports "every row needs an integer seed", CLI exit 2. Full reference → 66.01,
+  `out_of_scope` empty.
+- DISCUSSION: T6 note of Codex's `agree`; open only for robot day. T7 `agree` stands; asked Codex for a
+  final `agree` or objection; **not frozen**.
+- HANDOFF: branch table, items 8/9, Codex task 11 (final T7 review of the seed check), task 12 done apart
+  from robot day; lock released.
+- Not touched: `codex/*`, `claude/workspace`, `main`, PRs.
+
+### 2026-10-21 — integration — Freeze Arena 2 (T7) (22:01–22:02 Thai time)
+- Model: Claude Opus 5.5 (`integration` subagent). Worktree `/tmp/claude-0/wt_hub`.
+- Codex replied `agree` in T7 (hub `779e7e0`, 22:00); Claude had already agreed.
+- Lock: free (Codex released it at 21:59). Claimed in `d767eda` (22:01), pushed.
+- Freeze commit `9b78f1f` (`arena: freeze Arena 2 rules and scorer`): status line of
+  `experiments/arena/2026-10-21_arena2-draft.md` (draft → frozen) and the `score_entry_v2.py` docstring
+  only. No rule text or logic changes, no renames. `python3 scripts/check.py`: PASS (42 tests).
+- DISCUSSION T7: named `9b78f1f` as the freeze commit; entries `claude/robot/arena2-lag` and
+  `codex/robot/arena2-lag` branch from it; SHAs posted in T7; no reading the other branch until both
+  are in; the integration role judges with `--base-ref 9b78f1f`, same machine, alternating order. T7 open
+  until judging.
+- HANDOFF: item 9 frozen; new Codex task 13 (build the Codex entry from `9b78f1f`, post the SHA in T7);
+  lock released.
+- Not touched: `codex/*`, `claude/workspace`, `main`, PRs. No entry started.
+
+### 2026-10-21 — integration — Post Claude Arena 2 entry SHA (T7) (22:35 Thai time)
+- Lock claimed and released; posted only "Claude entry: `claude/robot/arena2-lag` @ `3848164` (from `9b78f1f`)" in T7 (ancestry from the freeze commit checked; content not read). HANDOFF item 9 notes it is waiting for the Codex entry (task 13).
+
+### 2026-10-22 — integration — Judge Arena 2 and post the results (T7) (2026-10-21 23:33 – 2026-10-22 00:29 Thai time)
+- Model: Claude Opus 5.5 (`integration` subagent), acting as judge.
+- Entries: Claude `claude/robot/arena2-lag` @ `3848164`, Codex `codex/robot/arena2-lag` @ `64dbe7f`; both from
+  the freeze commit `9b78f1f`.
+- Detached checkouts `/tmp/claude-0/judge_claude` and `/tmp/claude-0/judge_codex`. Built `twin:judge-<agent>` and
+  `twin-gz:judge-<agent>` (23:33:35–23:33:43). Image code hashes match the checkouts (claude `62979093515f`,
+  codex `abd3c74e45e9`).
+- Ran the protocol in alternating order, 23:34:02–00:26:53: twin seeds 0–2, then Gazebo gz1/gz2. All runs
+  exited 0. Raw runs are kept in `/tmp/claude-0/judge_runs`.
+- Scored in wt_hub at `2afe284` with `--base-ref 9b78f1f` (00:27): Claude 97.84, Codex 60.89. Both in scope;
+  no contact. Codex: 5/5 `curve_left`/`fixed` failures. Re-scoring from the committed raw files gives
+  identical JSON.
+- `check.py` in each entry checkout: Claude PASS (49), Codex PASS (43). Hub `check.py`: PASS (42).
+- Hub: claimed the lock in `8d912f8` (00:28). Results and raw data in `a8f1cae`. T7 judge reply; HANDOFF item 9
+  and Codex task 14 (cross-check); lock released.
+- Neither entry is merged; merging waits for Codex's cross-check and the user's decision.
+- Not touched: `codex/*`, the entry branches, `claude/workspace`, `main`, PRs.
+
+### 2026-10-21 — robot — Arena 2 entry (22:05–22:35 Thai time)
+- Branch `claude/robot/arena2-lag` from the freeze commit `9b78f1f`. I did not read Codex's branch.
+- `3633324`: speed feed-forward (`speed_command()`) plus a higher turn gain and limit in `follow_stop_node.py`; 7 new tests;
+  the early-turn test's clock stub supports subtraction. `check.py` passes 49 tests.
+- Tuning: a scratch kinematic model, then quick twin runs on curve_left/fixed (turn gain 0.2/0.6 gave max bearing 31°; 0.3/0.8 gave 21.5°).
+- Full protocol self-score: **97.87/100** (lag 47.87, reliability 30, behaviour 20, scope clean). Reference: 66.0.
+  Thin margin: in crossing on diff_drive the distractor passes 0.42 m from the robot's centre (contact line 0.40 m).
+- Details: `experiments/arena/entries/claude.md`. The judge (integration) runs the official score after both entries are in.
+
+### 2026-10-22 — integration — Merge the Arena 2 winner (T7) (00:59–01:00 Thai time)
+- Model: Claude Opus 5.5 (`integration` subagent). The user decided to merge the winning entry now
+  (relayed by the coordinator).
+- Lock: free. Claimed in `35fa722` (00:59), pushed.
+- Merged `origin/claude/robot/arena2-lag` (`3848164`) with `--no-ff`: merge `d8401a9`. The only conflict
+  was in `logs/claude.md`; both sides were kept. `experiments/arena/entries/claude.md` kept its Arena 1 part
+  (no lines removed).
+- `python3 scripts/check.py`: PASS (49 tests). `zlac_joystick_bridge.py`: no diff. No paths or secrets added.
+- DISCUSSION T7: named `d8401a9` and recorded Codex's relayed cross-check (codex/workspace `8509c82` at 00:54;
+  re-score 97.84 / 60.89 with an empty out_of_scope; check.py 49 on `3848164`; no blocking problem). Codex's own
+  post waits for its push approval. The Codex entry `64dbe7f` stays unmerged. T7 open until Codex posts `agree`.
+- HANDOFF: branch table (49 tests, `d8401a9`), item 9 merged, Codex task 14 → post the `agree` in T7; lock
+  released.
+- Not touched: `codex/*`, `claude/workspace`, `main`, PRs.

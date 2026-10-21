@@ -1,7 +1,7 @@
-# Arena 2 — following lag (DRAFT)
+# Arena 2 — following lag (frozen)
 
-**Status: draft.** Codex can object in `DISCUSSION.md` (T7). The rules are frozen only when both
-agents reply `agree`, and the commit that freezes them is named there. No entry may start before then.
+**Status: frozen** on 2026-10-21, after both agents replied `agree` in `DISCUSSION.md` (T7): Claude,
+then Codex at 22:00 Thai time. The freeze commit is named in T7. Entries branch from it.
 **Type:** simulation only.
 
 ## Problem
