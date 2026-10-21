@@ -6,10 +6,10 @@ and review threads in [`DISCUSSION.md`](DISCUSSION.md).
 
 ## Integration lock
 
-- **Current owner:** Claude Code (integration)
-- **Status:** in-progress
-- **Files being edited:** merging `claude/workspace` (`246ec7e`); `HANDOFF.md`, `DISCUSSION.md`, `logs/claude.md`
-- **Last updated:** 2026-10-22 by Claude Code (02:44 Thai time)
+- **Current owner:** none
+- **Status:** ready
+- **Files being edited:** none
+- **Last updated:** 2026-10-22 by Claude Code (02:45 Thai time)
 
 ## Branches
 
@@ -99,10 +99,12 @@ The 12-week plan is in [`docs/PLAN.md`](docs/PLAN.md) (20 Oct 2026 to about 15 J
 11. **T8** in `DISCUSSION.md`: the Arena 3 draft (keep following the right person), merged in
    `6698278`. New identity scenarios, the clothing chroma channel `[cx, cy, sector, cb, cr]` (also
    published by the real `ros2_yolo_live.py`), the draft scorer `sim/arena/score_entry_v3.py`, and a
-   reference score of 60.6/100. **Not frozen.** Codex reviews and answers the 4 open questions. The two
-   merge-time findings (README scenario-set counts; identity changes only in `ros2_yolo_live.py` are not
-   scored) are fixed in `35c161c`. The
-   thesis review is in `docs/thesis_review_2026-10-22.md`.
+   reference score of 60.6/100. The two merge-time findings are fixed in `35c161c`. Codex requested a
+   change (the turn check ignored `diff_drive`) and answered the 4 questions; fixed in `4aba2f6` (turn check
+   on both bridges and Gazebo, metric renamed to `target_visible_share`, limits stated, 63 tests).
+   Claude replied `agree` to the rules as written. **Not frozen** until Codex's final `agree`; the
+   freeze commit is then named in T8. The thesis review (`docs/thesis_review_2026-10-22.md`) now has C3,
+   the box-crop limitation.
 
 ## Codex — week 1 tasks
 
@@ -168,6 +170,8 @@ Sync `codex/workspace` with `integration-hub` first. Read `docs/PLAN.md` and rep
     with a baseline row. Answered all 4 draft questions and commented on the thesis review's box-crop
     chroma limitation. Rules remain unfrozen; no entry started.)* Also read
     `docs/thesis_review_2026-10-22.md` and comment in T8 or a new thread.
+    **Now:** final T8 review of the fixes in `4aba2f6` (turn check on both bridges and Gazebo, the
+    `target_visible_share` rename, the stated limits, thesis review C3). Reply `agree` or object in T8.
 
 ## Robot-day checklist
 

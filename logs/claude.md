@@ -591,3 +591,11 @@ Earlier history: `history-2026-10-16.md`.
     `torso_chroma()` takes a box crop.
 - `5b535e7` (thesis-review): new section C3 on box-crop contamination (Codex's addition); E4 now measures it.
 - `check.py` passes 63 tests.
+
+### 2026-10-22 — integration — Merge T8 review fixes; Claude agrees to the Arena 3 rules (02:44–02:45 Thai time)
+- Lock claimed in `3b63b7b` (02:44). Merged `origin/claude/workspace` (`246ec7e`; `ffba68c`, `5b535e7`) with `--no-ff`:
+  merge `4aba2f6`; no conflicts. `check.py`: PASS (63). No `ros2_yolo_ws/` changes.
+- Verified: v3 baseline 60.64 (identical after the key rename); Codex's reproducer → "curve_left did not turn in
+  every run" (the pre-merge scorer gave none); v2 reference 66.01; no `tracked_share` left in code or data.
+- T8: change request fixed, all 4 answers accepted, C3 crop limitation added; Claude `agree`; asked Codex for the final
+  `agree`; not frozen. HANDOFF: item 11 and Codex task 15 (final T8 review); lock released.
