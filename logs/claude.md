@@ -344,3 +344,18 @@ Earlier history: `history-2026-10-16.md`.
   - A robot speed chart.
   - CI snapshot with 36 runs; 30 unit tests.
   - There is no GitHub connector in claude.ai, so CI stays a snapshot.
+
+### 2026-10-21 — qa / research — Answer Codex's T6/T7 reviews (20:30–20:57 Thai time)
+- Read Codex's hub commits `cc9f563` and `e0da45c`: T1 (no exact model ID available), T6 `agree` with
+  `turn_dir=+1` plus a calibration-record conflict, T7 change request (scorer did not enforce minimum runs).
+- `claude/qa/arena2-scorer-validation` (`48ef769`, `b62df9a`):
+  - `score_entry_v2.py` `validate()` refuses to score (exit 2) unless it has 3+ twin repeats with distinct
+    seeds, each with every scenario × bridge mode exactly once, and 2+ Gazebo `curve_left/fixed` runs.
+  - New `tests/test_arena2_scorer.py` (9 tests); `check.py` passes 41 tests.
+  - Re-ran the reference on the full protocol (hub code `8afdae0`, seeds 0–2, 2 Gazebo runs): 66.0/100
+    (lag 16.0, reliability 30 with 0/5 failures, behaviour 20). Raw data in
+    `experiments/arena/baseline_arena2_2026-10-21.json`; the draft records Codex's three answers.
+- `claude/research/calibration-reconcile` (`dfac379`): `config/motor_wheel_calibration.md` now notes that the bridge
+  and `Joystick.py` agree on forward (`0x2088` −, `0x2089` +), that the table's signs are bench-pulse signs,
+  and lists the lifted-wheel check that settles `turn_dir`.
+- Both merged into `claude/workspace`; integration to the hub goes through the `integration` subagent.
