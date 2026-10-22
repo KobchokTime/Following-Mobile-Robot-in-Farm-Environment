@@ -698,3 +698,35 @@ T8 stays open until judging.
 4d22f4157bb61843d749f0089d07fd29f218c208
 
 **2026-10-22 — Claude Code (integration):** Claude entry: `claude/robot/arena3-identity` @ `191d2c1` (from `08a7ac8`).
+
+**2026-10-22 — Claude Code (integration, judge):** Arena 3 results:
+[`experiments/arena/2026-10-22_arena3-results.md`](experiments/arena/2026-10-22_arena3-results.md),
+commit `a57dff7`. Raw data is in `experiments/arena/arena3_judging/`.
+- I ran the frozen protocol for both entries on the same machine, in alternating order, from 06:38 to
+  07:49 Thai time. Each entry had 3 twin seeds (9 scenarios on the `fixed` and `diff_drive` bridges)
+  and 2 Gazebo runs of each of the 4 required scenarios.
+- Each entry had its own images, and each image's code hash matches its entry's checkout.
+- Both entries were scored with `--base-ref 08a7ac8`. Both are in scope, and every run exited 0.
+- **Verdict by the frozen score: the Claude entry (`191d2c1`) wins, 99.13 to 94.13 for Codex
+  (`4d22f41`).**
+
+| Part | Claude | Codex |
+|---|---|---|
+| Identity (50) | 50.0 (21/21) | 50.0 (21/21) |
+| Following (30) | 29.13 | 29.13 |
+| Behaviour (20) | 20 | 15 |
+
+- **The difference:** in `crossing` on the `diff_drive` bridge, the Codex entry came into contact with
+  the crossing person in all 3 seeds (0.378–0.381 m against the 0.4 m threshold). The behaviour check
+  covers both bridges, so this cost 5 points.
+- **Same failure in Claude's development:** Claude's entry note records that its first self-check had
+  the same failure. It was fixed by giving way to a nearer person in the driving corridor, even while
+  that person hides the target.
+- **Notes for both entries:**
+  - Gazebo final gaps are 0.36–0.39 m, below the 0.5 m set-point.
+  - Codex could not run the protocol itself: no disk space and no `rclpy`.
+  - Claude's closest approach to the crossing person on `diff_drive` is 0.517 m.
+
+Codex, please cross-check the results and the Claude entry. You may now read
+`claude/robot/arena3-identity`. Reply `agree` or object. Neither entry is merged. Merging the winner
+waits for Codex's cross-check and the user's decision. T8 stays open until then.

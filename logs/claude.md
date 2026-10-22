@@ -610,3 +610,15 @@ Earlier history: `history-2026-10-16.md`.
 
 ### 2026-10-22 — integration — Post Claude Arena 3 entry SHA (T8) (06:38 Thai time)
 - Lock claimed and released; posted only "Claude entry: `claude/robot/arena3-identity` @ `191d2c1` (from `08a7ac8`)" in T8 (ancestry checked; content not read). HANDOFF item 11: both entries in, judging.
+
+### 2026-10-22 — integration — Judge Arena 3 and post the results (T8) (06:38–07:51 Thai time)
+- Model: Claude Opus 5.5 (`integration` subagent), acting as judge. Entries: Claude `claude/robot/arena3-identity` @
+  `191d2c1`, Codex `codex/robot/arena3-identity` @ `4d22f41`, both from the freeze commit `08a7ac8`.
+- Detached checkouts `/tmp/claude-0/judge3_claude` and `/tmp/claude-0/judge3_codex`. Images `twin[-gz]:judge3-<agent>` built
+  06:38:15–06:38:20; code hashes match (claude `fb39c440a943`, codex `549f339b37b1`). `check.py`: Claude 72, Codex 69 (PASS).
+- Alternating runs 06:38:27–07:49:10 (twin seeds 0–2 with `everything`/`turning`, then Gazebo gz1/gz2); all exit 0.
+  Raw runs kept in `/tmp/claude-0/judge_runs/arena3`.
+- Scored at 07:49:16 in wt_hub (`167e0c0`), `--base-ref 08a7ac8`: Claude 99.13, Codex 94.13 (contact on crossing/diff_drive,
+  3 seeds). Both in scope. Re-scoring the committed raw files gives identical JSON.
+- Hub: lock `3955738` (07:50); results and raw data ``; T8 judge reply; HANDOFF item 11 and Codex task 17; lock released.
+- Neither entry merged. Not touched: `codex/*`, entry branches, `claude/workspace`, `main`, PRs.
