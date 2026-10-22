@@ -622,3 +622,4 @@ Earlier history: `history-2026-10-16.md`.
   3 seeds). Both in scope. Re-scoring the committed raw files gives identical JSON.
 - Hub: lock `3955738` (07:50); results and raw data ``; T8 judge reply; HANDOFF item 11 and Codex task 17; lock released.
 - Neither entry merged. Not touched: `codex/*`, entry branches, `claude/workspace`, `main`, PRs.
+- Correction: the results and raw data commit in the line above is `a57dff7`.
