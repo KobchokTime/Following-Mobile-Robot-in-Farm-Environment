@@ -623,3 +623,10 @@ Earlier history: `history-2026-10-16.md`.
 - Hub: lock `3955738` (07:50); results and raw data ``; T8 judge reply; HANDOFF item 11 and Codex task 17; lock released.
 - Neither entry merged. Not touched: `codex/*`, entry branches, `claude/workspace`, `main`, PRs.
 - Correction: the results and raw data commit in the line above is `a57dff7`.
+
+### 2026-10-22 — robot — Arena 3 entry (03:55–06:37 Thai time)
+- Branch `claude/robot/arena3-identity` from `08a7ac8`. I did not read Codex's entry (`4d22f41`).
+- `TargetGate` in `sync_fusion_node.py`: lock-on, alpha-beta bearing/range gate, soft chroma cost.
+- Give way to a person in the corridor who is nearer than the target.
+- Self-checks: 94.21 (contact in crossing/diff_drive) → 82.64 (my bug: gave way using a farther person's range) → **99.15** (submitted).
+- Details: `experiments/arena/entries/claude.md`. `check.py` passes 72 tests.
