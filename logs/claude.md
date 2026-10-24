@@ -646,3 +646,27 @@ Earlier history: `history-2026-10-16.md`.
 - Codex agreed in T8 (`3b6c5ed`). The user decided to merge; the Claude entry is merged on the hub (`efda1b0`); T8 is resolved.
 - Synced `claude/workspace` with hub `8f319b8`. `check.py` passes 72 tests.
 - Open: T1, T2, T3, T4, T6. Robot day: E1–E7 checklist and the new target-gate note in HANDOFF.
+
+### 2026-10-24 — research / robot — E7, robot-day kit, dashboard Arena 3 (16:35–17:49 Thai time)
+- `claude/research/e7-ablation` (`7d9d9a9`, `eb5ec78`):
+  - `run_scenario --ros-param` passes parameters to every robot node.
+  - E7 runs the Arena 3 winner with each part switched off, 30 identity runs per condition:
+    | Condition | Runs passed | Contacts |
+    |---|---|---|
+    | full | 30/30 | 0 |
+    | no colour | 27/30 | 0 |
+    | no give-way | 28/30 | 2 |
+    | no gate | 12/30 | 8 |
+  - Without colour, stand_aside swaps to the bystander, whose geometric cost is about 8.6 against a gate of 9.
+  - Write-up: `experiments/sim/2026-10-24_e7_ablation.md`.
+- `claude/robot/robot-day-kit` (`5596d34`, `919123e`):
+  - `/yolo_frame` from `ros2_yolo_live.py` and from the twin: capture stamp and boxes with conf and Cb/Cr.
+  - `tools/robot_day/analyze.py` (E1–E4).
+  - `tools/robot_day/turn_check.py` (T6).
+  - `docs/robot_day_protocol.md`.
+  - Tested end to end on twin bags.
+- Dashboard (https://claude.ai/artifact/JmYTWLwJiiPDRKiG2L1pdS):
+  - Arena 3 score card, an identity-runs card and an E7 card.
+  - The replay now has the second-person scenarios, plus "Before A3" and the Arena 3 entries.
+  - Unit tests 83/83.
+- Both branches merged into `claude/workspace`; `check.py` passes 83 tests.
