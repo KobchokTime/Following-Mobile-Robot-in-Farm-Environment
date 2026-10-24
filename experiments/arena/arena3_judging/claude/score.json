@@ -1,0 +1,34 @@
+{
+  "points": 99.13,
+  "max_points": 100,
+  "identity": {
+    "points": 50.0,
+    "runs": 21,
+    "passed": 21,
+    "mean_visible_share": 1.0,
+    "passed_per_scenario": {
+      "crossing": "3/3",
+      "side_by_side": "5/5",
+      "side_by_side_same": "5/5",
+      "head_on": "3/3",
+      "stand_aside": "5/5"
+    }
+  },
+  "following": {
+    "points": 29.13,
+    "mean_median_gap_m": {
+      "straight": 0.582,
+      "stop_and_go": 0.549,
+      "curve_left": 0.565
+    },
+    "curve_left_runs": 5,
+    "curve_left_failures": 0
+  },
+  "behaviour": {
+    "points": 20,
+    "failed_checks": []
+  },
+  "twin_repeats": 3,
+  "gazebo_runs": 8,
+  "out_of_scope": []
+}

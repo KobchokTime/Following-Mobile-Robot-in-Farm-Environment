@@ -9,7 +9,7 @@ and review threads in [`DISCUSSION.md`](DISCUSSION.md).
 - **Current owner:** none
 - **Status:** ready
 - **Files being edited:** none
-- **Last updated:** 2026-10-22 by Claude Code (03:54 Thai time)
+- **Last updated:** 2026-10-22 by Claude Code (07:51 Thai time)
 
 ## Branches
 
@@ -101,7 +101,13 @@ The 12-week plan is in [`docs/PLAN.md`](docs/PLAN.md) (20 Oct 2026 to about 15 J
    (`claude/robot/arena3-identity`, `codex/robot/arena3-identity`) branch from `08a7ac8`; each agent posts
    only its entry SHA in T8; neither reads the other's branch until both are in. The `integration` role
    judges with `score_entry_v3 --base-ref 08a7ac8`, both entries on the same machine in alternating order,
-   and posts the raw summaries. T8 stays open until judging. History: the draft was merged in
+   and posts the raw summaries. T8 stays open until judging. **Both entries are in:** Claude
+   `claude/robot/arena3-identity` @ `191d2c1`, Codex `codex/robot/arena3-identity` @ `4d22f41` (both
+   unmerged).
+   **Judged 2026-10-22** (results `experiments/arena/2026-10-22_arena3-results.md`, commit `a57dff7`): the
+   Claude entry wins by the frozen score, 99.13 to 94.13. Both entries passed 21/21 identity runs; Codex
+   had contact with the crossing person on `diff_drive` in all 3 seeds. Neither entry is merged. Merging
+   the winner waits for Codex's cross-check (Codex task 17) and the user's decision. History: the draft was merged in
    `6698278`. New identity scenarios, the clothing chroma channel `[cx, cy, sector, cb, cr]` (also
    published by the real `ros2_yolo_live.py`), the draft scorer `sim/arena/score_entry_v3.py`, and a
    reference score of 60.6/100. The two merge-time findings are fixed in `35c161c`. Codex requested a
@@ -186,6 +192,13 @@ Sync `codex/workspace` with `integration-hub` first. Read `docs/PLAN.md` and rep
       it, say so in your entry note.
     - Do not read `claude/robot/arena3-identity` until both entries are in. Post only the entry commit
       SHA in T8.
+    *(Entry pushed: `4d22f4157bb61843d749f0089d07fd29f218c208`; `scripts/check.py` passes 69 tests.
+    Full twin/Gazebo protocol unavailable because the root overlay is full and `rclpy` is absent; see
+    the entry note. Leave full scoring to the judge.)* *(Judged 2026-10-22: 94.13.)*
+17. **Arena 3 cross-check** (T8): cross-check `experiments/arena/2026-10-22_arena3-results.md`, the raw
+    data in `experiments/arena/arena3_judging/`, and the Claude entry `claude/robot/arena3-identity` @
+    `191d2c1` (you may read it now). Re-score from the committed files if you can. Reply `agree` or
+    object in T8.
 
 ## Robot-day checklist
 
