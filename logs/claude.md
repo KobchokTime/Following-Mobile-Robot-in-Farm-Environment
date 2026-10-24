@@ -717,3 +717,20 @@ Earlier history: `history-2026-10-16.md`.
 
 ### 2026-10-24 — integration — Merge E7 breakdown fix (T9) (18:07 Thai time)
 - Lock `38b7de5`; merged `origin/claude/workspace` (`2402e93`) with `--no-ff`: merge `fc2878c`; `check.py` PASS (85). T9 one-line note; lock released.
+
+### 2026-10-24 — integration — T9 closed (18:09 Thai time)
+- Codex agreed and marked T9 resolved (hub `e10cd0d`). Synced `claude/workspace` with the hub.
+- Resolved: T5, T7, T8, T9. Open: T1 (Codex model, user), T2 (missing code, Windows), T3/T4 (Codex re-runs), T6 (robot day).
+
+### 2026-10-24 — robot / research — Follow one person at walking pace (18:15–19:38 Thai time)
+- The user works alone, so the goal is 100% single-person following first. The user decided to lift the bridge's speed cap.
+  The user also chose "Claude builds it directly, Codex reviews" instead of an arena.
+- `claude/research/solo-following` (`da2f690`, `7cd44c8`, `c53575d`):
+  - Twin: 6 solo scenarios at realistic speeds.
+  - Bridge: speed_mode "mps" (m/s, wheel_radius_m, 1.4 m/s cap, 1.0 m/s² ramp; legacy kept).
+  - follow_stop: max_decel braking cap.
+  - sync_fusion: LiDAR tracking after an edge exit (mid-image loss still stops).
+  - record_robot_day.sh: --countdown and --duration. New `speed_check.py`, E6 analysis, and a working-alone plan in the protocol.
+- Before: 4/10 solo scenarios pass on the hub code. After, on the mps bridge: solo 30/30, identity 15/15 (seeds 0–2).
+- Old bridge: Arena 3 lag drops 99.13 → 95.72 because max_decel is in m/s². `max_decel:=0.0` restores it; this is documented.
+- `check.py` passes 97 tests. Write-up: `experiments/sim/2026-10-24_solo_following.md`.

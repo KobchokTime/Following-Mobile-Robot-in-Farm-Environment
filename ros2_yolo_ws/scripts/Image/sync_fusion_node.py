@@ -8,6 +8,7 @@ import rclpy
 from rclpy.node import Node
 from rclpy.qos import QoSProfile, QoSReliabilityPolicy, QoSHistoryPolicy, QoSDurabilityPolicy
 from std_msgs.msg import Int32MultiArray, Float32MultiArray
+from sensor_msgs.msg import LaserScan
 from collections import deque
 import math
 
@@ -28,6 +29,28 @@ def nearest_sector(bearing, sector_angles):
 def in_path(bearing, rng, half_width_m):
     """True if a return at (bearing, range) lies ahead within the robot's driving corridor."""
     return rng * math.cos(bearing) > 0.0 and abs(rng * math.sin(bearing)) <= half_width_m
+
+
+def lidar_track(points, pred_bearing, pred_range, window_rad, range_tol):
+    """Where the target is in a LiDAR scan, near its predicted bearing and range.
+
+    points: (robot-frame bearing, range) pairs. Returns (bearing, range) of the closest return of the
+    group within the window, or None. Used while the target is outside the camera's view.
+    """
+    near = [(b, r) for b, r in points
+            if abs((b - pred_bearing + math.pi) % (2.0 * math.pi) - math.pi) <= window_rad
+            and abs(r - pred_range) <= range_tol]
+    if not near:
+        return None
+    return min(near, key=lambda p: p[1])
+
+
+def bearing_to_cx(bearing, image_width, hfov_deg):
+    """Image column for a bearing (inverse of camera_bearing_rad), clamped to the image."""
+    f = (image_width / 2.0) / math.tan(math.radians(hfov_deg) / 2.0)
+    half = math.radians(hfov_deg) / 2.0
+    b = max(-half, min(half, bearing))
+    return int(round(min(image_width - 1, max(0, image_width / 2.0 - f * math.tan(b)))))
 
 
 class TargetGate:
@@ -77,6 +100,17 @@ class TargetGate:
         if chroma is not None and self.chroma is not None:
             c += ((chroma[0] - self.chroma[0]) ** 2 + (chroma[1] - self.chroma[1]) ** 2) / self.sc ** 2
         return c
+
+    def accept_lidar(self, t, bearing, rng):
+        """Update the track from a LiDAR-only fix (the caller already matched it to the prediction)."""
+        dt = max(1e-3, t - self.t)
+        pb, pr = self._predict(t)
+        eb, er = bearing - pb, rng - pr
+        self.bearing, self.range = pb + self.alpha * eb, pr + self.alpha * er
+        if dt < 1.0:
+            self.bearing_rate += self.beta * eb / dt
+            self.range_rate += self.beta * er / dt
+        self.t = t
 
     def accept(self, t, bearing, rng, chroma=None):
         """True if this detection is the target; updates the track when it is."""
@@ -129,6 +163,13 @@ class SyncFusionNode(Node):
         self.declare_parameter('path_half_width_m', 0.7)
         self.declare_parameter('path_hold_s', 0.5)
         self.declare_parameter('path_margin_m', 0.4)  # treat them as this much nearer, so the robot gives way early
+        # LiDAR keeps the target when it leaves the camera's view (a side step, a sharp turn)
+        self.declare_parameter('lidar_track', True)
+        self.declare_parameter('scan_topic', '/scan')
+        self.declare_parameter('lidar_angle_offset_deg', 180.0)  # as lidar_sectorizer_node.py angle_offset
+        self.declare_parameter('lidar_track_after_s', 0.3)  # camera silent this long -> use the LiDAR
+        self.declare_parameter('lidar_track_max_s', 5.0)    # give up after this long without the camera
+        self.declare_parameter('lidar_edge_deg', 8.0)  # only when last seen this close to the image edge
 
         self.max_dt = float(self.get_parameter('max_dt').value)
         self.buffer_sec = float(self.get_parameter('buffer_sec').value)
@@ -145,6 +186,14 @@ class SyncFusionNode(Node):
         self.path_margin = float(self.get_parameter('path_margin_m').value)
         self.path_block = None  # (time, range) of the latest other person in the corridor
         self.last_target = None  # (cx, cy, sector_id, range) last published for the target
+        self.use_lidar_track = bool(self.get_parameter('lidar_track').value)
+        self.lidar_offset = math.radians(float(self.get_parameter('lidar_angle_offset_deg').value))
+        self.lidar_after = float(self.get_parameter('lidar_track_after_s').value)
+        self.lidar_max = float(self.get_parameter('lidar_track_max_s').value)
+        self.scan_points = []     # latest scan as (robot-frame bearing, range)
+        self.last_camera_fix = None  # time of the last camera detection accepted as the target
+        self.last_camera_bearing = 0.0
+        self.edge_rad = math.radians(self.camera_hfov_deg / 2.0 - float(self.get_parameter('lidar_edge_deg').value))
 
         # ---------- buffers ----------
         self.buf_yolo = deque()
@@ -166,6 +215,8 @@ class SyncFusionNode(Node):
             Float32MultiArray, self.lidar_topic, self.cb_lidar, qos_lidar)
         self.sub_angles = self.create_subscription(
             Float32MultiArray, str(self.get_parameter('lidar_angles_topic').value), self.cb_angles, qos_lidar)
+        self.sub_scan = self.create_subscription(
+            LaserScan, str(self.get_parameter('scan_topic').value), self.cb_scan, qos_lidar)
 
         # ---------- pub ----------
         self.pub_synced = self.create_publisher(
@@ -173,6 +224,7 @@ class SyncFusionNode(Node):
 
         # ---------- timers ----------
         self.gc_timer = self.create_timer(0.5, self.gc_buffers)
+        self.track_timer = self.create_timer(0.1, self.track_with_lidar)
         self.sync_count = 0
 
         self.get_logger().info(
@@ -205,6 +257,38 @@ class SyncFusionNode(Node):
         if not msg.data:
             return
         self.buf_lidar.append((t, list(msg.data)))
+
+    def cb_scan(self, msg):
+        pts = []
+        for i, r in enumerate(msg.ranges):
+            if math.isfinite(r) and msg.range_min < r < msg.range_max:
+                a = (msg.angle_min + i * msg.angle_increment + self.lidar_offset + math.pi) % (2.0 * math.pi) - math.pi
+                pts.append((a, r))
+        self.scan_points = pts
+
+    def track_with_lidar(self):
+        """The target stepped out of the camera's view: keep it with the LiDAR and turn towards it.
+
+        Only when it was last seen near the image edge. If it vanished from the middle of the image
+        the camera or detector failed instead, and the controller's normal stop applies.
+        """
+        if not (self.use_gate and self.use_lidar_track and self.gate.locked and self.last_target is not None):
+            return
+        now = self.now_sec()
+        if self.last_camera_fix is None or now - self.last_camera_fix < self.lidar_after \
+                or now - self.last_camera_fix > self.lidar_max or abs(self.last_camera_bearing) < self.edge_rad:
+            return
+        pb, pr = self.gate._predict(now)
+        found = lidar_track(self.scan_points, pb, pr, math.radians(25.0), 0.5)
+        if found is None:
+            return
+        bearing, rng = found
+        self.gate.accept_lidar(now, bearing, rng)
+        # the image edge on the target's side: the controller turns that way at its full turn rate
+        cx = 0 if bearing > 0 else self.image_width - 1
+        sector = 0 if bearing > 0 else 8
+        _, cy, _, _ = self.last_target
+        self.publish_synced(cx, cy, rng, sector, 0.0)
 
     def cb_angles(self, msg):
         self.lidar_angles = list(msg.data)
@@ -255,6 +339,8 @@ class SyncFusionNode(Node):
                 self.publish_synced(cx_t, cy_t, max(0.0, dist - self.path_margin), sector_t, best_dt)
             return
         self.last_target = (cx, cy, sector_id, dist)  # the target's own range, before any give-way
+        self.last_camera_fix = ty
+        self.last_camera_bearing = bearing
         if self.path_block is not None and ty - self.path_block[0] <= self.path_hold:
             dist = min(dist, max(0.0, self.path_block[1] - self.path_margin))  # give way to whoever is in it
         self.publish_synced(cx, cy, dist, sector_id, best_dt)

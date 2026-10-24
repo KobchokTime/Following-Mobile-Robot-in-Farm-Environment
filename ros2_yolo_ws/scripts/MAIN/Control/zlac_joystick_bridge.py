@@ -26,6 +26,15 @@ USE_ANGULAR = True     # False = old behaviour (linear.x only)
 TRACK_WIDTH_M = 0.40   # distance between the wheels; not measured on this chassis yet
 TURN_DIR = 1.0         # set -1.0 if a positive angular.z spins the robot clockwise
 
+# Speed mode. "mps": /cmd_vel is in m/s and rad/s, turned into wheel RPM with the wheel radius,
+# capped at MAX_SPEED_MPS per wheel and ramped at MAX_ACCEL_MPS2. "legacy": the old mapping
+# (40 RPM per unit of linear.x, capped at 40 RPM, about 0.36 m/s with a 0.085 m wheel).
+SPEED_MODE = "mps"
+WHEEL_RADIUS_M = 0.085   # not measured on this chassis yet; measure on robot day
+MAX_SPEED_MPS = 1.4      # brisk walking pace
+MAX_ACCEL_MPS2 = 1.0     # per wheel; the ramp also applies when slowing down
+UPDATE_HZ = 10.0
+
 
 def wheel_commands(linear, angular, speed_gain=SPEED_GAIN, max_cmd=MAX_CMD, track_width=TRACK_WIDTH_M,
                    forward_dir=FORWARD_DIR, turn_dir=TURN_DIR, use_angular=USE_ANGULAR):
@@ -47,6 +56,33 @@ def wheel_commands(linear, angular, speed_gain=SPEED_GAIN, max_cmd=MAX_CMD, trac
     scale = max(1.0, abs(left) / max_cmd, abs(right) / max_cmd)
     left, right = left / scale, right / scale
     return -right, left
+
+def mps_to_rpm(mps, wheel_radius=WHEEL_RADIUS_M):
+    return mps * 60.0 / (2.0 * math.pi * wheel_radius)
+
+
+def wheel_commands_mps(linear, angular, wheel_radius=WHEEL_RADIUS_M, max_speed=MAX_SPEED_MPS,
+                       track_width=TRACK_WIDTH_M, forward_dir=FORWARD_DIR, turn_dir=TURN_DIR,
+                       use_angular=USE_ANGULAR):
+    """(0x2088, 0x2089) RPM targets for a /cmd_vel in m/s and rad/s ("mps" mode).
+
+    Same channels, signs and turn shape as wheel_commands(); each wheel's speed is capped at
+    max_speed (m/s), scaling both together so a turn keeps its shape.
+    """
+    if not (math.isfinite(linear) and math.isfinite(angular)):
+        return 0.0, 0.0
+    turn_dir = 1.0 if turn_dir >= 0 else -1.0
+    turn = turn_dir * angular * track_width / 2.0 if use_angular else 0.0
+    left = forward_dir * (linear - turn)
+    right = forward_dir * (linear + turn)
+    scale = max(1.0, abs(left) / max_speed, abs(right) / max_speed)
+    left, right = mps_to_rpm(left / scale, wheel_radius), mps_to_rpm(right / scale, wheel_radius)
+    return -right, left
+
+
+def ramp(current, target, max_step):
+    """Move current towards target by at most max_step."""
+    return current + max(-max_step, min(max_step, target - current))
 
 # ============== ZLAC DRIVER ===============
 class ZLAC8015D:
@@ -96,18 +132,29 @@ class DriveBridge(Node):
         self.declare_parameter('use_angular', USE_ANGULAR)
         self.declare_parameter('track_width_m', TRACK_WIDTH_M)
         self.declare_parameter('turn_dir', TURN_DIR)
+        self.declare_parameter('speed_mode', SPEED_MODE)
+        self.declare_parameter('wheel_radius_m', WHEEL_RADIUS_M)
+        self.declare_parameter('max_speed_mps', MAX_SPEED_MPS)
+        self.declare_parameter('max_accel_mps2', MAX_ACCEL_MPS2)
         self.use_angular = bool(self.get_parameter('use_angular').value)
         self.track_width = float(self.get_parameter('track_width_m').value)
         self.turn_dir = float(self.get_parameter('turn_dir').value)
+        self.speed_mode = str(self.get_parameter('speed_mode').value)
+        self.wheel_radius = float(self.get_parameter('wheel_radius_m').value)
+        self.max_speed = float(self.get_parameter('max_speed_mps').value)
+        # largest RPM change per update in "mps" mode
+        self.max_step = mps_to_rpm(float(self.get_parameter('max_accel_mps2').value) / UPDATE_HZ, self.wheel_radius)
         self.zlac = ZLAC8015D(PORT, SLAVE_ID, BAUD)
         self.zlac.enable_velocity()
 
         self.last_cmd_time = time.time()
         self.left = 0.0
         self.right = 0.0
+        self.out_left = 0.0   # what was last written, after the ramp ("mps" mode)
+        self.out_right = 0.0
 
         self.sub = self.create_subscription(Twist, '/cmd_vel', self.cmd_callback, 10)
-        self.timer = self.create_timer(0.1, self.update_loop)
+        self.timer = self.create_timer(1.0 / UPDATE_HZ, self.update_loop)
 
         self.get_logger().info("✅ ZLAC Drive Bridge started (listening to /cmd_vel)")
 
@@ -115,9 +162,14 @@ class DriveBridge(Node):
         linear = msg.linear.x
         angular = msg.angular.z
         # self.left / self.right are the values for registers 0x2088 / 0x2089 (see wheel_commands)
-        self.left, self.right = wheel_commands(
-            linear, angular, track_width=self.track_width,
-            turn_dir=self.turn_dir, use_angular=self.use_angular)
+        if self.speed_mode == "legacy":
+            self.left, self.right = wheel_commands(
+                linear, angular, track_width=self.track_width,
+                turn_dir=self.turn_dir, use_angular=self.use_angular)
+        else:
+            self.left, self.right = wheel_commands_mps(
+                linear, angular, wheel_radius=self.wheel_radius, max_speed=self.max_speed,
+                track_width=self.track_width, turn_dir=self.turn_dir, use_angular=self.use_angular)
 
         self.last_cmd_time = time.time()
 
@@ -134,7 +186,12 @@ class DriveBridge(Node):
             self.right = 0.0
 
         # ส่งค่าปัจจุบันเข้าไดรฟ์ทุก 0.1 วินาที
-        self.zlac.set_velocity(self.left, self.right)
+        if self.speed_mode == "legacy":
+            self.zlac.set_velocity(self.left, self.right)
+        else:
+            self.out_left = ramp(self.out_left, self.left, self.max_step)
+            self.out_right = ramp(self.out_right, self.right, self.max_step)
+            self.zlac.set_velocity(self.out_left, self.out_right)
 
     def destroy_node(self):
         # ตอนปิดโปรแกรม ค่อย soft stop + hard stop
