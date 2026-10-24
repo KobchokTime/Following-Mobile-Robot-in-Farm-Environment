@@ -69,6 +69,12 @@ class SpeedFeedForwardTest(unittest.TestCase):
         _, ff = self.cmd(1.0, 0.0, 30.0, **PARAMS)
         self.assertAlmostEqual(ff, 0.5)
 
+    def test_braking_caps_speed_to_what_can_stop_in_the_gap(self):
+        linear, _ = self.cmd(0.2, 1.0, 0.1, **PARAMS, max_decel=0.8)
+        self.assertAlmostEqual(linear, (2 * 0.8 * 0.2) ** 0.5)
+        linear, _ = self.cmd(2.0, 1.0, 0.1, **PARAMS, max_decel=0.8)
+        self.assertGreater(linear, 1.7)  # far away: not limited
+
     def test_output_is_clamped_to_max_speed(self):
         linear, _ = self.cmd(5.0, 1.0, 0.1, **PARAMS)
         self.assertEqual(linear, 3.5)

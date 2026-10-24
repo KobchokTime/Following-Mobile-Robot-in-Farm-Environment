@@ -27,8 +27,9 @@ from rclpy.node import Node
 from std_msgs.msg import Int32MultiArray, String
 from tf2_msgs.msg import TFMessage
 
-from sim.twin.scenarios import ALL_SCENARIOS, make_people
-from sim.twin.world import RobotParams, SensorParams, bridge_rpm, observe_clothing, project_detections, wheel_twist
+from sim.twin.scenarios import SCENARIO_LOOKUP, make_people
+from sim.twin.world import (RobotParams, SensorParams, bridge_rpm, observe_clothing, project_detections, ramp_rpm,
+                            wheel_twist)
 
 CONTROL_HZ = 50.0
 SENSOR_HZ = 10.0
@@ -43,7 +44,7 @@ class GzTwinNode(Node):
         self.declare_parameter("log_path", "")
         self.declare_parameter("seed", 0)
         name = str(self.get_parameter("scenario").value)
-        self.spec = ALL_SCENARIOS[name]
+        self.spec = SCENARIO_LOOKUP[name]
         self.people = make_people(self.spec)
         self.blackouts = self.spec.get("blackouts", ())
         self.robot = RobotParams(bridge_mode=str(self.get_parameter("bridge_mode").value))
@@ -111,7 +112,8 @@ class GzTwinNode(Node):
             self.pub_people[p.name].publish(msg)
 
         age = None if self.cmd_t is None else self.now() - self.cmd_t
-        self.rpm_left, self.rpm_right = bridge_rpm(self.robot, self.cmd, age)
+        self.rpm_left, self.rpm_right = ramp_rpm(self.robot, (self.rpm_left, self.rpm_right),
+                                                 bridge_rpm(self.robot, self.cmd, age), 1.0 / CONTROL_HZ)
         self.v, self.w = wheel_twist(self.robot, self.rpm_left, self.rpm_right)
         out = Twist()
         out.linear.x, out.angular.z = self.v, self.w

@@ -39,6 +39,8 @@ class RobotParams:
     speed_gain: float = 40.0  # zlac_joystick_bridge.py SPEED_GAIN
     max_cmd_rpm: float = 40.0  # zlac_joystick_bridge.py MAX_CMD
     cmd_timeout_s: float = 1.0  # zlac_joystick_bridge.py TIMEOUT
+    max_speed_mps: float = 1.4  # zlac_joystick_bridge.py MAX_SPEED_MPS ("mps" mode)
+    max_accel_mps2: float = 1.0  # zlac_joystick_bridge.py MAX_ACCEL_MPS2 ("mps" mode)
 
 
 @dataclass
@@ -121,6 +123,13 @@ def bridge_rpm(r: RobotParams, cmd: Tuple[float, float], age_s: Optional[float])
         left, right = (lin - turn) * r.speed_gain, (lin + turn) * r.speed_gain
         scale = max(1.0, abs(left) / r.max_cmd_rpm, abs(right) / r.max_cmd_rpm)
         return left / scale, right / scale
+    if r.bridge_mode == "mps":
+        # zlac_joystick_bridge.py speed_mode "mps": m/s -> RPM with the wheel radius, capped per wheel.
+        # The acceleration ramp is applied in World.step / the Gazebo node, which keep the state.
+        to_rpm = 60.0 / (2.0 * math.pi * r.wheel_radius_m)
+        left, right = lin - ang * r.track_width_m / 2.0, lin + ang * r.track_width_m / 2.0
+        scale = max(1.0, abs(left) / r.max_speed_mps, abs(right) / r.max_speed_mps)
+        return left / scale * to_rpm, right / scale * to_rpm
     if r.bridge_mode == "diff_drive":
         to_rpm = 60.0 / (2.0 * math.pi * r.wheel_radius_m)
         left = (lin - ang * r.track_width_m / 2.0) * to_rpm
@@ -128,6 +137,14 @@ def bridge_rpm(r: RobotParams, cmd: Tuple[float, float], age_s: Optional[float])
         scale = max(1.0, abs(left) / r.max_cmd_rpm, abs(right) / r.max_cmd_rpm)
         return left / scale, right / scale
     raise ValueError(f"unknown bridge_mode {r.bridge_mode!r}")
+
+
+def ramp_rpm(r: RobotParams, current: Tuple[float, float], target: Tuple[float, float], dt: float) -> Tuple[float, float]:
+    """The bridge's acceleration ramp ("mps" mode only; other modes change speed at once)."""
+    if r.bridge_mode != "mps":
+        return target
+    step = r.max_accel_mps2 * dt * 60.0 / (2.0 * math.pi * r.wheel_radius_m)
+    return tuple(c + max(-step, min(step, t - c)) for c, t in zip(current, target))
 
 
 def wheel_twist(r: RobotParams, rpm_left: float, rpm_right: float) -> Tuple[float, float]:
@@ -216,7 +233,7 @@ class World:
         return bridge_rpm(self.robot, self._cmd, age)
 
     def step(self, dt: float) -> None:
-        self.rpm_left, self.rpm_right = self._bridge()
+        self.rpm_left, self.rpm_right = ramp_rpm(self.robot, (self.rpm_left, self.rpm_right), self._bridge(), dt)
         self.v, self.w = wheel_twist(self.robot, self.rpm_left, self.rpm_right)
         self.yaw = (self.yaw + self.w * dt + math.pi) % (2.0 * math.pi) - math.pi
         self.x += self.v * math.cos(self.yaw) * dt

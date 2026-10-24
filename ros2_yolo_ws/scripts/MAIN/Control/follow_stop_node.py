@@ -3,17 +3,22 @@ import rclpy
 from rclpy.node import Node
 from std_msgs.msg import Float32MultiArray
 from geometry_msgs.msg import Twist
+import math
 from math import exp, isfinite
 
 
 def speed_command(error_dist, speed_ff, dt, linear_gain, tolerance, max_linear_speed,
-                  ff_gain, ff_max, ff_decay_s):
+                  ff_gain, ff_max, ff_decay_s, max_decel=0.0):
     """Linear command and the updated speed feed-forward, both in /cmd_vel linear.x units.
 
     The feed-forward learns the command that keeps pace with a walking target (an integral of the
     gap error), so the gap settles near the set-point instead of where P-only control balances.
     It only grows while the target is farther than the set-point and bleeds off quickly once the
     robot is closer, so a target that stops does not get run into.
+
+    max_decel (in /cmd_vel units per second, 0 = off) caps the forward speed at the speed the robot
+    can still stop from within the remaining gap, sqrt(2 * max_decel * error). The drive bridge
+    ramps the wheels, so without this a fast robot overshoots a target that stops.
     """
     dt = max(0.0, min(dt, 0.5))
     if error_dist > 0.0:
@@ -29,6 +34,8 @@ def speed_command(error_dist, speed_ff, dt, linear_gain, tolerance, max_linear_s
         linear_x = speed_ff
     else:
         linear_x = linear_gain * error_dist + speed_ff
+    if max_decel > 0.0 and linear_x > 0.0:
+        linear_x = min(linear_x, math.sqrt(2.0 * max_decel * max(0.0, error_dist)))
     linear_x = max(min(linear_x, max_linear_speed), -max_linear_speed)
     return linear_x, speed_ff
 
@@ -48,6 +55,8 @@ class FollowStopNode(Node):
         self.declare_parameter('speed_ff_gain', 1.0)      # per (m · s)
         self.declare_parameter('speed_ff_max', 1.0)       # the bridge saturates at 1.0 (40 RPM)
         self.declare_parameter('speed_ff_decay_s', 0.3)   # time constant once closer than the set-point
+        # braking: never faster than the robot can stop from within the gap (bridge ramp is 1.0 m/s^2)
+        self.declare_parameter('max_decel', 0.8)
 
         # init dist
         self.declare_parameter('init_dist_min', 0.5)
@@ -70,6 +79,7 @@ class FollowStopNode(Node):
         self.speed_ff_gain     = float(self.get_parameter('speed_ff_gain').value)
         self.speed_ff_max      = float(self.get_parameter('speed_ff_max').value)
         self.speed_ff_decay_s  = float(self.get_parameter('speed_ff_decay_s').value)
+        self.max_decel         = float(self.get_parameter('max_decel').value)
         self.init_dist_min     = float(self.get_parameter('init_dist_min').value)
         self.init_dist_max     = float(self.get_parameter('init_dist_max').value)
 
@@ -146,7 +156,7 @@ class FollowStopNode(Node):
         self.last_ctrl_time = now
         linear_x, self.speed_ff = speed_command(
             error_dist, self.speed_ff, dt, self.linear_gain, self.tolerance, self.max_linear_speed,
-            self.speed_ff_gain, self.speed_ff_max, self.speed_ff_decay_s)
+            self.speed_ff_gain, self.speed_ff_max, self.speed_ff_decay_s, self.max_decel)
 
         # ---------- Angular control (Bayesian / previous sector) ----------
         center = self.center_sector

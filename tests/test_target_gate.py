@@ -12,13 +12,14 @@ NODE = ROOT / "ros2_yolo_ws" / "scripts" / "Image" / "sync_fusion_node.py"
 
 
 def _load():
-    names = ["rclpy", "rclpy.node", "rclpy.qos", "std_msgs", "std_msgs.msg"]
+    names = ["rclpy", "rclpy.node", "rclpy.qos", "std_msgs", "std_msgs.msg", "sensor_msgs", "sensor_msgs.msg"]
     stubs = {n: types.ModuleType(n) for n in names}
     stubs["rclpy.node"].Node = object
     for k in ("QoSProfile", "QoSReliabilityPolicy", "QoSHistoryPolicy", "QoSDurabilityPolicy"):
         setattr(stubs["rclpy.qos"], k, object)
     stubs["std_msgs.msg"].Int32MultiArray = object
     stubs["std_msgs.msg"].Float32MultiArray = object
+    stubs["sensor_msgs.msg"].LaserScan = object
     previous = {k: sys.modules.get(k) for k in stubs}
     sys.modules.update(stubs)
     try:
@@ -44,6 +45,25 @@ class TargetGateTest(unittest.TestCase):
         module = _load()
         cls.Gate = module.TargetGate
         cls.in_path = staticmethod(module.in_path)
+        cls.lidar_track = staticmethod(module.lidar_track)
+        cls.bearing_to_cx = staticmethod(module.bearing_to_cx)
+
+    def test_lidar_track_finds_the_target_beside_the_image(self):
+        pts = [(D(-60), 0.9), (D(-58), 0.85), (D(10), 3.0), (D(170), 0.5)]
+        self.assertAlmostEqual(self.lidar_track(pts, D(-50), 0.8, D(25), 0.5)[1], 0.85)
+        self.assertIsNone(self.lidar_track(pts, D(40), 0.8, D(25), 0.5))   # nothing there
+        self.assertIsNone(self.lidar_track(pts, D(-50), 2.0, D(25), 0.5))  # wrong range
+
+    def test_bearing_to_cx_is_the_inverse_and_clamps(self):
+        self.assertEqual(self.bearing_to_cx(0.0, 640, 70.0), 320)
+        self.assertEqual(self.bearing_to_cx(D(80), 640, 70.0), 0)     # far left of the image
+        self.assertEqual(self.bearing_to_cx(D(-80), 640, 70.0), 639)  # far right
+
+    def test_lidar_fix_moves_the_track(self):
+        g = self.Gate()
+        g.accept(0.0, 0.0, 0.8)
+        g.accept_lidar(0.5, D(-45), 0.9)
+        self.assertLess(g.bearing, D(-20))
 
     def test_corridor(self):
         self.assertTrue(self.in_path(D(10), 1.0, 0.45))    # 0.17 m to the side
