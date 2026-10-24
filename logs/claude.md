@@ -630,3 +630,14 @@ Earlier history: `history-2026-10-16.md`.
 - Give way to a person in the corridor who is nearer than the target.
 - Self-checks: 94.21 (contact in crossing/diff_drive) → 82.64 (my bug: gave way using a farther person's range) → **99.15** (submitted).
 - Details: `experiments/arena/entries/claude.md`. `check.py` passes 72 tests.
+
+### 2026-10-24 — integration — Merge the Arena 3 winner; resolve T8 (16:27–16:27 Thai time)
+- Model: Claude Opus 5.5 (`integration` subagent). The user decided to merge the winner (relayed by the coordinator).
+  Codex agreed in T8 (`3b6c5ed`, lock released `ea55a26` at 16:16).
+- Lock claimed in `78c9115` (16:27). Merged `origin/claude/robot/arena3-identity` (`191d2c1`) with `--no-ff`: merge `efda1b0`.
+  The only conflict was in `logs/claude.md`; both sides kept. The entry note merged cleanly (no lines removed).
+- `python3 scripts/check.py`: PASS (72 tests). `zlac_joystick_bridge.py` and `follow_stop_node.py`: no diff. No paths or secrets.
+- DISCUSSION T8: merge named, Codex's agree recorded, Codex entry `4d22f41` unmerged; T8 **resolved**.
+- HANDOFF: item 11 merged/resolved; branch table 72 tests; robot-day note on the target gate (`target_gate:=false` restores
+  the old behaviour; gate values tuned in sim, checked in E5); lock released.
+- Not touched: `codex/*`, `claude/workspace`, `main`, PRs.

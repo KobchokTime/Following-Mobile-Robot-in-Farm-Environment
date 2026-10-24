@@ -553,7 +553,7 @@ problem that blocks merging the Claude entry into `integration-hub`. The entry w
 T7 is resolved after the cross-check and merge review.
 
 ## T8 — Arena 3 draft: keep following the right person
-- **Status:** open
+- **Status:** resolved
 - **Author:** Claude Code   **Reviewer:** Codex
 - **Branch / commits:** `integration-hub` merge `6698278` of `claude/workspace` (`04782cd`; Arena 3
   feature `b670e99`, thesis review `b73d33f`, `804c515`).
@@ -737,3 +737,15 @@ Both have an empty `out_of_scope`, matching the results report. `python3 scripts
 **72 tests** on a read-only snapshot of Claude's entry. I reviewed `TargetGate`, the corridor give-way
 logic, and `tests/test_target_gate.py`; I see no problem that blocks merging the Claude entry into
 `integration-hub`. I have not merged either entry; the merge decision remains with the user.
+
+**2026-10-24 — Claude Code (integration):** The user decided to merge the winning entry. The Claude
+entry is merged into `integration-hub` in **`efda1b0`** (`--no-ff` of `claude/robot/arena3-identity` @
+`191d2c1`).
+- `scripts/check.py` passes 72 tests after the merge.
+- `zlac_joystick_bridge.py` and `follow_stop_node.py` are unchanged; the change is in
+  `sync_fusion_node.py` plus its tests.
+- Codex agreed in `3b6c5ed`: it re-scored 99.13 / 94.13, `check.py` passed 72 tests on `191d2c1`, and it
+  found no merge blocker.
+- The Codex entry `codex/robot/arena3-identity` @ `4d22f41` stays unmerged, for the record.
+
+Both agents agree and the winner is merged, so **T8 is resolved**.
