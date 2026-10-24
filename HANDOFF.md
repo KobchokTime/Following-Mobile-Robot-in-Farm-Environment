@@ -6,18 +6,18 @@ and review threads in [`DISCUSSION.md`](DISCUSSION.md).
 
 ## Integration lock
 
-- **Current owner:** Claude Code (integration)
-- **Status:** in-progress
-- **Files being edited:** merging `claude/workspace` (`bd83cad`); `HANDOFF.md`, `DISCUSSION.md`, `logs/claude.md`
-- **Last updated:** 2026-10-24 by Claude Code (19:38 Thai time)
+- **Current owner:** none
+- **Status:** ready
+- **Files being edited:** none
+- **Last updated:** 2026-10-24 by Claude Code (19:42 Thai time)
 
 ## Branches
 
 | Branch | State |
 |---|---|
 | `main` | Initial commit only. It receives `integration-hub` through a PR once the user approves. |
-| `integration-hub` | Has the robot recovery, Thesis Desk, quest sources, agent workflow, GUI smoke-test results, 12-week plan, Codex week-1 changes, the offline twin (`sim/`, twin CI, first simulated findings; merge `18c2303`), the Gazebo 3D twin (`sim/gazebo/`, `Dockerfile.gazebo`, `gazebo` CI job, cross-check; merge `cef985f`), the frozen Arena 1 rules, scorer and baseline (merge `d623baf`) the Arena 1 results plus the combined sector-association fix `e6587fd` (merge `4652571`), the drive bridge forwarding `angular.z` plus the Arena 2 draft (merge `4f7a864`, T6/T7), the bridge guard follow-ups (non-finite guard, `turn_dir` as a sign only, Arena 2 entry scope; merge `9f55d17`), and the Arena 2 scorer validation, full-protocol reference (66.0/100) and calibration reconciliation (merge `ecc55ca`, T6/T7), and the scorer gap fixes (duplicate inputs rejected, `--agent`/`--base-ref` required; merge `da04d16`), and the integer seed check (merge `8c77425`). Arena 2 rules and scorer frozen in `9b78f1f` (T7), results in `a8f1cae`, and the winning Arena 2 entry `claude/robot/arena2-lag` (speed feed-forward, faster turning; merge `d8401a9`), and the Arena 3 draft with the clothing chroma channel and the thesis review (merge `6698278`, T8). Arena 3 rules frozen in `08a7ac8`, results in `a57dff7`, and the winning Arena 3 entry `claude/robot/arena3-identity` (target gate, give way in the path; merge `efda1b0`). and the E7 ablation plus the robot-day kit (`/yolo_frame`, `tools/robot_day/`, `docs/robot_day_protocol.md`; merge `0654471`, T9; review fixes merges `eb10a9c` and `9ecaecb`). `scripts/check.py` passes (85 tests). |
-| `claude/workspace` | Merged into `integration-hub` at `fc2878c` (`2402e93`: E7 per-scenario breakdown). Before that at `9ecaecb` (`b9eddf5`: T9 objection fixes). Before that at `eb10a9c` (`76416dc`: T9 finding fixes). Before that at `0654471` (`b165783`: E7 ablation, robot-day kit). Before that at `35c161c` (`11056a6`: T8 finding fixes). Before that at `6698278` (`04782cd`: Arena 3 draft, chroma channel, thesis review). Before that at `8c77425` (`abcbb9c`: integer seed check for T7). Before that at `da04d16` (`3b2cad5`: scorer gap fixes). Before that at `ecc55ca` (`16ac740`: Arena 2 scorer validation and calibration reconciliation). Before that at `9f55d17` (`0b934e3`: bridge guard follow-ups), and before that at `4f7a864` (`b36f31a`: bridge `angular.z`, Arena 2 draft), and before that at `7d400bb`, including the Arena 1 results and the combined fix `e6587fd`. The entry branch `claude/robot/arena-sector-association` (`929096d`) stays unmerged, for the record. The Arena 2 winning entry `claude/robot/arena2-lag` (`3848164`) was merged straight into `integration-hub` at `d8401a9`; `claude/workspace` picks it up at its next sync. The Arena 3 winning entry `claude/robot/arena3-identity` (`191d2c1`) was merged straight into `integration-hub` at `efda1b0` the same way. |
+| `integration-hub` | Has the robot recovery, Thesis Desk, quest sources, agent workflow, GUI smoke-test results, 12-week plan, Codex week-1 changes, the offline twin (`sim/`, twin CI, first simulated findings; merge `18c2303`), the Gazebo 3D twin (`sim/gazebo/`, `Dockerfile.gazebo`, `gazebo` CI job, cross-check; merge `cef985f`), the frozen Arena 1 rules, scorer and baseline (merge `d623baf`) the Arena 1 results plus the combined sector-association fix `e6587fd` (merge `4652571`), the drive bridge forwarding `angular.z` plus the Arena 2 draft (merge `4f7a864`, T6/T7), the bridge guard follow-ups (non-finite guard, `turn_dir` as a sign only, Arena 2 entry scope; merge `9f55d17`), and the Arena 2 scorer validation, full-protocol reference (66.0/100) and calibration reconciliation (merge `ecc55ca`, T6/T7), and the scorer gap fixes (duplicate inputs rejected, `--agent`/`--base-ref` required; merge `da04d16`), and the integer seed check (merge `8c77425`). Arena 2 rules and scorer frozen in `9b78f1f` (T7), results in `a8f1cae`, and the winning Arena 2 entry `claude/robot/arena2-lag` (speed feed-forward, faster turning; merge `d8401a9`), and the Arena 3 draft with the clothing chroma channel and the thesis review (merge `6698278`, T8). Arena 3 rules frozen in `08a7ac8`, results in `a57dff7`, and the winning Arena 3 entry `claude/robot/arena3-identity` (target gate, give way in the path; merge `efda1b0`). and the E7 ablation plus the robot-day kit (`/yolo_frame`, `tools/robot_day/`, `docs/robot_day_protocol.md`; merge `0654471`, T9; review fixes merges `eb10a9c` and `9ecaecb`). and solo following at walking pace (bridge `speed_mode` "mps" default, braking cap, LiDAR edge tracking; merge `c2c7f09`, T10). `scripts/check.py` passes (97 tests). |
+| `claude/workspace` | Merged into `integration-hub` at `c2c7f09` (`bd83cad`: solo following for T10). Before that at `fc2878c` (`2402e93`: E7 per-scenario breakdown). Before that at `9ecaecb` (`b9eddf5`: T9 objection fixes). Before that at `eb10a9c` (`76416dc`: T9 finding fixes). Before that at `0654471` (`b165783`: E7 ablation, robot-day kit). Before that at `35c161c` (`11056a6`: T8 finding fixes). Before that at `6698278` (`04782cd`: Arena 3 draft, chroma channel, thesis review). Before that at `8c77425` (`abcbb9c`: integer seed check for T7). Before that at `da04d16` (`3b2cad5`: scorer gap fixes). Before that at `ecc55ca` (`16ac740`: Arena 2 scorer validation and calibration reconciliation). Before that at `9f55d17` (`0b934e3`: bridge guard follow-ups), and before that at `4f7a864` (`b36f31a`: bridge `angular.z`, Arena 2 draft), and before that at `7d400bb`, including the Arena 1 results and the combined fix `e6587fd`. The entry branch `claude/robot/arena-sector-association` (`929096d`) stays unmerged, for the record. The Arena 2 winning entry `claude/robot/arena2-lag` (`3848164`) was merged straight into `integration-hub` at `d8401a9`; `claude/workspace` picks it up at its next sync. The Arena 3 winning entry `claude/robot/arena3-identity` (`191d2c1`) was merged straight into `integration-hub` at `efda1b0` the same way. |
 | `codex/workspace` | Synced through `integration-hub` `00a0584` (workspace merge `d2d0351`); the original Arena entry remains separate and unmerged. |
 | *To delete* | `integration/robot-thesis-desk`, `codex/robot-backup-quarantine` and `codex/thesis-desk`. They are fully merged, but the cloud session's git proxy cannot delete branches. The user deletes them on GitHub, or Codex runs `git push origin --delete ...` from Windows. |
 
@@ -117,14 +117,21 @@ The 12-week plan is in [`docs/PLAN.md`](docs/PLAN.md) (20 Oct 2026 to about 15 J
    on both bridges and Gazebo, metric renamed to `target_visible_share`, limits stated, 63 tests).
    Both agents replied `agree`. The thesis review (`docs/thesis_review_2026-10-22.md`) now has C3,
    the box-crop limitation.
-12. **T9** in `DISCUSSION.md`: the robot-day kit and the E7 ablation, merged in `0654471`. E7 (twin):
+12. **T9 — resolved 2026-10-24** in `DISCUSSION.md`: the robot-day kit and the E7 ablation, merged in `0654471`. E7 (twin):
    full 30/30, no colour 27/30, no give-way 28/30 (2 contacts), no gate 12/30 (8 contacts). The kit
    adds `/yolo_frame` (also published by the real `ros2_yolo_live.py`), `tools/robot_day/analyze.py`
    (E1–E4), `tools/robot_day/turn_check.py` (T6) and `docs/robot_day_protocol.md`. Codex reviews. The three
    review points (E2 stamp check, `turn_check.py` start-up wait and final stop) are fixed in `eb10a9c`.
    Codex objected (E7 attribution: "no gate" also disables give-way; E2 summed medians); both are
-   fixed in `9ecaecb`. Waiting for Codex's final `agree`.
-
+   fixed in `9ecaecb`. **Resolved 2026-10-24**: Codex agreed (`2b8b119`).
+13. **T10** in `DISCUSSION.md`: follow one person at walking pace, merged in `c2c7f09`. These are the
+   user's decisions: lift the speed cap, and Claude builds while Codex reviews.
+   - **The drive bridge default changed to `speed_mode` "mps"** (m/s with an assumed 0.085 m wheel,
+     1.4 m/s per wheel, 1.0 m/s² ramp). `speed_mode:=legacy` keeps the old mapping and needs
+     `max_decel:=0.0` on `follow_stop_node`.
+   - Twin results: solo 30/30 and identity 15/15 on `mps`.
+   - Six review points are listed in T10 (write-up count, `--duration` ignoring Ctrl-C, parameter
+     validation, ramp shape, `int()` truncation, LiDAR latch). Codex reviews.
 
 ## Codex — week 1 tasks
 
@@ -219,6 +226,13 @@ Sync `codex/workspace` with `integration-hub` first. Read `docs/PLAN.md` and rep
     **Resolved 2026-10-24:** reviewed fixes in `9ecaecb` and `fc2878c`; the E7 write-up isolates
     the gate effect, and E2 calculates the per-frame end-to-end latency (110 ms on the reproducer).
     `scripts/check.py` passed 85 tests. Codex replied `agree` and marked T9 resolved.
+19. **T10 review**: review the solo-following change (`experiments/sim/2026-10-24_solo_following.md`).
+    - Check the bridge `mps` mode and its new default, `follow_stop_node.py` `max_decel`, the
+      `sync_fusion_node.py` LiDAR edge tracking, the `SOLO_SCENARIOS` and `mps` twin mode,
+      `record_robot_day.sh --countdown/--duration`, `tools/robot_day/speed_check.py`, E6 in
+      `analyze.py`, and the working-alone plan in `docs/robot_day_protocol.md`.
+    - Say which of the 6 review points in T10 must be fixed before the first robot drive.
+    - Reply `agree` or object in T10.
 
 ## Robot-day checklist
 
@@ -227,6 +241,12 @@ Sync `codex/workspace` with `integration-hub` first. Read `docs/PLAN.md` and rep
   `sync_fusion_node.py` parameter) restores the old behaviour. All gate values were tuned in simulation
   and are checked on the robot in E5.
 
+- **Note (T10 merge `c2c7f09`): the drive bridge now defaults to `speed_mode` "mps"** (m/s, assumed
+  0.085 m wheel, 1.4 m/s cap, 1.0 m/s² ramp). Make the **first drive at `max_speed_mps:=0.5`**. Run
+  `tools/robot_day/speed_check.py` to measure the real speed (wheel radius) before going above
+  0.5 m/s. `speed_mode:=legacy` needs `max_decel:=0.0` on `follow_stop_node`.
+- **Working alone:** use the working-alone plan in `docs/robot_day_protocol.md`. It uses
+  `record_robot_day.sh --countdown/--duration`, so one person can start a run and walk to the mark.
 - **Procedure:** follow [`docs/robot_day_protocol.md`](docs/robot_day_protocol.md).
   - Step 0 is the T6 turn check with `tools/robot_day/turn_check.py`.
   - Record each experiment with `ros2_yolo_ws/scripts/record_robot_day.sh --scenario <label>`.
