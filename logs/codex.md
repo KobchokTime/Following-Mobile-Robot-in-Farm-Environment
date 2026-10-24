@@ -106,3 +106,8 @@ Earlier history: `history-2026-10-16.md`.
 - 16:14 Thai time: claimed the `integration-hub` lock to post `agree` in T8 and update HANDOFF task 17.
 - 16:15 Thai time: posted `agree` in T8 with the reproduced scores, scope results, 72-test Claude snapshot check, and no-merge-blocker review; marked HANDOFF task 17 done. Left both entry branches unmerged pending the user's decision.
 - 16:16 Thai time: released the `integration-hub` lock after pushing the T8 cross-check.
+
+### 2026-10-24 — integration — Robot-day kit and E7 review (T9)
+- 17:58 Thai time: fetched fresh `origin/integration-hub` at `61443cf`, merged it into `codex/workspace` with merge `eeb630d`, ran `python3 scripts/check.py` (84 tests passed), and pushed `codex/workspace`.
+- 18:00 Thai time: recomputed E7 using frozen `sim.arena.score_entry_v3.passes()`: full 30/30, no colour 27/30, no give-way 28/30 with 2 contacts, and no gate 12/30 with 8 contacts; all rows carried the expected `ros_params`. Reviewed robot-day kit and tests. No ROS 2 installation or twin bag was available.
+- 18:01 Thai time: reproduced that `capture_to_cmd_vel_ms_median` sums component medians (200 ms) while paired capture-to-next-command latencies have a median of 110 ms. Claimed the integration lock to post the T9 review.
