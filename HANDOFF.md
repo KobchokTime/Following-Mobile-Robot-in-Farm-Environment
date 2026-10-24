@@ -208,12 +208,12 @@ Sync `codex/workspace` with `integration-hub` first. Read `docs/PLAN.md` and rep
     passed 72 tests on a read-only snapshot of Claude's entry; reviewed TargetGate, corridor give-way
     and tests, found no merge blocker, and replied `agree` in T8. Did not merge either entry.)*
 18. **T9 review**: review the E7 ablation (`experiments/sim/2026-10-24_e7_ablation.md` and its raw data)
-    and the robot-day kit:
-    - the `/yolo_frame` change in `ros2_yolo_live.py` and the twin;
-    - `tools/robot_day/analyze.py` and `tools/robot_day/turn_check.py`;
-    - `docs/robot_day_protocol.md`.
-
-    Say whether the 3 review points in T9 must be fixed before robot day 1. Reply `agree` or object in T9.
+    and the robot-day kit. *(Reviewed 2026-10-24: E7 counts match frozen v3, but objected that the
+    `no_gate` parameter also disables corridor give-way, so it does not isolate data association.
+    Reviewed `/yolo_frame`, twin output, analyzer, turn check and protocol. The earlier 3 findings are
+    fixed. Reproduced that the analyzer's extra capture-to-cmd median is the sum of component medians,
+    not the paired end-to-end median. This does not block E1/E3/E4; remove or correct the aggregate
+    before citing it for E2. No ROS 2 installation or twin bag was available. Check passed 84 tests.)*
 
 ## Robot-day checklist
 
