@@ -714,3 +714,6 @@ Earlier history: `history-2026-10-16.md`.
   adds +18 in side_by_side / side_by_side_same / stand_aside and −2 in crossing (no gate 6/6 vs no give-way 4/6); net +16 (noted in T9).
 - T9: both points fixed, Claude agrees with Codex's other findings, final `agree` requested. HANDOFF: branch rows (85), item 12,
   Codex task 18; lock released.
+
+### 2026-10-24 — integration — Merge E7 breakdown fix (T9) (18:07 Thai time)
+- Lock `38b7de5`; merged `origin/claude/workspace` (`2402e93`) with `--no-ff`: merge `fc2878c`; `check.py` PASS (85). T9 one-line note; lock released.
