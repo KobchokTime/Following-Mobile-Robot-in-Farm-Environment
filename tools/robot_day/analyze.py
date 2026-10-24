@@ -139,13 +139,17 @@ def e1_stats(truth: dict, detections: Sequence[Tuple[float, float]], scans: Sequ
             "lidar_hit_share": round(hits / len(detections), 3) if detections else None}
 
 
-def e2_latency(frames: Sequence[Tuple[float, dict]], cmd_times: Sequence[float]) -> dict:
+def e2_latency(frames: Sequence[Tuple[float, dict]], cmd_times: Sequence[float], max_plausible_s: float = 5.0) -> dict:
     """Capture -> /yolo_frame (inference) and /yolo_frame -> next /cmd_vel (fusion + control).
 
     frames: (receive time, parsed /yolo_frame); cmd_times: receive times of /cmd_vel, sorted.
-    Only frames with at least one person count for the control part.
+    Only frames with at least one person count for the control part. Receive times are the
+    recorder's, so they include its own small delay. A capture stamp of 0, from another clock, or
+    later than its receive time makes the first part meaningless; such frames are left out and
+    counted in "bad_stamps".
     """
-    infer = [t - f["stamp"] for t, f in frames]
+    raw = [t - f["stamp"] for t, f in frames]
+    infer = [d for d in raw if 0.0 <= d <= max_plausible_s]
     ctrl = []
     for t, f in frames:
         if f["boxes"]:
@@ -153,7 +157,8 @@ def e2_latency(frames: Sequence[Tuple[float, dict]], cmd_times: Sequence[float])
             if j < len(cmd_times):
                 ctrl.append(cmd_times[j] - t)
     ms = lambda xs, q: None if not xs else round(1000.0 * percentile(xs, q), 1)  # noqa: E731
-    return {"frames": len(frames), "capture_to_detection_ms": {"median": ms(infer, 0.5), "p95": ms(infer, 0.95)},
+    return {"frames": len(frames), "bad_stamps": len(raw) - len(infer),
+            "capture_to_detection_ms": {"median": ms(infer, 0.5), "p95": ms(infer, 0.95)},
             "detection_to_cmd_vel_ms": {"median": ms(ctrl, 0.5), "p95": ms(ctrl, 0.95)},
             "capture_to_cmd_vel_ms_median": None if not (infer and ctrl) else round(
                 1000.0 * (percentile(infer, 0.5) + percentile(ctrl, 0.5)), 1)}

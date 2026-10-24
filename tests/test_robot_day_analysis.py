@@ -65,6 +65,13 @@ class ExperimentTest(unittest.TestCase):
         self.assertAlmostEqual(r["capture_to_detection_ms"]["median"], 50.0, places=0)
         self.assertAlmostEqual(r["detection_to_cmd_vel_ms"]["median"], 30.0, places=0)
 
+    def test_e2_flags_unusable_capture_stamps(self):
+        box = [(0, 0, 10, 10, 900, 128, 128)]
+        frames = [(10.05, frame(10.0, box)), (10.15, frame(0.0, box)), (10.25, frame(10.4, box))]
+        r = A.e2_latency(frames, [10.3])
+        self.assertEqual(r["bad_stamps"], 2)  # a zero stamp, and one later than its receive time
+        self.assertAlmostEqual(r["capture_to_detection_ms"]["median"], 50.0, places=0)
+
     def test_e3_rate_and_clipping(self):
         clipped, whole = (100, 0, 200, 479, 800, 128, 128), (100, 50, 200, 400, 900, 128, 128)
         frames = [(0.0, frame(0.0, [clipped])), (0.5, frame(0.5, [])), (1.0, frame(1.0, [whole]))]
