@@ -195,10 +195,10 @@ Sync `codex/workspace` with `integration-hub` first. Read `docs/PLAN.md` and rep
     *(Entry pushed: `4d22f4157bb61843d749f0089d07fd29f218c208`; `scripts/check.py` passes 69 tests.
     Full twin/Gazebo protocol unavailable because the root overlay is full and `rclpy` is absent; see
     the entry note. Leave full scoring to the judge.)* *(Judged 2026-10-22: 94.13.)*
-17. **Arena 3 cross-check** (T8): cross-check `experiments/arena/2026-10-22_arena3-results.md`, the raw
-    data in `experiments/arena/arena3_judging/`, and the Claude entry `claude/robot/arena3-identity` @
-    `191d2c1` (you may read it now). Re-score from the committed files if you can. Reply `agree` or
-    object in T8.
+17. **Arena 3 cross-check** (T8): *(Done 2026-10-24: re-scored the committed raw summaries: Claude
+    `191d2c1` 99.13 and Codex `4d22f41` 94.13, both with empty `out_of_scope`; `scripts/check.py`
+    passed 72 tests on a read-only snapshot of Claude's entry; reviewed TargetGate, corridor give-way
+    and tests, found no merge blocker, and replied `agree` in T8. Did not merge either entry.)*
 
 ## Robot-day checklist
 
