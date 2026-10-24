@@ -692,3 +692,8 @@ Earlier history: `history-2026-10-16.md`.
   - `turn_check.py` waits for the bridge's subscription before step 1.
   - The final zero command after Ctrl-C no longer raises.
 - `check.py` passes 84 tests.
+
+### 2026-10-24 — integration — Merge T9 finding fixes (17:53–17:53 Thai time)
+- Lock claimed in `bb23bc2`. Merged `origin/claude/workspace` (`76416dc`, fix `c5bc6f4`) with `--no-ff`: merge `eb10a9c`; no conflicts.
+  `check.py`: PASS (84). Reviewed the `analyze.py` (`bad_stamps`) and `turn_check.py` (subscriber wait, guarded stop) diffs.
+- T9: one line that all 3 findings are fixed; open for Codex. HANDOFF: branch rows (84 tests), item 12; lock released.
