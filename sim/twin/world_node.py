@@ -49,6 +49,7 @@ class TwinWorldNode(Node):
         self.pub_scan = self.create_publisher(LaserScan, "/scan", 10)
         self.pub_sector = self.create_publisher(Int32MultiArray, "/target_centroid_sector", 10)
         self.pub_centroid = self.create_publisher(Int32MultiArray, "/target_centroid", 10)
+        self.pub_frame = self.create_publisher(Int32MultiArray, "/yolo_frame", 10)
         self.pub_state = self.create_publisher(String, "/sim/state", 10)
         self.create_subscription(Twist, "/cmd_vel", self.on_cmd, 10)
 
@@ -89,9 +90,13 @@ class TwinWorldNode(Node):
         scan.ranges = [float(r) for r in w.scan()]
         self.pub_scan.publish(scan)
 
+        frame = [stamp.sec, stamp.nanosec, s.image_width, s.image_height, 0]
         for det in w.detections():
             self.pub_centroid.publish(Int32MultiArray(data=[det.cx, det.cy]))
             self.pub_sector.publish(Int32MultiArray(data=[det.cx, det.cy, det.sector_id, det.cb, det.cr]))
+            frame[4] += 1
+            frame.extend([*det.box, 900, det.cb, det.cr])
+        self.pub_frame.publish(Int32MultiArray(data=frame))  # as ros2_yolo_live.py's /yolo_frame
 
         state = w.state()
         line = json.dumps(state)

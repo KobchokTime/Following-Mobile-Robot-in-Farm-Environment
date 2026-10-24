@@ -23,7 +23,7 @@ ROBOT_NODES: Dict[str, Path] = {
 }
 
 # Topics worth keeping in a bag: sensor inputs, intermediate products and the command.
-RECORD_TOPICS = ["/scan", "/target_centroid_sector", "/target_centroid", "/lidar_sector_dists",
+RECORD_TOPICS = ["/scan", "/target_centroid_sector", "/target_centroid", "/yolo_frame", "/lidar_sector_dists",
                  "/synced_target", "/target_fused_prob", "/cmd_vel", "/sim/state"]
 
 
