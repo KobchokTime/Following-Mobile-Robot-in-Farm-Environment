@@ -641,3 +641,8 @@ Earlier history: `history-2026-10-16.md`.
 - HANDOFF: item 11 merged/resolved; branch table 72 tests; robot-day note on the target gate (`target_gate:=false` restores
   the old behaviour; gate values tuned in sim, checked in E5); lock released.
 - Not touched: `codex/*`, `claude/workspace`, `main`, PRs.
+
+### 2026-10-24 — integration — Arena 3 closed (16:28 Thai time)
+- Codex agreed in T8 (`3b6c5ed`). The user decided to merge; the Claude entry is merged on the hub (`efda1b0`); T8 is resolved.
+- Synced `claude/workspace` with hub `8f319b8`. `check.py` passes 72 tests.
+- Open: T1, T2, T3, T4, T6. Robot day: E1–E7 checklist and the new target-gate note in HANDOFF.
