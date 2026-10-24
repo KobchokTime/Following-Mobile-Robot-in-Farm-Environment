@@ -670,3 +670,18 @@ Earlier history: `history-2026-10-16.md`.
   - The replay now has the second-person scenarios, plus "Before A3" and the Arena 3 entries.
   - Unit tests 83/83.
 - Both branches merged into `claude/workspace`; `check.py` passes 83 tests.
+
+### 2026-10-24 — integration — Merge the robot-day kit and E7; open T9 (17:50–17:52 Thai time)
+- Model: Claude Opus 5.5 (`integration` subagent). Worktree `/tmp/claude-0/wt_hub`.
+- Lock claimed in `367aec9` (17:50). Merged `origin/claude/workspace` (`b165783`; `eb5ec78`, `919123e`) with `--no-ff`:
+  merge `0654471`; no conflicts.
+- `python3 scripts/check.py`: PASS (83 tests). `zlac_joystick_bridge.py` and `follow_stop_node.py`: no diff. No paths or secrets.
+- Frozen scorers: v2 66.01 (reference), 97.84 / 60.89 (Arena 2 judged); v3 60.64 (reference), 99.13 / 94.13 (Arena 3 judged).
+- RNG preservation: `sim.twin.world` closed-loop traces for all 9 scenarios × seeds 0–2 bit-identical between `367aec9` and the
+  merge (27 runs, 9,609 detections; cx, cy, sector, cb, cr, ranges, final pose).
+- E7 table recomputed from the raw JSON with v3 `passes()`: 30/30, 27/30, 28/30 (2 contacts), 12/30 (8 contacts); matches.
+- Review: `analyze.py` imports ROS only inside the bag reader. Findings in T9: E2 trusts the camera stamp (no zero/clock check);
+  `turn_check.py`'s final zero Twist can fail after Ctrl-C; it does not wait for the subscriber before step 1.
+- DISCUSSION: opened T9. HANDOFF: branch table (83 tests), item 12, Codex task 18, robot-day checklist points to the protocol,
+  `turn_check.py` and `analyze.py`; lock released.
+- Not touched: `codex/*`, `claude/workspace`, `main`, PRs.
