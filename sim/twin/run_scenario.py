@@ -31,13 +31,14 @@ from .scenarios import ALL_SCENARIOS, SCENARIO_SETS
 from .score import load, score
 
 
-def run_one(name: str, bridge_mode: str, out_root: Path, seed: int, record_bag: bool) -> dict:
+def run_one(name: str, bridge_mode: str, out_root: Path, seed: int, record_bag: bool,
+            ros_params: tuple = ()) -> dict:
     out = out_root / f"{name}_{bridge_mode}"
     out.mkdir(parents=True, exist_ok=True)
     env = isolated_env()
     procs = Processes(out, env)
     try:
-        procs.start_robot_nodes()
+        procs.start_robot_nodes([a for p in ros_params for a in ("-p", p)])
         if record_bag:
             procs.start("bag_record", ["ros2", "bag", "record", "-s", "sqlite3",
                                        "-o", str(out / "bag"), *RECORD_TOPICS], ROOT)
@@ -54,7 +55,7 @@ def run_one(name: str, bridge_mode: str, out_root: Path, seed: int, record_bag: 
     finally:
         procs.stop()
 
-    result = {"scenario": name, "bridge_mode": bridge_mode, "seed": seed,
+    result = {"scenario": name, "bridge_mode": bridge_mode, "seed": seed, "ros_params": list(ros_params),
               "doc": ALL_SCENARIOS[name]["doc"], **score(load(out / "state.jsonl"))}
     (out / "score.json").write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
     return result
@@ -67,12 +68,14 @@ def main() -> int:
     ap.add_argument("--out", default="sim_runs", type=Path)
     ap.add_argument("--seed", default=0, type=int)
     ap.add_argument("--record-bag", action="store_true", help="also record a sqlite3 rosbag2")
+    ap.add_argument("--ros-param", action="append", default=[], metavar="NAME:=VALUE",
+                    help="parameter for every robot node, e.g. target_gate:=false (repeatable; for ablations)")
     args = ap.parse_args()
 
     names = SCENARIO_SETS.get(args.scenario, [args.scenario])
     modes = {"both": ["current", "diff_drive"], "turning": ["fixed", "diff_drive"],
              "all": ["current", "fixed", "diff_drive"]}.get(args.bridge_mode, [args.bridge_mode])
-    results = [run_one(n, m, args.out, args.seed, args.record_bag) for n in names for m in modes]
+    results = [run_one(n, m, args.out, args.seed, args.record_bag, tuple(args.ros_param)) for n in names for m in modes]
     (args.out / "summary.json").write_text(json.dumps(results, indent=2) + "\n", encoding="utf-8")
 
     cols = ["scenario", "bridge_mode", "distance_travelled_m", "median_gap_m", "final_gap_m",
