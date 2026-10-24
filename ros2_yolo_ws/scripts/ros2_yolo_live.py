@@ -26,6 +26,19 @@ def torso_chroma(frame_bgr, x1, y1, x2, y2):
     return int(round(float(np.median(cb)))), int(round(float(np.median(cr))))
 
 
+def frame_summary(stamp_sec, stamp_nsec, width, height, boxes):
+    """One /yolo_frame message per processed image, even with no person in it.
+
+    Layout: [stamp_sec, stamp_nsec, width, height, n, then per box x1, y1, x2, y2, conf_milli, cb, cr].
+    The stamp is the image's capture stamp, so the delay to any later message can be measured (E2);
+    n over all frames gives the detection rate and the boxes show clipping (E3); cb, cr feed E4.
+    """
+    out = [int(stamp_sec), int(stamp_nsec), int(width), int(height), len(boxes)]
+    for box in boxes:
+        out.extend(int(v) for v in box)
+    return out
+
+
 class YoloROSNode(Node):
     def __init__(self):
         super().__init__('yolo_ros_node')
@@ -44,6 +57,8 @@ class YoloROSNode(Node):
         self.centroid_pub = self.create_publisher(Int32MultiArray, '/target_centroid', 10)
         # Pub ใหม่: [cx, cy, sector_id, cb, cr]; cb/cr = clothing chroma of the torso (YCbCr)
         self.centroid_sector_pub = self.create_publisher(Int32MultiArray, '/target_centroid_sector', 10)
+        # Per processed frame: capture stamp and every box (robot-day experiments E2-E4)
+        self.frame_pub = self.create_publisher(Int32MultiArray, '/yolo_frame', 10)
 
         self.get_logger().info('YOLO Node Started')
 
@@ -72,6 +87,8 @@ class YoloROSNode(Node):
     def listener_callback(self, msg):
         frame = self.bridge.imgmsg_to_cv2(msg, desired_encoding='bgr8')
         results = self.model(frame)[0]
+        frame_h, frame_w = frame.shape[:2]
+        frame_boxes = []
 
         person_boxes = results.boxes
         if person_boxes is not None:
@@ -103,6 +120,7 @@ class YoloROSNode(Node):
                 centroid_sector_msg = Int32MultiArray()
                 cb, cr = torso_chroma(frame, x1, y1, x2, y2)
                 centroid_sector_msg.data = [cx, cy, sector_id, cb, cr]
+                frame_boxes.append((x1, y1, x2, y2, round(conf * 1000), cb, cr))
                 self.centroid_sector_pub.publish(centroid_sector_msg)
 
                 # ---- Draw ----
@@ -117,6 +135,10 @@ class YoloROSNode(Node):
             cv2.resizeWindow("YOLOv8 Person Detection", 1280, 720)
             cv2.imshow("YOLOv8 Person Detection", frame_copy)
             cv2.waitKey(1)
+
+        stamp = msg.header.stamp
+        self.frame_pub.publish(Int32MultiArray(
+            data=frame_summary(stamp.sec, stamp.nanosec, frame_w, frame_h, frame_boxes)))
 
 def main(args=None):
     rclpy.init(args=args)

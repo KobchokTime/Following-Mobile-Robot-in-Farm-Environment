@@ -54,6 +54,8 @@ class SensorParams:
     camera_height_m: float = 0.5
     num_sectors: int = 9
     detect_range_m: Tuple[float, float] = (0.3, 8.0)
+    person_height_m: float = 1.7
+    person_width_m: float = 0.5
     detect_dropout: float = 0.0
     centroid_noise_px: float = 2.0
     chroma_noise: float = 3.0  # per-frame noise on observed Cb/Cr (0-255 units)
@@ -85,6 +87,7 @@ class Detection:
     sector_id: int
     cb: int = 128
     cr: int = 128
+    box: Tuple[int, int, int, int] = (0, 0, 0, 0)  # x1, y1, x2, y2, clipped to the image
 
 
 def shade_factor(x: float, shade: Sequence[Tuple[float, float, float]]) -> float:
@@ -169,7 +172,12 @@ def project_detections(people: Dict[str, Tuple[float, float]], s: "SensorParams"
         cx = max(0, min(s.image_width - 1, cx))
         sector = max(0, min(s.num_sectors - 1, (cx * s.num_sectors) // s.image_width))
         cb, cr = (chroma or {}).get(name, (128, 128))
-        out.append(Detection(name, cx, int(round(cy)), sector, cb, cr))
+        half_w = f * s.person_width_m / 2.0 / px
+        top = s.image_height / 2.0 + f * (s.camera_height_m - s.person_height_m) / px
+        bottom = s.image_height / 2.0 + f * s.camera_height_m / px
+        box = (int(max(0, cx - half_w)), int(max(0, top)),
+               int(min(s.image_width - 1, cx + half_w)), int(min(s.image_height - 1, bottom)))
+        out.append(Detection(name, cx, int(round(cy)), sector, cb, cr, box))
     return out
 
 

@@ -623,3 +623,77 @@ Earlier history: `history-2026-10-16.md`.
 - Hub: lock `3955738` (07:50); results and raw data ``; T8 judge reply; HANDOFF item 11 and Codex task 17; lock released.
 - Neither entry merged. Not touched: `codex/*`, entry branches, `claude/workspace`, `main`, PRs.
 - Correction: the results and raw data commit in the line above is `a57dff7`.
+
+### 2026-10-22 — robot — Arena 3 entry (03:55–06:37 Thai time)
+- Branch `claude/robot/arena3-identity` from `08a7ac8`. I did not read Codex's entry (`4d22f41`).
+- `TargetGate` in `sync_fusion_node.py`: lock-on, alpha-beta bearing/range gate, soft chroma cost.
+- Give way to a person in the corridor who is nearer than the target.
+- Self-checks: 94.21 (contact in crossing/diff_drive) → 82.64 (my bug: gave way using a farther person's range) → **99.15** (submitted).
+- Details: `experiments/arena/entries/claude.md`. `check.py` passes 72 tests.
+
+### 2026-10-24 — integration — Merge the Arena 3 winner; resolve T8 (16:27–16:27 Thai time)
+- Model: Claude Opus 5.5 (`integration` subagent). The user decided to merge the winner (relayed by the coordinator).
+  Codex agreed in T8 (`3b6c5ed`, lock released `ea55a26` at 16:16).
+- Lock claimed in `78c9115` (16:27). Merged `origin/claude/robot/arena3-identity` (`191d2c1`) with `--no-ff`: merge `efda1b0`.
+  The only conflict was in `logs/claude.md`; both sides kept. The entry note merged cleanly (no lines removed).
+- `python3 scripts/check.py`: PASS (72 tests). `zlac_joystick_bridge.py` and `follow_stop_node.py`: no diff. No paths or secrets.
+- DISCUSSION T8: merge named, Codex's agree recorded, Codex entry `4d22f41` unmerged; T8 **resolved**.
+- HANDOFF: item 11 merged/resolved; branch table 72 tests; robot-day note on the target gate (`target_gate:=false` restores
+  the old behaviour; gate values tuned in sim, checked in E5); lock released.
+- Not touched: `codex/*`, `claude/workspace`, `main`, PRs.
+
+### 2026-10-24 — integration — Arena 3 closed (16:28 Thai time)
+- Codex agreed in T8 (`3b6c5ed`). The user decided to merge; the Claude entry is merged on the hub (`efda1b0`); T8 is resolved.
+- Synced `claude/workspace` with hub `8f319b8`. `check.py` passes 72 tests.
+- Open: T1, T2, T3, T4, T6. Robot day: E1–E7 checklist and the new target-gate note in HANDOFF.
+
+### 2026-10-24 — research / robot — E7, robot-day kit, dashboard Arena 3 (16:35–17:49 Thai time)
+- `claude/research/e7-ablation` (`7d9d9a9`, `eb5ec78`):
+  - `run_scenario --ros-param` passes parameters to every robot node.
+  - E7 runs the Arena 3 winner with each part switched off, 30 identity runs per condition:
+    | Condition | Runs passed | Contacts |
+    |---|---|---|
+    | full | 30/30 | 0 |
+    | no colour | 27/30 | 0 |
+    | no give-way | 28/30 | 2 |
+    | no gate | 12/30 | 8 |
+  - Without colour, stand_aside swaps to the bystander, whose geometric cost is about 8.6 against a gate of 9.
+  - Write-up: `experiments/sim/2026-10-24_e7_ablation.md`.
+- `claude/robot/robot-day-kit` (`5596d34`, `919123e`):
+  - `/yolo_frame` from `ros2_yolo_live.py` and from the twin: capture stamp and boxes with conf and Cb/Cr.
+  - `tools/robot_day/analyze.py` (E1–E4).
+  - `tools/robot_day/turn_check.py` (T6).
+  - `docs/robot_day_protocol.md`.
+  - Tested end to end on twin bags.
+- Dashboard (https://claude.ai/artifact/JmYTWLwJiiPDRKiG2L1pdS):
+  - Arena 3 score card, an identity-runs card and an E7 card.
+  - The replay now has the second-person scenarios, plus "Before A3" and the Arena 3 entries.
+  - Unit tests 83/83.
+- Both branches merged into `claude/workspace`; `check.py` passes 83 tests.
+
+### 2026-10-24 — integration — Merge the robot-day kit and E7; open T9 (17:50–17:52 Thai time)
+- Model: Claude Opus 5.5 (`integration` subagent). Worktree `/tmp/claude-0/wt_hub`.
+- Lock claimed in `367aec9` (17:50). Merged `origin/claude/workspace` (`b165783`; `eb5ec78`, `919123e`) with `--no-ff`:
+  merge `0654471`; no conflicts.
+- `python3 scripts/check.py`: PASS (83 tests). `zlac_joystick_bridge.py` and `follow_stop_node.py`: no diff. No paths or secrets.
+- Frozen scorers: v2 66.01 (reference), 97.84 / 60.89 (Arena 2 judged); v3 60.64 (reference), 99.13 / 94.13 (Arena 3 judged).
+- RNG preservation: `sim.twin.world` closed-loop traces for all 9 scenarios × seeds 0–2 bit-identical between `367aec9` and the
+  merge (27 runs, 9,609 detections; cx, cy, sector, cb, cr, ranges, final pose).
+- E7 table recomputed from the raw JSON with v3 `passes()`: 30/30, 27/30, 28/30 (2 contacts), 12/30 (8 contacts); matches.
+- Review: `analyze.py` imports ROS only inside the bag reader. Findings in T9: E2 trusts the camera stamp (no zero/clock check);
+  `turn_check.py`'s final zero Twist can fail after Ctrl-C; it does not wait for the subscriber before step 1.
+- DISCUSSION: opened T9. HANDOFF: branch table (83 tests), item 12, Codex task 18, robot-day checklist points to the protocol,
+  `turn_check.py` and `analyze.py`; lock released.
+- Not touched: `codex/*`, `claude/workspace`, `main`, PRs.
+
+### 2026-10-24 — robot — T9 review fixes (17:53 Thai time)
+- `c5bc6f4` on `claude/robot/robot-day-kit`, for the integration review's 3 findings:
+  - E2 flags capture stamps that are 0, from another clock or in the future (`bad_stamps`), with a test.
+  - `turn_check.py` waits for the bridge's subscription before step 1.
+  - The final zero command after Ctrl-C no longer raises.
+- `check.py` passes 84 tests.
+
+### 2026-10-24 — integration — Merge T9 finding fixes (17:53–17:53 Thai time)
+- Lock claimed in `bb23bc2`. Merged `origin/claude/workspace` (`76416dc`, fix `c5bc6f4`) with `--no-ff`: merge `eb10a9c`; no conflicts.
+  `check.py`: PASS (84). Reviewed the `analyze.py` (`bad_stamps`) and `turn_check.py` (subscriber wait, guarded stop) diffs.
+- T9: one line that all 3 findings are fixed; open for Codex. HANDOFF: branch rows (84 tests), item 12; lock released.

@@ -9,15 +9,15 @@ and review threads in [`DISCUSSION.md`](DISCUSSION.md).
 - **Current owner:** none
 - **Status:** ready
 - **Files being edited:** none
-- **Last updated:** 2026-10-22 by Claude Code (07:51 Thai time)
+- **Last updated:** 2026-10-24 by Claude Code (17:53 Thai time)
 
 ## Branches
 
 | Branch | State |
 |---|---|
 | `main` | Initial commit only. It receives `integration-hub` through a PR once the user approves. |
-| `integration-hub` | Has the robot recovery, Thesis Desk, quest sources, agent workflow, GUI smoke-test results, 12-week plan, Codex week-1 changes, the offline twin (`sim/`, twin CI, first simulated findings; merge `18c2303`), the Gazebo 3D twin (`sim/gazebo/`, `Dockerfile.gazebo`, `gazebo` CI job, cross-check; merge `cef985f`), the frozen Arena 1 rules, scorer and baseline (merge `d623baf`) the Arena 1 results plus the combined sector-association fix `e6587fd` (merge `4652571`), the drive bridge forwarding `angular.z` plus the Arena 2 draft (merge `4f7a864`, T6/T7), the bridge guard follow-ups (non-finite guard, `turn_dir` as a sign only, Arena 2 entry scope; merge `9f55d17`), and the Arena 2 scorer validation, full-protocol reference (66.0/100) and calibration reconciliation (merge `ecc55ca`, T6/T7), and the scorer gap fixes (duplicate inputs rejected, `--agent`/`--base-ref` required; merge `da04d16`), and the integer seed check (merge `8c77425`). Arena 2 rules and scorer frozen in `9b78f1f` (T7), results in `a8f1cae`, and the winning Arena 2 entry `claude/robot/arena2-lag` (speed feed-forward, faster turning; merge `d8401a9`), and the Arena 3 draft with the clothing chroma channel and the thesis review (merge `6698278`, T8). `scripts/check.py` passes (62 tests). |
-| `claude/workspace` | Merged into `integration-hub` at `35c161c` (`11056a6`: T8 finding fixes). Before that at `6698278` (`04782cd`: Arena 3 draft, chroma channel, thesis review). Before that at `8c77425` (`abcbb9c`: integer seed check for T7). Before that at `da04d16` (`3b2cad5`: scorer gap fixes). Before that at `ecc55ca` (`16ac740`: Arena 2 scorer validation and calibration reconciliation). Before that at `9f55d17` (`0b934e3`: bridge guard follow-ups), and before that at `4f7a864` (`b36f31a`: bridge `angular.z`, Arena 2 draft), and before that at `7d400bb`, including the Arena 1 results and the combined fix `e6587fd`. The entry branch `claude/robot/arena-sector-association` (`929096d`) stays unmerged, for the record. The Arena 2 winning entry `claude/robot/arena2-lag` (`3848164`) was merged straight into `integration-hub` at `d8401a9`; `claude/workspace` picks it up at its next sync. |
+| `integration-hub` | Has the robot recovery, Thesis Desk, quest sources, agent workflow, GUI smoke-test results, 12-week plan, Codex week-1 changes, the offline twin (`sim/`, twin CI, first simulated findings; merge `18c2303`), the Gazebo 3D twin (`sim/gazebo/`, `Dockerfile.gazebo`, `gazebo` CI job, cross-check; merge `cef985f`), the frozen Arena 1 rules, scorer and baseline (merge `d623baf`) the Arena 1 results plus the combined sector-association fix `e6587fd` (merge `4652571`), the drive bridge forwarding `angular.z` plus the Arena 2 draft (merge `4f7a864`, T6/T7), the bridge guard follow-ups (non-finite guard, `turn_dir` as a sign only, Arena 2 entry scope; merge `9f55d17`), and the Arena 2 scorer validation, full-protocol reference (66.0/100) and calibration reconciliation (merge `ecc55ca`, T6/T7), and the scorer gap fixes (duplicate inputs rejected, `--agent`/`--base-ref` required; merge `da04d16`), and the integer seed check (merge `8c77425`). Arena 2 rules and scorer frozen in `9b78f1f` (T7), results in `a8f1cae`, and the winning Arena 2 entry `claude/robot/arena2-lag` (speed feed-forward, faster turning; merge `d8401a9`), and the Arena 3 draft with the clothing chroma channel and the thesis review (merge `6698278`, T8). Arena 3 rules frozen in `08a7ac8`, results in `a57dff7`, and the winning Arena 3 entry `claude/robot/arena3-identity` (target gate, give way in the path; merge `efda1b0`). and the E7 ablation plus the robot-day kit (`/yolo_frame`, `tools/robot_day/`, `docs/robot_day_protocol.md`; merge `0654471`, T9; review fixes merge `eb10a9c`). `scripts/check.py` passes (84 tests). |
+| `claude/workspace` | Merged into `integration-hub` at `eb10a9c` (`76416dc`: T9 finding fixes). Before that at `0654471` (`b165783`: E7 ablation, robot-day kit). Before that at `35c161c` (`11056a6`: T8 finding fixes). Before that at `6698278` (`04782cd`: Arena 3 draft, chroma channel, thesis review). Before that at `8c77425` (`abcbb9c`: integer seed check for T7). Before that at `da04d16` (`3b2cad5`: scorer gap fixes). Before that at `ecc55ca` (`16ac740`: Arena 2 scorer validation and calibration reconciliation). Before that at `9f55d17` (`0b934e3`: bridge guard follow-ups), and before that at `4f7a864` (`b36f31a`: bridge `angular.z`, Arena 2 draft), and before that at `7d400bb`, including the Arena 1 results and the combined fix `e6587fd`. The entry branch `claude/robot/arena-sector-association` (`929096d`) stays unmerged, for the record. The Arena 2 winning entry `claude/robot/arena2-lag` (`3848164`) was merged straight into `integration-hub` at `d8401a9`; `claude/workspace` picks it up at its next sync. The Arena 3 winning entry `claude/robot/arena3-identity` (`191d2c1`) was merged straight into `integration-hub` at `efda1b0` the same way. |
 | `codex/workspace` | Synced through `integration-hub` `00a0584` (workspace merge `d2d0351`); the original Arena entry remains separate and unmerged. |
 | *To delete* | `integration/robot-thesis-desk`, `codex/robot-backup-quarantine` and `codex/thesis-desk`. They are fully merged, but the cloud session's git proxy cannot delete branches. The user deletes them on GitHub, or Codex runs `git push origin --delete ...` from Windows. |
 
@@ -96,7 +96,10 @@ The 12-week plan is in [`docs/PLAN.md`](docs/PLAN.md) (20 Oct 2026 to about 15 J
    but found that `validate()` accepted a twin repeat with no seed field. Fixed in `8c77425`: every
    twin row needs an integer seed (regression test added, 42 tests). Codex's final `agree` is in T7.
 10. `integration-hub` → `main` (draft PR KobchokTime/Following-Mobile-Robot-in-Farm-Environment#2): needs every thread resolved and the user's approval.
-11. **T8** in `DISCUSSION.md`: Arena 3 (keep following the right person). **Frozen in `08a7ac8`** on
+11. **T8 — resolved 2026-10-24** in `DISCUSSION.md`: Arena 3 (keep following the right person).
+   **Merged on the user's decision:** `claude/robot/arena3-identity` @ `191d2c1` → `efda1b0` (72 tests;
+   the drive bridge and `follow_stop_node.py` are unchanged). Codex agreed (`3b6c5ed`). The Codex entry
+   `4d22f41` stays unmerged. **Frozen in `08a7ac8`** on
    2026-10-22 after both agents agreed (Codex at 03:37 Thai time). Entries
    (`claude/robot/arena3-identity`, `codex/robot/arena3-identity`) branch from `08a7ac8`; each agent posts
    only its entry SHA in T8; neither reads the other's branch until both are in. The `integration` role
@@ -106,8 +109,7 @@ The 12-week plan is in [`docs/PLAN.md`](docs/PLAN.md) (20 Oct 2026 to about 15 J
    unmerged).
    **Judged 2026-10-22** (results `experiments/arena/2026-10-22_arena3-results.md`, commit `a57dff7`): the
    Claude entry wins by the frozen score, 99.13 to 94.13. Both entries passed 21/21 identity runs; Codex
-   had contact with the crossing person on `diff_drive` in all 3 seeds. Neither entry is merged. Merging
-   the winner waits for Codex's cross-check (Codex task 17) and the user's decision. History: the draft was merged in
+   had contact with the crossing person on `diff_drive` in all 3 seeds. History: the draft was merged in
    `6698278`. New identity scenarios, the clothing chroma channel `[cx, cy, sector, cb, cr]` (also
    published by the real `ros2_yolo_live.py`), the draft scorer `sim/arena/score_entry_v3.py`, and a
    reference score of 60.6/100. The two merge-time findings are fixed in `35c161c`. Codex requested a
@@ -115,6 +117,12 @@ The 12-week plan is in [`docs/PLAN.md`](docs/PLAN.md) (20 Oct 2026 to about 15 J
    on both bridges and Gazebo, metric renamed to `target_visible_share`, limits stated, 63 tests).
    Both agents replied `agree`. The thesis review (`docs/thesis_review_2026-10-22.md`) now has C3,
    the box-crop limitation.
+12. **T9** in `DISCUSSION.md`: the robot-day kit and the E7 ablation, merged in `0654471`. E7 (twin):
+   full 30/30, no colour 27/30, no give-way 28/30 (2 contacts), no gate 12/30 (8 contacts). The kit
+   adds `/yolo_frame` (also published by the real `ros2_yolo_live.py`), `tools/robot_day/analyze.py`
+   (E1–E4), `tools/robot_day/turn_check.py` (T6) and `docs/robot_day_protocol.md`. Codex reviews. The three
+   review points (E2 stamp check, `turn_check.py` start-up wait and final stop) are fixed in `eb10a9c`.
+
 
 ## Codex — week 1 tasks
 
@@ -195,14 +203,31 @@ Sync `codex/workspace` with `integration-hub` first. Read `docs/PLAN.md` and rep
     *(Entry pushed: `4d22f4157bb61843d749f0089d07fd29f218c208`; `scripts/check.py` passes 69 tests.
     Full twin/Gazebo protocol unavailable because the root overlay is full and `rclpy` is absent; see
     the entry note. Leave full scoring to the judge.)* *(Judged 2026-10-22: 94.13.)*
-17. **Arena 3 cross-check** (T8): cross-check `experiments/arena/2026-10-22_arena3-results.md`, the raw
-    data in `experiments/arena/arena3_judging/`, and the Claude entry `claude/robot/arena3-identity` @
-    `191d2c1` (you may read it now). Re-score from the committed files if you can. Reply `agree` or
-    object in T8.
+17. **Arena 3 cross-check** (T8): *(Done 2026-10-24: re-scored the committed raw summaries: Claude
+    `191d2c1` 99.13 and Codex `4d22f41` 94.13, both with empty `out_of_scope`; `scripts/check.py`
+    passed 72 tests on a read-only snapshot of Claude's entry; reviewed TargetGate, corridor give-way
+    and tests, found no merge blocker, and replied `agree` in T8. Did not merge either entry.)*
+18. **T9 review**: review the E7 ablation (`experiments/sim/2026-10-24_e7_ablation.md` and its raw data)
+    and the robot-day kit:
+    - the `/yolo_frame` change in `ros2_yolo_live.py` and the twin;
+    - `tools/robot_day/analyze.py` and `tools/robot_day/turn_check.py`;
+    - `docs/robot_day_protocol.md`.
+
+    Say whether the 3 review points in T9 must be fixed before robot day 1. Reply `agree` or object in T9.
 
 ## Robot-day checklist
 
-- [ ] Lifted-wheel turn-direction check for `zlac_joystick_bridge.py` (T6):
+- **Note (Arena 3 merge `efda1b0`):** the real robot now follows only the person it locks on to at the
+  start, and gives way to a nearer person in its driving corridor. `target_gate:=false` (a
+  `sync_fusion_node.py` parameter) restores the old behaviour. All gate values were tuned in simulation
+  and are checked on the robot in E5.
+
+- **Procedure:** follow [`docs/robot_day_protocol.md`](docs/robot_day_protocol.md).
+  - Step 0 is the T6 turn check with `tools/robot_day/turn_check.py`.
+  - Record each experiment with `ros2_yolo_ws/scripts/record_robot_day.sh --scenario <label>`.
+  - Analyse the recordings with `tools/robot_day/analyze.py` (E1–E4).
+- [ ] Lifted-wheel turn-direction check for `zlac_joystick_bridge.py` (T6), run with
+  `tools/robot_day/turn_check.py`:
   - With the wheels off the ground, publish a small positive `angular.z` (counter-clockwise) and no
     `linear.x`.
   - The right wheel should turn forward and the left wheel backward. If not, set `turn_dir:=-1`.
@@ -211,7 +236,7 @@ Sync `codex/workspace` with `integration-hub` first. Read `docs/PLAN.md` and rep
   ([`docs/thesis_review_2026-10-22.md`](docs/thesis_review_2026-10-22.md), section E):
   - **Robot day 1:** E1 (camera vs LiDAR bearing against tape marks), E3 (detection rate against
     distance) and E4 (clothing colour, 2 people × same/different clothes × sun/shade). Add E2
-    (latency) once detections carry image stamps.
+    (latency) from `/yolo_frame`, which now carries the image stamps.
   - **Robot day 2:** E5 (keep the right person, with the Arena 3 winner) and E6 (following quality).
   - E7 (ablation) runs in the twin.
 

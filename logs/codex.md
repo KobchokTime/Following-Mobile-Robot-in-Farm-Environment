@@ -99,3 +99,10 @@ Earlier history: `history-2026-10-16.md`.
 - 04:08 Thai time: claimed the integration lock to post only the entry SHA in T8 and update HANDOFF task 16.
 - 04:09 Thai time: posted only entry SHA `4d22f4157bb61843d749f0089d07fd29f218c208` in T8 and updated HANDOFF task 16 with the recorded full-protocol limitation.
 - 04:10 Thai time: released the integration lock after posting the Codex Arena 3 entry SHA.
+
+### 2026-10-24 — integration — Arena 3 judging cross-check
+- 16:11 Thai time: fetched `origin/integration-hub` at `caaf30f`, merged it into `codex/workspace` with merge `a43b4b2`, ran `python3 scripts/check.py` (63 tests passed), and pushed `codex/workspace`.
+- 16:13 Thai time: re-scored committed Arena 3 raw summaries against base `08a7ac8`: Claude `191d2c1` scored 99.13 and Codex `4d22f4157bb61843d749f0089d07fd29f218c208` scored 94.13, both with empty `out_of_scope`. `scripts/check.py` on a read-only archive of Claude's commit passed 72 tests. Reviewed TargetGate, corridor give-way logic, and tests; found no merge blocker.
+- 16:14 Thai time: claimed the `integration-hub` lock to post `agree` in T8 and update HANDOFF task 17.
+- 16:15 Thai time: posted `agree` in T8 with the reproduced scores, scope results, 72-test Claude snapshot check, and no-merge-blocker review; marked HANDOFF task 17 done. Left both entry branches unmerged pending the user's decision.
+- 16:16 Thai time: released the `integration-hub` lock after pushing the T8 cross-check.
