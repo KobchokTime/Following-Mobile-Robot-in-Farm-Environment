@@ -55,7 +55,8 @@ class FollowStopNode(Node):
         self.declare_parameter('speed_ff_gain', 1.0)      # per (m · s)
         self.declare_parameter('speed_ff_max', 1.0)       # the bridge saturates at 1.0 (40 RPM)
         self.declare_parameter('speed_ff_decay_s', 0.3)   # time constant once closer than the set-point
-        # braking: never faster than the robot can stop from within the gap (bridge ramp is 1.0 m/s^2)
+        # braking: never faster than the robot can stop from within the gap (bridge ramp is 1.0 m/s^2).
+        # In m/s, for the bridge's "mps" mode; with speed_mode:=legacy set max_decel:=0.0
         self.declare_parameter('max_decel', 0.8)
 
         # init dist
