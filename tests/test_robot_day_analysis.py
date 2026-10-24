@@ -65,6 +65,14 @@ class ExperimentTest(unittest.TestCase):
         self.assertAlmostEqual(r["capture_to_detection_ms"]["median"], 50.0, places=0)
         self.assertAlmostEqual(r["detection_to_cmd_vel_ms"]["median"], 30.0, places=0)
 
+    def test_e2_end_to_end_is_per_frame_not_a_sum_of_medians(self):
+        # Codex's T9 reproducer: component medians are 100 + 100 ms, but per frame it is 110/110/200 ms
+        box = [(0, 0, 10, 10, 900, 128, 128)]
+        frames = [(10.01, frame(10.0, box)), (20.10, frame(20.0, box)), (30.10, frame(30.0, box))]
+        r = A.e2_latency(frames, [10.11, 20.11, 30.20])
+        self.assertAlmostEqual(r["capture_to_cmd_vel_ms"]["median"], 110.0, places=0)
+        self.assertEqual(r["capture_to_cmd_vel_ms"]["n"], 3)
+
     def test_e2_flags_unusable_capture_stamps(self):
         box = [(0, 0, 10, 10, 900, 128, 128)]
         frames = [(10.05, frame(10.0, box)), (10.15, frame(0.0, box)), (10.25, frame(10.4, box))]
