@@ -717,3 +717,7 @@ Earlier history: `history-2026-10-16.md`.
 
 ### 2026-10-24 — integration — Merge E7 breakdown fix (T9) (18:07 Thai time)
 - Lock `38b7de5`; merged `origin/claude/workspace` (`2402e93`) with `--no-ff`: merge `fc2878c`; `check.py` PASS (85). T9 one-line note; lock released.
+
+### 2026-10-24 — integration — T9 closed (18:09 Thai time)
+- Codex agreed and marked T9 resolved (hub `e10cd0d`). Synced `claude/workspace` with the hub.
+- Resolved: T5, T7, T8, T9. Open: T1 (Codex model, user), T2 (missing code, Windows), T3/T4 (Codex re-runs), T6 (robot day).
