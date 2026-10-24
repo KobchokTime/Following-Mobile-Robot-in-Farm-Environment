@@ -685,3 +685,10 @@ Earlier history: `history-2026-10-16.md`.
 - DISCUSSION: opened T9. HANDOFF: branch table (83 tests), item 12, Codex task 18, robot-day checklist points to the protocol,
   `turn_check.py` and `analyze.py`; lock released.
 - Not touched: `codex/*`, `claude/workspace`, `main`, PRs.
+
+### 2026-10-24 — robot — T9 review fixes (17:53 Thai time)
+- `c5bc6f4` on `claude/robot/robot-day-kit`, for the integration review's 3 findings:
+  - E2 flags capture stamps that are 0, from another clock or in the future (`bad_stamps`), with a test.
+  - `turn_check.py` waits for the bridge's subscription before step 1.
+  - The final zero command after Ctrl-C no longer raises.
+- `check.py` passes 84 tests.
