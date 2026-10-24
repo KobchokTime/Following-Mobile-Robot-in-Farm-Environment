@@ -131,3 +131,22 @@ python3 tools/robot_day/analyze.py ~/robot_day_recordings --out robot_day_report
 
 Copy the report (not the bags) into `experiments/robot_day/<date>/` with a short write-up. The bags
 stay on the robot or an external drive and are listed in `raw_data_index.md`.
+
+## Tested on twin bags (2026-10-24)
+
+I ran the analyser inside the twin image on bags from `run_scenario --record-bag`. The labels were
+assigned by hand, and the commands were:
+
+```bash
+source /opt/ros/humble/setup.bash
+python3 tools/robot_day/analyze.py <bag> --label e4_diff_sun
+```
+
+The full pipeline works: bag, `/yolo_frame`, statistics. The outputs were:
+
+- **E4 on `side_by_side`:** mean chroma A (109.6, 164.9) and B (159.4, 110.0). These are the twin's two
+  clothing colours. Separation ratio 20, nearest-mean accuracy 1.0.
+- **E3 on `straight`:** 10 fps, detection rate 1.0, all boxes clipped. The twin's person is 0.5–0.8 m
+  away and taller than the image.
+- **E1 and E2** produced numbers. They mean nothing here, because the person walks and the twin has
+  no inference delay.
