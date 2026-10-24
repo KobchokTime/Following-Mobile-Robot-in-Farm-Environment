@@ -140,28 +140,34 @@ def e1_stats(truth: dict, detections: Sequence[Tuple[float, float]], scans: Sequ
 
 
 def e2_latency(frames: Sequence[Tuple[float, dict]], cmd_times: Sequence[float], max_plausible_s: float = 5.0) -> dict:
-    """Capture -> /yolo_frame (inference) and /yolo_frame -> next /cmd_vel (fusion + control).
+    """Capture -> /yolo_frame (inference), /yolo_frame -> next /cmd_vel (fusion + control), and the
+    end-to-end capture -> /cmd_vel delay of each frame.
 
     frames: (receive time, parsed /yolo_frame); cmd_times: receive times of /cmd_vel, sorted.
-    Only frames with at least one person count for the control part. Receive times are the
-    recorder's, so they include its own small delay. A capture stamp of 0, from another clock, or
-    later than its receive time makes the first part meaningless; such frames are left out and
-    counted in "bad_stamps".
+    Only frames with at least one person count for the control and end-to-end parts. Receive times
+    are the recorder's, so they include its own small delay. A capture stamp of 0, from another
+    clock, or later than its receive time makes the capture-based parts meaningless; such frames are
+    left out and counted in "bad_stamps". The end-to-end median is taken over frames, not by adding
+    the two component medians.
     """
-    raw = [t - f["stamp"] for t, f in frames]
-    infer = [d for d in raw if 0.0 <= d <= max_plausible_s]
-    ctrl = []
+    infer, ctrl, total, bad = [], [], [], 0
     for t, f in frames:
+        d = t - f["stamp"]
+        ok = 0.0 <= d <= max_plausible_s
+        bad += not ok
+        if ok:
+            infer.append(d)
         if f["boxes"]:
             j = bisect_right(cmd_times, t)
             if j < len(cmd_times):
                 ctrl.append(cmd_times[j] - t)
+                if ok:
+                    total.append(cmd_times[j] - f["stamp"])
     ms = lambda xs, q: None if not xs else round(1000.0 * percentile(xs, q), 1)  # noqa: E731
-    return {"frames": len(frames), "bad_stamps": len(raw) - len(infer),
+    return {"frames": len(frames), "bad_stamps": bad,
             "capture_to_detection_ms": {"median": ms(infer, 0.5), "p95": ms(infer, 0.95)},
             "detection_to_cmd_vel_ms": {"median": ms(ctrl, 0.5), "p95": ms(ctrl, 0.95)},
-            "capture_to_cmd_vel_ms_median": None if not (infer and ctrl) else round(
-                1000.0 * (percentile(infer, 0.5) + percentile(ctrl, 0.5)), 1)}
+            "capture_to_cmd_vel_ms": {"median": ms(total, 0.5), "p95": ms(total, 0.95), "n": len(total)}}
 
 
 def e3_stats(truth: dict, frames: Sequence[Tuple[float, dict]]) -> dict:
