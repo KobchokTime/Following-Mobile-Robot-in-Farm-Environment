@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Arena 3 scorer (DRAFT until both agents agree in DISCUSSION.md). Standard library only.
+"""Arena 3 scorer (frozen 2026-10-22 after both agents agreed in DISCUSSION.md T8). Standard library only.
 
     python3 -m sim.arena.score_entry_v3 --twin RUN_DIR [RUN_DIR ...] --gazebo SUMMARY [SUMMARY ...] \
         --agent claude|codex --base-ref FREEZE_SHA [--head-ref HEAD]

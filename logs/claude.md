@@ -591,3 +591,53 @@ Earlier history: `history-2026-10-16.md`.
     `torso_chroma()` takes a box crop.
 - `5b535e7` (thesis-review): new section C3 on box-crop contamination (Codex's addition); E4 now measures it.
 - `check.py` passes 63 tests.
+
+### 2026-10-22 — integration — Merge T8 review fixes; Claude agrees to the Arena 3 rules (02:44–02:45 Thai time)
+- Lock claimed in `3b63b7b` (02:44). Merged `origin/claude/workspace` (`246ec7e`; `ffba68c`, `5b535e7`) with `--no-ff`:
+  merge `4aba2f6`; no conflicts. `check.py`: PASS (63). No `ros2_yolo_ws/` changes.
+- Verified: v3 baseline 60.64 (identical after the key rename); Codex's reproducer → "curve_left did not turn in
+  every run" (the pre-merge scorer gave none); v2 reference 66.01; no `tracked_share` left in code or data.
+- T8: change request fixed, all 4 answers accepted, C3 crop limitation added; Claude `agree`; asked Codex for the final
+  `agree`; not frozen. HANDOFF: item 11 and Codex task 15 (final T8 review); lock released.
+
+### 2026-10-22 — integration — Freeze Arena 3 (T8) (03:53–03:54 Thai time)
+- Codex replied `agree` in T8 (hub `5e1a57b`, 03:37); Claude had already agreed. Lock claimed in `81f54b5` (03:53).
+- Freeze commit `08a7ac8` (`arena: freeze Arena 3 rules and scorer`): the draft's title and status line, and the
+  `score_entry_v3.py` docstring only. No rule text or logic changes, no renames. `check.py`: PASS (63).
+- T8: named `08a7ac8`; entries `claude/robot/arena3-identity` / `codex/robot/arena3-identity` from it; SHA only; no reading
+  the other branch until both are in; the integration role judges with `--base-ref 08a7ac8`. T8 open until judging.
+- HANDOFF: item 11 frozen; Codex task 16 (build the Codex Arena 3 entry); lock released.
+
+### 2026-10-22 — integration — Post Claude Arena 3 entry SHA (T8) (06:38 Thai time)
+- Lock claimed and released; posted only "Claude entry: `claude/robot/arena3-identity` @ `191d2c1` (from `08a7ac8`)" in T8 (ancestry checked; content not read). HANDOFF item 11: both entries in, judging.
+
+### 2026-10-22 — integration — Judge Arena 3 and post the results (T8) (06:38–07:51 Thai time)
+- Model: Claude Opus 5.5 (`integration` subagent), acting as judge. Entries: Claude `claude/robot/arena3-identity` @
+  `191d2c1`, Codex `codex/robot/arena3-identity` @ `4d22f41`, both from the freeze commit `08a7ac8`.
+- Detached checkouts `/tmp/claude-0/judge3_claude` and `/tmp/claude-0/judge3_codex`. Images `twin[-gz]:judge3-<agent>` built
+  06:38:15–06:38:20; code hashes match (claude `fb39c440a943`, codex `549f339b37b1`). `check.py`: Claude 72, Codex 69 (PASS).
+- Alternating runs 06:38:27–07:49:10 (twin seeds 0–2 with `everything`/`turning`, then Gazebo gz1/gz2); all exit 0.
+  Raw runs kept in `/tmp/claude-0/judge_runs/arena3`.
+- Scored at 07:49:16 in wt_hub (`167e0c0`), `--base-ref 08a7ac8`: Claude 99.13, Codex 94.13 (contact on crossing/diff_drive,
+  3 seeds). Both in scope. Re-scoring the committed raw files gives identical JSON.
+- Hub: lock `3955738` (07:50); results and raw data ``; T8 judge reply; HANDOFF item 11 and Codex task 17; lock released.
+- Neither entry merged. Not touched: `codex/*`, entry branches, `claude/workspace`, `main`, PRs.
+- Correction: the results and raw data commit in the line above is `a57dff7`.
+
+### 2026-10-22 — robot — Arena 3 entry (03:55–06:37 Thai time)
+- Branch `claude/robot/arena3-identity` from `08a7ac8`. I did not read Codex's entry (`4d22f41`).
+- `TargetGate` in `sync_fusion_node.py`: lock-on, alpha-beta bearing/range gate, soft chroma cost.
+- Give way to a person in the corridor who is nearer than the target.
+- Self-checks: 94.21 (contact in crossing/diff_drive) → 82.64 (my bug: gave way using a farther person's range) → **99.15** (submitted).
+- Details: `experiments/arena/entries/claude.md`. `check.py` passes 72 tests.
+
+### 2026-10-24 — integration — Merge the Arena 3 winner; resolve T8 (16:27–16:27 Thai time)
+- Model: Claude Opus 5.5 (`integration` subagent). The user decided to merge the winner (relayed by the coordinator).
+  Codex agreed in T8 (`3b6c5ed`, lock released `ea55a26` at 16:16).
+- Lock claimed in `78c9115` (16:27). Merged `origin/claude/robot/arena3-identity` (`191d2c1`) with `--no-ff`: merge `efda1b0`.
+  The only conflict was in `logs/claude.md`; both sides kept. The entry note merged cleanly (no lines removed).
+- `python3 scripts/check.py`: PASS (72 tests). `zlac_joystick_bridge.py` and `follow_stop_node.py`: no diff. No paths or secrets.
+- DISCUSSION T8: merge named, Codex's agree recorded, Codex entry `4d22f41` unmerged; T8 **resolved**.
+- HANDOFF: item 11 merged/resolved; branch table 72 tests; robot-day note on the target gate (`target_gate:=false` restores
+  the old behaviour; gate values tuned in sim, checked in E5); lock released.
+- Not touched: `codex/*`, `claude/workspace`, `main`, PRs.

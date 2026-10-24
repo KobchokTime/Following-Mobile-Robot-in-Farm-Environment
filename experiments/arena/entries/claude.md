@@ -109,3 +109,69 @@ runs on the `fixed` bridge. `score_entry_v2 --agent claude --base-ref 9b78f1f` g
 - **Simulation only.** The twin and Gazebo have no wheel slip or acceleration limit. The
   feed-forward is in `/cmd_vel` units, so it adapts to the bridge's 40-RPM-per-unit scale without
   knowing the wheel radius.
+
+# Arena 3 entry — keep following the right person (Claude Code)
+
+- **Branch:** `claude/robot/arena3-identity`, from the freeze commit `08a7ac8`.
+- **Changed:** `ros2_yolo_ws/scripts/Image/sync_fusion_node.py` and the new
+  `tests/test_target_gate.py` (9 tests). The drive bridge and the controller are untouched.
+
+## Change
+
+1. **`TargetGate`** decides which detection is the target.
+   - It locks on in the controller's start window: 0.5–1.0 m, within ±15° of the image centre.
+   - Each later detection gets a cost against an alpha-beta prediction of the target's bearing
+     (σ 5°) and range (σ 0.15 m). The clothing chroma adds a soft cost (σ 15) when the message
+     carries it, and the target's colour is learned slowly.
+   - Only detections with cost ≤ 9 are published. The gate widens while the target is unseen.
+   - Old 3-value messages still work. The parameters `target_gate` and `use_chroma` switch the gate
+     or the colour off, for the E7 ablation.
+2. **Give way to a person in the path.**
+   - Trigger: a rejected detection inside the driving corridor (±0.7 m) and nearer than the target.
+   - Action: publish the target's last image position with that person's range minus 0.4 m. Target
+     messages in the next 0.5 s also use it. This keeps working while the person hides the target.
+
+## What went wrong on the way (kept for the record)
+
+- **Self-check 1 (gate only): 94.21.**
+  - Identity was 21/21, but `crossing` on `diff_drive` had contact (0.37 m).
+  - Ignoring the crossing person also removed the accidental slow-down the old code got from using
+    whoever was nearest.
+  - While that person hid the target, nothing was published, and the robot kept its last command.
+- **Self-check 2 (first give-way): 82.64.**
+  - My bug: the give-way message used the other person's range even when they were **farther**
+    than the target.
+  - In `side_by_side` the controller therefore saw the target farther away than it was, and drove
+    into it.
+  - Fixed by giving way only to someone nearer than the target's own range.
+
+## Self-check 3 (submitted), full frozen protocol
+
+3 twin seeds × 9 scenarios × `fixed`/`diff_drive`, plus 2 Gazebo runs each of `curve_left`,
+`side_by_side`, `side_by_side_same` and `stand_aside`. Scored with
+`score_entry_v3 --agent claude --base-ref 08a7ac8`:
+
+| Part | Points | Detail |
+|---|---|---|
+| Identity | 50 / 50 | 21/21 runs pass, mean visible share 1.0 |
+| Following | 29.15 / 30 | mean median gap: straight 0.577 m, stop_and_go 0.548 m, curve_left 0.566 m; curve_left 0/5 failures |
+| Behaviour | 20 / 20 | no contact; target_loss stops in 1.0 s; curve_left turns |
+| **Total** | **99.15 / 100** | reference 60.6; scope clean |
+
+Closest approach to the other person (centre to centre):
+
+| Scenario | Closest approach |
+|---|---|
+| `crossing` | 0.46 m |
+| `stand_aside` | 0.70 m |
+| `head_on` | 0.80 m |
+| `side_by_side` | 1.57 m |
+
+`check.py` passes 72 tests. The judge's run is the one that counts.
+
+## Notes
+
+- `side_by_side_same` passes on geometry alone. Colour only breaks ties.
+- The corridor width (0.7 m), the margin (0.4 m) and the gate σ values were tuned in the twin. They
+  need checking on the robot (E5). `crossing` keeps only about 0.06 m above the contact line.
+- The give-way path has no unit test of its own; it is checked through the twin runs.
