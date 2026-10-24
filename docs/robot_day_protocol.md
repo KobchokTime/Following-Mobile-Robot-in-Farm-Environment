@@ -7,6 +7,46 @@ Every recording is one `record_robot_day.sh` run. Its `--scenario` label carries
 and `tools/robot_day/analyze.py` turns a folder of recordings into numbers. Write labels exactly as
 shown, because the analyser parses them.
 
+## Working alone (current plan, 2026-10-24)
+
+The user runs robot days alone, so the two-person experiments (E4, E5) wait. The goal for now is
+**following one person reliably at walking pace**. Each recording uses `--countdown` (time to walk to
+the mark; the terminal beeps each second) and `--duration` (it stops by itself):
+
+```bash
+ros2_yolo_ws/scripts/record_robot_day.sh --scenario e3_d0.5_front --countdown 10 --duration 10
+```
+
+| Order | What | Alone? | Time |
+|---|---|---|---|
+| 0 | `turn_check.py`, wheels lifted (T6) | yes | 10 min |
+| 1 | Measure the wheel radius, track width and camera height. Then on the ground run `speed_check.py --speed 0.4` and correct `wheel_radius_m` | yes | 20 min |
+| 2 | First drive at `max_speed_mps:=0.5`; raise it to 1.0, then 1.4, once following looks right | yes | — |
+| 3 | E3: you stand at each distance, with a countdown | yes | 30 min |
+| 4 | E1: you stand on each tape mark, with a countdown | yes | 40 min |
+| 5 | E6 solo: the robot follows you through the twin's solo moves, 3 runs each (`e6_<move>_<n>`, `--countdown 5 --duration 30`) | yes | 60 min |
+| — | E2 is computed from every recording | — | — |
+
+The E6 moves match the twin's `solo` set:
+
+| Twin scenario | Move |
+|---|---|
+| `straight` | walk straight and stop |
+| `stop_and_go` | walk, stop 5 s, walk on |
+| `walk_0p6` and `walk_1p0` | your slow and normal pace |
+| `turn_90` | a right-angle turn |
+| `side_step` | step 1 m sideways, then walk on |
+| `come_back` | walk away, turn and come back towards the robot to load it |
+| `zigzag` | weave left and right |
+
+`analyze.py` reports for each run:
+- the share of time the target was tracked;
+- the longest dropout;
+- the median, 95th-percentile and smallest gap;
+- the highest forward command.
+
+A phone video from behind helps with the notes.
+
 ## Before the day
 
 - [ ] Check out the commit to test. Note its SHA; the recorder also stores it in `recording.json`.

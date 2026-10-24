@@ -26,7 +26,7 @@ from rclpy.node import Node
 from sensor_msgs.msg import LaserScan
 from std_msgs.msg import Int32MultiArray, String
 
-from .scenarios import ALL_SCENARIOS, build
+from .scenarios import SCENARIO_LOOKUP, build
 
 PHYSICS_HZ = 50.0
 SENSOR_HZ = 10.0
@@ -40,7 +40,7 @@ class TwinWorldNode(Node):
         self.declare_parameter("bridge_mode", "current")
         self.declare_parameter("log_path", "")
         name = str(self.get_parameter("scenario").value)
-        self.spec = ALL_SCENARIOS[name]
+        self.spec = SCENARIO_LOOKUP[name]
         self.world = build(name, seed=int(self.get_parameter("seed").value),
                            bridge_mode=str(self.get_parameter("bridge_mode").value))
         log_path = str(self.get_parameter("log_path").value)
