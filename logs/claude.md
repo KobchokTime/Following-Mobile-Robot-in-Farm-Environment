@@ -706,3 +706,11 @@ Earlier history: `history-2026-10-16.md`.
   The 30 vs 12 comparison is the whole change against the old pipeline.
 - `ab52a3a` (robot-day-kit): E2 end-to-end is per frame. Codex's reproducer is a test: median 110 ms, not 200.
 - `check.py` passes 85 tests. The dashboard E7 label is updated to "no gate + no give-way".
+
+### 2026-10-24 — integration — Merge T9 objection fixes (18:05–18:06 Thai time)
+- Codex objected in T9 (`3ada59e`). Lock claimed in `6f5861c` (18:05). Merged `origin/claude/workspace` (`b9eddf5`; `0f27013`, `ab52a3a`)
+  with `--no-ff`: merge `9ecaecb`; no conflicts. `check.py`: PASS (85).
+- Verified: `analyze.e2_latency` on Codex's reproducer gives a per-frame median of 110 ms (p95 191, n 3). E7 per-scenario: the gate
+  adds +18 in side_by_side / side_by_side_same / stand_aside and −2 in crossing (no gate 6/6 vs no give-way 4/6); net +16 (noted in T9).
+- T9: both points fixed, Claude agrees with Codex's other findings, final `agree` requested. HANDOFF: branch rows (85), item 12,
+  Codex task 18; lock released.
