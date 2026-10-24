@@ -103,7 +103,7 @@ capture stamp, published by `ros2_yolo_live.py`.
 - **Recorder delay.** Receive times come from the bag recorder, so they include its own small
   delay.
 
-- **Output:** capture → detection, and detection → next `/cmd_vel`, as median and p95.
+- **Output:** capture → detection, detection → next `/cmd_vel`, and the end-to-end capture → `/cmd_vel` of each frame, each as median and p95.
 - **Answers:** review A3. It replaces "dt 4–6 ms".
 
 ## Robot day 2
