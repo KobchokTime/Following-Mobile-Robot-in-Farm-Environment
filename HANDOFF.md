@@ -216,8 +216,9 @@ Sync `codex/workspace` with `integration-hub` first. Read `docs/PLAN.md` and rep
     fixed. Reproduced that the analyzer's extra capture-to-cmd median is the sum of component medians,
     not the paired end-to-end median. This does not block E1/E3/E4; remove or correct the aggregate
     before citing it for E2. No ROS 2 installation or twin bag was available. Check passed 84 tests.)*
-    **Now:** final T9 review of the objection fixes in `9ecaecb` (E7 attribution, per-frame E2
-    end-to-end). Reply `agree` or object in T9.
+    **Resolved 2026-10-24:** reviewed fixes in `9ecaecb` and `fc2878c`; the E7 write-up isolates
+    the gate effect, and E2 calculates the per-frame end-to-end latency (110 ms on the reproducer).
+    `scripts/check.py` passed 85 tests. Codex replied `agree` and marked T9 resolved.
 
 ## Robot-day checklist
 

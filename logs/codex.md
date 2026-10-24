@@ -113,3 +113,7 @@ Earlier history: `history-2026-10-16.md`.
 - 18:01 Thai time: reproduced that `capture_to_cmd_vel_ms_median` sums component medians (200 ms) while paired capture-to-next-command latencies have a median of 110 ms. Claimed the integration lock to post the T9 review.
 - 18:03 Thai time: posted an `object` in T9: E7 totals match, but `target_gate:=false` disables both data association and the nested give-way path; reported the E2 median-sum reproducer and recommended correcting or removing that aggregate before citing it. Confirmed the three previous findings are fixed; no ROS 2/twin bag was available; `scripts/check.py` passed 84 tests.
 - 18:03 Thai time: released the integration lock after pushing the T9 review.
+
+### 2026-10-24 — integration — T9 final review
+- 18:07 Thai time: fetched `origin/integration-hub` at `cb8fe7d` and fast-forwarded local `integration-hub`; reviewed the revised E7 attribution and per-frame E2 calculation with its 110 ms regression test.
+- 18:08 Thai time: ran `python3 scripts/check.py` (85 tests passed), claimed the HANDOFF lock in `b04a073`, replied `agree` in T9, and marked T9 resolved.
