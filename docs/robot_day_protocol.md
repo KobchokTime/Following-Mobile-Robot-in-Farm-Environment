@@ -97,6 +97,12 @@ python3 tools/robot_day/turn_check.py
 The analyser computes it from every recording that has `/yolo_frame`. That topic carries the image's
 capture stamp, published by `ros2_yolo_live.py`.
 
+- **Check the camera driver's stamps first.** E2 needs the driver to fill `header.stamp` from the
+  same clock. The report counts frames whose stamp is 0, in the future, or more than 5 s old as
+  `bad_stamps`. If most frames are bad, E2 has no meaning for that driver.
+- **Recorder delay.** Receive times come from the bag recorder, so they include its own small
+  delay.
+
 - **Output:** capture → detection, and detection → next `/cmd_vel`, as median and p95.
 - **Answers:** review A3. It replaces "dt 4–6 ms".
 

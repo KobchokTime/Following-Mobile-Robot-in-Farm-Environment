@@ -16,6 +16,8 @@ If step 1 is wrong, the forward mapping (FORWARD_DIR) is wrong. If only step 3 i
 bridge with `turn_dir:=-1` and run this again. Record the result in config/motor_wheel_calibration.md.
 """
 
+import time
+
 import rclpy
 from geometry_msgs.msg import Twist
 from rclpy.node import Node
@@ -35,6 +37,8 @@ class TurnCheck(Node):
         super().__init__("turn_check")
         self.pub = self.create_publisher(Twist, "/cmd_vel", 10)
         self.step, self.ticks = 0, 0
+
+    def start(self):
         self.timer = self.create_timer(1.0 / RATE_HZ, self.tick)
         print(f"step 1/{len(STEPS)}: {STEPS[0][2]}", flush=True)
 
@@ -56,13 +60,27 @@ def main():
     rclpy.init()
     node = TurnCheck()
     try:
+        # wait for the drive bridge to subscribe, so step 1 is not lost
+        deadline = time.monotonic() + 5.0
+        while node.pub.get_subscription_count() == 0 and time.monotonic() < deadline:
+            rclpy.spin_once(node, timeout_sec=0.1)
+        if node.pub.get_subscription_count() == 0:
+            print("no subscriber on /cmd_vel: is zlac_joystick_bridge.py running?", flush=True)
+            return
+        node.start()
         while rclpy.ok() and node.step < len(STEPS):
             rclpy.spin_once(node, timeout_sec=0.1)
+        print("done; record what you saw in config/motor_wheel_calibration.md", flush=True)
+    except KeyboardInterrupt:
+        print("stopped", flush=True)
     finally:
-        node.pub.publish(Twist())
+        try:
+            node.pub.publish(Twist())  # the bridge's 1 s command timeout stops the wheels anyway
+        except Exception:  # noqa: BLE001  (the context may already be shut down after Ctrl-C)
+            pass
         node.destroy_node()
-        rclpy.shutdown()
-    print("done; record what you saw in config/motor_wheel_calibration.md", flush=True)
+        if rclpy.ok():
+            rclpy.shutdown()
 
 
 if __name__ == "__main__":
