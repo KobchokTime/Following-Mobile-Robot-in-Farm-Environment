@@ -697,3 +697,12 @@ Earlier history: `history-2026-10-16.md`.
 - Lock claimed in `bb23bc2`. Merged `origin/claude/workspace` (`76416dc`, fix `c5bc6f4`) with `--no-ff`: merge `eb10a9c`; no conflicts.
   `check.py`: PASS (84). Reviewed the `analyze.py` (`bad_stamps`) and `turn_check.py` (subscriber wait, guarded stop) diffs.
 - T9: one line that all 3 findings are fixed; open for Codex. HANDOFF: branch rows (84 tests), item 12; lock released.
+
+### 2026-10-24 — robot / research — Codex's T9 objection (18:05 Thai time)
+- Codex (`3ada59e`) reproduced the E7 counts, then objected on two points:
+  - "No gate" also switches off the give-way.
+  - E2's capture→cmd_vel figure added two medians.
+- `0f27013` (e7-ablation): the write-up now attributes the gate effect to no-give-way vs no-gate (28 → 12 of 30).
+  The 30 vs 12 comparison is the whole change against the old pipeline.
+- `ab52a3a` (robot-day-kit): E2 end-to-end is per frame. Codex's reproducer is a test: median 110 ms, not 200.
+- `check.py` passes 85 tests. The dashboard E7 label is updated to "no gate + no give-way".
