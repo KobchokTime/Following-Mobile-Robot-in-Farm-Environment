@@ -39,7 +39,14 @@ def _load():
 class TorsoChromaTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.chroma = staticmethod(_load().torso_chroma)
+        module = _load()
+        cls.chroma = staticmethod(module.torso_chroma)
+        cls.summary = staticmethod(module.frame_summary)
+
+    def test_frame_summary_layout(self):
+        self.assertEqual(self.summary(5, 7, 640, 480, []), [5, 7, 640, 480, 0])
+        self.assertEqual(self.summary(5, 7, 640, 480, [(1, 2, 3, 4, 900, 110, 165)]),
+                         [5, 7, 640, 480, 1, 1, 2, 3, 4, 900, 110, 165])
 
     def test_grey_is_neutral(self):
         frame = np.full((100, 100, 3), 90, np.uint8)
