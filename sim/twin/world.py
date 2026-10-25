@@ -295,11 +295,11 @@ class World:
                 hit = _ray_circle(a_robot, px, py, PERSON_RADIUS_M)
                 if hit is not None and hit < best:
                     best = hit
-            if clutter:
-                for cx_, cy_, cr in clutter:
-                    hit = _ray_circle(a_robot, cx_, cy_, cr)
-                    if hit is not None and hit < best:
-                        best = hit
+            for cx_, cy_, cr in clutter:
+                hit = _ray_circle(a_robot, cx_, cy_, cr)
+                if hit is not None and hit < best:
+                    best = hit
+            if self.realism:
                 if self.real_rng.random() < self.realism.lidar_ray_dropout:
                     best = math.inf
             if math.isfinite(best):

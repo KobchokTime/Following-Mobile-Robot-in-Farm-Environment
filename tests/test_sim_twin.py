@@ -132,3 +132,8 @@ class RealismTest(unittest.TestCase):
         ranges = w.scan()
         self.assertTrue(math.isinf(clean[0]))
         self.assertAlmostEqual(ranges[0], 0.9, places=2)
+
+    def test_scenario_obstacles_show_in_scan_without_realism(self):
+        w = world_with()
+        w.obstacles = ((1.0, 0.0, 0.1),)
+        self.assertAlmostEqual(w.scan()[0], 0.9, places=2)
