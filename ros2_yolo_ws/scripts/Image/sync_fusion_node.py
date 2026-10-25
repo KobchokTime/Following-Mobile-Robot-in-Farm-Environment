@@ -35,7 +35,7 @@ def lidar_clusters(points, gap_m=0.15):
     """Group a scan, sorted by bearing, into clusters of neighbouring returns.
 
     Two neighbours belong together when their ranges differ by less than gap_m. Returns a list of
-    (bearing of the middle return, closest range, width in metres).
+    (bearing of the middle return, closest range, length in metres from the first to the last return).
     """
     pts = sorted(points)
     clusters, cur = [], []
@@ -49,7 +49,10 @@ def lidar_clusters(points, gap_m=0.15):
     out = []
     for c in clusters:
         rmin = min(r for _, r in c)
-        width = rmin * (c[-1][0] - c[0][0]) if len(c) > 1 else 0.0
+        # straight-line distance between the first and last return, so depth counts too: a crop row
+        # seen at an angle is long even when it spans a narrow angle
+        (b0, r0), (b1, r1) = c[0], c[-1]
+        width = math.hypot(r1 * math.cos(b1) - r0 * math.cos(b0), r1 * math.sin(b1) - r0 * math.sin(b0))
         out.append((c[len(c) // 2][0], rmin, width))
     return out
 
