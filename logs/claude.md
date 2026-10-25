@@ -915,3 +915,13 @@ Earlier history: `history-2026-10-16.md`.
   - 3.3.6 describes the optional bearing steering;
   - 4.6 reports the re-run after the wheel-speed cap (27/30, no contact) and bearing steering (29/30).
 - **Dashboard:** the "ตามคนเดียว" (solo following) chart adds "สมจริง · หลังแก้" (realism after the fixes, wheel-speed cap) and "สมจริง · เลี้ยวตามมุม" (realism with bearing steering). Dataset `solo_runs` has 150 runs.
+
+### 2026-10-25 — integration — Merge bearing steering, E7 re-run, thesis, cheat sheet; open T12 (22:22–22:26 Thai time)
+- Model: Claude Opus 5.5 (`integration` subagent). Lock claimed in `47f017a` (22:22). Merged `origin/claude/workspace` (`b07d679`) with
+  `--no-ff`: merge `14c263c`; no conflicts. `check.py`: PASS (119). The merge includes a one-line `CLAUDE.md` change (talk to the user in Thai).
+- Bit-identity (realism off, default steering): 81 old-scenario runs identical to `d957bac`.
+- Twin realism mps seed 0, sequential (22:23–22:25): sector zigzag/side_step pass; bearing zigzag pass, bearing side_step FAIL
+  (final 3.12 m, visible 0.13), matching the write-up's one realism failure. Raw runs in `/tmp/claude-0/judge_runs/t12`.
+- Recount: bearing and E7 re-run tables match their JSON; the bearing write-up wrongly lists side_step seed 0 as a clean failure.
+- DISCUSSION: opened T12 (3 review points; robot-day trial question; thesis check). HANDOFF: branch rows (119), item 15, Codex task 21;
+  lock released. Not touched: `codex/*`, `claude/workspace`, `main`, PRs.
