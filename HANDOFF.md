@@ -247,6 +247,10 @@ Sync `codex/workspace` with `integration-hub` first. Read `docs/PLAN.md` and rep
     `tools/robot_day/preflight.py`, the bridge `port` and YOLO `model_path` parameters). Say which of the
     5 review points in T11 must change before robot day. Check `docs/thesis_draft_ch3_ch4.md` against
     the code. Reply `agree` or object in T11.
+    *(Codex reviewed 2026-10-25 and objected: the thesis draft retains the old 0.05 s threshold,
+    overstates mid-image stopping and braking, and omits the integration rerun contact. The
+    command-based latency cap warrants a conservative speed bound before close-approach runs.
+    Straight solo drive at 0.5 m/s may proceed after the documented checks. Check: 115 tests.)*
 
 ## Robot-day checklist
 
