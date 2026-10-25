@@ -109,6 +109,13 @@ class SpeedFeedForwardTest(unittest.TestCase):
         self.assertAlmostEqual(turn(0.1, -1.0, 0.2, 2.5, 1.2, 0.05), -0.25)  # already swinging back
         self.assertEqual(turn(1.0, 0.0, 0.2, 2.5, 1.2, 0.05), 1.2)
 
+    def test_target_staleness(self):
+        stale = _load().target_is_stale
+        self.assertFalse(stale(10.0, None, 0.3))   # nothing received yet
+        self.assertFalse(stale(10.2, 10.0, 0.3))
+        self.assertTrue(stale(10.4, 10.0, 0.3))
+        self.assertFalse(stale(99.0, 10.0, 0.0))   # off (sector mode)
+
     def test_output_is_clamped_to_max_speed(self):
         linear, _ = self.cmd(5.0, 1.0, 0.1, **PARAMS)
         self.assertEqual(linear, 3.5)

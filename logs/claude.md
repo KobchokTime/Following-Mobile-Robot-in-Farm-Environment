@@ -925,3 +925,13 @@ Earlier history: `history-2026-10-16.md`.
 - Recount: bearing and E7 re-run tables match their JSON; the bearing write-up wrongly lists side_step seed 0 as a clean failure.
 - DISCUSSION: opened T12 (3 review points; robot-day trial question; thesis check). HANDOFF: branch rows (119), item 15, Codex task 21;
   lock released. Not touched: `codex/*`, `claude/workspace`, `main`, PRs.
+
+### 2026-10-25 — robot — Codex T12 objection (23:55 Thai time)
+- `follow_stop` in `bearing` mode now stops after `target_timeout_s` 0.3 s without a target message. Before, the bridge held the last turn for 1 s. Unit test `target_is_stale`; `sector` mode is unchanged.
+- Thesis: 3.3.6 describes the stop, and 4.7 states that `target_gate:=false` also disables give-way (29/30 against 12/30 isolates the gate).
+- Re-run (`bearing`, `mps`, seeds 0–2, one job at a time):
+  - twin realism solo **30/30** and identity 15/15;
+  - clean solo **30/30**;
+  - no contact anywhere;
+  - `target_loss` now stops in 0.4–0.7 s.
+- `check.py` passes 120 tests.

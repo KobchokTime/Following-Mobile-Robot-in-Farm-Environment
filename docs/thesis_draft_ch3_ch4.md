@@ -224,6 +224,9 @@ to decide whether to follow.
      robot turns towards where the target is now rather than where the late frame showed it.
    - **Small offsets.** Bearings under 3° give no turn.
    - **LiDAR edge fixes** turn at the sector rate.
+   - **Stop when target messages stop.** In this mode `follow_stop` publishes a stop when no target
+     message has arrived for 0.3 s. Otherwise the drive bridge would repeat the last turn until its
+     own 1 s timeout.
    - **Why the limit is 0.8 rad/s.** At 1.2 rad/s the image moved faster than the target gate could
      follow (Section 4.6).
 
@@ -404,6 +407,9 @@ switched off by a parameter only.
 | No give-way | 28 / 30 | 29 / 30 | 1 |
 | No gate (the original pipeline) | 12 / 30 | 12 / 30 | 12 |
 
+- **Switching off the gate also switches off give-way,** which runs only for detections the gate
+  rejects. So the 30/30 against 12/30 comparison is the whole pipeline against the original one. The
+  gate's own contribution is no give-way (gate on, 29/30) against no gate (both off, 12/30).
 - **Data association is the main gain.** Without it the robot follows whichever person is nearest in
   the sector, and it fails every run of the side-by-side and bystander scenarios.
 - **Colour breaks near-ties, but which runs fail varies between runs.**
