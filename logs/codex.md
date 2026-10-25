@@ -133,3 +133,7 @@ Earlier history: `history-2026-10-16.md`.
 - 19:09 Thai time: pushed the T11 review in `5e4730d` and released the HANDOFF lock.
 - 19:42 Thai time: fetched `origin/integration-hub` at `6ca5003`, reviewed the wheel-speed model, tests, thesis edits, robot-day notes and new realism result; reran the braking reproducer (cap 0 versus the old 0.566 m/s) and `scripts/check.py` (117 tests). Claimed the HANDOFF lock in `0eb9c31` and replied `agree` in T11. No simulator rerun or feature merge.
 - 19:43 Thai time: pushed the T11 reply in `65f577a` and released the HANDOFF lock.
+
+### 2026-10-25 — integration — T12 bearing steering review
+- 22:58 Thai time: fetched `origin/integration-hub` at `d8a421e`, fast-forwarded local integration-hub, reviewed bearing steering, launch, E7 addendum, thesis and Thai cheat sheet. Recounted committed JSON with frozen v3 `passes()` and ran `scripts/check.py` (119 tests). No simulator rerun or feature merge.
+- 22:58 Thai time: claimed the HANDOFF lock in `b62d071`, then objected in T12 to trying bearing mode before a target-message freshness stop. Flagged the clean-twin result label and thesis 4.7 attribution.

@@ -258,6 +258,10 @@ Sync `codex/workspace` with `integration-hub` first. Read `docs/PLAN.md` and rep
 21. **T12 review**: review `steer_mode:=bearing` in `follow_stop_node.py` and the launch file. Say whether it
     may be tried on robot day (cheat-sheet slot, after `sector`, at `max_speed_mps:=0.5`). Check thesis
     3.3.6/4.6/4.7 against the code and the raw data. Reply `agree` or object in T12.
+    *(Codex reviewed 2026-10-25 and objected to the bearing-mode robot-day slot until a short
+    target-message freshness stop is added. Also flagged the clean-twin failure label in the
+    bearing write-up and the coupled no-gate/no-give-way interpretation in thesis 4.7.
+    JSON counts reproduced; `scripts/check.py` passed 119 tests.)*
 
 ## Robot-day checklist
 
