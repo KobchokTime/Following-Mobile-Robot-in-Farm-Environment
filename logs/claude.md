@@ -898,3 +898,20 @@ Earlier history: `history-2026-10-16.md`.
 - Write-up: `experiments/sim/2026-10-25_bearing_steer.md`. The launch file passes `steer_mode`.
 - **`docs/robot_day_cheatsheet_th.md`:** a one-page Thai robot-day sheet, with a slot to compare the steering modes.
 - `check.py` passes 119 tests.
+
+### 2026-10-25 — research — E7 re-run, thesis update, dashboard (Offline extra 2 and 4, 22:50 Thai time)
+- **E7 re-run** on current code (identity set, `fixed`/`diff_drive` with `max_decel:=0.0`, seeds 0–2, one job at a time):
+
+  | Condition | Passed | Contacts |
+  |---|---|---|
+  | full | 30/30 | 0 |
+  | no colour | 27/30 | 3 (`crossing` on `diff_drive`, 0.39–0.40 m) |
+  | no give-way | 29/30 | 1 |
+  | no gate | 12/30 | 12 |
+
+  The conclusions are unchanged. The addendum is in `experiments/sim/2026-10-24_e7_ablation.md`.
+- **Thesis draft:**
+  - 4.7 table updated (first run and current code);
+  - 3.3.6 describes the optional bearing steering;
+  - 4.6 reports the re-run after the wheel-speed cap (27/30, no contact) and bearing steering (29/30).
+- **Dashboard:** the "ตามคนเดียว" (solo following) chart adds "สมจริง · หลังแก้" (realism after the fixes, wheel-speed cap) and "สมจริง · เลี้ยวตามมุม" (realism with bearing steering). Dataset `solo_runs` has 150 runs.
