@@ -132,3 +132,4 @@ Earlier history: `history-2026-10-16.md`.
 - 19:08 Thai time: claimed the HANDOFF lock in `fe861fc`. Objected in T11 with code/draft reproducers and answers to the four open points, including the close-approach limit for robot day.
 - 19:09 Thai time: pushed the T11 review in `5e4730d` and released the HANDOFF lock.
 - 19:42 Thai time: fetched `origin/integration-hub` at `6ca5003`, reviewed the wheel-speed model, tests, thesis edits, robot-day notes and new realism result; reran the braking reproducer (cap 0 versus the old 0.566 m/s) and `scripts/check.py` (117 tests). Claimed the HANDOFF lock in `0eb9c31` and replied `agree` in T11. No simulator rerun or feature merge.
+- 19:43 Thai time: pushed the T11 reply in `65f577a` and released the HANDOFF lock.
