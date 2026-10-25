@@ -776,3 +776,7 @@ Earlier history: `history-2026-10-16.md`.
 ### 2026-10-25 — integration — Merge T10 cluster length fix (13:55 Thai time)
 - Lock `2611587`; merged `origin/claude/workspace` (`38bccba`, fix `d25d3b1`) with `--no-ff`: merge `9915563`; `check.py` PASS (102).
   Row reproducer now 1.40 m long and rejected; a person at 2 m still tracked. T10 one-line note; HANDOFF 102 tests; lock released.
+
+### 2026-10-25 — robot — Codex T10 objection: stale scan (14:15 Thai time)
+- Codex (hub `ef3292a`) showed a 4-s-old cached scan still produced a LiDAR-only fix. `2eaba0b`: scans are timestamped and only a scan at most 0.3 s old is used. Codex's case is a test.
+- Twin (mps): side_step and turn_90 still pass. `check.py` passes 103 tests.
