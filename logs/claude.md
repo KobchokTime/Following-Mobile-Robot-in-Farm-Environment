@@ -992,3 +992,16 @@ Earlier history: `history-2026-10-16.md`.
   - A button switches between them.
 - With the true pose the walls stay static apart from areas just revealed behind the moving person. With the command-based pose they turn "moving" while the robot turns or accelerates.
 - Boxes still show the actual `StaticMap` decision. Page version 8.
+
+### 2026-10-26 — research + dashboard — 2D point-cloud maps and scan matching (07:20 Thai time)
+- The filter-trial tab now draws a world-frame 2D point-cloud map per pane, as the user asked:
+  - scans once a second over the last 3 s;
+  - three crop-row walls added for the picture only;
+  - each point is white (static) or green (moving), matched against scans 0.5–1.5 s earlier.
+- The pose that lays the scans down can be switched between:
+  - dead reckoning from `/cmd_vel`;
+  - 2D ICP scan matching against a keyframe refreshed every second, as in the paper;
+  - the true pose.
+- **End-of-run pose error:** ICP 0.02–0.11 m in all 18 runs. Dead reckoning is 0.03–0.17 m in most runs but up to 1.3 m in some.
+- **Bug found and fixed on `claude/robot/static-filter` (`08eb36b`):** `StaticMap` kept integrating the last `/cmd_vel` after follow_stop went quiet, while the bridge had stopped the wheels after 1 s. It now ignores commands older than 1 s. The trial runs on the dashboard predate this fix.
+- **Next, if wanted:** put ICP scan matching into `StaticMap` instead of dead reckoning and rerun the trial.
