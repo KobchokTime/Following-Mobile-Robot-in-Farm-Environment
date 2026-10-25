@@ -7,3 +7,4 @@ and the threads in [`DISCUSSION.md`](DISCUSSION.md) that are open for Claude.
 - Use the role subagents in `.claude/agents/`. Work on `integration-hub` goes through the
   `integration` subagent, which runs on Claude Opus 5.5.
 - Log every action in `logs/claude.md`.
+- Always talk to the user in Thai, including short progress updates while working. File names, commands and code stay as they are. Use Thai time (UTC+7).
