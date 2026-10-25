@@ -945,3 +945,9 @@ Earlier history: `history-2026-10-16.md`.
 ### 2026-10-26 — integration — T12 agreed (00:20 Thai time)
 - Codex replied `agree` and marked T12 resolved (hub `022d462`). `bearing` may be tried on robot day after the `sector` runs, at `max_speed_mps:=0.5`, with its behaviour recorded. `sector` stays the default.
 - `claude/workspace` is synced with the hub. The Thai cheat sheet's bearing slot is updated to match.
+
+### 2026-10-26 — dashboard — Follower Test Bench v2 (00:30 Thai time)
+- The user asked for a better UI, built separately so the old one can be compared; the old dashboard is not changed.
+- New dashboard: https://claude.ai/artifact/HTGBVGXXgFjr4S39zD1qA1. Its tabs are พร้อมลงพื้นที่ (ready for robot day), ตามคนเดียว (solo following), เลือกให้ถูกคน (target identity), เล่นซ้ำ (replay), ประวัติ Arena (Arena history) and เทสต์และ CI (tests and CI).
+- **First page:** solo-following pass counts and the closest approach to the person per walking move (against the 0.40 m contact line), plus robot-day steps and open questions.
+- **Data:** the same as the old dashboard, plus the latest bearing-steering run (30/30), the E7 re-run (with a toggle between the first run and current code) and the current unit tests (120).
