@@ -884,3 +884,17 @@ Earlier history: `history-2026-10-16.md`.
 
 ### 2026-10-25 — decision — come_back (20:10 Thai time)
 - User's decision: do not change the code now. On robot day, do `come_back` last and walk back to the robot slowly at first. Then choose between backing away faster and letting the person come close, based on the real robot.
+
+### 2026-10-25 — robot + research — Bearing steering, Thai cheat sheet (Offline extra 1 and 3, 21:30 Thai time)
+- **`follow_stop` `steer_mode:=bearing`** (default still `sector`):
+  - turn rate ω = 2.5·θ̂, limited to 0.8 rad/s, where θ̂ is the camera bearing predicted over `latency_s`;
+  - 3° deadband;
+  - LiDAR edge fixes turn at the sector rate.
+- **Tuning.** A 1.2 rad/s limit spun the robot past the target in `side_step`, and the jump to the image edge spoiled the rate estimate. Both are handled.
+- **Results** (`mps`, seeds 0–2, one job at a time):
+  - twin realism solo: `sector` 27/30 → `bearing` 29/30, no contact (`zigzag` 1/3 → 3/3);
+  - identity: 15/15 in both modes;
+  - clean twin: 29/30 and 15/15. The one clean `come_back` 0.37 m did not reproduce in 4 reruns (0.43 m).
+- Write-up: `experiments/sim/2026-10-25_bearing_steer.md`. The launch file passes `steer_mode`.
+- **`docs/robot_day_cheatsheet_th.md`:** a one-page Thai robot-day sheet, with a slot to compare the steering modes.
+- `check.py` passes 119 tests.
