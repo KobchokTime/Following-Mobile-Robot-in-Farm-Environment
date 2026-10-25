@@ -76,6 +76,14 @@ below 0.4 m.
 
 **Identity set on `mps`:** 15/15 pass (5 scenarios × 3 seeds).
 
+## After the integration review fixes (), rerun
+
+- **What changed:** person-sized LiDAR clusters, both wheels ramped together, and parameter checks.
+- **Results:** solo 30/30 and identity 15/15 on , seeds 0–2. No contact; the closest approach is
+  0.43 m.  still stops in 1.3 s.
+- ** improved:** target visible 0.99–1.00 (was 0.94), max gap 0.82 m (was 1.8 m).
+- **Raw data:**  in the JSON.
+
 ## Regression check on the old bridges
 
 - **Arena 3 protocol, twin on `fixed` and `diff_drive`, seeds 0–2, scored with the judged Gazebo
