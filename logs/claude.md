@@ -839,10 +839,29 @@ Earlier history: `history-2026-10-16.md`.
   - new dataset `solo_runs` (120 runs).
 - Note: the first integration attempt for T11 stopped on a usage limit after claiming the lock (hub `a4fb5f4`). It is being resumed.
 
+### 2026-10-25 — integration — Merge twin realism, robot fixes, bringup, Gazebo solo, thesis draft; open T11 (14:57–18:48 Thai time)
+- Model: Claude Opus 5.5 (`integration` subagent). Lock claimed in `a4fb5f4` (14:57). Work paused for a usage limit and a machine
+  restart; the first, uncommitted merge of `172e06e` was aborted and redone on `0526ab3` (no code changes after `172e06e`).
+- Merged `origin/claude/workspace` (`0526ab3`) with `--no-ff`: merge `b23ec2b`; no conflicts. `check.py`: PASS (114).
+- Bit-identity (realism off): 81 old-scenario runs on current/fixed/diff_drive identical to `a4fb5f4` and `d957bac`.
+- Twin runs (image `twin:hub-t11`, 14:58–15:45, overlapping the coordinator's Gazebo jobs; then `twin:hub-t11b` on an idle machine,
+  18:14–18:47, solo only): clean solo 29/30 (side_step s0), realism solo 29/30 with 1 contact (come_back s2, 0.355 m),
+  identity 15/15 both. Arena 3 protocol on old bridges with new code: 94.46 (lag only; legacy caveat). Raw runs in
+  `/tmp/claude-0/judge_runs/t11` and `/tmp/claude-0/judge_runs/t11q`.
+- Probes: `min_rate_dt` 0.05 disables rate estimation at ≥25 fps; `unlock_after_s` re-locks on any person in the lock window.
+- DISCUSSION: opened T11 (5 review points, thesis-draft accuracy request, come_back 0.39 m as a design question for the user).
+  HANDOFF: branch rows (114), item 14, Codex task 20; lock released.
+- Not touched: `codex/*`, `claude/workspace`, `main`, PRs.
+
 ### 2026-10-25 — robot — T11 integration findings (18:55 Thai time)
 - Integration (hub `5d95e69`) found that the write-up's "realism: no contact" did not reproduce: `come_back` with realism, seed 2, came within 0.355 m. The write-up is corrected. This is the same design question as Gazebo's 0.39 m and is put to the user.
 - **Finding 1:** `min_rate_dt` 0.05 switched off rate estimation at 25 fps or more. It is now 0.015 s, with a test at 10, 30 and 60 fps. `check.py` passes 115 tests.
 - **Findings 2–5** (re-lock on anyone after 5 s, predicted-edge rule, give-way gap, latency cap using the command and not the wheel speed) are left for Codex's T11 review.
+
+### 2026-10-25 — integration — Merge T11 min_rate_dt fix (18:51 Thai time)
+- Lock `e54479d`; merged `origin/claude/workspace` (`5e3a90d`) with `--no-ff`: merge `fba0d89` (log conflict, both sides kept); `check.py` PASS (115).
+- Rate reproducer: 0.300 rad/s at 10/20/25/30/60 fps. come_back and side_step (mps, seed 0, sequential, idle machine): both pass.
+- T11 one-line note (finding 1 fixed; 2–5 wait for Codex). HANDOFF: item 13 marked resolved (T10), branch rows (115), item 14; lock released.
 
 ### 2026-10-25 — robot — Codex T11 objection (19:40 Thai time)
 - `88efdd4` answers Codex's objection:
@@ -850,3 +869,10 @@ Earlier history: `history-2026-10-16.md`.
   - **Thesis draft:** corrected to `min_rate_dt` 0.015 s; the mid-image stop now applies only when the target is not moving sideways; the cap is described as an estimate with the `max(0, ·)` clamp; the re-lock and give-way caveats are added; both realism runs are reported.
   - **Robot-day protocol:** gets Codex's operator notes (first drive `straight` at 0.5 m/s; `come_back` last; the re-lock rule).
 - **Re-run, one job at a time:** twin realism solo 27/30, no contact (`come_back` 0.42–0.44 m, was 0.355). Gazebo `come_back` is still 0.39 m: the person walks up while the robot is reversing. That is the open design question for the user. `check.py` passes 117 tests.
+
+### 2026-10-25 — integration — Merge T11 objection fixes (19:34–19:37 Thai time)
+- Codex objected in T11 (`5e4730d`). Lock `0baff08`; merged `origin/claude/workspace` (`15036d0`, fix `88efdd4`) with `--no-ff`: merge `f52e73f`
+  (log conflict, both sides kept). `check.py`: PASS (117). Realism-off bit-identity: 81 runs identical.
+- Codex's braking example through `speed_command`: cap 0.0 with the wheel estimate (0.32 with the command). Thesis draft checked for
+  0.015 s, the clamp and both realism runs. come_back and side_step (mps, seed 0, sequential): pass.
+- T11 reply asking Codex to re-check. HANDOFF: branch rows (117), item 14; lock released.

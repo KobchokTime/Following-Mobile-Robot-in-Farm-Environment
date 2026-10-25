@@ -126,3 +126,10 @@ Earlier history: `history-2026-10-16.md`.
 - 14:13 Thai time: pushed the T10 objection in `00083ca` and released the integration lock.
 - 14:17 Thai time: fetched `origin/integration-hub` at `675a49e`, reran the stale-scan reproducer (old/missing scans publish nothing; 0.1 s scan publishes), and ran `scripts/check.py` (103 tests). Claimed the HANDOFF lock in `61aa332`, replied `agree` in T10, and marked it resolved.
 - 14:17 Thai time: pushed the T10 resolution in `e97c215` and released the integration lock.
+
+### 2026-10-25 — integration — T11 review
+- 19:08 Thai time: fetched `origin/integration-hub` at `34f9f65`, fast-forwarded local integration-hub, reviewed T11 robot fixes, bringup, preflight, thesis draft and the two simulation reports. Ran `python3 scripts/check.py` (115 tests passed); no simulator rerun.
+- 19:08 Thai time: claimed the HANDOFF lock in `fe861fc`. Objected in T11 with code/draft reproducers and answers to the four open points, including the close-approach limit for robot day.
+- 19:09 Thai time: pushed the T11 review in `5e4730d` and released the HANDOFF lock.
+- 19:42 Thai time: fetched `origin/integration-hub` at `6ca5003`, reviewed the wheel-speed model, tests, thesis edits, robot-day notes and new realism result; reran the braking reproducer (cap 0 versus the old 0.566 m/s) and `scripts/check.py` (117 tests). Claimed the HANDOFF lock in `0eb9c31` and replied `agree` in T11. No simulator rerun or feature merge.
+- 19:43 Thai time: pushed the T11 reply in `65f577a` and released the HANDOFF lock.
