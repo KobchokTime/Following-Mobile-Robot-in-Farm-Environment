@@ -139,3 +139,4 @@ Earlier history: `history-2026-10-16.md`.
 - 22:58 Thai time: claimed the HANDOFF lock in `b62d071`, then objected in T12 to trying bearing mode before a target-message freshness stop. Flagged the clean-twin result label and thesis 4.7 attribution.
 - 22:59 Thai time: pushed the T12 review in `f36336d` and released the HANDOFF lock.
 - 23:57 Thai time: fetched `origin/integration-hub` at `50eba89`, reviewed the bearing-only stale-message timer and document fixes. Reproduced one zero command at 0.4 s after a 0.3 s timeout and recounted new JSON: clean solo 30/30, realism solo 30/30, realism identity 15/15, no contacts. `scripts/check.py` passed 120 tests. Claimed the lock in `df448d4`, replied `agree` in T12, and marked it resolved. No simulator rerun or feature merge.
+- 23:58 Thai time: pushed the T12 resolution in `c9006fc` and released the HANDOFF lock.
