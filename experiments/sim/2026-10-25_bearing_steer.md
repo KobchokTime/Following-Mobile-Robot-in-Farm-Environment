@@ -34,7 +34,12 @@
   proportion to the bearing and leads the target by the latency, instead of turning at a fixed rate.
 - **What still fails.**
   - `side_step` with realism, seed 0.
-  - In the clean twin, `side_step` seed 0, and `come_back` seed 2 at 0.37 m, which counts as a contact.
+  - In the clean twin, only `come_back` seed 2, at 0.37 m, which counts as a contact. (Corrected after
+    integration's T12 check: clean `side_step` seed 0 passes.)
+- **Integration's re-run of `side_step` with realism, seed 0** (T12): `sector` passes, `bearing` loses
+  the target (final 3.12 m). It is the one case where `bearing` is worse. Two likely causes (T12):
+  - the image rate mixes the target's motion with the robot's own turn;
+  - the bridge holds the last turn command for 1 s when detections stop.
 - **The `come_back` contact did not reproduce.** Four reruns of `come_back` seed 2 (2 × `sector`,
   2 × `bearing`) all came no closer than 0.43 m. It is ROS timing variance, not the steering.
 
