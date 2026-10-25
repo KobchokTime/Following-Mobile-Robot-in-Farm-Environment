@@ -295,6 +295,7 @@ class SyncFusionNode(Node):
                                     float(self.get_parameter('static_radius_m').value)) \
             if bool(self.get_parameter('static_filter').value) else None
         self.cmd = (0.0, 0.0)
+        self.cmd_time = None
         self.last_scan_stamp = None
         self.last_camera_fix = None  # time of the last camera detection accepted as the target
         self.last_camera_bearing = 0.0
@@ -367,6 +368,7 @@ class SyncFusionNode(Node):
 
     def cb_cmd(self, msg):
         self.cmd = (msg.linear.x, msg.angular.z)
+        self.cmd_time = self.now_sec()
 
     def cb_scan(self, msg):
         pts = []
@@ -378,7 +380,10 @@ class SyncFusionNode(Node):
         self.scan_time = self.now_sec()
         if self.static_map is not None:
             if self.last_scan_stamp is not None:
-                self.static_map.move(self.cmd[0], self.cmd[1], self.scan_time - self.last_scan_stamp)
+                # the drive bridge stops the wheels 1 s after its last command, so an old command means standing still
+                fresh = self.cmd_time is not None and self.scan_time - self.cmd_time <= 1.0
+                v, w = self.cmd if fresh else (0.0, 0.0)
+                self.static_map.move(v, w, self.scan_time - self.last_scan_stamp)
             self.last_scan_stamp = self.scan_time
             self.static_map.update(self.scan_time, [(b, r) for b, r, _ in lidar_clusters(pts)])
 
