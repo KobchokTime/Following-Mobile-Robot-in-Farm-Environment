@@ -47,6 +47,13 @@ class TargetGateTest(unittest.TestCase):
         cls.in_path = staticmethod(module.in_path)
         cls.lidar_track = staticmethod(module.lidar_track)
         cls.bearing_to_cx = staticmethod(module.bearing_to_cx)
+        cls.scan_is_fresh = staticmethod(module.scan_is_fresh)
+
+    def test_old_or_missing_scans_are_not_used(self):
+        self.assertTrue(self.scan_is_fresh(10.0, 9.9, 0.3))
+        self.assertFalse(self.scan_is_fresh(10.0, 6.0, 0.3))   # Codex's 4 s old scan
+        self.assertFalse(self.scan_is_fresh(10.0, None, 0.3))  # never received
+        self.assertFalse(self.scan_is_fresh(10.0, 10.5, 0.3))  # clock went backwards
 
     @staticmethod
     def _blob(centre_deg, rng, width_m, step_deg=0.5):
