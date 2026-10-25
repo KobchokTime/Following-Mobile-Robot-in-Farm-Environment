@@ -36,12 +36,25 @@ Same as `2026-10-24_solo_following.md`. A run passes when:
 |---|---|---|---|
 | Before (hub code) | 19/30 | 13/15 | 0 |
 | Fixes 1–2 | 22/30 | 15/15 | 2 (0.38 m and 0.39 m) |
-| **Fixes 1–5** | **27/30** | **15/15** | **0** |
+| **Fixes 1–5** | **27/30** | **15/15** | **0** (but see the integration re-run below) |
 | Fixes 1–5, clean twin (no realism) | 29/30 | 15/15 | 0 |
 
 - **Clean-twin failure:** `side_step` seed 1, under the load of 6 runs at once. It passed on 2 reruns.
 - **Clean repeats:** `side_step` and `zigzag`, seeds 1–3, pass 6/6.
 - **Still failing with realism:** `zigzag` seeds 0 and 2, and `side_step` seed 0.
+
+## Integration re-run (hub `b23ec2b`, one job at a time on an idle machine)
+
+| Set | Clean | Realism |
+|---|---|---|
+| Solo | 29/30, no contact | 29/30, **1 contact**: `come_back` seed 2, 0.355 m |
+
+- **The result above does not hold.** "No contact with realism" did not reproduce.
+- **The `come_back` contact matches Gazebo** (0.39 m in every seed): reversing is too slow for a
+  person walking up to the robot. This is an open design question for the user (T11).
+
+Integration also found that `min_rate_dt` 0.05 switched off rate estimation at 25 fps or more. It is
+now 0.015 s, which is under one frame even at 60 fps (test `test_rate_is_estimated_at_high_frame_rates`).
 
 ## What realism found, and the fixes (robot code)
 

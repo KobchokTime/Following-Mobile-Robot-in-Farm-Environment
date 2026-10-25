@@ -160,6 +160,13 @@ class TargetGateTest(unittest.TestCase):
         for i in range(6, 30):
             self.assertTrue(g.accept(0.1 * i, 0.0, 0.8), i)
 
+    def test_rate_is_estimated_at_high_frame_rates(self):
+        for fps in (10, 30, 60):
+            g = self.Gate()
+            for i in range(3 * fps):
+                g.accept(i / fps, 0.3 * i / fps, 0.8)
+            self.assertAlmostEqual(g.bearing_rate, 0.3, delta=0.02, msg=fps)
+
     def test_long_loss_returns_to_the_lock_on_window(self):
         g = self.Gate()
         g.accept(0.0, 0.0, 0.8)

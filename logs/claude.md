@@ -852,3 +852,8 @@ Earlier history: `history-2026-10-16.md`.
 - DISCUSSION: opened T11 (5 review points, thesis-draft accuracy request, come_back 0.39 m as a design question for the user).
   HANDOFF: branch rows (114), item 14, Codex task 20; lock released.
 - Not touched: `codex/*`, `claude/workspace`, `main`, PRs.
+
+### 2026-10-25 — robot — T11 integration findings (18:55 Thai time)
+- Integration (hub `5d95e69`) found that the write-up's "realism: no contact" did not reproduce: `come_back` with realism, seed 2, came within 0.355 m. The write-up is corrected. This is the same design question as Gazebo's 0.39 m and is put to the user.
+- **Finding 1:** `min_rate_dt` 0.05 switched off rate estimation at 25 fps or more. It is now 0.015 s, with a test at 10, 30 and 60 fps. `check.py` passes 115 tests.
+- **Findings 2–5** (re-lock on anyone after 5 s, predicted-edge rule, give-way gap, latency cap using the command and not the wheel speed) are left for Codex's T11 review.
