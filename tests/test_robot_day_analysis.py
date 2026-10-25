@@ -25,6 +25,8 @@ class LabelTest(unittest.TestCase):
         self.assertEqual(A.parse_label("e4_overlap_same_shade"),
                          {"exp": "e4", "overlap": True, "clothes": "same", "light": "shade"})
         self.assertEqual(A.parse_label("follow_straight_1")["exp"], "other")
+        self.assertEqual(A.parse_label("e6_turn90_2"), {"exp": "e6", "move": "turn90", "run": 2})
+        self.assertEqual(A.parse_label("e6_side_step_1"), {"exp": "e6", "move": "side_step", "run": 1})
 
 
 class GeometryTest(unittest.TestCase):
@@ -65,6 +67,14 @@ class ExperimentTest(unittest.TestCase):
         self.assertAlmostEqual(r["capture_to_detection_ms"]["median"], 50.0, places=0)
         self.assertAlmostEqual(r["detection_to_cmd_vel_ms"]["median"], 30.0, places=0)
 
+    def test_e2_end_to_end_is_per_frame_not_a_sum_of_medians(self):
+        # Codex's T9 reproducer: component medians are 100 + 100 ms, but per frame it is 110/110/200 ms
+        box = [(0, 0, 10, 10, 900, 128, 128)]
+        frames = [(10.01, frame(10.0, box)), (20.10, frame(20.0, box)), (30.10, frame(30.0, box))]
+        r = A.e2_latency(frames, [10.11, 20.11, 30.20])
+        self.assertAlmostEqual(r["capture_to_cmd_vel_ms"]["median"], 110.0, places=0)
+        self.assertEqual(r["capture_to_cmd_vel_ms"]["n"], 3)
+
     def test_e2_flags_unusable_capture_stamps(self):
         box = [(0, 0, 10, 10, 900, 128, 128)]
         frames = [(10.05, frame(10.0, box)), (10.15, frame(0.0, box)), (10.25, frame(10.4, box))]
@@ -90,10 +100,42 @@ class ExperimentTest(unittest.TestCase):
                 for i in range(6)]
         self.assertLess(A.e4_stats({}, same)["nearest_mean_accuracy"], 0.75)
 
+    def test_e6_tracking_and_gap(self):
+        fused = [(0.1 * i, 0.5 + (0.1 if i % 2 else 0.0)) for i in range(50)]  # 5 s, 10 Hz
+        fused += [(7.0 + 0.1 * i, 0.5) for i in range(30)]                      # 2 s dropout, then 3 s
+        r = A.e6_stats({}, fused, [(0.0, 0.3), (5.0, 0.8)])
+        self.assertEqual(r["longest_dropout_s"], 2.1)
+        self.assertLess(r["tracked_share"], 0.9)
+        self.assertGreater(r["tracked_share"], 0.7)
+        self.assertEqual(r["median_gap_m"], 0.5)
+        self.assertEqual(r["max_forward_cmd"], 0.8)
+
     def test_overlap_shift(self):
         base = {"mean_a": [110, 165], "mean_b": [160, 110]}
         over = {"mean_a": [113, 161], "mean_b": [160, 110]}
         self.assertEqual(A.e4_overlap_shift(base, over), {"shift_a": 5.0, "shift_b": 0.0})
+
+
+class SpeedCheckTest(unittest.TestCase):
+    def test_expected_distance(self):
+        import importlib.util, types
+        stubs = {n: types.ModuleType(n) for n in ("rclpy", "rclpy.node", "geometry_msgs", "geometry_msgs.msg")}
+        stubs["rclpy.node"].Node = object
+        stubs["geometry_msgs.msg"].Twist = object
+        prev = {k: sys.modules.get(k) for k in stubs}
+        sys.modules.update(stubs)
+        try:
+            spec = importlib.util.spec_from_file_location("speed_check_under_test", ROOT / "tools" / "robot_day" / "speed_check.py")
+            mod = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(mod)
+        finally:
+            for k, v in prev.items():
+                if v is None:
+                    sys.modules.pop(k, None)
+                else:
+                    sys.modules[k] = v
+        self.assertAlmostEqual(mod.expected_distance(0.4, 4.0, 1.0), 1.6)
+        self.assertAlmostEqual(mod.expected_distance(2.0, 1.0, 1.0), 1.0)  # ramp never reaches 2 m/s
 
 
 if __name__ == "__main__":

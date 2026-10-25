@@ -81,11 +81,52 @@ IDENTITY_SCENARIOS: Dict[str, dict] = {
     },
 }
 
-ALL_SCENARIOS: Dict[str, dict] = {**SCENARIOS, **IDENTITY_SCENARIOS}
+# One person only, at realistic walking speeds and with the moves a farm worker makes. The earlier
+# scenarios walk at 0.3 m/s; people usually walk at 1.0-1.4 m/s.
+SOLO_SCENARIOS: Dict[str, dict] = {
+    "walk_0p6": {
+        "doc": "Target walks straight at 0.6 m/s for 10 s, then stops.",
+        "duration_s": 25.0,
+        "people": [("target", True, [(0, 1.0, 0.0), (3, 1.0, 0.0), (13, 7.0, 0.0)])],
+    },
+    "walk_1p0": {
+        "doc": "Target walks straight at 1.0 m/s (normal walking) for 8 s, then stops.",
+        "duration_s": 30.0,
+        "people": [("target", True, [(0, 1.0, 0.0), (3, 1.0, 0.0), (11, 9.0, 0.0)])],
+    },
+    "turn_90": {
+        "doc": "Target walks 3 m at 0.4 m/s, turns 90 degrees left and walks 3 m more.",
+        "duration_s": 30.0,
+        "people": [("target", True, [(0, 1.0, 0.0), (3, 1.0, 0.0), (10.5, 4.0, 0.0), (18, 4.0, 3.0)])],
+    },
+    "come_back": {
+        "doc": "Target walks 3 m away at 0.4 m/s, turns round and walks 1.5 m back towards the robot, "
+               "as a worker does to load the cart, then stands.",
+        "duration_s": 30.0,
+        "people": [("target", True, [(0, 1.0, 0.0), (3, 1.0, 0.0), (10.5, 4.0, 0.0), (12, 4.0, 0.0),
+                                      (15.75, 2.5, 0.0)])],
+    },
+    "side_step": {
+        "doc": "Target steps 1 m sideways (out of the camera's view at this range), then walks on.",
+        "duration_s": 30.0,
+        "people": [("target", True, [(0, 1.0, 0.0), (3, 1.0, 0.0), (6, 2.2, 0.0), (7, 2.2, 1.0),
+                                      (14, 5.0, 1.0)])],
+    },
+    "zigzag": {
+        "doc": "Target weaves 0.6 m left and right every 3 s while walking at 0.4 m/s.",
+        "duration_s": 30.0,
+        "people": [("target", True, [(0, 1.0, 0.0), (3, 1.0, 0.0), (6, 2.2, 0.6), (9, 3.4, -0.6),
+                                      (12, 4.6, 0.6), (15, 5.8, -0.6), (18, 7.0, 0.0)])],
+    },
+}
+
+ALL_SCENARIOS: Dict[str, dict] = {**SCENARIOS, **IDENTITY_SCENARIOS}  # frozen: the Arena 3 scorer checks runs against it
+SCENARIO_LOOKUP: Dict[str, dict] = {**ALL_SCENARIOS, **SOLO_SCENARIOS}  # every scenario that can be run
 SCENARIO_SETS: Dict[str, list] = {
     "all": sorted(SCENARIOS),  # the Arena 2 set; kept as "all" so existing commands mean the same
     "identity": ["crossing", *sorted(IDENTITY_SCENARIOS)],
     "everything": sorted(ALL_SCENARIOS),
+    "solo": ["straight", "stop_and_go", "curve_left", "target_loss", *sorted(SOLO_SCENARIOS)],
 }
 
 
@@ -97,7 +138,7 @@ def make_people(spec: dict) -> list:
 
 
 def build(name: str, seed: int = 0, **robot_overrides) -> World:
-    spec = ALL_SCENARIOS[name]
+    spec = SCENARIO_LOOKUP[name]
     world = World(people=make_people(spec), blackouts=spec.get("blackouts", ()), shade=spec.get("shade", ()), seed=seed)
     for key, value in robot_overrides.items():
         setattr(world.robot, key, value)

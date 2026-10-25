@@ -753,7 +753,7 @@ Both agents agree and the winner is merged, so **T8 is resolved**.
 ---
 
 ## T9 — Robot-day kit and E7 ablation
-- **Status:** open
+- **Status:** resolved
 - **Author:** Claude Code   **Reviewer:** Codex
 - **Branch / commits:** `integration-hub` merge `0654471` of `claude/workspace` (`b165783`; features
   `claude/research/e7-ablation` `eb5ec78`, `claude/robot/robot-day-kit` `919123e`).
@@ -821,3 +821,181 @@ Both agents agree and the winner is merged, so **T8 is resolved**.
   4. Reply `agree` or object.
 
 **2026-10-24 — Claude Code (integration):** All 3 review findings above are fixed in merge `eb10a9c` (`claude/workspace` `76416dc`, fix `c5bc6f4`): E2 drops and counts `bad_stamps` (zero, other-clock or future stamps; new test) and the protocol says to check the driver's stamps and notes the recorder delay; `turn_check.py` waits up to 5 s for a `/cmd_vel` subscriber and exits with a message if there is none; the final zero `Twist` cannot raise after Ctrl-C and `rclpy.shutdown()` runs only while the context is ok. `scripts/check.py` passes 84 tests. T9 stays open for Codex's review.
+
+**2026-10-24 — Codex:** object to the E7 causal conclusion, with this reproducer. The counts do reproduce under frozen v3 `passes()`: full 30/30, no colour 27/30, no give-way 28/30 (2 contacts), and no gate 12/30 (8 contacts), with the expected ROS parameters on all rows. But `target_gate:=false` skips the whole `if self.use_gate and not self.gate.accept(...)` branch in `sync_fusion_node.py`; `path_block` give-way is only calculated inside that branch for rejected detections. Therefore “no gate” switches off both data association and give-way, so 12/30 versus 30/30 does not isolate the gate's effect. Please describe it as the combined old-pipeline ablation, or add an independent condition before attributing the full difference to data association. The raw result table itself is correct.
+
+Robot-day kit review: the three findings listed above are fixed. `/yolo_frame` has a consistent sec/nsec, dimensions, count, and seven integers per box; the twin emits the same format, including empty frames. I found no reason to block E1/E3/E4 or the lifted-wheel procedure. I did find a misleading extra E2 output in `analyze.py`: `capture_to_cmd_vel_ms_median` adds the median capture→frame delay to the median frame→cmd delay, which is not the median end-to-end delay.
+
+Reproducer for `e2_latency`: frames received at 10.01/20.10/30.10 s with capture stamps 10/20/30 s, and next commands at 10.11/20.11/30.20 s. It reports component medians 100 ms + 100 ms = 200 ms, but the per-frame capture→command latencies are 110/110/200 ms, whose median is 110 ms. The protocol only requires the two component distributions, so this does not block collecting E1/E3/E4 on robot day 1; remove or correct this aggregate before interpreting it as an E2 end-to-end median. The three original T9 concerns do not need further changes before the day.
+
+I could not run `analyze.py` on a twin bag: this workspace has no `rclpy`/`rosbag2_py` and contains no rosbag recording. `python3 scripts/check.py` passes 84 tests; the review here is code-and-test based.
+
+**2026-10-24 — Claude Code (integration):** Both objection points are fixed in merge `9ecaecb`
+(`claude/workspace` `b9eddf5`; E7 `0f27013`, E2 `ab52a3a`). `scripts/check.py` passes 85 tests.
+- **E7 attribution.** The write-up now says that "no gate" also switches off the give-way.
+  - The gate's own effect is "no give-way" (gate on, 28/30) against "no gate" (both off, 12/30): +16.
+  - 30 vs 12 is described as the whole change against the old pipeline.
+  - The give-way's own effect is full against "no give-way": +2 runs and 2 fewer contacts.
+  - From the raw JSON, per scenario: `side_by_side`, `side_by_side_same` and `stand_aside` go from
+    0/6 to 6/6, which is +18. `crossing` goes the other way, 6/6 with no gate against 4/6 with the
+    gate but no give-way, which is −2. That makes +16 net. The write-up attributes the +16 to the three
+    scenarios; the −2 in `crossing` could be stated too. Claude does not consider this blocking.
+- **E2.** `capture_to_cmd_vel_ms` is now computed per frame (median, p95, n), not as a sum of medians.
+  Your reproducer is a test. I re-checked it through `analyze.e2_latency`: frames at 10.01 / 20.10 /
+  30.10 s with stamps 10 / 20 / 30 s, and commands at 10.11 / 20.11 / 30.20 s, give a median of
+  **110 ms** (p95 191, n 3). The components stay 100 + 100 ms.
+
+Claude agrees with your other findings:
+- the raw E7 table is correct;
+- the `/yolo_frame` layout is consistent between the robot and the twin;
+- nothing blocks E1, E3, E4 or the lifted-wheel procedure on robot day 1;
+- the three original T9 points need no further change.
+
+Codex, please give a final `agree` or objection.
+
+**2026-10-24 — Claude Code (integration):** The E7 breakdown is fixed in merge `fc2878c` (`claude/workspace` `2402e93`): the net +16 is now given as +18 (`side_by_side`, `side_by_side_same`, `stand_aside`, 0/6 → 6/6) and −2 in `crossing` (only the give-way keeps the robot clear once the gate ignores the crossing person). `scripts/check.py` passes 85 tests. T9 stays open for Codex's final `agree`.
+
+**2026-10-24 — Codex:** agree. I reviewed the final E7 write-up: 28/30 versus 12/30 isolates the gate while give-way is off in both conditions, and 30/30 versus 12/30 is correctly labeled as the whole change from the old pipeline. The scenario breakdown includes the +18 and −2 contributions. `e2_latency` now computes capture-to-command latency per eligible frame; the regression test using my reproducer confirms a 110 ms median and `n=3`. `python3 scripts/check.py` passes 85 tests. Both objections are resolved; T9 is resolved.
+
+---
+
+## T10 — Follow one person at walking pace
+- **Status:** open
+- **Author:** Claude Code   **Reviewer:** Codex
+- **Branch / commits:** `integration-hub` merge `c2c7f09` of `claude/workspace` (`bd83cad`; feature
+  `claude/research/solo-following`: `da2f690`, `7cd44c8`, `c53575d`).
+- **User decisions (2026-10-24, relayed by the coordinator):**
+  1. The user works alone, so the first goal is to follow **one person** reliably. They chose to
+     **lift the bridge speed cap**.
+  2. Claude builds this directly and Codex reviews it. There is no arena.
+- **What changed:**
+  - **Twin and Gazebo:**
+    - 6 new single-person scenarios in `SOLO_SCENARIOS`: `walk_0p6`, `walk_1p0`, `turn_90`,
+      `come_back`, `side_step` and `zigzag`.
+    - A `solo` scenario set (these 6 plus `straight`, `stop_and_go`, `curve_left` and `target_loss`).
+    - Bridge mode `mps`, with an acceleration ramp.
+    - `ALL_SCENARIOS` is unchanged (the frozen v3 scorer checks against it). The runners use the new
+      `SCENARIO_LOOKUP`.
+  - **`zlac_joystick_bridge.py`:** `speed_mode` **"mps" is now the default**.
+    - `/cmd_vel` is in m/s and rad/s, converted to RPM with `wheel_radius_m` 0.085. That radius is
+      **assumed, not measured**.
+    - Each wheel is capped at `max_speed_mps` 1.4 and ramped at `max_accel_mps2` 1.0, for both
+      speeding up and slowing down.
+    - `speed_mode:=legacy` keeps the old mapping. **This changes the real robot's speed.**
+  - **`follow_stop_node.py`:** a braking cap, `max_decel` 0.8 (in m/s²). The forward speed is limited
+    to √(2·a·gap error).
+  - **`sync_fusion_node.py`:** LiDAR tracking when the target leaves the image at its edge (within 8°
+    of ±35°).
+    - It tracks the target for up to 5 s, near the predicted bearing and range (±25°, ±0.5 m), and
+      steers towards that side.
+    - A loss in the middle of the image still stops the robot.
+  - **Tools:**
+    - `record_robot_day.sh` gets `--countdown` and `--duration`.
+    - New `tools/robot_day/speed_check.py`.
+    - `analyze.py` gets E6.
+    - `docs/robot_day_protocol.md` has a working-alone plan.
+- **Before and after** (twin; `experiments/sim/2026-10-24_solo_following.md`):
+  - **Before** (hub code, old `fixed` bridge, seed 0): 5 of 10 solo scenarios pass under the Arena 3
+    pass rule. `walk_0p6`, `walk_1p0`, `turn_90`, `side_step` and the original `come_back` fail.
+    The cause is the 40 RPM cap, about 0.36 m/s, while a person walks at 1.0–1.4 m/s.
+  - **After** (`mps` bridge, seeds 0–2): **solo 30/30** and **identity 15/15**, with no contact. The
+    closest approach is 0.43 m, in `come_back`.
+- **Caveat for the old bridge mapping:**
+  - `max_decel` is in m/s², but one legacy unit is about 0.36 m/s, so the cap brakes far too early.
+  - On the old bridges the Arena 3 protocol drops to 95.72 (identity is still 21/21; only lag drops).
+  - With `max_decel:=0.0` the old gaps come back. Rule: **`speed_mode:=legacy` needs
+    `max_decel:=0.0`**.
+- **The real speed depends on the wheel radius.** Every m/s figure scales with the assumed 0.085 m.
+  On robot day, run `tools/robot_day/speed_check.py` before following above 0.5 m/s, and make the
+  first drive at `max_speed_mps:=0.5`.
+- **How it was tested (integration review, 2026-10-24):**
+  - `scripts/check.py` passes 97 tests.
+  - The frozen scorers give the same results as before: v2 66.01, 97.84 / 60.89; v3 60.64, 99.13 /
+    94.13.
+  - **Bit-identity:** I stepped the twin world in closed loop for all 9 old scenarios × the `current`,
+    `fixed` and `diff_drive` bridges × seeds 0–2, before (`d957bac`) and after. Detections, LiDAR
+    ranges, wheel RPMs and the final pose are bit-identical (81 runs, 20,495 detections). `ramp_rpm`
+    is a no-op outside `mps`.
+  - **Legacy mapping:** `wheel_commands()` gives identical output before and after (513,611 inputs,
+    including NaN and ±inf). The legacy path writes `self.left/right` directly, as before.
+  - **`mps` signs:** forward is (−, +) and counter-clockwise is (−, −), the same channels and signs
+    as legacy.
+  - The solo and identity counts were recomputed from the raw JSON with the v3 `passes()`: 30/30 and
+    15/15.
+- **Found at review** (for Claude's workspace):
+  1. **Write-up count.** The write-up says "4 of 10 pass" before; the raw data gives 5 of 10
+     (`straight`, `stop_and_go`, `curve_left`, `target_loss`, `zigzag`). The "before" `come_back` row
+     is the original scenario, in which the person walks through the robot (closest 0.002 m), so it is
+     not comparable with the new `come_back`.
+  2. **`record_robot_day.sh --duration` ignores Ctrl-C.** coreutils `timeout` puts itself in its own
+     process group, so Ctrl-C does not reach `ros2 bag record`; the recording runs until the timer
+     ends. I reproduced this with a mock of the same pattern: SIGINT to the script's process group
+     after 1 s, and the run still lasted the full 6 s with `exit_code` 0.
+     - The normal timeout path works: SIGINT to the recorder, 124 treated as success, and the EXIT
+       trap writes `exit_code`.
+     - A failing recorder still exits with its own code.
+     - Fix: `timeout --foreground`, or forward INT.
+  3. **The bridge parameters are not validated.**
+     - `max_speed_mps:=0` raises `ZeroDivisionError` in the callback, and `wheel_radius_m:=0` does
+       the same at start-up.
+     - Any `speed_mode` other than exactly `legacy` (for example a typo) silently runs `mps`.
+     - `speed_mode` and `follow_stop_node`'s `max_decel` live in two nodes and must be kept consistent
+       by hand.
+  4. **Ramp shape.** The ramp works per wheel. When the two wheels change by different amounts, they
+     reach their targets at different times, so the turn shape is not kept during the ramp. From
+     1.4 m/s, a stop (including after the bridge's 1 s command timeout) takes about 1.4 s.
+  5. **`int()` truncation.** `set_velocity` truncates RPM towards zero, which is less than
+     0.009 m/s at 0.085 m. Negligible.
+  6. **LiDAR tracking can latch on to something else.**
+     - `lidar_track()` takes the single closest return within ±25° and ±0.5 m of the prediction, not a
+       person-sized cluster. A post, crop row, cart or another person in that window can win.
+     - For up to 5 s the track then follows that object, and the robot turns towards it.
+     - When the target comes back into view, the gate's prediction may be on the wrong object, and the
+       gate can reject the real target.
+     - Only the identity set (15/15) was tested with another person nearby. No static clutter near the
+       predicted spot was tested.
+     - Small: the out-of-view publish hard-codes sector 8 instead of the last sector.
+- **Unsure about:** Codex, please:
+  1. Review the bridge `mps` mode and its default, the braking cap, the LiDAR edge tracking, the new
+     scenarios and the robot-day tools.
+  2. Say which of the 6 points must be fixed before the first robot drive.
+  3. Reply `agree` or object.
+
+**2026-10-25 — Claude Code (integration):** All 6 review findings are addressed in merge `72c7ea9`
+(`claude/workspace` `cfa81be`; fix `2463d0c` plus the write-up commits). `scripts/check.py` passes
+101 tests.
+1. **Write-up:** it now says 5 of 10 passed before, and that the old `come_back` run is not comparable.
+2. **Recorder:** it uses `timeout --foreground` and `trap ':' INT`. I re-ran my mock reproducer
+   (SIGINT to the script's process group after 1 s):
+   - `--duration 6` stops after 1 s with `exit_code` 0;
+   - without `--duration` it stops after 1 s with `exit_code` 0;
+   - timer only stops at 2 s with `exit_code` 0;
+   - a recorder that exits 130 on SIGINT is recorded as 130.
+
+   I also checked real `ros2 bag record` (Humble, in the twin image). It exits **0** on SIGINT and
+   closes the bag, so a Ctrl-C run is recorded as a success.
+3. **Parameter validation:** `check_params()` runs before the motor controller is opened. It rejects
+   a `speed_mode` other than `mps` or `legacy`, and any radius, speed or acceleration that is not
+   positive and finite.
+4. **Ramp:** `ramp_pair()` and the twin's `ramp_rpm` move both wheels together, so a turn keeps its
+   shape. The documented stop from 1.4 m/s still takes about 1.4 s.
+5. **`int()` truncation:** left as is (negligible).
+6. **LiDAR tracking:** it now accepts only person-sized clusters (0.15–0.8 m wide), and picks the one
+   nearest the prediction. There are tests with a post and a crop row. The edge sector 0 or 8 is
+   intentional: it makes the controller turn to that side at its full rate.
+
+**Bit-identity, re-run:** all 9 old scenarios × the `current`, `fixed` and `diff_drive` bridges ×
+seeds 0–2 (81 runs) are bit-identical before (`6035509`) and after, and also identical to the hub
+before T10 (`d957bac`). `ramp_rpm` is still a no-op outside `mps`.
+
+**One remaining limit, for Codex to judge.** The cluster width is the angular span at the closest
+range, so it ignores the cluster's depth. A crop row seen obliquely can therefore look person-sized.
+I fed `lidar_clusters()` points along a line 1 m to the side, running from 1.6 m to 3.0 m ahead. They
+form one cluster 0.45 m "wide" (its real extent is about 1.4 m). `lidar_track()` accepted it for a
+prediction at 0.5 rad and 2.0 m. Measuring the extent between the first and last return would catch
+this. Claude suggests it as a follow-up, not a blocker, because the tracking runs only after an
+edge exit and for at most 5 s.
+
+Codex, please review T10 as it now stands and reply `agree` or object.
+
+**2026-10-25 — Claude Code (integration):** The cluster-depth limit is fixed in merge `9915563` (`claude/workspace` `38bccba`, fix `d25d3b1`): `lidar_clusters()` now uses the straight-line length between the first and last return. Re-run on the merged code, my row reproducer measures 1.40 m and `lidar_track()` rejects it, while a 0.2 m-radius person at 2 m is still tracked. `scripts/check.py` passes 102 tests. Nothing is left open in T10 except Codex's review.

@@ -3,7 +3,7 @@ set -Eeuo pipefail
 
 usage() {
     cat <<'EOF'
-Usage: record_robot_day.sh --scenario LABEL [--output-root DIRECTORY]
+Usage: record_robot_day.sh --scenario LABEL [--output-root DIRECTORY] [--countdown SEC] [--duration SEC]
 
 Record every currently available ROS 2 topic to an MCAP rosbag2 and save
 tracked project configuration plus run metadata beside the bag.
@@ -11,6 +11,8 @@ tracked project configuration plus run metadata beside the bag.
 Options:
   --scenario LABEL       Required short label using letters, digits, dot, _ or -
   --output-root DIR      Destination directory (default: ~/robot_day_recordings)
+  --countdown SEC        Wait SEC seconds before recording, so one person can walk to the mark
+  --duration SEC         Stop recording by itself after SEC seconds (no Ctrl-C needed)
   -h, --help             Show this help
 
 Stop recording with Ctrl-C. The ROS 2 MCAP storage plugin must be installed.
@@ -20,6 +22,8 @@ EOF
 
 scenario=""
 output_root="${ROBOT_DAY_OUTPUT:-$HOME/robot_day_recordings}"
+countdown=0
+duration=0
 
 while (($#)); do
     case "$1" in
@@ -31,6 +35,11 @@ while (($#)); do
         --output-root)
             (($# >= 2)) || { usage >&2; exit 2; }
             output_root="$2"
+            shift 2
+            ;;
+        --countdown|--duration)
+            (($# >= 2)) && [[ "$2" =~ ^[0-9]+$ ]] || { usage >&2; exit 2; }
+            if [[ "$1" == --countdown ]]; then countdown="$2"; else duration="$2"; fi
             shift 2
             ;;
         -h|--help)
@@ -131,7 +140,24 @@ PY
     exit "$result"
 }
 trap finish EXIT
+# Ctrl-C goes to the recorder, which closes the bag; the script itself carries on so the EXIT trap
+# above can record the result. (A trap, unlike an ignored signal, is reset in child processes.)
+trap ':' INT
 
 printf 'Recording all topics to %s\n' "$session_dir/recording"
 printf 'Commit: %s | scenario: %s | config files: %s\n' "$commit_sha" "$scenario" "${#copied_configs[@]}"
-ros2 bag record --all --storage mcap --output "$session_dir/recording"
+for ((i = countdown; i > 0; i--)); do
+    printf '\rStarting in %2d s ' "$i"
+    printf '\a'  # terminal bell, so you can hear it from the mark
+    sleep 1
+done
+((countdown > 0)) && printf '\rRecording now.        \n'
+if ((duration > 0)); then
+    # SIGINT lets rosbag2 close the bag cleanly; timeout's own 124 means it ran the full time.
+    # --foreground keeps the recorder in this process group, so Ctrl-C still stops it early.
+    timeout --foreground --signal=INT "$duration" ros2 bag record --all --storage mcap --output "$session_dir/recording" \
+        || { code=$?; ((code == 124)) || exit "$code"; }
+    printf '\aDone after %s s.\n' "$duration"
+else
+    ros2 bag record --all --storage mcap --output "$session_dir/recording"
+fi

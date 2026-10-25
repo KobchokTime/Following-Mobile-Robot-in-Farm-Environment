@@ -25,8 +25,12 @@ def _load_sync_module():
     std_msgs = types.ModuleType("std_msgs")
     std_msgs_msg = types.ModuleType("std_msgs.msg")
     std_msgs_msg.Int32MultiArray = std_msgs_msg.Float32MultiArray = object
+    sensor_msgs = types.ModuleType("sensor_msgs")
+    sensor_msgs_msg = types.ModuleType("sensor_msgs.msg")
+    sensor_msgs_msg.LaserScan = object
     stubs.update({"rclpy": rclpy, "rclpy.node": node, "rclpy.qos": qos,
-                  "std_msgs": std_msgs, "std_msgs.msg": std_msgs_msg})
+                  "std_msgs": std_msgs, "std_msgs.msg": std_msgs_msg,
+                  "sensor_msgs": sensor_msgs, "sensor_msgs.msg": sensor_msgs_msg})
     previous = {k: sys.modules.get(k) for k in stubs}
     sys.modules.update(stubs)
     try:

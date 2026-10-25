@@ -697,3 +697,82 @@ Earlier history: `history-2026-10-16.md`.
 - Lock claimed in `bb23bc2`. Merged `origin/claude/workspace` (`76416dc`, fix `c5bc6f4`) with `--no-ff`: merge `eb10a9c`; no conflicts.
   `check.py`: PASS (84). Reviewed the `analyze.py` (`bad_stamps`) and `turn_check.py` (subscriber wait, guarded stop) diffs.
 - T9: one line that all 3 findings are fixed; open for Codex. HANDOFF: branch rows (84 tests), item 12; lock released.
+
+### 2026-10-24 — robot / research — Codex's T9 objection (18:05 Thai time)
+- Codex (`3ada59e`) reproduced the E7 counts, then objected on two points:
+  - "No gate" also switches off the give-way.
+  - E2's capture→cmd_vel figure added two medians.
+- `0f27013` (e7-ablation): the write-up now attributes the gate effect to no-give-way vs no-gate (28 → 12 of 30).
+  The 30 vs 12 comparison is the whole change against the old pipeline.
+- `ab52a3a` (robot-day-kit): E2 end-to-end is per frame. Codex's reproducer is a test: median 110 ms, not 200.
+- `check.py` passes 85 tests. The dashboard E7 label is updated to "no gate + no give-way".
+
+### 2026-10-24 — integration — Merge T9 objection fixes (18:05–18:06 Thai time)
+- Codex objected in T9 (`3ada59e`). Lock claimed in `6f5861c` (18:05). Merged `origin/claude/workspace` (`b9eddf5`; `0f27013`, `ab52a3a`)
+  with `--no-ff`: merge `9ecaecb`; no conflicts. `check.py`: PASS (85).
+- Verified: `analyze.e2_latency` on Codex's reproducer gives a per-frame median of 110 ms (p95 191, n 3). E7 per-scenario: the gate
+  adds +18 in side_by_side / side_by_side_same / stand_aside and −2 in crossing (no gate 6/6 vs no give-way 4/6); net +16 (noted in T9).
+- T9: both points fixed, Claude agrees with Codex's other findings, final `agree` requested. HANDOFF: branch rows (85), item 12,
+  Codex task 18; lock released.
+
+### 2026-10-24 — integration — Merge E7 breakdown fix (T9) (18:07 Thai time)
+- Lock `38b7de5`; merged `origin/claude/workspace` (`2402e93`) with `--no-ff`: merge `fc2878c`; `check.py` PASS (85). T9 one-line note; lock released.
+
+### 2026-10-24 — integration — T9 closed (18:09 Thai time)
+- Codex agreed and marked T9 resolved (hub `e10cd0d`). Synced `claude/workspace` with the hub.
+- Resolved: T5, T7, T8, T9. Open: T1 (Codex model, user), T2 (missing code, Windows), T3/T4 (Codex re-runs), T6 (robot day).
+
+### 2026-10-24 — robot / research — Follow one person at walking pace (18:15–19:38 Thai time)
+- The user works alone, so the goal is 100% single-person following first. The user decided to lift the bridge's speed cap.
+  The user also chose "Claude builds it directly, Codex reviews" instead of an arena.
+- `claude/research/solo-following` (`da2f690`, `7cd44c8`, `c53575d`):
+  - Twin: 6 solo scenarios at realistic speeds.
+  - Bridge: speed_mode "mps" (m/s, wheel_radius_m, 1.4 m/s cap, 1.0 m/s² ramp; legacy kept).
+  - follow_stop: max_decel braking cap.
+  - sync_fusion: LiDAR tracking after an edge exit (mid-image loss still stops).
+  - record_robot_day.sh: --countdown and --duration. New `speed_check.py`, E6 analysis, and a working-alone plan in the protocol.
+- Before: 4/10 solo scenarios pass on the hub code. After, on the mps bridge: solo 30/30, identity 15/15 (seeds 0–2).
+- Old bridge: Arena 3 lag drops 99.13 → 95.72 because max_decel is in m/s². `max_decel:=0.0` restores it; this is documented.
+- `check.py` passes 97 tests. Write-up: `experiments/sim/2026-10-24_solo_following.md`.
+
+### 2026-10-24 — integration — Merge solo following (walking pace); open T10 (19:38–19:42 Thai time)
+- Model: Claude Opus 5.5 (`integration` subagent). User decisions relayed by the coordinator: lift the bridge speed cap;
+  Claude builds, Codex reviews (no arena).
+- Lock claimed in `d957bac` (19:38). Merged `origin/claude/workspace` (`bd83cad`; `da2f690`, `7cd44c8`, `c53575d`) with
+  `--no-ff`: merge `c2c7f09`; no conflicts. `check.py`: PASS (97).
+- Frozen scorers unchanged: v2 66.01, 97.84 / 60.89; v3 60.64, 99.13 / 94.13.
+- Bit-identity: 9 old scenarios × current/fixed/diff_drive × seeds 0–2 (81 runs, 20,495 detections, wheel RPMs, pose)
+  identical before/after; `ramp_rpm` no-op outside mps. Legacy `wheel_commands()` identical over 513,611 inputs.
+- Solo/identity counts recomputed from raw JSON (30/30, 15/15). Before-count in the write-up is 4/10; raw data gives 5/10.
+- Mock test: `record_robot_day.sh --duration` does not stop on Ctrl-C (timeout's own process group); normal path OK.
+- Findings in T10: write-up count, Ctrl-C under --duration, no parameter validation (ZeroDivisionError, silent mps on typo,
+  speed_mode/max_decel in two nodes), per-wheel ramp shape, int() truncation (negligible), LiDAR closest-return latch.
+- DISCUSSION: opened T10. HANDOFF: bridge default note and first drive at max_speed_mps:=0.5 under the robot-day checklist,
+  working-alone plan, item 13, item 12 marked resolved (Codex `2b8b119`), Codex task 19, 97 tests; lock released.
+- Not touched: `codex/*`, `claude/workspace`, `main`, PRs.
+
+### 2026-10-25 — robot — T10 review fixes (13:46 Thai time)
+- Integration's 6 findings on the solo work, fixed in `2463d0c`:
+  - LiDAR tracking takes only person-sized clusters.
+  - The bridge rejects bad parameters, and both wheels ramp together (twin too).
+  - Ctrl-C stops a --duration recording (timeout --foreground plus an INT trap), and exit_code is still written.
+  - The write-up's "before" count is corrected to 5/10.
+- A transient failure of the server-side command check blocked shell commands for a while; nothing was lost.
+- Rerun (`ea4b277`): solo 30/30 and identity 15/15 on mps. side_step improved: visible 0.99, max gap 0.82 m. `check.py` passes 101 tests.
+
+### 2026-10-25 — integration — Merge T10 finding fixes (13:47–13:49 Thai time)
+- Lock claimed in `6035509` (13:47). Merged `origin/claude/workspace` (`cfa81be`; `2463d0c` and write-up commits) with `--no-ff`:
+  merge `72c7ea9`; no conflicts. `check.py`: PASS (101).
+- Bit-identity re-run: 81 runs identical before/after and to `d957bac`. Recorder mock: Ctrl-C with/without --duration stops in
+  1 s, exit_code 0; timer only 2 s; real `ros2 bag record` (Humble, twin image) exits 0 on SIGINT.
+- `check_params()` runs before the ZLAC is opened. Probe: an oblique crop-row line forms a 0.45 m "wide" cluster and is
+  accepted by `lidar_track()` (width ignores depth); noted in T10 as a follow-up.
+- T10 note (6 fixes, request for Codex review). HANDOFF: branch rows (101), item 13; lock released.
+
+### 2026-10-25 — robot — Cluster length (13:55 Thai time)
+- `d25d3b1`: the LiDAR cluster size is now its end-to-end length, so a row seen at an angle is rejected. Integration's reproducer is a test.
+- Twin (mps, seed 0): side_step, turn_90, zigzag and identity 5/5 still pass. `check.py` passes 102 tests.
+
+### 2026-10-25 — integration — Merge T10 cluster length fix (13:55 Thai time)
+- Lock `2611587`; merged `origin/claude/workspace` (`38bccba`, fix `d25d3b1`) with `--no-ff`: merge `9915563`; `check.py` PASS (102).
+  Row reproducer now 1.40 m long and rejected; a person at 2 m still tracked. T10 one-line note; HANDOFF 102 tests; lock released.

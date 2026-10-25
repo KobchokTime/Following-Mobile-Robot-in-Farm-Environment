@@ -12,6 +12,7 @@ a recording belongs to and holds its ground truth:
     e3_d<distance m>_<front|back>     one person facing towards or away from the robot
     e4_<diff|same>_<sun|shade>        two people side by side, A on the left, B on the right
     e4_overlap_<diff|same>_<sun|shade> the same with B partly behind A in the image
+    e6_<move>_<n>                     one person walking and the robot following, e.g. e6_turn90_2
     anything else                     used for E2 only
 
 E2 (latency) uses every recording that has `/yolo_frame`. Reading bags needs ROS 2 (rosbag2_py);
@@ -45,6 +46,9 @@ def parse_label(label: str) -> dict:
     m = re.fullmatch(r"e3_d(\d+(?:\.\d+)?)_(front|back)", label)
     if m:
         return {"exp": "e3", "distance_m": float(m.group(1)), "facing": m.group(2)}
+    m = re.fullmatch(r"e6_([a-z0-9]+(?:_[a-z0-9]+)*?)_(\d+)", label)
+    if m:
+        return {"exp": "e6", "move": m.group(1), "run": int(m.group(2))}
     m = re.fullmatch(r"e4_(overlap_)?(diff|same)_(sun|shade)", label)
     if m:
         return {"exp": "e4", "overlap": bool(m.group(1)), "clothes": m.group(2), "light": m.group(3)}
@@ -140,28 +144,34 @@ def e1_stats(truth: dict, detections: Sequence[Tuple[float, float]], scans: Sequ
 
 
 def e2_latency(frames: Sequence[Tuple[float, dict]], cmd_times: Sequence[float], max_plausible_s: float = 5.0) -> dict:
-    """Capture -> /yolo_frame (inference) and /yolo_frame -> next /cmd_vel (fusion + control).
+    """Capture -> /yolo_frame (inference), /yolo_frame -> next /cmd_vel (fusion + control), and the
+    end-to-end capture -> /cmd_vel delay of each frame.
 
     frames: (receive time, parsed /yolo_frame); cmd_times: receive times of /cmd_vel, sorted.
-    Only frames with at least one person count for the control part. Receive times are the
-    recorder's, so they include its own small delay. A capture stamp of 0, from another clock, or
-    later than its receive time makes the first part meaningless; such frames are left out and
-    counted in "bad_stamps".
+    Only frames with at least one person count for the control and end-to-end parts. Receive times
+    are the recorder's, so they include its own small delay. A capture stamp of 0, from another
+    clock, or later than its receive time makes the capture-based parts meaningless; such frames are
+    left out and counted in "bad_stamps". The end-to-end median is taken over frames, not by adding
+    the two component medians.
     """
-    raw = [t - f["stamp"] for t, f in frames]
-    infer = [d for d in raw if 0.0 <= d <= max_plausible_s]
-    ctrl = []
+    infer, ctrl, total, bad = [], [], [], 0
     for t, f in frames:
+        d = t - f["stamp"]
+        ok = 0.0 <= d <= max_plausible_s
+        bad += not ok
+        if ok:
+            infer.append(d)
         if f["boxes"]:
             j = bisect_right(cmd_times, t)
             if j < len(cmd_times):
                 ctrl.append(cmd_times[j] - t)
+                if ok:
+                    total.append(cmd_times[j] - f["stamp"])
     ms = lambda xs, q: None if not xs else round(1000.0 * percentile(xs, q), 1)  # noqa: E731
-    return {"frames": len(frames), "bad_stamps": len(raw) - len(infer),
+    return {"frames": len(frames), "bad_stamps": bad,
             "capture_to_detection_ms": {"median": ms(infer, 0.5), "p95": ms(infer, 0.95)},
             "detection_to_cmd_vel_ms": {"median": ms(ctrl, 0.5), "p95": ms(ctrl, 0.95)},
-            "capture_to_cmd_vel_ms_median": None if not (infer and ctrl) else round(
-                1000.0 * (percentile(infer, 0.5) + percentile(ctrl, 0.5)), 1)}
+            "capture_to_cmd_vel_ms": {"median": ms(total, 0.5), "p95": ms(total, 0.95), "n": len(total)}}
 
 
 def e3_stats(truth: dict, frames: Sequence[Tuple[float, dict]]) -> dict:
@@ -198,6 +208,35 @@ def e4_stats(truth: dict, frames: Sequence[Tuple[float, dict]]) -> dict:
             "within_person_spread": round(within, 2), "between_person_distance": round(between, 2),
             "separation_ratio": round(between / within, 2) if within > 0 else None,
             "nearest_mean_accuracy": round(correct / (2 * len(a)), 3)}
+
+
+def e6_stats(truth: dict, fused: Sequence[Tuple[float, float]], cmds: Sequence[Tuple[float, float]],
+             set_point: float = 0.5, lost_after: float = 0.5) -> dict:
+    """How well the robot followed one person: from /target_fused_prob (time, LiDAR gap) and
+    /cmd_vel (time, linear.x).
+
+    "Tracked" means a target message within the last `lost_after` seconds, checked every 0.1 s from
+    the first to the last message of the recording.
+    """
+    if not fused:
+        return {"truth": truth, "target_messages": 0}
+    times = [t for t, _ in fused]
+    gaps = [g for _, g in fused if math.isfinite(g)]
+    t0, t1 = times[0], max(times[-1], cmds[-1][0] if cmds else times[-1])
+    steps = max(1, int((t1 - t0) / 0.1))
+    tracked = 0
+    for k in range(steps + 1):
+        t = t0 + 0.1 * k
+        i = bisect_right(times, t)
+        tracked += i > 0 and t - times[i - 1] <= lost_after
+    longest = max((b - a for a, b in zip(times, times[1:])), default=0.0)
+    return {"truth": truth, "duration_s": round(t1 - t0, 1), "target_messages": len(fused),
+            "tracked_share": round(tracked / (steps + 1), 3), "longest_dropout_s": round(longest, 2),
+            "median_gap_m": round(statistics.median(gaps), 2) if gaps else None,
+            "p95_gap_m": round(percentile(gaps, 0.95), 2) if gaps else None,
+            "min_gap_m": round(min(gaps), 2) if gaps else None,
+            "median_gap_error_m": round(statistics.median(abs(g - set_point) for g in gaps), 2) if gaps else None,
+            "max_forward_cmd": round(max((v for _, v in cmds), default=0.0), 2)}
 
 
 def e4_overlap_shift(base: dict, overlap: dict) -> Optional[dict]:
@@ -244,11 +283,11 @@ def find_recordings(roots: Sequence[Path], label: Optional[str]) -> List[Tuple[s
 
 
 def analyse(recordings: Sequence[Tuple[str, Path]]) -> dict:
-    report = {"e1": [], "e2": [], "e3": [], "e4": [], "e4_overlap_shift": []}
+    report = {"e1": [], "e2": [], "e3": [], "e4": [], "e4_overlap_shift": [], "e6": []}
     e4_by_key = {}
     for label, bag in recordings:
         truth = parse_label(label)
-        msgs = read_bag(bag, ["/yolo_frame", "/target_centroid_sector", "/scan", "/cmd_vel"])
+        msgs = read_bag(bag, ["/yolo_frame", "/target_centroid_sector", "/scan", "/cmd_vel", "/target_fused_prob"])
         frames = [(t, parse_frame(m.data)) for t, m in msgs.get("/yolo_frame", [])]
         width = frames[0][1]["width"] if frames else 640
         if frames:
@@ -257,6 +296,10 @@ def analyse(recordings: Sequence[Tuple[str, Path]]) -> dict:
             dets = [(t, m.data[0]) for t, m in msgs.get("/target_centroid_sector", [])]
             scans = [(t, scan_points(m.angle_min, m.angle_increment, list(m.ranges))) for t, m in msgs.get("/scan", [])]
             report["e1"].append({"label": label, **e1_stats(truth, dets, scans, width)})
+        elif truth["exp"] == "e6":
+            fused = [(t, float(m.data[2])) for t, m in msgs.get("/target_fused_prob", []) if len(m.data) >= 3]
+            cmds = [(t, m.linear.x) for t, m in msgs.get("/cmd_vel", [])]
+            report["e6"].append({"label": label, **e6_stats(truth, fused, cmds)})
         elif truth["exp"] == "e3":
             report["e3"].append({"label": label, **e3_stats(truth, frames)})
         elif truth["exp"] == "e4":
