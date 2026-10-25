@@ -951,3 +951,14 @@ Earlier history: `history-2026-10-16.md`.
 - New dashboard: https://claude.ai/artifact/HTGBVGXXgFjr4S39zD1qA1. Its tabs are พร้อมลงพื้นที่ (ready for robot day), ตามคนเดียว (solo following), เลือกให้ถูกคน (target identity), เล่นซ้ำ (replay), ประวัติ Arena (Arena history) and เทสต์และ CI (tests and CI).
 - **First page:** solo-following pass counts and the closest approach to the person per walking move (against the 0.40 m contact line), plus robot-day steps and open questions.
 - **Data:** the same as the old dashboard, plus the latest bearing-steering run (30/30), the E7 re-run (with a toggle between the first run and current code) and the current unit tests (120).
+
+### 2026-10-26 — research — Static-object filter from the re-identification paper (01:40 Thai time)
+- The user asked whether the system uses the paper *Multi-modal Bayesian Learning, Re-identification and Tracking of a Target Person for Mobile Robots*.
+  - Answer: segmentation yes; scan registration, the dynamic-object filter and online re-identification no.
+  - The user asked to try the filter.
+- Built on `claude/robot/static-filter` (not merged):
+  - `StaticMap` in `sync_fusion`, off by default;
+  - twin scenario obstacles and the `side_step_bush` scenario;
+  - unit tests (123 pass). Old scenarios are bit-identical.
+- **Result:** not adopted. The robot never chased the bush without the filter. The filter made the clean twin worse (3/3 → 1/3), likely because dead reckoning from `/cmd_vel` makes a followed person look static. It needs real wheel odometry or scan registration first.
+- Write-up: `experiments/sim/2026-10-26_static_filter.md`.

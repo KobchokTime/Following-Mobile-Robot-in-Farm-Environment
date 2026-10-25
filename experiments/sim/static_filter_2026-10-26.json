@@ -1,0 +1,549 @@
+{
+ "note": "side_step_bush, mps, seeds 0-2; branch claude/robot/static-filter",
+ "sf/real_ffalse_s0": [
+  {
+   "scenario": "side_step_bush",
+   "bridge_mode": "mps",
+   "seed": 0,
+   "ros_params": [
+    "static_filter:=false"
+   ],
+   "realism": true,
+   "doc": "side_step with a person-sized bush beside the point where the target leaves the camera's view.",
+   "samples": 300,
+   "duration_s": 29.9,
+   "distance_travelled_m": 4.471631156188685,
+   "final_gap_m": 0.4659907173598708,
+   "median_gap_m": 0.4659907173598708,
+   "max_gap_m": 0.8726265456594884,
+   "gap_target_m": 0.5,
+   "time_moving_s": 12.600000000000001,
+   "max_speed_mps": 0.5890365944805981,
+   "min_speed_mps": 0.0,
+   "max_abs_target_bearing_deg": 39.820281245760185,
+   "final_target_bearing_deg": 4.653930418783854,
+   "target_in_camera_fov_end": true,
+   "min_person_range_m": 0.6659907173598708,
+   "contact": false,
+   "max_abs_rpm": 85.2925324964297,
+   "turned": true,
+   "target_visible_share": 0.981549815498155
+  }
+ ],
+ "sf/real_ffalse_s1": [
+  {
+   "scenario": "side_step_bush",
+   "bridge_mode": "mps",
+   "seed": 1,
+   "ros_params": [
+    "static_filter:=false"
+   ],
+   "realism": true,
+   "doc": "side_step with a person-sized bush beside the point where the target leaves the camera's view.",
+   "samples": 300,
+   "duration_s": 29.9,
+   "distance_travelled_m": 2.613564012815351,
+   "final_gap_m": 2.3023525124537296,
+   "median_gap_m": 2.3023525124537296,
+   "max_gap_m": 2.3023525124537296,
+   "gap_target_m": 0.5,
+   "time_moving_s": 7.800000000000001,
+   "max_speed_mps": 0.5943563197891335,
+   "min_speed_mps": 0.0,
+   "max_abs_target_bearing_deg": 41.838152264042414,
+   "final_target_bearing_deg": 8.363532764574934,
+   "target_in_camera_fov_end": true,
+   "min_person_range_m": 0.6844511621632285,
+   "contact": false,
+   "max_abs_rpm": 83.5180039452245,
+   "turned": true,
+   "target_visible_share": 0.35424354243542433
+  }
+ ],
+ "sf/real_ffalse_s2": [
+  {
+   "scenario": "side_step_bush",
+   "bridge_mode": "mps",
+   "seed": 2,
+   "ros_params": [
+    "static_filter:=false"
+   ],
+   "realism": true,
+   "doc": "side_step with a person-sized bush beside the point where the target leaves the camera's view.",
+   "samples": 300,
+   "duration_s": 29.9,
+   "distance_travelled_m": 4.487797991986221,
+   "final_gap_m": 0.4519952381146967,
+   "median_gap_m": 0.4519952381146967,
+   "max_gap_m": 0.8754635626879601,
+   "gap_target_m": 0.5,
+   "time_moving_s": 12.700000000000001,
+   "max_speed_mps": 0.5819922899332068,
+   "min_speed_mps": -0.0013185056696039324,
+   "max_abs_target_bearing_deg": 39.564448091467625,
+   "final_target_bearing_deg": -5.599240415223971,
+   "target_in_camera_fov_end": true,
+   "min_person_range_m": 0.6519952381146967,
+   "contact": false,
+   "max_abs_rpm": 80.06330621201833,
+   "turned": true,
+   "target_visible_share": 0.981549815498155
+  }
+ ],
+ "sf/real_ftrue_s0": [
+  {
+   "scenario": "side_step_bush",
+   "bridge_mode": "mps",
+   "seed": 0,
+   "ros_params": [
+    "static_filter:=true"
+   ],
+   "realism": true,
+   "doc": "side_step with a person-sized bush beside the point where the target leaves the camera's view.",
+   "samples": 300,
+   "duration_s": 29.9,
+   "distance_travelled_m": 4.427652257038026,
+   "final_gap_m": 0.4752324878631475,
+   "median_gap_m": 0.4752561510256537,
+   "max_gap_m": 1.7693030643610246,
+   "gap_target_m": 0.5,
+   "time_moving_s": 10.100000000000001,
+   "max_speed_mps": 1.17102754164838,
+   "min_speed_mps": 0.0,
+   "max_abs_target_bearing_deg": 63.584915644956084,
+   "final_target_bearing_deg": -0.26878733260906285,
+   "target_in_camera_fov_end": true,
+   "min_person_range_m": 0.6752324878631475,
+   "contact": false,
+   "max_abs_rpm": 145.71074545279515,
+   "turned": true,
+   "target_visible_share": 0.8745387453874539
+  }
+ ],
+ "sf/real_ftrue_s1": [
+  {
+   "scenario": "side_step_bush",
+   "bridge_mode": "mps",
+   "seed": 1,
+   "ros_params": [
+    "static_filter:=true"
+   ],
+   "realism": true,
+   "doc": "side_step with a person-sized bush beside the point where the target leaves the camera's view.",
+   "samples": 300,
+   "duration_s": 29.9,
+   "distance_travelled_m": 4.481114504852389,
+   "final_gap_m": 0.45309776534248286,
+   "median_gap_m": 0.45309776534248286,
+   "max_gap_m": 0.895295434543945,
+   "gap_target_m": 0.5,
+   "time_moving_s": 12.600000000000001,
+   "max_speed_mps": 0.6026014695145575,
+   "min_speed_mps": 0.0,
+   "max_abs_target_bearing_deg": 41.496075472606265,
+   "final_target_bearing_deg": -8.734417424396945,
+   "target_in_camera_fov_end": true,
+   "min_person_range_m": 0.6530977653424829,
+   "contact": false,
+   "max_abs_rpm": 84.34484677159212,
+   "turned": true,
+   "target_visible_share": 0.974169741697417
+  }
+ ],
+ "sf/real_ftrue_s2": [
+  {
+   "scenario": "side_step_bush",
+   "bridge_mode": "mps",
+   "seed": 2,
+   "ros_params": [
+    "static_filter:=true"
+   ],
+   "realism": true,
+   "doc": "side_step with a person-sized bush beside the point where the target leaves the camera's view.",
+   "samples": 300,
+   "duration_s": 29.9,
+   "distance_travelled_m": 2.4226563517145787,
+   "final_gap_m": 2.49390730382367,
+   "median_gap_m": 2.49390730382367,
+   "max_gap_m": 2.49390730382367,
+   "gap_target_m": 0.5,
+   "time_moving_s": 7.6000000000000005,
+   "max_speed_mps": 0.5841228538733589,
+   "min_speed_mps": 0.0,
+   "max_abs_target_bearing_deg": 38.75473032282058,
+   "final_target_bearing_deg": 4.432071076126764,
+   "target_in_camera_fov_end": true,
+   "min_person_range_m": 0.674099671799629,
+   "contact": false,
+   "max_abs_rpm": 83.78929948660326,
+   "turned": true,
+   "target_visible_share": 0.34317343173431736
+  }
+ ],
+ "sf2/clean_ffalse_s0": [
+  {
+   "scenario": "side_step_bush",
+   "bridge_mode": "mps",
+   "seed": 0,
+   "ros_params": [
+    "static_filter:=false"
+   ],
+   "realism": false,
+   "doc": "side_step with a person-sized bush beside the point where the target leaves the camera's view.",
+   "samples": 300,
+   "duration_s": 29.9,
+   "distance_travelled_m": 4.469534472014403,
+   "final_gap_m": 0.4885048802510367,
+   "median_gap_m": 0.488691342083251,
+   "max_gap_m": 0.8457566994777743,
+   "gap_target_m": 0.5,
+   "time_moving_s": 12.600000000000001,
+   "max_speed_mps": 0.6117347856620151,
+   "min_speed_mps": 0.0,
+   "max_abs_target_bearing_deg": 32.5624771542894,
+   "final_target_bearing_deg": -11.995423089090945,
+   "target_in_camera_fov_end": true,
+   "min_person_range_m": 0.6885048802510367,
+   "contact": false,
+   "max_abs_rpm": 86.70028651346404,
+   "turned": true,
+   "target_visible_share": 1.0
+  }
+ ],
+ "sf2/clean_ffalse_s1": [
+  {
+   "scenario": "side_step_bush",
+   "bridge_mode": "mps",
+   "seed": 1,
+   "ros_params": [
+    "static_filter:=false"
+   ],
+   "realism": false,
+   "doc": "side_step with a person-sized bush beside the point where the target leaves the camera's view.",
+   "samples": 300,
+   "duration_s": 29.9,
+   "distance_travelled_m": 4.492383749047311,
+   "final_gap_m": 0.4663492131118517,
+   "median_gap_m": 0.4663492131118517,
+   "max_gap_m": 0.8471908201992233,
+   "gap_target_m": 0.5,
+   "time_moving_s": 12.4,
+   "max_speed_mps": 0.6685374047290464,
+   "min_speed_mps": 0.0,
+   "max_abs_target_bearing_deg": 32.21602287213791,
+   "final_target_bearing_deg": -8.26527820399637,
+   "target_in_camera_fov_end": true,
+   "min_person_range_m": 0.6663492131118517,
+   "contact": false,
+   "max_abs_rpm": 93.08175776411154,
+   "turned": true,
+   "target_visible_share": 1.0
+  }
+ ],
+ "sf2/clean_ffalse_s2": [
+  {
+   "scenario": "side_step_bush",
+   "bridge_mode": "mps",
+   "seed": 2,
+   "ros_params": [
+    "static_filter:=false"
+   ],
+   "realism": false,
+   "doc": "side_step with a person-sized bush beside the point where the target leaves the camera's view.",
+   "samples": 300,
+   "duration_s": 29.9,
+   "distance_travelled_m": 4.461426906133433,
+   "final_gap_m": 0.48293447520762817,
+   "median_gap_m": 0.48293447520762817,
+   "max_gap_m": 0.8588942733989473,
+   "gap_target_m": 0.5,
+   "time_moving_s": 12.5,
+   "max_speed_mps": 0.6853356252810963,
+   "min_speed_mps": 0.0,
+   "max_abs_target_bearing_deg": 32.034232336335165,
+   "final_target_bearing_deg": -9.574007374376933,
+   "target_in_camera_fov_end": true,
+   "min_person_range_m": 0.6829344752076282,
+   "contact": false,
+   "max_abs_rpm": 94.9689482365868,
+   "turned": true,
+   "target_visible_share": 1.0
+  }
+ ],
+ "sf2/clean_ftrue_s0": [
+  {
+   "scenario": "side_step_bush",
+   "bridge_mode": "mps",
+   "seed": 0,
+   "ros_params": [
+    "static_filter:=true"
+   ],
+   "realism": false,
+   "doc": "side_step with a person-sized bush beside the point where the target leaves the camera's view.",
+   "samples": 300,
+   "duration_s": 29.9,
+   "distance_travelled_m": 4.490964235587509,
+   "final_gap_m": 0.46925438473307074,
+   "median_gap_m": 0.46925438473307074,
+   "max_gap_m": 0.8547404578035709,
+   "gap_target_m": 0.5,
+   "time_moving_s": 12.5,
+   "max_speed_mps": 0.6229178059729891,
+   "min_speed_mps": 0.0,
+   "max_abs_target_bearing_deg": 33.26319754627909,
+   "final_target_bearing_deg": -10.64509482453708,
+   "target_in_camera_fov_end": true,
+   "min_person_range_m": 0.6692543847330708,
+   "contact": false,
+   "max_abs_rpm": 87.95663919195009,
+   "turned": true,
+   "target_visible_share": 1.0
+  }
+ ],
+ "sf2/clean_ftrue_s1": [
+  {
+   "scenario": "side_step_bush",
+   "bridge_mode": "mps",
+   "seed": 1,
+   "ros_params": [
+    "static_filter:=true"
+   ],
+   "realism": false,
+   "doc": "side_step with a person-sized bush beside the point where the target leaves the camera's view.",
+   "samples": 300,
+   "duration_s": 29.9,
+   "distance_travelled_m": 4.417290915573673,
+   "final_gap_m": 0.4877983664221092,
+   "median_gap_m": 0.4878119610123744,
+   "max_gap_m": 1.6245204947133787,
+   "gap_target_m": 0.5,
+   "time_moving_s": 10.0,
+   "max_speed_mps": 1.0896559204880965,
+   "min_speed_mps": 0.0,
+   "max_abs_target_bearing_deg": 66.86576169600013,
+   "final_target_bearing_deg": -12.172860444706007,
+   "target_in_camera_fov_end": true,
+   "min_person_range_m": 0.6877983664221092,
+   "contact": false,
+   "max_abs_rpm": 134.81359885431124,
+   "turned": true,
+   "target_visible_share": 0.8745387453874539
+  }
+ ],
+ "sf2/clean_ftrue_s2": [
+  {
+   "scenario": "side_step_bush",
+   "bridge_mode": "mps",
+   "seed": 2,
+   "ros_params": [
+    "static_filter:=true"
+   ],
+   "realism": false,
+   "doc": "side_step with a person-sized bush beside the point where the target leaves the camera's view.",
+   "samples": 300,
+   "duration_s": 29.9,
+   "distance_travelled_m": 4.4220757996507345,
+   "final_gap_m": 0.4802163683494836,
+   "median_gap_m": 0.4802163683494836,
+   "max_gap_m": 1.64519247273658,
+   "gap_target_m": 0.5,
+   "time_moving_s": 10.100000000000001,
+   "max_speed_mps": 1.1054721828223402,
+   "min_speed_mps": 0.0,
+   "max_abs_target_bearing_deg": 67.41486563133185,
+   "final_target_bearing_deg": -12.03669469843175,
+   "target_in_camera_fov_end": true,
+   "min_person_range_m": 0.6802163683494836,
+   "contact": false,
+   "max_abs_rpm": 134.81359885431124,
+   "turned": true,
+   "target_visible_share": 0.8708487084870848
+  }
+ ],
+ "sf2/realb_ffalse_s0": [
+  {
+   "scenario": "side_step_bush",
+   "bridge_mode": "mps",
+   "seed": 0,
+   "ros_params": [
+    "static_filter:=false",
+    "steer_mode:=bearing"
+   ],
+   "realism": true,
+   "doc": "side_step with a person-sized bush beside the point where the target leaves the camera's view.",
+   "samples": 300,
+   "duration_s": 29.9,
+   "distance_travelled_m": 2.3237517886758527,
+   "final_gap_m": 2.6522156930132916,
+   "median_gap_m": 2.6385763976741616,
+   "max_gap_m": 2.6522156930132916,
+   "gap_target_m": 0.5,
+   "time_moving_s": 7.4,
+   "max_speed_mps": 0.9005766878464982,
+   "min_speed_mps": -0.010014533647699095,
+   "max_abs_target_bearing_deg": 103.01537907623347,
+   "final_target_bearing_deg": -103.01537907623347,
+   "target_in_camera_fov_end": false,
+   "min_person_range_m": 0.6205938548640998,
+   "contact": false,
+   "max_abs_rpm": 115.9174378766956,
+   "turned": true,
+   "target_visible_share": 0.17712177121771217
+  }
+ ],
+ "sf2/realb_ffalse_s1": [
+  {
+   "scenario": "side_step_bush",
+   "bridge_mode": "mps",
+   "seed": 1,
+   "ros_params": [
+    "static_filter:=false",
+    "steer_mode:=bearing"
+   ],
+   "realism": true,
+   "doc": "side_step with a person-sized bush beside the point where the target leaves the camera's view.",
+   "samples": 300,
+   "duration_s": 29.9,
+   "distance_travelled_m": 4.479827724622634,
+   "final_gap_m": 0.4302500878594507,
+   "median_gap_m": 0.4302500878594507,
+   "max_gap_m": 0.9331107496073745,
+   "gap_target_m": 0.5,
+   "time_moving_s": 12.9,
+   "max_speed_mps": 0.7327694783427896,
+   "min_speed_mps": -0.09936975635134969,
+   "max_abs_target_bearing_deg": 47.305703514979456,
+   "final_target_bearing_deg": 0.07729686298180774,
+   "target_in_camera_fov_end": true,
+   "min_person_range_m": 0.6102281734074638,
+   "contact": false,
+   "max_abs_rpm": 95.920129605367,
+   "turned": true,
+   "target_visible_share": 0.959409594095941
+  }
+ ],
+ "sf2/realb_ffalse_s2": [
+  {
+   "scenario": "side_step_bush",
+   "bridge_mode": "mps",
+   "seed": 2,
+   "ros_params": [
+    "static_filter:=false",
+    "steer_mode:=bearing"
+   ],
+   "realism": true,
+   "doc": "side_step with a person-sized bush beside the point where the target leaves the camera's view.",
+   "samples": 300,
+   "duration_s": 29.9,
+   "distance_travelled_m": 4.435771037273361,
+   "final_gap_m": 0.4729111720202372,
+   "median_gap_m": 0.47294212275343134,
+   "max_gap_m": 1.313163827159744,
+   "gap_target_m": 0.5,
+   "time_moving_s": 11.4,
+   "max_speed_mps": 0.9273101204196188,
+   "min_speed_mps": -0.00856866110402902,
+   "max_abs_target_bearing_deg": 48.42162330594249,
+   "final_target_bearing_deg": -0.5256355633438126,
+   "target_in_camera_fov_end": true,
+   "min_person_range_m": 0.6727579302968412,
+   "contact": false,
+   "max_abs_rpm": 115.72812475242026,
+   "turned": true,
+   "target_visible_share": 0.948339483394834
+  }
+ ],
+ "sf2/realb_ftrue_s0": [
+  {
+   "scenario": "side_step_bush",
+   "bridge_mode": "mps",
+   "seed": 0,
+   "ros_params": [
+    "static_filter:=true",
+    "steer_mode:=bearing"
+   ],
+   "realism": true,
+   "doc": "side_step with a person-sized bush beside the point where the target leaves the camera's view.",
+   "samples": 300,
+   "duration_s": 29.9,
+   "distance_travelled_m": 4.437451008932648,
+   "final_gap_m": 0.4766733114847959,
+   "median_gap_m": 0.4766733114847959,
+   "max_gap_m": 0.8616674988822011,
+   "gap_target_m": 0.5,
+   "time_moving_s": 12.700000000000001,
+   "max_speed_mps": 0.6200710374042,
+   "min_speed_mps": -0.0018424927475609466,
+   "max_abs_target_bearing_deg": 39.01767269498669,
+   "final_target_bearing_deg": -1.3850886507965723,
+   "target_in_camera_fov_end": true,
+   "min_person_range_m": 0.661216106925571,
+   "contact": false,
+   "max_abs_rpm": 88.51681169482214,
+   "turned": true,
+   "target_visible_share": 0.981549815498155
+  }
+ ],
+ "sf2/realb_ftrue_s1": [
+  {
+   "scenario": "side_step_bush",
+   "bridge_mode": "mps",
+   "seed": 1,
+   "ros_params": [
+    "static_filter:=true",
+    "steer_mode:=bearing"
+   ],
+   "realism": true,
+   "doc": "side_step with a person-sized bush beside the point where the target leaves the camera's view.",
+   "samples": 300,
+   "duration_s": 29.9,
+   "distance_travelled_m": 4.450256561136945,
+   "final_gap_m": 0.46072710675685563,
+   "median_gap_m": 0.46072710675685563,
+   "max_gap_m": 0.8886229308568565,
+   "gap_target_m": 0.5,
+   "time_moving_s": 12.4,
+   "max_speed_mps": 0.654198163817131,
+   "min_speed_mps": 0.0,
+   "max_abs_target_bearing_deg": 41.71156949599251,
+   "final_target_bearing_deg": -0.029331100130004666,
+   "target_in_camera_fov_end": true,
+   "min_person_range_m": 0.6322047850418482,
+   "contact": false,
+   "max_abs_rpm": 86.9589385490295,
+   "turned": true,
+   "target_visible_share": 0.974169741697417
+  }
+ ],
+ "sf2/realb_ftrue_s2": [
+  {
+   "scenario": "side_step_bush",
+   "bridge_mode": "mps",
+   "seed": 2,
+   "ros_params": [
+    "static_filter:=true",
+    "steer_mode:=bearing"
+   ],
+   "realism": true,
+   "doc": "side_step with a person-sized bush beside the point where the target leaves the camera's view.",
+   "samples": 300,
+   "duration_s": 29.9,
+   "distance_travelled_m": 4.522541233472832,
+   "final_gap_m": 0.4765158529497668,
+   "median_gap_m": 0.5369520429068776,
+   "max_gap_m": 1.505767564614338,
+   "gap_target_m": 0.5,
+   "time_moving_s": 12.600000000000001,
+   "max_speed_mps": 1.0599839289597686,
+   "min_speed_mps": -0.004290551739810633,
+   "max_abs_target_bearing_deg": 78.52308513988666,
+   "final_target_bearing_deg": 0.07975973165832646,
+   "target_in_camera_fov_end": true,
+   "min_person_range_m": 0.6763149817537812,
+   "contact": false,
+   "max_abs_rpm": 134.7726331444978,
+   "turned": true,
+   "target_visible_share": 0.8413284132841329
+  }
+ ]
+}
