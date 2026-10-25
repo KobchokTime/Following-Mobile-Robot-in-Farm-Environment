@@ -772,3 +772,7 @@ Earlier history: `history-2026-10-16.md`.
 ### 2026-10-25 — robot — Cluster length (13:55 Thai time)
 - `d25d3b1`: the LiDAR cluster size is now its end-to-end length, so a row seen at an angle is rejected. Integration's reproducer is a test.
 - Twin (mps, seed 0): side_step, turn_90, zigzag and identity 5/5 still pass. `check.py` passes 102 tests.
+
+### 2026-10-25 — integration — Merge T10 cluster length fix (13:55 Thai time)
+- Lock `2611587`; merged `origin/claude/workspace` (`38bccba`, fix `d25d3b1`) with `--no-ff`: merge `9915563`; `check.py` PASS (102).
+  Row reproducer now 1.40 m long and rejected; a person at 2 m still tracked. T10 one-line note; HANDOFF 102 tests; lock released.
