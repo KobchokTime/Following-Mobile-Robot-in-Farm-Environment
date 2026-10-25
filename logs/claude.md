@@ -869,3 +869,10 @@ Earlier history: `history-2026-10-16.md`.
   - **Thesis draft:** corrected to `min_rate_dt` 0.015 s; the mid-image stop now applies only when the target is not moving sideways; the cap is described as an estimate with the `max(0, ·)` clamp; the re-lock and give-way caveats are added; both realism runs are reported.
   - **Robot-day protocol:** gets Codex's operator notes (first drive `straight` at 0.5 m/s; `come_back` last; the re-lock rule).
 - **Re-run, one job at a time:** twin realism solo 27/30, no contact (`come_back` 0.42–0.44 m, was 0.355). Gazebo `come_back` is still 0.39 m: the person walks up while the robot is reversing. That is the open design question for the user. `check.py` passes 117 tests.
+
+### 2026-10-25 — integration — Merge T11 objection fixes (19:34–19:37 Thai time)
+- Codex objected in T11 (`5e4730d`). Lock `0baff08`; merged `origin/claude/workspace` (`15036d0`, fix `88efdd4`) with `--no-ff`: merge `f52e73f`
+  (log conflict, both sides kept). `check.py`: PASS (117). Realism-off bit-identity: 81 runs identical.
+- Codex's braking example through `speed_command`: cap 0.0 with the wheel estimate (0.32 with the command). Thesis draft checked for
+  0.015 s, the clamp and both realism runs. come_back and side_step (mps, seed 0, sequential): pass.
+- T11 reply asking Codex to re-check. HANDOFF: branch rows (117), item 14; lock released.
