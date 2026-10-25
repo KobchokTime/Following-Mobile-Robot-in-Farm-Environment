@@ -46,12 +46,13 @@ class YoloROSNode(Node):
         # ----- Params -----
         self.declare_parameter('num_sectors', 9)   # ปรับจำนวน sector ได้จาก ROS param
         self.num_sectors = int(self.get_parameter('num_sectors').value)
+        self.declare_parameter('model_path', '/home/yakgreen001/yolov8n_openvino_model/')
 
         # ----- IO -----
         self.subscription = self.create_subscription(Image, '/image_raw',
                                                      self.listener_callback, 10)
         self.bridge = CvBridge()
-        self.model = YOLO('/home/yakgreen001/yolov8n_openvino_model/')
+        self.model = YOLO(str(self.get_parameter('model_path').value))
 
         # Pub เดิม (compat)
         self.centroid_pub = self.create_publisher(Int32MultiArray, '/target_centroid', 10)

@@ -27,6 +27,7 @@ from sensor_msgs.msg import LaserScan
 from std_msgs.msg import Int32MultiArray, String
 
 from .scenarios import SCENARIO_LOOKUP, build
+from .world import Realism
 
 PHYSICS_HZ = 50.0
 SENSOR_HZ = 10.0
@@ -39,9 +40,11 @@ class TwinWorldNode(Node):
         self.declare_parameter("seed", 0)
         self.declare_parameter("bridge_mode", "current")
         self.declare_parameter("log_path", "")
+        self.declare_parameter("realism", False)
         name = str(self.get_parameter("scenario").value)
         self.spec = SCENARIO_LOOKUP[name]
         self.world = build(name, seed=int(self.get_parameter("seed").value),
+                           realism=Realism() if bool(self.get_parameter("realism").value) else None,
                            bridge_mode=str(self.get_parameter("bridge_mode").value))
         log_path = str(self.get_parameter("log_path").value)
         self.log = open(log_path, "w", encoding="utf-8") if log_path else None

@@ -784,3 +784,57 @@ Earlier history: `history-2026-10-16.md`.
 ### 2026-10-25 — integration — Merge T10 stale-scan fix (14:16 Thai time)
 - Codex objected in T10 (`00083ca`). Lock `d68b076`; merged `origin/claude/workspace` (`42cc22e`, fix `2eaba0b`) with `--no-ff`: merge `7e79cea`;
   `check.py` PASS (103). Codex's reproducer on the merged node: stale (4 s) and no scan → no publish; fresh (0.1 s) → publishes. T10 reply; lock released.
+
+### 2026-10-25 — integration — T10 closed (14:17 Thai time)
+- Codex agreed and marked T10 resolved (hub `f121c6a`). Synced `claude/workspace`.
+- Solo following is ready for robot day: twin solo 30/30 and identity 15/15 on mps.
+- Robot day starts with the turn check and the wheel measurement, then `speed_check.py`; the first drive is at `max_speed_mps:=0.5`.
+- Open: T1, T2, T3/T4, T6.
+
+### 2026-10-25 — research + robot — Twin realism profile and the fixes it found (Offline 1, 14:56 Thai time)
+- `44eddb7`: the twin gains an optional `Realism` profile (`run_scenario --realism`):
+  - 0.15 s detection latency, 10% missed detections, 3% false positives;
+  - LiDAR noise and ray dropout, 5% wheel slip, posts and bushes beside the path.
+- With realism off the runs stay bit-identical (hash over every Arena 2 scenario). Unit tests in `tests/test_sim_twin.py`.
+- First realism run on hub code (mps, seeds 0–2): solo 19/30, identity 13/15.
+- `45d9d29` fixes these robot-code bugs:
+  - **TargetGate rate blow-up:** two boxes on one person, about 1 ms apart, lost the target for good. Steps under 0.05 s now update position only.
+  - **Gate never unlocked:** it widened with no limit. It now unlocks after 5 s with no fix and locks again only in the start window.
+  - **Give-way phantom:** a false box over the target made the robot reverse. It now needs someone ≥ 0.2 m nearer than the target.
+  - **Late edge exit:** LiDAR edge tracking also starts when the predicted bearing is past the edge.
+  - **Braking:** the cap allows for latency (`latency_s` 0.2).
+- After the fixes:
+  - realism: solo 27/30, identity 15/15, no contact;
+  - clean twin: solo 29/30 (one side_step timing flake, passes on reruns; side_step and zigzag repeats 6/6) and identity 15/15.
+- Still failing with realism: zigzag ×2 and side_step ×1. Fixed turn rates plus 0.2 s latency make the robot turn the wrong way. A proportional bearing controller is left for after E2.
+- Write-up: `experiments/sim/2026-10-25_twin_realism.md` and `twin_realism_2026-10-25.json`. `check.py` passes 114 tests.
+
+### 2026-10-25 — robot — One-command bringup and preflight (Offline 2, 14:56 Thai time)
+- `4fbfc8d`, `ros2_yolo_ws/launch/follow_bringup.launch.py`:
+  - starts YOLO, lidar_sectorizer, sync_fusion, fusion_prob, follow_stop and the ZLAC bridge;
+  - arguments: speed_mode, max_speed_mps, wheel_radius_m, turn_dir, port, model_path, target_distance, latency_s, bridge:=false (bench), camera_cmd and lidar_cmd;
+  - `speed_mode:=legacy` sets max_decel 0.0 by itself, and numbers are always passed as floats.
+- New parameters (defaults unchanged): the bridge's `port` and YOLO's `model_path`.
+- `tools/robot_day/preflight.py` checks:
+  - the model, the serial port, disk space and the parameters;
+  - that `wheel_radius_m = X (measured DATE)` is written in `config/motor_wheel_calibration.md`;
+  - with `--live`, every topic's rate, the LiDAR content, and `/cmd_vel` publisher and subscriber.
+- Tests in `tests/test_preflight.py`. Smoke test in the twin image: every node starts (YOLO only lacks cv_bridge in the image).
+- `docs/robot_day_protocol.md`: section "Starting the robot (one command)". E2 now sets `latency_s`.
+- For Codex to review: both items above (T11).
+
+### 2026-10-25 — research — Gazebo solo set, thesis ch3–4 draft, dashboard (Offline 3–5, 18:15 Thai time)
+- **Gazebo solo set** (`bb24efd`), on `mps`, seeds 0–2, run one at a time: **27/30**.
+  - All 3 failures are `come_back`. The person walks back to the robot and comes within 0.39 m, centre to centre, against the 0.40 m contact limit, in every seed. Reversing (1.5·e plus the ramp) is slower than the person walking up.
+  - Left for the user to decide whether the robot should back away faster.
+  - A first attempt with three Gazebo containers in parallel overloaded the 4-CPU machine (timeouts, nonsense results). It is discarded and noted in the write-up.
+  - Write-up: `experiments/sim/2026-10-25_gazebo_solo.md`.
+- **Thesis chapters 3–4 draft** (`4d6c584`), `docs/thesis_draft_ch3_ch4.md`:
+  - describes what the code runs: YOLOv8n, bearing association, TargetGate, fused confidence (not Bayes), Follow–Stop with the braking cap, and the m/s bridge;
+  - drops the circular correlations and the dt claim;
+  - reports simulation results as simulation, with ⟦ROBOT DAY⟧ placeholders for E1–E6.
+  - The thesis .docx is not committed.
+- **Dashboard:**
+  - new section "ตามคนเดียว: ทุกท่าเดิน" (solo following, every walking move): scenario × condition, for twin realism before and after the fixes, the plain twin, and Gazebo;
+  - new dataset `solo_runs` (120 runs).
+- Note: the first integration attempt for T11 stopped on a usage limit after claiming the lock (hub `a4fb5f4`). It is being resumed.
