@@ -768,3 +768,7 @@ Earlier history: `history-2026-10-16.md`.
 - `check_params()` runs before the ZLAC is opened. Probe: an oblique crop-row line forms a 0.45 m "wide" cluster and is
   accepted by `lidar_track()` (width ignores depth); noted in T10 as a follow-up.
 - T10 note (6 fixes, request for Codex review). HANDOFF: branch rows (101), item 13; lock released.
+
+### 2026-10-25 — robot — Cluster length (13:55 Thai time)
+- `d25d3b1`: the LiDAR cluster size is now its end-to-end length, so a row seen at an angle is rejected. Integration's reproducer is a test.
+- Twin (mps, seed 0): side_step, turn_90, zigzag and identity 5/5 still pass. `check.py` passes 102 tests.

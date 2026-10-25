@@ -63,6 +63,15 @@ class TargetGateTest(unittest.TestCase):
         self.assertIsNone(self.lidar_track(pts, D(40), 0.8, D(25), 0.5))   # nothing there
         self.assertIsNone(self.lidar_track(pts, D(-50), 2.0, D(25), 0.5))  # wrong range
 
+    def test_lidar_track_ignores_a_row_seen_at_an_angle(self):
+        # integration's reproducer: a row 1 m to the side, from 1.6 m to 3.0 m ahead
+        pts = []
+        x = 1.6
+        while x <= 3.0:
+            pts.append((math.atan2(1.0, x), math.hypot(x, 1.0)))
+            x += 0.02
+        self.assertIsNone(self.lidar_track(pts, 0.5, 2.0, D(25), 0.5))
+
     def test_lidar_track_ignores_posts_and_rows(self):
         # one range per bearing, as a real scan: person, then a post, then a crop row
         person = self._blob(-62, 0.9, 0.4)            # about -75 to -49 deg
