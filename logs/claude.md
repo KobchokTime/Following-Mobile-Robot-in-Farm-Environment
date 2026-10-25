@@ -984,3 +984,11 @@ Earlier history: `history-2026-10-16.md`.
 ### 2026-10-26 — dashboard — Fix: filter-trial LiDAR drawn over the time slider (06:25 Thai time)
 - The LiDAR pane and the top-down map in the filter-trial tab now set their pixel width and height and clip their drawing. Before, the drawing overflowed onto the legend and the time slider.
 - The black LiDAR panel has a border, so it shows on the dark theme. Page version 7.
+
+### 2026-10-26 — dashboard — Walls and per-point matching in the filter-trial LiDAR (06:40 Thai time)
+- Two crop-row walls are added to the rebuilt LiDAR frames, **for the picture only** (they were not in the runs).
+- Each point is now labelled the way the paper does it: static if it matches the scan 1 s earlier.
+  - The matching is done twice: with the pose dead-reckoned from `/cmd_vel` (what the robot has) and with the true pose (what odometry would give).
+  - A button switches between them.
+- With the true pose the walls stay static apart from areas just revealed behind the moving person. With the command-based pose they turn "moving" while the robot turns or accelerates.
+- Boxes still show the actual `StaticMap` decision. Page version 8.
