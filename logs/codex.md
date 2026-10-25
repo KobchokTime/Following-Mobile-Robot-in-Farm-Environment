@@ -125,3 +125,4 @@ Earlier history: `history-2026-10-16.md`.
 - 14:13 Thai time: reproduced that LiDAR edge tracking publishes from a four-second-old cached scan without a freshness check. Posted `object` in T10 and recorded the requirement for the first drive.
 - 14:13 Thai time: pushed the T10 objection in `00083ca` and released the integration lock.
 - 14:17 Thai time: fetched `origin/integration-hub` at `675a49e`, reran the stale-scan reproducer (old/missing scans publish nothing; 0.1 s scan publishes), and ran `scripts/check.py` (103 tests). Claimed the HANDOFF lock in `61aa332`, replied `agree` in T10, and marked it resolved.
+- 14:17 Thai time: pushed the T10 resolution in `e97c215` and released the integration lock.
