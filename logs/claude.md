@@ -876,3 +876,42 @@ Earlier history: `history-2026-10-16.md`.
 - Codex's braking example through `speed_command`: cap 0.0 with the wheel estimate (0.32 with the command). Thesis draft checked for
   0.015 s, the clamp and both realism runs. come_back and side_step (mps, seed 0, sequential): pass.
 - T11 reply asking Codex to re-check. HANDOFF: branch rows (117), item 14; lock released.
+
+### 2026-10-25 — integration — T11 agreed (19:55 Thai time)
+- Codex replied `agree` (hub `65f577a`) to the T11 objection fixes. Its reproducer: the old command value gives a 0.566 m/s cap, and the wheel-speed estimate gives 0. `check.py` passes 117 tests.
+- `claude/workspace` is synced with the hub (`a6615af`).
+- Still open, for the user: Gazebo `come_back` reaches 0.39 m when the person walks up to the robot. The choices are to back away faster, or to let the person come close.
+
+### 2026-10-25 — decision — come_back (20:10 Thai time)
+- User's decision: do not change the code now. On robot day, do `come_back` last and walk back to the robot slowly at first. Then choose between backing away faster and letting the person come close, based on the real robot.
+
+### 2026-10-25 — robot + research — Bearing steering, Thai cheat sheet (Offline extra 1 and 3, 21:30 Thai time)
+- **`follow_stop` `steer_mode:=bearing`** (default still `sector`):
+  - turn rate ω = 2.5·θ̂, limited to 0.8 rad/s, where θ̂ is the camera bearing predicted over `latency_s`;
+  - 3° deadband;
+  - LiDAR edge fixes turn at the sector rate.
+- **Tuning.** A 1.2 rad/s limit spun the robot past the target in `side_step`, and the jump to the image edge spoiled the rate estimate. Both are handled.
+- **Results** (`mps`, seeds 0–2, one job at a time):
+  - twin realism solo: `sector` 27/30 → `bearing` 29/30, no contact (`zigzag` 1/3 → 3/3);
+  - identity: 15/15 in both modes;
+  - clean twin: 29/30 and 15/15. The one clean `come_back` 0.37 m did not reproduce in 4 reruns (0.43 m).
+- Write-up: `experiments/sim/2026-10-25_bearing_steer.md`. The launch file passes `steer_mode`.
+- **`docs/robot_day_cheatsheet_th.md`:** a one-page Thai robot-day sheet, with a slot to compare the steering modes.
+- `check.py` passes 119 tests.
+
+### 2026-10-25 — research — E7 re-run, thesis update, dashboard (Offline extra 2 and 4, 22:50 Thai time)
+- **E7 re-run** on current code (identity set, `fixed`/`diff_drive` with `max_decel:=0.0`, seeds 0–2, one job at a time):
+
+  | Condition | Passed | Contacts |
+  |---|---|---|
+  | full | 30/30 | 0 |
+  | no colour | 27/30 | 3 (`crossing` on `diff_drive`, 0.39–0.40 m) |
+  | no give-way | 29/30 | 1 |
+  | no gate | 12/30 | 12 |
+
+  The conclusions are unchanged. The addendum is in `experiments/sim/2026-10-24_e7_ablation.md`.
+- **Thesis draft:**
+  - 4.7 table updated (first run and current code);
+  - 3.3.6 describes the optional bearing steering;
+  - 4.6 reports the re-run after the wheel-speed cap (27/30, no contact) and bearing steering (29/30).
+- **Dashboard:** the "ตามคนเดียว" (solo following) chart adds "สมจริง · หลังแก้" (realism after the fixes, wheel-speed cap) and "สมจริง · เลี้ยวตามมุม" (realism with bearing steering). Dataset `solo_runs` has 150 runs.
