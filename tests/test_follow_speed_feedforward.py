@@ -75,6 +75,13 @@ class SpeedFeedForwardTest(unittest.TestCase):
         linear, _ = self.cmd(2.0, 1.0, 0.1, **PARAMS, max_decel=0.8)
         self.assertGreater(linear, 1.7)  # far away: not limited
 
+    def test_braking_allows_for_the_gap_closed_during_latency(self):
+        # at 1.0 m/s with 0.2 s latency the robot is 0.2 m nearer than the 0.3 m measured
+        linear, _ = self.cmd(0.3, 1.0, 0.1, **PARAMS, max_decel=0.8, latency_s=0.2, prev_linear=1.0)
+        self.assertAlmostEqual(linear, (2 * 0.8 * 0.1) ** 0.5)
+        linear, _ = self.cmd(0.3, 1.0, 0.1, **PARAMS, max_decel=0.8, latency_s=0.2, prev_linear=-0.5)
+        self.assertAlmostEqual(linear, (2 * 0.8 * 0.3) ** 0.5)  # reversing never loosens the cap
+
     def test_output_is_clamped_to_max_speed(self):
         linear, _ = self.cmd(5.0, 1.0, 0.1, **PARAMS)
         self.assertEqual(linear, 3.5)

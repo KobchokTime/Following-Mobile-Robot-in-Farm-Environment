@@ -8,7 +8,7 @@ from math import exp, isfinite
 
 
 def speed_command(error_dist, speed_ff, dt, linear_gain, tolerance, max_linear_speed,
-                  ff_gain, ff_max, ff_decay_s, max_decel=0.0):
+                  ff_gain, ff_max, ff_decay_s, max_decel=0.0, latency_s=0.0, prev_linear=0.0):
     """Linear command and the updated speed feed-forward, both in /cmd_vel linear.x units.
 
     The feed-forward learns the command that keeps pace with a walking target (an integral of the
@@ -19,6 +19,8 @@ def speed_command(error_dist, speed_ff, dt, linear_gain, tolerance, max_linear_s
     max_decel (in /cmd_vel units per second, 0 = off) caps the forward speed at the speed the robot
     can still stop from within the remaining gap, sqrt(2 * max_decel * error). The drive bridge
     ramps the wheels, so without this a fast robot overshoots a target that stops.
+    latency_s: the gap was measured this long ago (camera + detector), and the robot has kept moving
+    at prev_linear since, so the cap uses the gap that is left now.
     """
     dt = max(0.0, min(dt, 0.5))
     if error_dist > 0.0:
@@ -35,7 +37,8 @@ def speed_command(error_dist, speed_ff, dt, linear_gain, tolerance, max_linear_s
     else:
         linear_x = linear_gain * error_dist + speed_ff
     if max_decel > 0.0 and linear_x > 0.0:
-        linear_x = min(linear_x, math.sqrt(2.0 * max_decel * max(0.0, error_dist)))
+        left = error_dist - max(0.0, prev_linear) * latency_s
+        linear_x = min(linear_x, math.sqrt(2.0 * max_decel * max(0.0, left)))
     linear_x = max(min(linear_x, max_linear_speed), -max_linear_speed)
     return linear_x, speed_ff
 
@@ -58,6 +61,7 @@ class FollowStopNode(Node):
         # braking: never faster than the robot can stop from within the gap (bridge ramp is 1.0 m/s^2).
         # In m/s, for the bridge's "mps" mode; with speed_mode:=legacy set max_decel:=0.0
         self.declare_parameter('max_decel', 0.8)
+        self.declare_parameter('latency_s', 0.2)          # capture -> command; measure it as E2 on robot day
 
         # init dist
         self.declare_parameter('init_dist_min', 0.5)
@@ -81,6 +85,7 @@ class FollowStopNode(Node):
         self.speed_ff_max      = float(self.get_parameter('speed_ff_max').value)
         self.speed_ff_decay_s  = float(self.get_parameter('speed_ff_decay_s').value)
         self.max_decel         = float(self.get_parameter('max_decel').value)
+        self.latency_s         = float(self.get_parameter('latency_s').value)
         self.init_dist_min     = float(self.get_parameter('init_dist_min').value)
         self.init_dist_max     = float(self.get_parameter('init_dist_max').value)
 
@@ -97,6 +102,7 @@ class FollowStopNode(Node):
         self.last_good_time = self.get_clock().now()
         self.p_buffer      = []
         self.speed_ff      = 0.0
+        self.last_linear   = 0.0
         self.last_ctrl_time = None
 
         # Bayesian sector prior
@@ -157,7 +163,9 @@ class FollowStopNode(Node):
         self.last_ctrl_time = now
         linear_x, self.speed_ff = speed_command(
             error_dist, self.speed_ff, dt, self.linear_gain, self.tolerance, self.max_linear_speed,
-            self.speed_ff_gain, self.speed_ff_max, self.speed_ff_decay_s, self.max_decel)
+            self.speed_ff_gain, self.speed_ff_max, self.speed_ff_decay_s, self.max_decel,
+            self.latency_s, self.last_linear)
+        self.last_linear = linear_x
 
         # ---------- Angular control (Bayesian / previous sector) ----------
         center = self.center_sector

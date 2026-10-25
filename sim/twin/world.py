@@ -201,6 +201,26 @@ def project_detections(people: Dict[str, Tuple[float, float]], s: "SensorParams"
 
 
 @dataclass
+class Realism:
+    """Imperfections the default twin leaves out; off unless a World is given one.
+
+    All randomness comes from its own stream, so turning it off gives bit-identical runs.
+    """
+    detect_latency_s: float = 0.15   # camera + YOLO on the UP Board, from capture to message
+    detect_dropout: float = 0.10     # chance a visible person is not detected in a frame
+    false_positive_rate: float = 0.03  # chance per frame of one spurious person box
+    lidar_noise_m: float = 0.03
+    lidar_ray_dropout: float = 0.02  # chance a ray returns nothing
+    wheel_slip: float = 0.05         # std of the relative error of each wheel's real speed
+    # static clutter in world coordinates (x, y, radius): thin posts and person-sized bushes
+    clutter: Tuple[Tuple[float, float, float], ...] = (
+        (2.0, -1.2, 0.06), (4.0, -1.2, 0.06), (6.0, -1.2, 0.06), (8.0, -1.2, 0.06), (10.0, -1.2, 0.06),
+        (3.0, 1.4, 0.06), (7.0, 1.4, 0.06), (11.0, 1.4, 0.06),
+        (5.0, -1.6, 0.25), (9.0, 1.9, 0.25), (2.5, 2.2, 0.3),
+    )
+
+
+@dataclass
 class World:
     people: List[Person]
     robot: RobotParams = field(default_factory=RobotParams)
@@ -208,10 +228,13 @@ class World:
     blackouts: Sequence[Tuple[float, float]] = ()  # detector blind windows (t_start, t_end)
     shade: Sequence[Tuple[float, float, float]] = ()  # (x0, x1, saturation factor) bands in world x
     seed: int = 0
+    realism: Optional[Realism] = None
 
     def __post_init__(self) -> None:
         self.rng = random.Random(self.seed)
         self.color_rng = random.Random(self.seed + 7919)  # separate stream: chroma never shifts other noise
+        self.real_rng = random.Random(self.seed + 104729)  # realism only; never touched when it is off
+        self._pending: List[Tuple[float, List["Detection"]]] = []  # delayed detections (realism)
         self.t = 0.0
         self.x = 0.0
         self.y = 0.0
@@ -236,7 +259,12 @@ class World:
 
     def step(self, dt: float) -> None:
         self.rpm_left, self.rpm_right = ramp_rpm(self.robot, (self.rpm_left, self.rpm_right), self._bridge(), dt)
-        self.v, self.w = wheel_twist(self.robot, self.rpm_left, self.rpm_right)
+        if self.realism and self.realism.wheel_slip:
+            slip = self.realism.wheel_slip
+            self.v, self.w = wheel_twist(self.robot, self.rpm_left * (1.0 + self.real_rng.gauss(0.0, slip)),
+                                         self.rpm_right * (1.0 + self.real_rng.gauss(0.0, slip)))
+        else:
+            self.v, self.w = wheel_twist(self.robot, self.rpm_left, self.rpm_right)
         self.yaw = (self.yaw + self.w * dt + math.pi) % (2.0 * math.pi) - math.pi
         self.x += self.v * math.cos(self.yaw) * dt
         self.y += self.v * math.sin(self.yaw) * dt
@@ -255,6 +283,7 @@ class World:
         """Ranges in the LiDAR frame, angle_min=-pi, increment 2*pi/rays."""
         s = self.sensors
         people = list(self.people_robot_frame().values())
+        clutter = [(*self._to_robot(x, y), r) for x, y, r in self.realism.clutter] if self.realism else []
         out = []
         for i in range(s.lidar_rays):
             a_lidar = -math.pi + i * 2.0 * math.pi / s.lidar_rays
@@ -264,8 +293,17 @@ class World:
                 hit = _ray_circle(a_robot, px, py, PERSON_RADIUS_M)
                 if hit is not None and hit < best:
                     best = hit
+            if self.realism:
+                for cx_, cy_, cr in clutter:
+                    hit = _ray_circle(a_robot, cx_, cy_, cr)
+                    if hit is not None and hit < best:
+                        best = hit
+                if self.real_rng.random() < self.realism.lidar_ray_dropout:
+                    best = math.inf
             if math.isfinite(best):
                 best += self.rng.gauss(0.0, s.lidar_noise_m)
+                if self.realism:
+                    best += self.real_rng.gauss(0.0, self.realism.lidar_noise_m)
                 if not (s.lidar_range_min_m < best < s.lidar_range_max_m):
                     best = math.inf
             out.append(best)
@@ -276,7 +314,25 @@ class World:
             return []
         chroma = observe_clothing(self.people, {p.name: p.position(self.t)[0] for p in self.people},
                                   self.shade, self.sensors.chroma_noise, self.color_rng)
-        return project_detections(self.people_robot_frame(), self.sensors, self.rng, chroma)
+        dets = project_detections(self.people_robot_frame(), self.sensors, self.rng, chroma)
+        if not self.realism:
+            return dets
+        return self._realistic(dets)
+
+    def _realistic(self, dets: List["Detection"]) -> List["Detection"]:
+        """Drop some detections, add a spurious one now and then, and deliver them late."""
+        r, s = self.realism, self.sensors
+        dets = [d for d in dets if self.real_rng.random() >= r.detect_dropout]
+        if self.real_rng.random() < r.false_positive_rate:
+            cx = self.real_rng.randrange(s.image_width)
+            sector = max(0, min(s.num_sectors - 1, (cx * s.num_sectors) // s.image_width))
+            dets.append(Detection("false_positive", cx, s.image_height // 2, sector,
+                                  self.real_rng.randrange(90, 170), self.real_rng.randrange(90, 170),
+                                  (max(0, cx - 40), 100, min(s.image_width - 1, cx + 40), 400)))
+        self._pending.append((self.t + r.detect_latency_s, dets))
+        ready = [d for t, d in self._pending if t <= self.t + 1e-9]
+        self._pending = [(t, d) for t, d in self._pending if t > self.t + 1e-9]
+        return ready[-1] if ready else []
 
     def state(self) -> dict:
         people = {}
