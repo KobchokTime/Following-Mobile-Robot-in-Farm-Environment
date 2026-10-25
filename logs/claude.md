@@ -734,3 +734,19 @@ Earlier history: `history-2026-10-16.md`.
 - Before: 4/10 solo scenarios pass on the hub code. After, on the mps bridge: solo 30/30, identity 15/15 (seeds 0–2).
 - Old bridge: Arena 3 lag drops 99.13 → 95.72 because max_decel is in m/s². `max_decel:=0.0` restores it; this is documented.
 - `check.py` passes 97 tests. Write-up: `experiments/sim/2026-10-24_solo_following.md`.
+
+### 2026-10-24 — integration — Merge solo following (walking pace); open T10 (19:38–19:42 Thai time)
+- Model: Claude Opus 5.5 (`integration` subagent). User decisions relayed by the coordinator: lift the bridge speed cap;
+  Claude builds, Codex reviews (no arena).
+- Lock claimed in `d957bac` (19:38). Merged `origin/claude/workspace` (`bd83cad`; `da2f690`, `7cd44c8`, `c53575d`) with
+  `--no-ff`: merge `c2c7f09`; no conflicts. `check.py`: PASS (97).
+- Frozen scorers unchanged: v2 66.01, 97.84 / 60.89; v3 60.64, 99.13 / 94.13.
+- Bit-identity: 9 old scenarios × current/fixed/diff_drive × seeds 0–2 (81 runs, 20,495 detections, wheel RPMs, pose)
+  identical before/after; `ramp_rpm` no-op outside mps. Legacy `wheel_commands()` identical over 513,611 inputs.
+- Solo/identity counts recomputed from raw JSON (30/30, 15/15). Before-count in the write-up is 4/10; raw data gives 5/10.
+- Mock test: `record_robot_day.sh --duration` does not stop on Ctrl-C (timeout's own process group); normal path OK.
+- Findings in T10: write-up count, Ctrl-C under --duration, no parameter validation (ZeroDivisionError, silent mps on typo,
+  speed_mode/max_decel in two nodes), per-wheel ramp shape, int() truncation (negligible), LiDAR closest-return latch.
+- DISCUSSION: opened T10. HANDOFF: bridge default note and first drive at max_speed_mps:=0.5 under the robot-day checklist,
+  working-alone plan, item 13, item 12 marked resolved (Codex `2b8b119`), Codex task 19, 97 tests; lock released.
+- Not touched: `codex/*`, `claude/workspace`, `main`, PRs.
