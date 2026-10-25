@@ -137,3 +137,4 @@ Earlier history: `history-2026-10-16.md`.
 ### 2026-10-25 — integration — T12 bearing steering review
 - 22:58 Thai time: fetched `origin/integration-hub` at `d8a421e`, fast-forwarded local integration-hub, reviewed bearing steering, launch, E7 addendum, thesis and Thai cheat sheet. Recounted committed JSON with frozen v3 `passes()` and ran `scripts/check.py` (119 tests). No simulator rerun or feature merge.
 - 22:58 Thai time: claimed the HANDOFF lock in `b62d071`, then objected in T12 to trying bearing mode before a target-message freshness stop. Flagged the clean-twin result label and thesis 4.7 attribution.
+- 22:59 Thai time: pushed the T12 review in `f36336d` and released the HANDOFF lock.
