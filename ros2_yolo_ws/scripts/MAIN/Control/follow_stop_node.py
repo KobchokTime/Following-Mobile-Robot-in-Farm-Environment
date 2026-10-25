@@ -35,6 +35,11 @@ def bearing_turn(bearing, rate, latency_s, gain, limit, deadband):
     return max(-limit, min(limit, gain * pred))
 
 
+def target_is_stale(now_s, last_msg_s, timeout_s):
+    """True once no target message has arrived for timeout_s (0 = never stale)."""
+    return timeout_s > 0.0 and last_msg_s is not None and now_s - last_msg_s > timeout_s
+
+
 def speed_command(error_dist, speed_ff, dt, linear_gain, tolerance, max_linear_speed,
                   ff_gain, ff_max, ff_decay_s, max_decel=0.0, latency_s=0.0, prev_linear=0.0):
     """Linear command and the updated speed feed-forward, both in /cmd_vel linear.x units.
@@ -112,6 +117,9 @@ class FollowStopNode(Node):
         self.declare_parameter('bearing_deadband_deg', 3.0)
         self.declare_parameter('camera_hfov_deg', 70.0)
         self.declare_parameter('image_width', 640)
+        # bearing mode only: publish a stop when target messages stop for this long, instead of leaving
+        # the bridge to repeat the last turn until its own 1 s timeout (Codex, T12)
+        self.declare_parameter('target_timeout_s', 0.3)
 
         # ---------- Load ----------
         self.target_distance   = float(self.get_parameter('target_distance').value)
@@ -145,6 +153,9 @@ class FollowStopNode(Node):
         self.prev_bearing      = None
         self.prev_bearing_time = None
         self.bearing_rate      = 0.0
+        self.target_timeout    = float(self.get_parameter('target_timeout_s').value) if self.steer_mode == 'bearing' else 0.0
+        self.last_msg_time     = None
+        self.stale_stopped     = False
 
         # ---------- State ----------
         self.initialized   = False
@@ -164,6 +175,8 @@ class FollowStopNode(Node):
         # ---------- ROS ----------
         self.sub = self.create_subscription(Float32MultiArray, '/target_fused_prob', self.cb_fused, 10)
         self.pub = self.create_publisher(Twist, '/cmd_vel', 10)
+        if self.target_timeout > 0.0:
+            self.stale_timer = self.create_timer(0.05, self.check_stale)
 
         self.get_logger().info(
             f"FollowStopNode ✅ started | Target={self.target_distance:.2f} m "
@@ -176,6 +189,8 @@ class FollowStopNode(Node):
             return
         cx, cy, dist, sector, P_C, P_L, P_fused, dt_ms = msg.data
         sector = int(sector)
+        self.last_msg_time = self.get_clock().now().nanoseconds / 1e9
+        self.stale_stopped = False
 
         # ---------- Initial distance check ----------
         if not self.initialized:
@@ -295,6 +310,20 @@ class FollowStopNode(Node):
         )
 
     # ==================================================
+    def check_stale(self):
+        """Stop once target messages have stopped; the next message resumes control."""
+        if self.stale_stopped or not target_is_stale(self.get_clock().now().nanoseconds / 1e9,
+                                                     self.last_msg_time, self.target_timeout):
+            return
+        self.publish_stop()
+        self.stale_stopped = True
+        self.speed_ff = 0.0
+        self.last_linear = 0.0
+        self.last_ctrl_time = None
+        self.prev_bearing = None
+        self.bearing_rate = 0.0
+        self.get_logger().info(f"[STALE] no target message for {self.target_timeout:.2f} s → stop")
+
     def publish_stop(self):
         twist = Twist()
         self.pub.publish(twist)
