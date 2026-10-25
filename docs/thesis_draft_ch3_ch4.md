@@ -323,7 +323,12 @@ cloud cannot show that colour separates *two* people.
 **Before the speed changes in Section 3.3.7:** with the original bridge, capped at about 0.36 m/s,
 5 of 10 solo scenarios passed. A person walking at 1.0 m/s pulled away to 5.8 m.
 
-⟦GAZEBO: solo set on the `mps` bridge (in progress, `experiments/sim/2026-10-25_gazebo_solo.md`).⟧
+**Gazebo, `mps` bridge, seeds 0–2:**
+- 27 of 30 runs pass.
+- All three failures are `come_back`: the person walks back to the robot and comes within 0.39 m,
+  centre to centre, against the 0.40 m contact limit. Reversing is slower than the person walking up.
+- Every other scenario passes 3/3, with median gaps of 0.43–0.57 m.
+- See `experiments/sim/2026-10-25_gazebo_solo.md`.
 
 ⟦ROBOT DAY E6:
 - for each move: share of time tracked, longest dropout, median, p95 and smallest gap, and highest
