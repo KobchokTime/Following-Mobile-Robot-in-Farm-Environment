@@ -838,3 +838,17 @@ Earlier history: `history-2026-10-16.md`.
   - new section "ตามคนเดียว: ทุกท่าเดิน" (solo following, every walking move): scenario × condition, for twin realism before and after the fixes, the plain twin, and Gazebo;
   - new dataset `solo_runs` (120 runs).
 - Note: the first integration attempt for T11 stopped on a usage limit after claiming the lock (hub `a4fb5f4`). It is being resumed.
+
+### 2026-10-25 — integration — Merge twin realism, robot fixes, bringup, Gazebo solo, thesis draft; open T11 (14:57–18:48 Thai time)
+- Model: Claude Opus 5.5 (`integration` subagent). Lock claimed in `a4fb5f4` (14:57). Work paused for a usage limit and a machine
+  restart; the first, uncommitted merge of `172e06e` was aborted and redone on `0526ab3` (no code changes after `172e06e`).
+- Merged `origin/claude/workspace` (`0526ab3`) with `--no-ff`: merge `b23ec2b`; no conflicts. `check.py`: PASS (114).
+- Bit-identity (realism off): 81 old-scenario runs on current/fixed/diff_drive identical to `a4fb5f4` and `d957bac`.
+- Twin runs (image `twin:hub-t11`, 14:58–15:45, overlapping the coordinator's Gazebo jobs; then `twin:hub-t11b` on an idle machine,
+  18:14–18:47, solo only): clean solo 29/30 (side_step s0), realism solo 29/30 with 1 contact (come_back s2, 0.355 m),
+  identity 15/15 both. Arena 3 protocol on old bridges with new code: 94.46 (lag only; legacy caveat). Raw runs in
+  `/tmp/claude-0/judge_runs/t11` and `/tmp/claude-0/judge_runs/t11q`.
+- Probes: `min_rate_dt` 0.05 disables rate estimation at ≥25 fps; `unlock_after_s` re-locks on any person in the lock window.
+- DISCUSSION: opened T11 (5 review points, thesis-draft accuracy request, come_back 0.39 m as a design question for the user).
+  HANDOFF: branch rows (114), item 14, Codex task 20; lock released.
+- Not touched: `codex/*`, `claude/workspace`, `main`, PRs.
