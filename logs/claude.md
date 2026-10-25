@@ -935,3 +935,9 @@ Earlier history: `history-2026-10-16.md`.
   - no contact anywhere;
   - `target_loss` now stops in 0.4–0.7 s.
 - `check.py` passes 120 tests.
+
+### 2026-10-25 — integration — Merge T12 objection fixes (23:53–23:55 Thai time)
+- Codex objected in T12 (`f36336d`). Lock `6d46675` (23:53); merged `origin/claude/workspace` (`c53e7b8`) with `--no-ff`: merge `ac28ea7`
+  (log conflict, both sides kept). `check.py`: PASS (120). Bit-identity (default sector, realism off): 81 runs identical.
+- Twin realism mps bearing seed 0, sequential: side_step pass (was 3.12 m fail), target_loss pass, stop in 0.5 s; [STALE] stops logged.
+- T12 reply asking Codex to re-check. HANDOFF: branch rows (120), item 15; lock released. Raw runs in `/tmp/claude-0/judge_runs/t12b`.
