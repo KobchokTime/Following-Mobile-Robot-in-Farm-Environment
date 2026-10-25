@@ -145,6 +145,8 @@ capture stamp, published by `ros2_yolo_live.py`.
 
 - **Output:** capture → detection, detection → next `/cmd_vel`, and the end-to-end capture → `/cmd_vel` of each frame, each as median and p95.
 - **Answers:** review A3. It replaces "dt 4–6 ms".
+- **Then:** set `follow_stop` `latency_s` (default 0.2) to the median capture → `/cmd_vel`. The braking
+  cap uses it.
 
 ## Robot day 2
 

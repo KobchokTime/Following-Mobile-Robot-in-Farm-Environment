@@ -151,6 +151,23 @@ class TargetGateTest(unittest.TestCase):
         self.assertFalse(g.accept(0.2, D(8), 1.6))  # a jump of 0.8 m at once is not the target
         self.assertTrue(g.accept(4.1, D(8), 1.9))    # after 4 s unseen the target may have walked on
 
+    def test_two_boxes_in_one_frame_do_not_lose_the_target(self):
+        g = self.Gate()
+        for i in range(5):
+            self.assertTrue(g.accept(0.1 * i, 0.0, 0.8))
+        self.assertTrue(g.accept(0.5, 0.0, 0.8))
+        g.accept(0.501, D(4), 0.8)  # a second, offset box on the same person, 1 ms later
+        for i in range(6, 30):
+            self.assertTrue(g.accept(0.1 * i, 0.0, 0.8), i)
+
+    def test_long_loss_returns_to_the_lock_on_window(self):
+        g = self.Gate()
+        g.accept(0.0, 0.0, 0.8)
+        g.accept(0.1, 0.0, 0.8)
+        self.assertFalse(g.accept(7.0, D(20), 3.5))  # a false box 3.5 m away after 7 s unseen
+        self.assertFalse(g.locked)
+        self.assertTrue(g.accept(9.0, D(2), 0.8))     # the person walks back to the robot
+
     def test_old_three_value_messages_work(self):
         g = self.Gate()
         self.assertTrue(g.accept(0.0, 0.0, 0.8, None))
