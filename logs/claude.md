@@ -962,3 +962,9 @@ Earlier history: `history-2026-10-16.md`.
   - unit tests (123 pass). Old scenarios are bit-identical.
 - **Result:** not adopted. The robot never chased the bush without the filter. The filter made the clean twin worse (3/3 → 1/3), likely because dead reckoning from `/cmd_vel` makes a followed person look static. It needs real wheel odometry or scan registration first.
 - Write-up: `experiments/sim/2026-10-26_static_filter.md`.
+
+### 2026-10-26 — dashboard — Static-filter trial as a graphic (05:55 Thai time)
+- Dashboard v2 gets a "ทดลองตัวกรอง" (filter trial) tab:
+  - a pass bar chart, filter off against on, for the three test sets;
+  - side-by-side top-down maps of `side_step_bush` (robot path, target path, bush), with test-set and seed buttons and a time slider with play.
+- New datasets: `static_filter_paths` and `static_filter_runs`.
