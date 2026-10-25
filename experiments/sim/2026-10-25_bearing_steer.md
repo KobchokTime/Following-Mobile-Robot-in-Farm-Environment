@@ -48,3 +48,21 @@
 - **On robot day:** compare both modes on `zigzag` and `side_step`. Add `steer_mode:=bearing` to the
   `follow_stop` parameters; the launch file passes it through, see the cheat sheet.
 - **Default:** make `bearing` the default only after Codex's review and the robot result.
+
+## After Codex's T12 objection: stop when target messages stop
+
+- **Change.** In `bearing` mode, `follow_stop` publishes a stop after `target_timeout_s` (0.3 s) with
+  no target message. Before, the bridge repeated the last turn until its own 1 s timeout.
+  `sector` mode is unchanged.
+- **How it was run:** `mps`, seeds 0–2, one job at a time.
+
+| Set | `bearing` before | `bearing` with the stop |
+|---|---|---|
+| Twin realism, solo | 29/30 | **30/30, no contact** |
+| Twin realism, identity | 15/15 | 15/15, no contact |
+| Clean twin, solo | 29/30 | **30/30, no contact** |
+
+- `side_step` with realism, the one case where `bearing` was worse than `sector`, now passes in all
+  3 seeds.
+- `target_loss` now stops in 0.4–0.7 s, instead of 1.1–1.3 s.
+- **Not re-run with the stop:** the clean-twin identity set (15/15 before) and Gazebo.
