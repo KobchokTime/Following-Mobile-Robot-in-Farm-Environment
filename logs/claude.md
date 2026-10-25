@@ -822,3 +822,19 @@ Earlier history: `history-2026-10-16.md`.
 - Tests in `tests/test_preflight.py`. Smoke test in the twin image: every node starts (YOLO only lacks cv_bridge in the image).
 - `docs/robot_day_protocol.md`: section "Starting the robot (one command)". E2 now sets `latency_s`.
 - For Codex to review: both items above (T11).
+
+### 2026-10-25 — research — Gazebo solo set, thesis ch3–4 draft, dashboard (Offline 3–5, 18:15 Thai time)
+- **Gazebo solo set** (`bb24efd`), on `mps`, seeds 0–2, run one at a time: **27/30**.
+  - All 3 failures are `come_back`. The person walks back to the robot and comes within 0.39 m, centre to centre, against the 0.40 m contact limit, in every seed. Reversing (1.5·e plus the ramp) is slower than the person walking up.
+  - Left for the user to decide whether the robot should back away faster.
+  - A first attempt with three Gazebo containers in parallel overloaded the 4-CPU machine (timeouts, nonsense results). It is discarded and noted in the write-up.
+  - Write-up: `experiments/sim/2026-10-25_gazebo_solo.md`.
+- **Thesis chapters 3–4 draft** (`4d6c584`), `docs/thesis_draft_ch3_ch4.md`:
+  - describes what the code runs: YOLOv8n, bearing association, TargetGate, fused confidence (not Bayes), Follow–Stop with the braking cap, and the m/s bridge;
+  - drops the circular correlations and the dt claim;
+  - reports simulation results as simulation, with ⟦ROBOT DAY⟧ placeholders for E1–E6.
+  - The thesis .docx is not committed.
+- **Dashboard:**
+  - new section "ตามคนเดียว: ทุกท่าเดิน" (solo following, every walking move): scenario × condition, for twin realism before and after the fixes, the plain twin, and Gazebo;
+  - new dataset `solo_runs` (120 runs).
+- Note: the first integration attempt for T11 stopped on a usage limit after claiming the lock (hub `a4fb5f4`). It is being resumed.
