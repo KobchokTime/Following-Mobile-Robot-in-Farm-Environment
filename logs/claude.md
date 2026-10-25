@@ -977,3 +977,6 @@ Earlier history: `history-2026-10-16.md`.
   - the camera's field of view shaded.
 - The frames are rebuilt from the logged poses with the twin geometry (no noise) and labelled by the branch's own `StaticMap`; dataset `static_filter_scans`.
 - The frames show the failure: at the start the standing target is "static", and while the robot turns the bush reads as "moving" (dead reckoning from `/cmd_vel`).
+
+### 2026-10-26 — dashboard — Fix: filter-trial LiDAR pane stopped the page (06:15 Thai time)
+- Error: `fr.points.forEach is not a function`. Nested lists in a file dataset arrive as JSON text. The pane now parses `points` and `boxes` (and `t` as a number) before drawing. Page version 6.
