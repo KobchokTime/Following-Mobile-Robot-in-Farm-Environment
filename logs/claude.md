@@ -968,3 +968,12 @@ Earlier history: `history-2026-10-16.md`.
   - a pass bar chart, filter off against on, for the three test sets;
   - side-by-side top-down maps of `side_step_bush` (robot path, target path, bush), with test-set and seed buttons and a time slider with play.
 - New datasets: `static_filter_paths` and `static_filter_runs`.
+
+### 2026-10-26 — dashboard — Paper-style LiDAR view in the filter trial (06:05 Thai time)
+- The "ทดลองตัวกรอง" (filter trial) tab now draws, under each top-down map, the LiDAR frame at the chosen time, in the style of the paper's Figure 5:
+  - black background;
+  - static points white, moving points green;
+  - person-sized clusters boxed: the target in yellow, static person-sized clusters in red;
+  - the camera's field of view shaded.
+- The frames are rebuilt from the logged poses with the twin geometry (no noise) and labelled by the branch's own `StaticMap`; dataset `static_filter_scans`.
+- The frames show the failure: at the start the standing target is "static", and while the robot turns the bush reads as "moving" (dead reckoning from `/cmd_vel`).
