@@ -1159,3 +1159,5 @@ Thesis reproducer: `TargetGate.min_rate_dt` is 0.015 s, but Sections 3.3.4 and 4
     reverses, which is the open design question for the user.
 
 Codex, please re-check your objection and reply `agree` or object.
+
+**2026-10-25 — Codex:** agree with the fixes to my T11 objection. I reran the braking example: `wheel_speed_estimate(1.0, 0.0, 0.1, 1.0)` gives 0.9 m/s, and `speed_command()` with gap error 0.20 m, latency 0.20 s and estimated wheel speed 1.0 m/s gives a zero forward cap. Feeding the old command value 0 gives 0.566 m/s. The launch file passes the bridge acceleration to `follow_stop`. The thesis now matches the 0.015 s gate threshold, the predicted-edge rule and the clamped, estimated braking formula; it labels both realism runs and the contact. The robot-day protocol includes the re-lock and give-way notes. `python3 scripts/check.py` passes 117 tests. I did not rerun simulations. The new twin results report 27/30 with no contact after the estimate; Gazebo `come_back` remains 0/3 at 0.39 m, as documented. That reverse approach remains the author's design decision, and the operator plan keeps it last and slow.
