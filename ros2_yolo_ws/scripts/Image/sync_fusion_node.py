@@ -75,6 +75,11 @@ def lidar_track(points, pred_bearing, pred_range, window_rad, range_tol, width_m
     return best
 
 
+def scan_is_fresh(now, scan_time, max_age):
+    """True if the latest scan arrived at most max_age seconds ago (a stopped LiDAR must not steer)."""
+    return scan_time is not None and 0.0 <= now - scan_time <= max_age
+
+
 def bearing_to_cx(bearing, image_width, hfov_deg):
     """Image column for a bearing (inverse of camera_bearing_rad), clamped to the image."""
     f = (image_width / 2.0) / math.tan(math.radians(hfov_deg) / 2.0)
@@ -200,6 +205,7 @@ class SyncFusionNode(Node):
         self.declare_parameter('lidar_track_after_s', 0.3)  # camera silent this long -> use the LiDAR
         self.declare_parameter('lidar_track_max_s', 5.0)    # give up after this long without the camera
         self.declare_parameter('lidar_edge_deg', 8.0)  # only when last seen this close to the image edge
+        self.declare_parameter('lidar_scan_max_age_s', 0.3)  # older scans are never used to track
 
         self.max_dt = float(self.get_parameter('max_dt').value)
         self.buffer_sec = float(self.get_parameter('buffer_sec').value)
@@ -221,6 +227,8 @@ class SyncFusionNode(Node):
         self.lidar_after = float(self.get_parameter('lidar_track_after_s').value)
         self.lidar_max = float(self.get_parameter('lidar_track_max_s').value)
         self.scan_points = []     # latest scan as (robot-frame bearing, range)
+        self.scan_time = None     # when it arrived
+        self.scan_max_age = float(self.get_parameter('lidar_scan_max_age_s').value)
         self.last_camera_fix = None  # time of the last camera detection accepted as the target
         self.last_camera_bearing = 0.0
         self.edge_rad = math.radians(self.camera_hfov_deg / 2.0 - float(self.get_parameter('lidar_edge_deg').value))
@@ -295,6 +303,7 @@ class SyncFusionNode(Node):
                 a = (msg.angle_min + i * msg.angle_increment + self.lidar_offset + math.pi) % (2.0 * math.pi) - math.pi
                 pts.append((a, r))
         self.scan_points = pts
+        self.scan_time = self.now_sec()
 
     def track_with_lidar(self):
         """The target stepped out of the camera's view: keep it with the LiDAR and turn towards it.
@@ -308,6 +317,8 @@ class SyncFusionNode(Node):
         if self.last_camera_fix is None or now - self.last_camera_fix < self.lidar_after \
                 or now - self.last_camera_fix > self.lidar_max or abs(self.last_camera_bearing) < self.edge_rad:
             return
+        if not scan_is_fresh(now, self.scan_time, self.scan_max_age):
+            return  # no recent scan: do not steer by an old one; the controller's normal stop applies
         pb, pr = self.gate._predict(now)
         found = lidar_track(self.scan_points, pb, pr, math.radians(25.0), 0.5)
         if found is None:
