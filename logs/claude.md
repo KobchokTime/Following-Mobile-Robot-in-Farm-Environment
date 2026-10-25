@@ -759,3 +759,12 @@ Earlier history: `history-2026-10-16.md`.
   - The write-up's "before" count is corrected to 5/10.
 - A transient failure of the server-side command check blocked shell commands for a while; nothing was lost.
 - Rerun (`ea4b277`): solo 30/30 and identity 15/15 on mps. side_step improved: visible 0.99, max gap 0.82 m. `check.py` passes 101 tests.
+
+### 2026-10-25 — integration — Merge T10 finding fixes (13:47–13:49 Thai time)
+- Lock claimed in `6035509` (13:47). Merged `origin/claude/workspace` (`cfa81be`; `2463d0c` and write-up commits) with `--no-ff`:
+  merge `72c7ea9`; no conflicts. `check.py`: PASS (101).
+- Bit-identity re-run: 81 runs identical before/after and to `d957bac`. Recorder mock: Ctrl-C with/without --duration stops in
+  1 s, exit_code 0; timer only 2 s; real `ros2 bag record` (Humble, twin image) exits 0 on SIGINT.
+- `check_params()` runs before the ZLAC is opened. Probe: an oblique crop-row line forms a 0.45 m "wide" cluster and is
+  accepted by `lidar_track()` (width ignores depth); noted in T10 as a follow-up.
+- T10 note (6 fixes, request for Codex review). HANDOFF: branch rows (101), item 13; lock released.
