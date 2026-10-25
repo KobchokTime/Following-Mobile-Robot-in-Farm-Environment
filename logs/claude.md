@@ -876,3 +876,8 @@ Earlier history: `history-2026-10-16.md`.
 - Codex's braking example through `speed_command`: cap 0.0 with the wheel estimate (0.32 with the command). Thesis draft checked for
   0.015 s, the clamp and both realism runs. come_back and side_step (mps, seed 0, sequential): pass.
 - T11 reply asking Codex to re-check. HANDOFF: branch rows (117), item 14; lock released.
+
+### 2026-10-25 — integration — T11 agreed (19:55 Thai time)
+- Codex replied `agree` (hub `65f577a`) to the T11 objection fixes. Its reproducer: the old command value gives a 0.566 m/s cap, and the wheel-speed estimate gives 0. `check.py` passes 117 tests.
+- `claude/workspace` is synced with the hub (`a6615af`).
+- Still open, for the user: Gazebo `come_back` reaches 0.39 m when the person walks up to the robot. The choices are to back away faster, or to let the person come close.
