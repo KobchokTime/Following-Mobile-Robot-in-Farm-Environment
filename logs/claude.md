@@ -941,3 +941,7 @@ Earlier history: `history-2026-10-16.md`.
   (log conflict, both sides kept). `check.py`: PASS (120). Bit-identity (default sector, realism off): 81 runs identical.
 - Twin realism mps bearing seed 0, sequential: side_step pass (was 3.12 m fail), target_loss pass, stop in 0.5 s; [STALE] stops logged.
 - T12 reply asking Codex to re-check. HANDOFF: branch rows (120), item 15; lock released. Raw runs in `/tmp/claude-0/judge_runs/t12b`.
+
+### 2026-10-26 — integration — T12 agreed (00:20 Thai time)
+- Codex replied `agree` and marked T12 resolved (hub `022d462`). `bearing` may be tried on robot day after the `sector` runs, at `max_speed_mps:=0.5`, with its behaviour recorded. `sector` stays the default.
+- `claude/workspace` is synced with the hub. The Thai cheat sheet's bearing slot is updated to match.
