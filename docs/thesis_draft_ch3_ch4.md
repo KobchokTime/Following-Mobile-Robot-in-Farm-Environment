@@ -218,6 +218,14 @@ to decide whether to follow.
    - Outside them it turns at ω = −0.3·(s − 4), limited to ±0.8 rad/s.
    - LiDAR edge tracking (3.3.4) reports sector 0 or 8, which gives a full-rate turn towards the side
      where the target left.
+5. **Optional steering by bearing** (`steer_mode:=bearing`; the default is still the sector rule):
+   - **Turn rate.** ω = 2.5·θ̂, limited to ±0.8 rad/s.
+   - **Bearing.** θ̂ is the camera bearing of the box centre plus its rate in the image times τ, so the
+     robot turns towards where the target is now rather than where the late frame showed it.
+   - **Small offsets.** Bearings under 3° give no turn.
+   - **LiDAR edge fixes** turn at the sector rate.
+   - **Why the limit is 0.8 rad/s.** At 1.2 rad/s the image moved faster than the target gate could
+     follow (Section 4.6).
 
 #### 3.3.7 Drive bridge
 
@@ -374,7 +382,10 @@ then fixed:
   both.
 - **The contact.** The `come_back` contact matches Gazebo, where the closest approach is 0.39 m in
   every seed. A person walking back to the robot comes closer than the controller can reverse.
-- ⟦RE-RUN after the wheel-speed estimate in the braking cap; update this table.⟧
+- **After the wheel-speed estimate in the braking cap** (one job at a time): solo 27/30 with no
+  contact. `come_back` now comes no closer than 0.42–0.44 m.
+- **With the optional bearing steering** (`steer_mode:=bearing`, 3.3.6): solo 29/30 with no contact,
+  and identity 15/15. `zigzag` goes from 1/3 to 3/3.
 
 In the first run the three failures were `zigzag` ×2 and `side_step` ×1:
 - The person weaves within 1 m of the robot, so the bearing changes at about 100°/s.
@@ -386,20 +397,24 @@ In the first run the three failures were `zigzag` ×2 and `side_step` ×1:
 Identity set, `fixed` and `diff_drive` bridges, seeds 0–2, 30 runs per condition. Each part is
 switched off by a parameter only.
 
-| Condition | Passed | Contacts |
-|---|---|---|
-| Full | 30 / 30 | 0 |
-| No colour | 27 / 30 | 0 |
-| No give-way | 28 / 30 | 2 |
-| No gate (the original pipeline) | 12 / 30 | 8 |
+| Condition | First run (before 4.6) | Current code | Contacts (current) |
+|---|---|---|---|
+| Full | 30 / 30 | **30 / 30** | 0 |
+| No colour | 27 / 30 | 27 / 30 | 3 |
+| No give-way | 28 / 30 | 29 / 30 | 1 |
+| No gate (the original pipeline) | 12 / 30 | 12 / 30 | 12 |
 
 - **Data association is the main gain.** Without it the robot follows whichever person is nearest in
-  the sector.
-- **Colour breaks the near-ties.** These are cases where geometry alone puts a bystander inside the
-  gate.
-- **The give-way rule prevents contact** with a person crossing between the robot and the target.
+  the sector, and it fails every run of the side-by-side and bystander scenarios.
+- **Colour breaks near-ties, but which runs fail varies between runs.**
+  - In the first run, without colour the robot swapped to the bystander in `stand_aside`.
+  - On the current code, without colour it fails `crossing` on `diff_drive`: the crossing person comes
+    within 0.39–0.40 m.
+- **The give-way rule** keeps the robot clear of a person crossing between it and the target.
+- **Only the full system passes every run without contact.**
 
-These runs were made before the fixes in 4.6. ⟦RE-RUN E7 on the current code and update the table.⟧
+The current-code numbers are from `experiments/sim/2026-10-24_e7_ablation.md`, section "Re-run on the
+current code".
 
 ⟦ROBOT DAY E5: the identity scenarios with two people, 3 repeats each, including `side_by_side` with
 `target_gate:=false` for comparison.⟧
