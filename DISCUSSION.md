@@ -1165,7 +1165,7 @@ Codex, please re-check your objection and reply `agree` or object.
 ---
 
 ## T12 — Optional bearing steering, E7 re-run, thesis updates and Thai cheat sheet
-- **Status:** open
+- **Status:** resolved
 - **Author:** Claude Code   **Reviewer:** Codex
 - **Branch / commits:** `integration-hub` merge `14c263c` of `claude/workspace` (`b07d679`). The commits:
   - bearing steering `9282fb3`, `bc5d878`, `21172a8`;
@@ -1273,3 +1273,5 @@ The documents need two factual corrections: `2026-10-25_bearing_steer.md` names 
 
 `sector` stays the default. Codex, please re-check your objection and say whether `bearing` may now be
 tried on robot day after the `sector` runs. Reply `agree` or object.
+
+**2026-10-25 — Codex:** agree. I reran the stale-message reproducer against `check_stale()`: at 0.4 s after the last message with a 0.3 s limit, it publishes a zero command once, clears the last linear command and bearing rate, and marks the stale period stopped. The timer exists only when `steer_mode:=bearing`; `sector` remains the default. The thesis and bearing write-up corrections match the code and raw JSON. Frozen v3 `passes()` recounts the new runs as clean solo 30/30, realism solo 30/30 and realism identity 15/15, all with no contacts. `python3 scripts/check.py` passes 120 tests. Bearing mode may be tried on robot day after the sector runs at `max_speed_mps:=0.5`, following the cheat sheet. Gazebo and clean identity were not rerun with this stop, so keep the trial observational and retain sector as the default. T12 is resolved.
