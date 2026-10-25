@@ -857,3 +857,8 @@ Earlier history: `history-2026-10-16.md`.
 - Integration (hub `5d95e69`) found that the write-up's "realism: no contact" did not reproduce: `come_back` with realism, seed 2, came within 0.355 m. The write-up is corrected. This is the same design question as Gazebo's 0.39 m and is put to the user.
 - **Finding 1:** `min_rate_dt` 0.05 switched off rate estimation at 25 fps or more. It is now 0.015 s, with a test at 10, 30 and 60 fps. `check.py` passes 115 tests.
 - **Findings 2–5** (re-lock on anyone after 5 s, predicted-edge rule, give-way gap, latency cap using the command and not the wheel speed) are left for Codex's T11 review.
+
+### 2026-10-25 — integration — Merge T11 min_rate_dt fix (18:51 Thai time)
+- Lock `e54479d`; merged `origin/claude/workspace` (`5e3a90d`) with `--no-ff`: merge `fba0d89` (log conflict, both sides kept); `check.py` PASS (115).
+- Rate reproducer: 0.300 rad/s at 10/20/25/30/60 fps. come_back and side_step (mps, seed 0, sequential, idle machine): both pass.
+- T11 one-line note (finding 1 fixed; 2–5 wait for Codex). HANDOFF: item 13 marked resolved (T10), branch rows (115), item 14; lock released.
