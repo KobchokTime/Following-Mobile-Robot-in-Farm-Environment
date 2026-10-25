@@ -154,6 +154,7 @@ class DriveBridge(Node):
         self.declare_parameter('wheel_radius_m', WHEEL_RADIUS_M)
         self.declare_parameter('max_speed_mps', MAX_SPEED_MPS)
         self.declare_parameter('max_accel_mps2', MAX_ACCEL_MPS2)
+        self.declare_parameter('port', PORT)
         self.use_angular = bool(self.get_parameter('use_angular').value)
         self.track_width = float(self.get_parameter('track_width_m').value)
         self.turn_dir = float(self.get_parameter('turn_dir').value)
@@ -164,7 +165,7 @@ class DriveBridge(Node):
                      float(self.get_parameter('max_accel_mps2').value))
         # largest RPM change per update in "mps" mode
         self.max_step = mps_to_rpm(float(self.get_parameter('max_accel_mps2').value) / UPDATE_HZ, self.wheel_radius)
-        self.zlac = ZLAC8015D(PORT, SLAVE_ID, BAUD)
+        self.zlac = ZLAC8015D(str(self.get_parameter('port').value), SLAVE_ID, BAUD)
         self.zlac.enable_velocity()
 
         self.last_cmd_time = time.time()
