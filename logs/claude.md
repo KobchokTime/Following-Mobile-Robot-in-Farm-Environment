@@ -790,3 +790,35 @@ Earlier history: `history-2026-10-16.md`.
 - Solo following is ready for robot day: twin solo 30/30 and identity 15/15 on mps.
 - Robot day starts with the turn check and the wheel measurement, then `speed_check.py`; the first drive is at `max_speed_mps:=0.5`.
 - Open: T1, T2, T3/T4, T6.
+
+### 2026-10-25 — research + robot — Twin realism profile and the fixes it found (Offline 1, 14:56 Thai time)
+- `44eddb7`: the twin gains an optional `Realism` profile (`run_scenario --realism`):
+  - 0.15 s detection latency, 10% missed detections, 3% false positives;
+  - LiDAR noise and ray dropout, 5% wheel slip, posts and bushes beside the path.
+- With realism off the runs stay bit-identical (hash over every Arena 2 scenario). Unit tests in `tests/test_sim_twin.py`.
+- First realism run on hub code (mps, seeds 0–2): solo 19/30, identity 13/15.
+- `45d9d29` fixes these robot-code bugs:
+  - **TargetGate rate blow-up:** two boxes on one person, about 1 ms apart, lost the target for good. Steps under 0.05 s now update position only.
+  - **Gate never unlocked:** it widened with no limit. It now unlocks after 5 s with no fix and locks again only in the start window.
+  - **Give-way phantom:** a false box over the target made the robot reverse. It now needs someone ≥ 0.2 m nearer than the target.
+  - **Late edge exit:** LiDAR edge tracking also starts when the predicted bearing is past the edge.
+  - **Braking:** the cap allows for latency (`latency_s` 0.2).
+- After the fixes:
+  - realism: solo 27/30, identity 15/15, no contact;
+  - clean twin: solo 29/30 (one side_step timing flake, passes on reruns; side_step and zigzag repeats 6/6) and identity 15/15.
+- Still failing with realism: zigzag ×2 and side_step ×1. Fixed turn rates plus 0.2 s latency make the robot turn the wrong way. A proportional bearing controller is left for after E2.
+- Write-up: `experiments/sim/2026-10-25_twin_realism.md` and `twin_realism_2026-10-25.json`. `check.py` passes 114 tests.
+
+### 2026-10-25 — robot — One-command bringup and preflight (Offline 2, 14:56 Thai time)
+- `4fbfc8d`, `ros2_yolo_ws/launch/follow_bringup.launch.py`:
+  - starts YOLO, lidar_sectorizer, sync_fusion, fusion_prob, follow_stop and the ZLAC bridge;
+  - arguments: speed_mode, max_speed_mps, wheel_radius_m, turn_dir, port, model_path, target_distance, latency_s, bridge:=false (bench), camera_cmd and lidar_cmd;
+  - `speed_mode:=legacy` sets max_decel 0.0 by itself, and numbers are always passed as floats.
+- New parameters (defaults unchanged): the bridge's `port` and YOLO's `model_path`.
+- `tools/robot_day/preflight.py` checks:
+  - the model, the serial port, disk space and the parameters;
+  - that `wheel_radius_m = X (measured DATE)` is written in `config/motor_wheel_calibration.md`;
+  - with `--live`, every topic's rate, the LiDAR content, and `/cmd_vel` publisher and subscriber.
+- Tests in `tests/test_preflight.py`. Smoke test in the twin image: every node starts (YOLO only lacks cv_bridge in the image).
+- `docs/robot_day_protocol.md`: section "Starting the robot (one command)". E2 now sets `latency_s`.
+- For Codex to review: both items above (T11).

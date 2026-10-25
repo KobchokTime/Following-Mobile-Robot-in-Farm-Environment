@@ -17,6 +17,7 @@ Arguments (default):
     port (/dev/ttyUSB1)     ZLAC8015D serial port
     model_path (/home/yakgreen001/yolov8n_openvino_model/)
     target_distance (0.5)   follow set-point in metres
+    latency_s (0.2)         capture -> /cmd_vel from E2; the braking cap allows for it
     bridge (true)           false = everything but the motors (bench test)
     camera_cmd, lidar_cmd   shell commands for the drivers (empty = not started here)
 """
@@ -38,6 +39,7 @@ DEFAULTS = {
     "port": "/dev/ttyUSB1",
     "model_path": "/home/yakgreen001/yolov8n_openvino_model/",
     "target_distance": "0.5",
+    "latency_s": "0.2",
     "bridge": "true",
     "camera_cmd": "",
     "lidar_cmd": "",
@@ -65,7 +67,7 @@ def actions(a):
         node("fusion_prob", "Image/fusion_prob_node.py", {}),
         # max_decel is in m/s^2, which only means something on the "mps" bridge
         node("follow_stop", "MAIN/Control/follow_stop_node.py",
-             {"target_distance": a["target_distance"],
+             {"target_distance": a["target_distance"], "latency_s": a["latency_s"],
               "max_decel": "0.0" if a["speed_mode"] == "legacy" else "0.8"}),
     ]
     if a["bridge"].lower() in ("true", "1", "yes"):
@@ -75,7 +77,7 @@ def actions(a):
     return out
 
 
-FLOATS = ("max_speed_mps", "max_accel_mps2", "wheel_radius_m", "track_width_m", "turn_dir", "target_distance")
+FLOATS = ("max_speed_mps", "max_accel_mps2", "wheel_radius_m", "track_width_m", "turn_dir", "target_distance", "latency_s")
 
 
 def launch_setup(context):
