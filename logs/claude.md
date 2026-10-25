@@ -916,6 +916,16 @@ Earlier history: `history-2026-10-16.md`.
   - 4.6 reports the re-run after the wheel-speed cap (27/30, no contact) and bearing steering (29/30).
 - **Dashboard:** the "ตามคนเดียว" (solo following) chart adds "สมจริง · หลังแก้" (realism after the fixes, wheel-speed cap) and "สมจริง · เลี้ยวตามมุม" (realism with bearing steering). Dataset `solo_runs` has 150 runs.
 
+### 2026-10-25 — integration — Merge bearing steering, E7 re-run, thesis, cheat sheet; open T12 (22:22–22:26 Thai time)
+- Model: Claude Opus 5.5 (`integration` subagent). Lock claimed in `47f017a` (22:22). Merged `origin/claude/workspace` (`b07d679`) with
+  `--no-ff`: merge `14c263c`; no conflicts. `check.py`: PASS (119). The merge includes a one-line `CLAUDE.md` change (talk to the user in Thai).
+- Bit-identity (realism off, default steering): 81 old-scenario runs identical to `d957bac`.
+- Twin realism mps seed 0, sequential (22:23–22:25): sector zigzag/side_step pass; bearing zigzag pass, bearing side_step FAIL
+  (final 3.12 m, visible 0.13), matching the write-up's one realism failure. Raw runs in `/tmp/claude-0/judge_runs/t12`.
+- Recount: bearing and E7 re-run tables match their JSON; the bearing write-up wrongly lists side_step seed 0 as a clean failure.
+- DISCUSSION: opened T12 (3 review points; robot-day trial question; thesis check). HANDOFF: branch rows (119), item 15, Codex task 21;
+  lock released. Not touched: `codex/*`, `claude/workspace`, `main`, PRs.
+
 ### 2026-10-25 — robot — Codex T12 objection (23:55 Thai time)
 - `follow_stop` in `bearing` mode now stops after `target_timeout_s` 0.3 s without a target message. Before, the bridge held the last turn for 1 s. Unit test `target_is_stale`; `sector` mode is unchanged.
 - Thesis: 3.3.6 describes the stop, and 4.7 states that `target_gate:=false` also disables give-way (29/30 against 12/30 isolates the gate).
@@ -925,3 +935,9 @@ Earlier history: `history-2026-10-16.md`.
   - no contact anywhere;
   - `target_loss` now stops in 0.4–0.7 s.
 - `check.py` passes 120 tests.
+
+### 2026-10-25 — integration — Merge T12 objection fixes (23:53–23:55 Thai time)
+- Codex objected in T12 (`f36336d`). Lock `6d46675` (23:53); merged `origin/claude/workspace` (`c53e7b8`) with `--no-ff`: merge `ac28ea7`
+  (log conflict, both sides kept). `check.py`: PASS (120). Bit-identity (default sector, realism off): 81 runs identical.
+- Twin realism mps bearing seed 0, sequential: side_step pass (was 3.12 m fail), target_loss pass, stop in 0.5 s; [STALE] stops logged.
+- T12 reply asking Codex to re-check. HANDOFF: branch rows (120), item 15; lock released. Raw runs in `/tmp/claude-0/judge_runs/t12b`.
