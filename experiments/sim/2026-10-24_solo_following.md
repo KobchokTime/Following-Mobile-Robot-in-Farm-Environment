@@ -20,7 +20,8 @@ The `solo` set also includes `straight`, `stop_and_go`, `curve_left` and `target
 
 ## Before: current hub code, old bridge (`fixed`, seed 0)
 
-4 of 10 pass:
+5 of 10 pass: `straight`, `stop_and_go`, `curve_left`, `target_loss` and `zigzag`. The failures
+(corrected after the integration review):
 
 | Scenario | Result |
 |---|---|
@@ -28,7 +29,7 @@ The `solo` set also includes `straight`, `stop_and_go`, `curve_left` and `target
 | `walk_1p0` | target pulls away to 5.8 m (target visible 39%) |
 | `turn_90` | loses the target (final 2.7 m) |
 | `side_step` | target visible only 72% |
-| `come_back` | contact (the original scenario walked back through the robot; fixed, see below) |
+| `come_back` | contact. This run used the first version of the scenario, where the person walked back *through* the robot, so it is not comparable with the corrected scenario. |
 
 The root cause of the speed failures is the bridge. It caps each wheel at 40 RPM, about 0.36 m/s
 with the assumed 0.085 m wheel, and a person walks at 1.0–1.4 m/s.

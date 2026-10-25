@@ -144,7 +144,9 @@ def ramp_rpm(r: RobotParams, current: Tuple[float, float], target: Tuple[float, 
     if r.bridge_mode != "mps":
         return target
     step = r.max_accel_mps2 * dt * 60.0 / (2.0 * math.pi * r.wheel_radius_m)
-    return tuple(c + max(-step, min(step, t - c)) for c, t in zip(current, target))
+    dl, dr = target[0] - current[0], target[1] - current[1]  # both wheels together, as the bridge's ramp_pair
+    k = min(1.0, step / max(abs(dl), abs(dr))) if (dl or dr) else 1.0
+    return current[0] + k * dl, current[1] + k * dr
 
 
 def wheel_twist(r: RobotParams, rpm_left: float, rpm_right: float) -> Tuple[float, float]:
