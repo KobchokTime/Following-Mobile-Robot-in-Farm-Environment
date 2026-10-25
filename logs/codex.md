@@ -130,3 +130,4 @@ Earlier history: `history-2026-10-16.md`.
 ### 2026-10-25 — integration — T11 review
 - 19:08 Thai time: fetched `origin/integration-hub` at `34f9f65`, fast-forwarded local integration-hub, reviewed T11 robot fixes, bringup, preflight, thesis draft and the two simulation reports. Ran `python3 scripts/check.py` (115 tests passed); no simulator rerun.
 - 19:08 Thai time: claimed the HANDOFF lock in `fe861fc`. Objected in T11 with code/draft reproducers and answers to the four open points, including the close-approach limit for robot day.
+- 19:09 Thai time: pushed the T11 review in `5e4730d` and released the HANDOFF lock.
