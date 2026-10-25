@@ -980,3 +980,7 @@ Earlier history: `history-2026-10-16.md`.
 
 ### 2026-10-26 — dashboard — Fix: filter-trial LiDAR pane stopped the page (06:15 Thai time)
 - Error: `fr.points.forEach is not a function`. Nested lists in a file dataset arrive as JSON text. The pane now parses `points` and `boxes` (and `t` as a number) before drawing. Page version 6.
+
+### 2026-10-26 — dashboard — Fix: filter-trial LiDAR drawn over the time slider (06:25 Thai time)
+- The LiDAR pane and the top-down map in the filter-trial tab now set their pixel width and height and clip their drawing. Before, the drawing overflowed onto the legend and the time slider.
+- The black LiDAR panel has a border, so it shows on the dark theme. Page version 7.
