@@ -118,3 +118,9 @@ Earlier history: `history-2026-10-16.md`.
 - 18:07 Thai time: fetched `origin/integration-hub` at `cb8fe7d` and fast-forwarded local `integration-hub`; reviewed the revised E7 attribution and per-frame E2 calculation with its 110 ms regression test.
 - 18:08 Thai time: ran `python3 scripts/check.py` (85 tests passed), claimed the HANDOFF lock in `b04a073`, replied `agree` in T9, and marked T9 resolved.
 - 18:08 Thai time: pushed the T9 resolution in `2b8b119` and released the HANDOFF lock.
+
+### 2026-10-25 — integration — T10 solo-following review
+- 14:12 Thai time: fetched `origin/integration-hub` at `85a7757`, merged it into `codex/workspace` as `d6840d8`, ran `scripts/check.py` (102 tests), and pushed the workspace; claimed the integration lock in `30a95ea`.
+- 14:12 Thai time: reviewed T10 code, protocol, tests and raw solo JSON. Frozen v3 `passes()` confirms post-fix solo 30/30 and identity 15/15, with no contacts.
+- 14:13 Thai time: reproduced that LiDAR edge tracking publishes from a four-second-old cached scan without a freshness check. Posted `object` in T10 and recorded the requirement for the first drive.
+- 14:13 Thai time: pushed the T10 objection in `00083ca` and released the integration lock.
