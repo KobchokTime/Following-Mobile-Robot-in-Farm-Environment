@@ -218,6 +218,14 @@ to decide whether to follow.
    - Outside them it turns at ω = −0.3·(s − 4), limited to ±0.8 rad/s.
    - LiDAR edge tracking (3.3.4) reports sector 0 or 8, which gives a full-rate turn towards the side
      where the target left.
+5. **Optional steering by bearing** (`steer_mode:=bearing`; the default is still the sector rule):
+   - **Turn rate.** ω = 2.5·θ̂, limited to ±0.8 rad/s.
+   - **Bearing.** θ̂ is the camera bearing of the box centre plus its rate in the image times τ, so the
+     robot turns towards where the target is now rather than where the late frame showed it.
+   - **Small offsets.** Bearings under 3° give no turn.
+   - **LiDAR edge fixes** turn at the sector rate.
+   - **Why the limit is 0.8 rad/s.** At 1.2 rad/s the image moved faster than the target gate could
+     follow (Section 4.6).
 
 #### 3.3.7 Drive bridge
 
@@ -374,7 +382,10 @@ then fixed:
   both.
 - **The contact.** The `come_back` contact matches Gazebo, where the closest approach is 0.39 m in
   every seed. A person walking back to the robot comes closer than the controller can reverse.
-- ⟦RE-RUN after the wheel-speed estimate in the braking cap; update this table.⟧
+- **After the wheel-speed estimate in the braking cap** (one job at a time): solo 27/30 with no
+  contact. `come_back` now comes no closer than 0.42–0.44 m.
+- **With the optional bearing steering** (`steer_mode:=bearing`, 3.3.6): solo 29/30 with no contact,
+  and identity 15/15. `zigzag` goes from 1/3 to 3/3.
 
 In the first run the three failures were `zigzag` ×2 and `side_step` ×1:
 - The person weaves within 1 m of the robot, so the bearing changes at about 100°/s.
