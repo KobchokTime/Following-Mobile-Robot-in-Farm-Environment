@@ -39,6 +39,19 @@ The E6 moves match the twin's `solo` set:
 | `come_back` | walk away, turn and come back towards the robot to load it |
 | `zigzag` | weave left and right |
 
+Notes from the T11 review (Codex, 2026-10-25):
+- **First drive.** Start with `straight` at `max_speed_mps:=0.5`, after the turn check, the wheel
+  measurement and `speed_check.py`.
+- **`come_back`.**
+  - Do it last, at 0.5 m/s, and walk back slowly at first.
+  - In simulation a person walking back reached 0.36–0.39 m from the robot, because reversing is
+    slower than walking.
+  - The braking cap now uses an estimate of the wheel speed (a model of the bridge ramp), not the
+    measured speed.
+- **Locking on again.** After about 5 s without seeing you, the robot locks on to the first person
+  who stands 0.5–1.0 m in front of it, whoever that is. When working alone that is you. Before trials
+  with two people, review this rule and the 0.2 m give-way threshold.
+
 `analyze.py` reports for each run:
 - the share of time the target was tracked;
 - the longest dropout;

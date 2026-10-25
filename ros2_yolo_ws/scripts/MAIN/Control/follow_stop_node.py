@@ -7,6 +7,16 @@ import math
 from math import exp, isfinite
 
 
+def wheel_speed_estimate(v_est, last_cmd, dt, accel):
+    """Forward speed the wheels have now: the drive bridge ramps towards the last command at accel.
+
+    The braking cap needs the real speed, not the command: while the robot slows down the wheels
+    still turn faster than the (lower) command.
+    """
+    step = max(0.0, accel * dt)
+    return v_est + max(-step, min(step, last_cmd - v_est))
+
+
 def speed_command(error_dist, speed_ff, dt, linear_gain, tolerance, max_linear_speed,
                   ff_gain, ff_max, ff_decay_s, max_decel=0.0, latency_s=0.0, prev_linear=0.0):
     """Linear command and the updated speed feed-forward, both in /cmd_vel linear.x units.
@@ -20,7 +30,8 @@ def speed_command(error_dist, speed_ff, dt, linear_gain, tolerance, max_linear_s
     can still stop from within the remaining gap, sqrt(2 * max_decel * error). The drive bridge
     ramps the wheels, so without this a fast robot overshoots a target that stops.
     latency_s: the gap was measured this long ago (camera + detector), and the robot has kept moving
-    at prev_linear since, so the cap uses the gap that is left now.
+    at prev_linear (its estimated wheel speed, see wheel_speed_estimate) since, so the cap uses the gap
+    that is left now.
     """
     dt = max(0.0, min(dt, 0.5))
     if error_dist > 0.0:
@@ -62,6 +73,7 @@ class FollowStopNode(Node):
         # In m/s, for the bridge's "mps" mode; with speed_mode:=legacy set max_decel:=0.0
         self.declare_parameter('max_decel', 0.8)
         self.declare_parameter('latency_s', 0.2)          # capture -> command; measure it as E2 on robot day
+        self.declare_parameter('bridge_accel_mps2', 1.0)  # the drive bridge's max_accel_mps2 (wheel ramp)
 
         # init dist
         self.declare_parameter('init_dist_min', 0.5)
@@ -86,6 +98,7 @@ class FollowStopNode(Node):
         self.speed_ff_decay_s  = float(self.get_parameter('speed_ff_decay_s').value)
         self.max_decel         = float(self.get_parameter('max_decel').value)
         self.latency_s         = float(self.get_parameter('latency_s').value)
+        self.bridge_accel      = float(self.get_parameter('bridge_accel_mps2').value)
         self.init_dist_min     = float(self.get_parameter('init_dist_min').value)
         self.init_dist_max     = float(self.get_parameter('init_dist_max').value)
 
@@ -102,7 +115,9 @@ class FollowStopNode(Node):
         self.last_good_time = self.get_clock().now()
         self.p_buffer      = []
         self.speed_ff      = 0.0
-        self.last_linear   = 0.0
+        self.last_linear   = 0.0   # last forward command
+        self.v_wheels      = 0.0   # estimated forward wheel speed (bridge ramp towards last_linear)
+        self.v_wheels_time = None
         self.last_ctrl_time = None
 
         # Bayesian sector prior
@@ -146,6 +161,10 @@ class FollowStopNode(Node):
 
         # ---------- Confidence check ----------
         now = self.get_clock().now()
+        if self.v_wheels_time is not None:
+            dtw = min(5.0, (now - self.v_wheels_time).nanoseconds / 1e9)
+            self.v_wheels = wheel_speed_estimate(self.v_wheels, self.last_linear, dtw, self.bridge_accel)
+        self.v_wheels_time = now
         if P_fused_smooth < self.p_fused_threshold or not isfinite(dist):
             if (now - self.last_good_time).nanoseconds / 1e9 < 1.0:
                 self.pub.publish(self.last_good_cmd)
@@ -153,6 +172,7 @@ class FollowStopNode(Node):
             else:
                 self.publish_stop()
                 self.speed_ff = 0.0
+                self.last_linear = 0.0
                 self.last_ctrl_time = None
                 self.get_logger().info(f"[STOP] P_fused={P_fused_smooth:.2f} (low confidence)")
             return
@@ -164,7 +184,7 @@ class FollowStopNode(Node):
         linear_x, self.speed_ff = speed_command(
             error_dist, self.speed_ff, dt, self.linear_gain, self.tolerance, self.max_linear_speed,
             self.speed_ff_gain, self.speed_ff_max, self.speed_ff_decay_s, self.max_decel,
-            self.latency_s, self.last_linear)
+            self.latency_s, self.v_wheels)
         self.last_linear = linear_x
 
         # ---------- Angular control (Bayesian / previous sector) ----------

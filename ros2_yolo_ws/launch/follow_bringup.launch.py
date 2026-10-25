@@ -68,6 +68,7 @@ def actions(a):
         # max_decel is in m/s^2, which only means something on the "mps" bridge
         node("follow_stop", "MAIN/Control/follow_stop_node.py",
              {"target_distance": a["target_distance"], "latency_s": a["latency_s"],
+              "bridge_accel_mps2": a["max_accel_mps2"],  # wheel-speed estimate for the braking cap
               "max_decel": "0.0" if a["speed_mode"] == "legacy" else "0.8"}),
     ]
     if a["bridge"].lower() in ("true", "1", "yes"):
