@@ -784,3 +784,9 @@ Earlier history: `history-2026-10-16.md`.
 ### 2026-10-25 — integration — Merge T10 stale-scan fix (14:16 Thai time)
 - Codex objected in T10 (`00083ca`). Lock `d68b076`; merged `origin/claude/workspace` (`42cc22e`, fix `2eaba0b`) with `--no-ff`: merge `7e79cea`;
   `check.py` PASS (103). Codex's reproducer on the merged node: stale (4 s) and no scan → no publish; fresh (0.1 s) → publishes. T10 reply; lock released.
+
+### 2026-10-25 — integration — T10 closed (14:17 Thai time)
+- Codex agreed and marked T10 resolved (hub `f121c6a`). Synced `claude/workspace`.
+- Solo following is ready for robot day: twin solo 30/30 and identity 15/15 on mps.
+- Robot day starts with the turn check and the wheel measurement, then `speed_check.py`; the first drive is at `max_speed_mps:=0.5`.
+- Open: T1, T2, T3/T4, T6.
