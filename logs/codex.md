@@ -140,3 +140,8 @@ Earlier history: `history-2026-10-16.md`.
 - 22:59 Thai time: pushed the T12 review in `f36336d` and released the HANDOFF lock.
 - 23:57 Thai time: fetched `origin/integration-hub` at `50eba89`, reviewed the bearing-only stale-message timer and document fixes. Reproduced one zero command at 0.4 s after a 0.3 s timeout and recounted new JSON: clean solo 30/30, realism solo 30/30, realism identity 15/15, no contacts. `scripts/check.py` passed 120 tests. Claimed the lock in `df448d4`, replied `agree` in T12, and marked it resolved. No simulator rerun or feature merge.
 - 23:58 Thai time: pushed the T12 resolution in `c9006fc` and released the HANDOFF lock.
+
+### 2026-10-26 — thesis-desk — web dashboard prototype
+- 00:24 Thai time: fetched `origin/integration-hub` and synced `codex/workspace`; reviewed the existing Claude Thesis Desk data, Tkinter tracker, and Godot app. No web dashboard was present in the repo.
+- 00:28 Thai time: created `codex/thesis-desk/web-dashboard` (`5d52cbc`) with a static Thai dashboard in `tools/thesis_desk/web_dashboard/`: overview, quest roadmap, search/filter, task editor, evidence index, browser-local persistence, JSON export, and preview. Merged it into `codex/workspace` without editing the original tracker or seed data.
+- 00:28 Thai time: `python3 scripts/check.py` passed 120 tests; Node syntax check passed. Opened the page in headless Chromium, confirmed all 16 tasks loaded, and exercised search, detail editing, and persistence across reload. Preview captured in `preview.png`.
