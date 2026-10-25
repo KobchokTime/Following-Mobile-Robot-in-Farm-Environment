@@ -750,3 +750,12 @@ Earlier history: `history-2026-10-16.md`.
 - DISCUSSION: opened T10. HANDOFF: bridge default note and first drive at max_speed_mps:=0.5 under the robot-day checklist,
   working-alone plan, item 13, item 12 marked resolved (Codex `2b8b119`), Codex task 19, 97 tests; lock released.
 - Not touched: `codex/*`, `claude/workspace`, `main`, PRs.
+
+### 2026-10-25 — robot — T10 review fixes (13:46 Thai time)
+- Integration's 6 findings on the solo work, fixed in `2463d0c`:
+  - LiDAR tracking takes only person-sized clusters.
+  - The bridge rejects bad parameters, and both wheels ramp together (twin too).
+  - Ctrl-C stops a --duration recording (timeout --foreground plus an INT trap), and exit_code is still written.
+  - The write-up's "before" count is corrected to 5/10.
+- A transient failure of the server-side command check blocked shell commands for a while; nothing was lost.
+- Rerun (`ea4b277`): solo 30/30 and identity 15/15 on mps. side_step improved: visible 0.99, max gap 0.82 m. `check.py` passes 101 tests.

@@ -20,7 +20,8 @@ The `solo` set also includes `straight`, `stop_and_go`, `curve_left` and `target
 
 ## Before: current hub code, old bridge (`fixed`, seed 0)
 
-4 of 10 pass:
+5 of 10 pass: `straight`, `stop_and_go`, `curve_left`, `target_loss` and `zigzag`. The failures
+(corrected after the integration review):
 
 | Scenario | Result |
 |---|---|
@@ -28,7 +29,7 @@ The `solo` set also includes `straight`, `stop_and_go`, `curve_left` and `target
 | `walk_1p0` | target pulls away to 5.8 m (target visible 39%) |
 | `turn_90` | loses the target (final 2.7 m) |
 | `side_step` | target visible only 72% |
-| `come_back` | contact (the original scenario walked back through the robot; fixed, see below) |
+| `come_back` | contact. This run used the first version of the scenario, where the person walked back *through* the robot, so it is not comparable with the corrected scenario. |
 
 The root cause of the speed failures is the bridge. It caps each wheel at 40 RPM, about 0.36 m/s
 with the assumed 0.085 m wheel, and a person walks at 1.0–1.4 m/s.
@@ -74,6 +75,14 @@ Gaps are surface to surface, in metres. "Closest" is centre to centre to the per
 below 0.4 m.
 
 **Identity set on `mps`:** 15/15 pass (5 scenarios × 3 seeds).
+
+## After the integration review fixes (`2463d0c`), rerun
+
+- **What changed:** person-sized LiDAR clusters, both wheels ramped together, and parameter checks.
+- **Results:** solo 30/30 and identity 15/15 on `mps`, seeds 0–2. No contact; the closest approach is
+  0.43 m. `target_loss` still stops in 1.3 s.
+- **`side_step` improved:** target visible 0.99–1.00 (was 0.94), max gap 0.82 m (was 1.8 m).
+- **Raw data:** `after_review_fixes_2463d0c` in the JSON.
 
 ## Regression check on the old bridges
 

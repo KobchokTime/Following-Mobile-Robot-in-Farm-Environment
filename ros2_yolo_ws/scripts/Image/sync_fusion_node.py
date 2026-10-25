@@ -31,18 +31,45 @@ def in_path(bearing, rng, half_width_m):
     return rng * math.cos(bearing) > 0.0 and abs(rng * math.sin(bearing)) <= half_width_m
 
 
-def lidar_track(points, pred_bearing, pred_range, window_rad, range_tol):
+def lidar_clusters(points, gap_m=0.15):
+    """Group a scan, sorted by bearing, into clusters of neighbouring returns.
+
+    Two neighbours belong together when their ranges differ by less than gap_m. Returns a list of
+    (bearing of the middle return, closest range, width in metres).
+    """
+    pts = sorted(points)
+    clusters, cur = [], []
+    for b, r in pts:
+        if cur and (abs(r - cur[-1][1]) > gap_m or b - cur[-1][0] > math.radians(3.0)):
+            clusters.append(cur)
+            cur = []
+        cur.append((b, r))
+    if cur:
+        clusters.append(cur)
+    out = []
+    for c in clusters:
+        rmin = min(r for _, r in c)
+        width = rmin * (c[-1][0] - c[0][0]) if len(c) > 1 else 0.0
+        out.append((c[len(c) // 2][0], rmin, width))
+    return out
+
+
+def lidar_track(points, pred_bearing, pred_range, window_rad, range_tol, width_m=(0.15, 0.8)):
     """Where the target is in a LiDAR scan, near its predicted bearing and range.
 
-    points: (robot-frame bearing, range) pairs. Returns (bearing, range) of the closest return of the
-    group within the window, or None. Used while the target is outside the camera's view.
+    points: (robot-frame bearing, range) pairs. Only person-sized clusters count (width_m), so a thin
+    post or a long crop row is not taken for the target. Returns (bearing, range) of the cluster
+    nearest the prediction, or None. Used while the target is outside the camera's view.
     """
-    near = [(b, r) for b, r in points
-            if abs((b - pred_bearing + math.pi) % (2.0 * math.pi) - math.pi) <= window_rad
-            and abs(r - pred_range) <= range_tol]
-    if not near:
-        return None
-    return min(near, key=lambda p: p[1])
+    best, best_cost = None, None
+    for b, r, w in lidar_clusters(points):
+        db = abs((b - pred_bearing + math.pi) % (2.0 * math.pi) - math.pi)
+        if db > window_rad or abs(r - pred_range) > range_tol or not (width_m[0] <= w <= width_m[1]):
+            continue
+        cost = (db / window_rad) ** 2 + ((r - pred_range) / range_tol) ** 2
+        if best is None or cost < best_cost:
+            best, best_cost = (b, r), cost
+    return best
 
 
 def bearing_to_cx(bearing, image_width, hfov_deg):

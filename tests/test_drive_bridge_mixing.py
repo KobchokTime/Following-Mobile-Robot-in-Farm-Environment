@@ -10,7 +10,7 @@ ROOT = Path(__file__).resolve().parents[1]
 BRIDGE = ROOT / "ros2_yolo_ws" / "scripts" / "MAIN" / "Control" / "zlac_joystick_bridge.py"
 sys.path.insert(0, str(ROOT))
 
-from sim.twin.world import RobotParams, bridge_rpm  # noqa: E402
+from sim.twin.world import RobotParams, bridge_rpm, ramp_rpm  # noqa: E402
 
 
 def _load_bridge():
@@ -128,6 +128,27 @@ class BridgeMpsTest(unittest.TestCase):
         self.assertEqual(self.b.ramp(0.0, 100.0, 11.0), 11.0)
         self.assertEqual(self.b.ramp(50.0, 0.0, 11.0), 39.0)
         self.assertEqual(self.b.ramp(5.0, 8.0, 11.0), 8.0)
+
+    def test_ramp_pair_keeps_the_turn_shape(self):
+        out = self.b.ramp_pair((0.0, 0.0), (-100.0, 50.0), 10.0)
+        self.assertAlmostEqual(out[0], -10.0)
+        self.assertAlmostEqual(out[1], 5.0)
+        self.assertEqual(self.b.ramp_pair((3.0, 4.0), (3.0, 4.0), 10.0), (3.0, 4.0))
+
+    def test_bad_parameters_are_rejected(self):
+        self.b.check_params("mps", 0.085, 1.4, 1.0)
+        for args in (("msp", 0.085, 1.4, 1.0), ("mps", 0.0, 1.4, 1.0), ("mps", 0.085, 0.0, 1.0),
+                     ("mps", 0.085, 1.4, float("nan"))):
+            with self.assertRaises(ValueError):
+                self.b.check_params(*args)
+
+    def test_sim_ramp_matches_the_bridge(self):
+        r = RobotParams(bridge_mode="mps")
+        step = self.b.mps_to_rpm(r.max_accel_mps2 * 0.1, r.wheel_radius_m)
+        sim = ramp_rpm(r, (0.0, 0.0), (-100.0, 50.0), 0.1)
+        bridge = self.b.ramp_pair((0.0, 0.0), (-100.0, 50.0), step)
+        self.assertAlmostEqual(sim[0], bridge[0])
+        self.assertAlmostEqual(sim[1], bridge[1])
 
     def test_sim_mps_mode_matches_the_bridge(self):
         r = RobotParams(bridge_mode="mps")
