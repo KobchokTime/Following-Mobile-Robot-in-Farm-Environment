@@ -102,7 +102,7 @@ class TargetGate:
 
     def __init__(self, lock_range=(0.5, 1.0), lock_bearing_deg=15.0, bearing_sigma_deg=5.0,
                  range_sigma_m=0.15, chroma_sigma=15.0, gate=9.0, widen_per_s=1.0,
-                 alpha=0.6, beta=0.2, chroma_rate=0.05, min_rate_dt=0.05, unlock_after_s=5.0):
+                 alpha=0.6, beta=0.2, chroma_rate=0.05, min_rate_dt=0.015, unlock_after_s=5.0):
         self.lock_range = lock_range
         self.lock_bearing = math.radians(lock_bearing_deg)
         self.sb = math.radians(bearing_sigma_deg)
@@ -114,6 +114,7 @@ class TargetGate:
         self.chroma_rate = chroma_rate
         # Two boxes on one person arrive within a frame; a rate from a ~1 ms step would blow up the
         # prediction and the target would never be accepted again, so such steps update position only.
+        # 15 ms is under one frame even at 60 fps, so real frame-to-frame steps always update the rate.
         self.min_rate_dt = min_rate_dt
         # After this long with no fix the widened gates would take almost anything (a false box in
         # front of a post); start over from the lock-on window instead, like the controller does.
