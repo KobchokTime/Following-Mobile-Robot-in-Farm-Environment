@@ -108,7 +108,7 @@ class FollowStopNode(Node):
         # "sector" (default) is the original sector logic above.
         self.declare_parameter('steer_mode', 'sector')
         self.declare_parameter('bearing_gain', 2.5)          # rad/s per rad
-        self.declare_parameter('bearing_limit', 1.2)         # rad/s
+        self.declare_parameter('bearing_limit', 0.8)         # rad/s; faster turns outrun the target gate
         self.declare_parameter('bearing_deadband_deg', 3.0)
         self.declare_parameter('camera_hfov_deg', 70.0)
         self.declare_parameter('image_width', 640)
@@ -259,7 +259,13 @@ class FollowStopNode(Node):
         # update prior
         self.prev_sector = sector
 
-        if self.steer_mode == 'bearing':
+        if self.steer_mode == 'bearing' and (cx <= 0 or cx >= self.image_width - 1):
+            # LiDAR edge tracking (sync_fusion) reports the image edge, not a camera bearing: turn that
+            # way at the full sector rate and drop the rate estimate, which the jump to the edge spoils
+            angular_z = self.angular_limit if cx <= 0 else -self.angular_limit
+            self.prev_bearing = None
+            self.bearing_rate = 0.0
+        elif self.steer_mode == 'bearing':
             bearing = camera_bearing(cx, self.image_width, self.camera_hfov_deg)
             if self.prev_bearing is not None:
                 dtb = (now - self.prev_bearing_time).nanoseconds / 1e9
