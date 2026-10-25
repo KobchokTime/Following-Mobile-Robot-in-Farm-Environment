@@ -82,6 +82,18 @@ class SpeedFeedForwardTest(unittest.TestCase):
         linear, _ = self.cmd(0.3, 1.0, 0.1, **PARAMS, max_decel=0.8, latency_s=0.2, prev_linear=-0.5)
         self.assertAlmostEqual(linear, (2 * 0.8 * 0.3) ** 0.5)  # reversing never loosens the cap
 
+    def test_wheel_speed_estimate_follows_the_bridge_ramp(self):
+        est = _load().wheel_speed_estimate
+        self.assertAlmostEqual(est(1.0, 0.0, 0.1, 1.0), 0.9)   # slowing: wheels lag the stop command
+        self.assertAlmostEqual(est(0.0, 0.5, 0.1, 1.0), 0.1)   # speeding up
+        self.assertAlmostEqual(est(0.45, 0.5, 0.1, 1.0), 0.5)  # reaches the command
+        self.assertAlmostEqual(est(-0.3, 0.0, 0.1, 1.0), -0.2)
+
+    def test_braking_uses_the_wheel_speed_not_the_command(self):
+        # Codex T11: gap error 0.2 m, latency 0.2 s, last command 0 but wheels still at 1.0 m/s
+        linear, _ = self.cmd(0.2, 1.0, 0.1, **PARAMS, max_decel=0.8, latency_s=0.2, prev_linear=1.0)
+        self.assertEqual(linear, 0.0)
+
     def test_output_is_clamped_to_max_speed(self):
         linear, _ = self.cmd(5.0, 1.0, 0.1, **PARAMS)
         self.assertEqual(linear, 3.5)

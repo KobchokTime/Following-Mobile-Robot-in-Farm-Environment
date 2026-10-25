@@ -108,3 +108,21 @@ now 0.015 s, which is under one frame even at 60 fps (test `test_rate_is_estimat
 - **`latency_s` is a guess.** Set it from E2 on robot day.
 
 Raw data: `twin_realism_2026-10-25.json` (summaries for every run above).
+
+## After Codex's T11 review: the braking cap uses the estimated wheel speed (`88efdd4`)
+
+- **Change.** `follow_stop` models the wheel speed as the bridge's 1.0 m/s² ramp towards the last
+  command, and the latency allowance uses that model instead of the command.
+- **How it was run:** one job at a time, `mps`, seeds 0–2.
+
+| Run | Result |
+|---|---|
+| Twin, realism, solo | **27/30, no contact.** `come_back` closest is 0.42–0.44 m (was 0.355 m). The failures are `zigzag` ×2 and `side_step` ×1, the known fixed-turn-rate limit. |
+| Gazebo `come_back` | 0/3, closest 0.39 m in every seed, the same as before. |
+| Gazebo `walk_1p0` and `stop_and_go` | 3/3 each, with the same gaps as before. |
+
+- **Trade-off.** Median gaps in the twin rise slightly, to about 0.60 m from 0.55 m, because the cap
+  is more conservative while the robot slows down.
+- **Gazebo `come_back` is a different cause.** The person walks up while the robot is *reversing*,
+  which the braking cap does not limit; the reverse gain and the ramp do. It stays an open design
+  question for the user.

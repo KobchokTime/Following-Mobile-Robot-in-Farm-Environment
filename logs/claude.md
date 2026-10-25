@@ -862,3 +862,10 @@ Earlier history: `history-2026-10-16.md`.
 - Lock `e54479d`; merged `origin/claude/workspace` (`5e3a90d`) with `--no-ff`: merge `fba0d89` (log conflict, both sides kept); `check.py` PASS (115).
 - Rate reproducer: 0.300 rad/s at 10/20/25/30/60 fps. come_back and side_step (mps, seed 0, sequential, idle machine): both pass.
 - T11 one-line note (finding 1 fixed; 2–5 wait for Codex). HANDOFF: item 13 marked resolved (T10), branch rows (115), item 14; lock released.
+
+### 2026-10-25 — robot — Codex T11 objection (19:40 Thai time)
+- `88efdd4` answers Codex's objection:
+  - **Braking cap:** it now uses an estimated wheel speed (the bridge ramp towards the last command, parameter `bridge_accel_mps2`, set from the launch file's `max_accel_mps2`), not the command. Tests cover Codex's example.
+  - **Thesis draft:** corrected to `min_rate_dt` 0.015 s; the mid-image stop now applies only when the target is not moving sideways; the cap is described as an estimate with the `max(0, ·)` clamp; the re-lock and give-way caveats are added; both realism runs are reported.
+  - **Robot-day protocol:** gets Codex's operator notes (first drive `straight` at 0.5 m/s; `come_back` last; the re-lock rule).
+- **Re-run, one job at a time:** twin realism solo 27/30, no contact (`come_back` 0.42–0.44 m, was 0.355). Gazebo `come_back` is still 0.39 m: the person walks up while the robot is reversing. That is the open design question for the user. `check.py` passes 117 tests.
