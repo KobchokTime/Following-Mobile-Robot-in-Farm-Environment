@@ -838,3 +838,8 @@ Earlier history: `history-2026-10-16.md`.
   - new section "ตามคนเดียว: ทุกท่าเดิน" (solo following, every walking move): scenario × condition, for twin realism before and after the fixes, the plain twin, and Gazebo;
   - new dataset `solo_runs` (120 runs).
 - Note: the first integration attempt for T11 stopped on a usage limit after claiming the lock (hub `a4fb5f4`). It is being resumed.
+
+### 2026-10-25 — robot — T11 integration findings (18:55 Thai time)
+- Integration (hub `5d95e69`) found that the write-up's "realism: no contact" did not reproduce: `come_back` with realism, seed 2, came within 0.355 m. The write-up is corrected. This is the same design question as Gazebo's 0.39 m and is put to the user.
+- **Finding 1:** `min_rate_dt` 0.05 switched off rate estimation at 25 fps or more. It is now 0.015 s, with a test at 10, 30 and 60 fps. `check.py` passes 115 tests.
+- **Findings 2–5** (re-lock on anyone after 5 s, predicted-edge rule, give-way gap, latency cap using the command and not the wheel speed) are left for Codex's T11 review.
