@@ -140,6 +140,9 @@ PY
     exit "$result"
 }
 trap finish EXIT
+# Ctrl-C goes to the recorder, which closes the bag; the script itself carries on so the EXIT trap
+# above can record the result. (A trap, unlike an ignored signal, is reset in child processes.)
+trap ':' INT
 
 printf 'Recording all topics to %s\n' "$session_dir/recording"
 printf 'Commit: %s | scenario: %s | config files: %s\n' "$commit_sha" "$scenario" "${#copied_configs[@]}"
@@ -150,8 +153,9 @@ for ((i = countdown; i > 0; i--)); do
 done
 ((countdown > 0)) && printf '\rRecording now.        \n'
 if ((duration > 0)); then
-    # SIGINT lets rosbag2 close the bag cleanly; timeout's own 124 means it ran the full time
-    timeout --signal=INT "$duration" ros2 bag record --all --storage mcap --output "$session_dir/recording" \
+    # SIGINT lets rosbag2 close the bag cleanly; timeout's own 124 means it ran the full time.
+    # --foreground keeps the recorder in this process group, so Ctrl-C still stops it early.
+    timeout --foreground --signal=INT "$duration" ros2 bag record --all --storage mcap --output "$session_dir/recording" \
         || { code=$?; ((code == 124)) || exit "$code"; }
     printf '\aDone after %s s.\n' "$duration"
 else

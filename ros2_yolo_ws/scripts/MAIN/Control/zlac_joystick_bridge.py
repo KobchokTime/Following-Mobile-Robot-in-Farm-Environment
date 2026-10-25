@@ -84,6 +84,24 @@ def ramp(current, target, max_step):
     """Move current towards target by at most max_step."""
     return current + max(-max_step, min(max_step, target - current))
 
+
+def ramp_pair(current, target, max_step):
+    """Ramp both wheels together: the wheel with the larger change moves at most max_step and the
+    other moves in proportion, so they arrive at the same time and a turn keeps its shape."""
+    dl, dr = target[0] - current[0], target[1] - current[1]
+    k = min(1.0, max_step / max(abs(dl), abs(dr))) if (dl or dr) else 1.0
+    return current[0] + k * dl, current[1] + k * dr
+
+
+def check_params(speed_mode, wheel_radius, max_speed, max_accel):
+    """Reject parameter values that would divide by zero or silently pick the wrong mode."""
+    if speed_mode not in ("mps", "legacy"):
+        raise ValueError(f"speed_mode must be 'mps' or 'legacy', got {speed_mode!r}")
+    for name, value in (("wheel_radius_m", wheel_radius), ("max_speed_mps", max_speed),
+                        ("max_accel_mps2", max_accel)):
+        if not (math.isfinite(value) and value > 0.0):
+            raise ValueError(f"{name} must be a positive number, got {value!r}")
+
 # ============== ZLAC DRIVER ===============
 class ZLAC8015D:
     def __init__(self, port, sid, baud):
@@ -142,6 +160,8 @@ class DriveBridge(Node):
         self.speed_mode = str(self.get_parameter('speed_mode').value)
         self.wheel_radius = float(self.get_parameter('wheel_radius_m').value)
         self.max_speed = float(self.get_parameter('max_speed_mps').value)
+        check_params(self.speed_mode, self.wheel_radius, self.max_speed,
+                     float(self.get_parameter('max_accel_mps2').value))
         # largest RPM change per update in "mps" mode
         self.max_step = mps_to_rpm(float(self.get_parameter('max_accel_mps2').value) / UPDATE_HZ, self.wheel_radius)
         self.zlac = ZLAC8015D(PORT, SLAVE_ID, BAUD)
@@ -189,8 +209,8 @@ class DriveBridge(Node):
         if self.speed_mode == "legacy":
             self.zlac.set_velocity(self.left, self.right)
         else:
-            self.out_left = ramp(self.out_left, self.left, self.max_step)
-            self.out_right = ramp(self.out_right, self.right, self.max_step)
+            self.out_left, self.out_right = ramp_pair((self.out_left, self.out_right),
+                                                      (self.left, self.right), self.max_step)
             self.zlac.set_velocity(self.out_left, self.out_right)
 
     def destroy_node(self):
