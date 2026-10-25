@@ -386,20 +386,24 @@ In the first run the three failures were `zigzag` ×2 and `side_step` ×1:
 Identity set, `fixed` and `diff_drive` bridges, seeds 0–2, 30 runs per condition. Each part is
 switched off by a parameter only.
 
-| Condition | Passed | Contacts |
-|---|---|---|
-| Full | 30 / 30 | 0 |
-| No colour | 27 / 30 | 0 |
-| No give-way | 28 / 30 | 2 |
-| No gate (the original pipeline) | 12 / 30 | 8 |
+| Condition | First run (before 4.6) | Current code | Contacts (current) |
+|---|---|---|---|
+| Full | 30 / 30 | **30 / 30** | 0 |
+| No colour | 27 / 30 | 27 / 30 | 3 |
+| No give-way | 28 / 30 | 29 / 30 | 1 |
+| No gate (the original pipeline) | 12 / 30 | 12 / 30 | 12 |
 
 - **Data association is the main gain.** Without it the robot follows whichever person is nearest in
-  the sector.
-- **Colour breaks the near-ties.** These are cases where geometry alone puts a bystander inside the
-  gate.
-- **The give-way rule prevents contact** with a person crossing between the robot and the target.
+  the sector, and it fails every run of the side-by-side and bystander scenarios.
+- **Colour breaks near-ties, but which runs fail varies between runs.**
+  - In the first run, without colour the robot swapped to the bystander in `stand_aside`.
+  - On the current code, without colour it fails `crossing` on `diff_drive`: the crossing person comes
+    within 0.39–0.40 m.
+- **The give-way rule** keeps the robot clear of a person crossing between it and the target.
+- **Only the full system passes every run without contact.**
 
-These runs were made before the fixes in 4.6. ⟦RE-RUN E7 on the current code and update the table.⟧
+The current-code numbers are from `experiments/sim/2026-10-24_e7_ablation.md`, section "Re-run on the
+current code".
 
 ⟦ROBOT DAY E5: the identity scenarios with two people, 3 repeats each, including `side_by_side` with
 `target_gate:=false` for comparison.⟧
