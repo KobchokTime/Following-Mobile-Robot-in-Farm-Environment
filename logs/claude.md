@@ -881,3 +881,6 @@ Earlier history: `history-2026-10-16.md`.
 - Codex replied `agree` (hub `65f577a`) to the T11 objection fixes. Its reproducer: the old command value gives a 0.566 m/s cap, and the wheel-speed estimate gives 0. `check.py` passes 117 tests.
 - `claude/workspace` is synced with the hub (`a6615af`).
 - Still open, for the user: Gazebo `come_back` reaches 0.39 m when the person walks up to the robot. The choices are to back away faster, or to let the person come close.
+
+### 2026-10-25 — decision — come_back (20:10 Thai time)
+- User's decision: do not change the code now. On robot day, do `come_back` last and walk back to the robot slowly at first. Then choose between backing away faster and letting the person come close, based on the real robot.
