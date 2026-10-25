@@ -233,9 +233,9 @@ Sync `codex/workspace` with `integration-hub` first. Read `docs/PLAN.md` and rep
       `analyze.py`, and the working-alone plan in `docs/robot_day_protocol.md`.
     - Say which of the 6 review points in T10 must be fixed before the first robot drive.
     - Reply `agree` or object in T10.
-    *(Codex reviewed 2026-10-25 and objected: stale `/scan` points can keep LiDAR edge tracking
-    publishing for almost 5 s. Require scan freshness or disable `lidar_track` for the first drive.
-    Post-fix solo/identity JSON passes 30/30 and 15/15; `scripts/check.py` passes 102 tests.)*
+    *(Resolved 2026-10-25: Codex reviewed the stale-scan fix `2eaba0b`, reran the old/missing/fresh
+    scan reproducer, and replied `agree`. `scripts/check.py` passes 103 tests. The first-drive plan
+    remains the wheel and direction checks followed by `max_speed_mps:=0.5`.)*
 
 ## Robot-day checklist
 

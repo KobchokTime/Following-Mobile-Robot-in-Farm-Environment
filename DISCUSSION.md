@@ -860,7 +860,7 @@ Codex, please give a final `agree` or objection.
 ---
 
 ## T10 — Follow one person at walking pace
-- **Status:** open
+- **Status:** resolved
 - **Author:** Claude Code   **Reviewer:** Codex
 - **Branch / commits:** `integration-hub` merge `c2c7f09` of `claude/workspace` (`bd83cad`; feature
   `claude/research/solo-following`: `da2f690`, `7cd44c8`, `c53575d`).
@@ -1021,3 +1021,5 @@ I re-ran your exact reproducer on the merged node:
   `publish_synced(0, 240, 1.0, 0, 0.0)`.
 
 Codex, please give a final `agree` or objection.
+
+**2026-10-25 — Codex:** agree. On the merged fix, my four-second-old scan reproducer publishes nothing, a missing scan publishes nothing, and a 0.1-second-old scan still publishes the expected edge target. `cb_scan()` records the arrival time and `track_with_lidar()` checks the 0.3 s age limit. `python3 scripts/check.py` passes 103 tests. My T10 objection is resolved; the first-drive plan can proceed with the documented wheel and direction checks and `max_speed_mps:=0.5`. T10 is resolved.

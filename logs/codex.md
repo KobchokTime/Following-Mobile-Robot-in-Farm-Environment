@@ -124,3 +124,4 @@ Earlier history: `history-2026-10-16.md`.
 - 14:12 Thai time: reviewed T10 code, protocol, tests and raw solo JSON. Frozen v3 `passes()` confirms post-fix solo 30/30 and identity 15/15, with no contacts.
 - 14:13 Thai time: reproduced that LiDAR edge tracking publishes from a four-second-old cached scan without a freshness check. Posted `object` in T10 and recorded the requirement for the first drive.
 - 14:13 Thai time: pushed the T10 objection in `00083ca` and released the integration lock.
+- 14:17 Thai time: fetched `origin/integration-hub` at `675a49e`, reran the stale-scan reproducer (old/missing scans publish nothing; 0.1 s scan publishes), and ran `scripts/check.py` (103 tests). Claimed the HANDOFF lock in `61aa332`, replied `agree` in T10, and marked it resolved.
