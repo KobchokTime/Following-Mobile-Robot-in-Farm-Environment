@@ -121,7 +121,17 @@ SOLO_SCENARIOS: Dict[str, dict] = {
 }
 
 ALL_SCENARIOS: Dict[str, dict] = {**SCENARIOS, **IDENTITY_SCENARIOS}  # frozen: the Arena 3 scorer checks runs against it
-SCENARIO_LOOKUP: Dict[str, dict] = {**ALL_SCENARIOS, **SOLO_SCENARIOS}  # every scenario that can be run
+CLUTTER_SCENARIOS: Dict[str, dict] = {  # static-filter tests; not part of the solo set
+    "side_step_bush": {
+        "doc": "side_step with a person-sized bush beside the point where the target leaves the camera's view.",
+        "duration_s": 30.0,
+        "people": [("target", True, [(0, 1.0, 0.0), (3, 1.0, 0.0), (6, 2.2, 0.0), (7, 2.2, 1.0),
+                                      (14, 5.0, 1.0)])],
+        "obstacles": [(2.2, 1.6, 0.25)],
+    },
+}
+
+SCENARIO_LOOKUP: Dict[str, dict] = {**ALL_SCENARIOS, **SOLO_SCENARIOS, **CLUTTER_SCENARIOS}  # every scenario that can be run
 SCENARIO_SETS: Dict[str, list] = {
     "all": sorted(SCENARIOS),  # the Arena 2 set; kept as "all" so existing commands mean the same
     "identity": ["crossing", *sorted(IDENTITY_SCENARIOS)],
@@ -139,7 +149,8 @@ def make_people(spec: dict) -> list:
 
 def build(name: str, seed: int = 0, realism=None, **robot_overrides) -> World:
     spec = SCENARIO_LOOKUP[name]
-    world = World(people=make_people(spec), blackouts=spec.get("blackouts", ()), shade=spec.get("shade", ()), seed=seed,
+    world = World(people=make_people(spec), blackouts=spec.get("blackouts", ()), shade=spec.get("shade", ()),
+                  obstacles=spec.get("obstacles", ()), seed=seed,
                   realism=realism)
     for key, value in robot_overrides.items():
         setattr(world.robot, key, value)

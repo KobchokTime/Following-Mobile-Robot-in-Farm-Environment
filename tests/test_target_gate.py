@@ -12,7 +12,8 @@ NODE = ROOT / "ros2_yolo_ws" / "scripts" / "Image" / "sync_fusion_node.py"
 
 
 def _load():
-    names = ["rclpy", "rclpy.node", "rclpy.qos", "std_msgs", "std_msgs.msg", "sensor_msgs", "sensor_msgs.msg"]
+    names = ["rclpy", "rclpy.node", "rclpy.qos", "std_msgs", "std_msgs.msg", "sensor_msgs", "sensor_msgs.msg",
+             "geometry_msgs", "geometry_msgs.msg"]
     stubs = {n: types.ModuleType(n) for n in names}
     stubs["rclpy.node"].Node = object
     for k in ("QoSProfile", "QoSReliabilityPolicy", "QoSHistoryPolicy", "QoSDurabilityPolicy"):
@@ -20,6 +21,7 @@ def _load():
     stubs["std_msgs.msg"].Int32MultiArray = object
     stubs["std_msgs.msg"].Float32MultiArray = object
     stubs["sensor_msgs.msg"].LaserScan = object
+    stubs["geometry_msgs.msg"].Twist = object
     previous = {k: sys.modules.get(k) for k in stubs}
     sys.modules.update(stubs)
     try:
@@ -48,6 +50,7 @@ class TargetGateTest(unittest.TestCase):
         cls.lidar_track = staticmethod(module.lidar_track)
         cls.bearing_to_cx = staticmethod(module.bearing_to_cx)
         cls.scan_is_fresh = staticmethod(module.scan_is_fresh)
+        cls.StaticMap = module.StaticMap
 
     def test_old_or_missing_scans_are_not_used(self):
         self.assertTrue(self.scan_is_fresh(10.0, 9.9, 0.3))
@@ -174,6 +177,26 @@ class TargetGateTest(unittest.TestCase):
         self.assertFalse(g.accept(7.0, D(20), 3.5))  # a false box 3.5 m away after 7 s unseen
         self.assertFalse(g.locked)
         self.assertTrue(g.accept(9.0, D(2), 0.8))     # the person walks back to the robot
+
+    def test_static_map_flags_a_post_but_not_a_walking_person(self):
+        m = self.StaticMap(static_s=2.0, radius_m=0.3)
+        t = 0.0
+        for i in range(31):  # 3 s at 10 Hz; the robot drives forward at 0.5 m/s
+            t = 0.1 * i
+            if i:
+                m.move(0.5, 0.0, 0.1)
+            x = m.pose[0]
+            post = (math.atan2(1.0, 3.0 - x), math.hypot(3.0 - x, 1.0))        # still, at (3, 1)
+            px, py = 2.0 + 1.0 * t, -0.5                                         # walking at 1 m/s
+            person = (math.atan2(py, px - x), math.hypot(px - x, py))
+            m.update(t, [post, person])
+        self.assertTrue(m.is_static(*post))
+        self.assertFalse(m.is_static(*person))
+
+    def test_lidar_track_skips_excluded_clusters(self):
+        pts = [(D(40 + i * 0.5), 1.2) for i in range(-12, 13)]  # one person-sized cluster at 40 deg
+        self.assertIsNotNone(self.lidar_track(pts, D(40), 1.2, D(25), 0.5))
+        self.assertIsNone(self.lidar_track(pts, D(40), 1.2, D(25), 0.5, exclude=lambda b, r: True))
 
     def test_old_three_value_messages_work(self):
         g = self.Gate()

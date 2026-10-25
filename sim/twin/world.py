@@ -227,6 +227,7 @@ class World:
     sensors: SensorParams = field(default_factory=SensorParams)
     blackouts: Sequence[Tuple[float, float]] = ()  # detector blind windows (t_start, t_end)
     shade: Sequence[Tuple[float, float, float]] = ()  # (x0, x1, saturation factor) bands in world x
+    obstacles: Sequence[Tuple[float, float, float]] = ()  # static (x, y, radius) the LiDAR sees and the camera ignores
     seed: int = 0
     realism: Optional[Realism] = None
 
@@ -284,6 +285,7 @@ class World:
         s = self.sensors
         people = list(self.people_robot_frame().values())
         clutter = [(*self._to_robot(x, y), r) for x, y, r in self.realism.clutter] if self.realism else []
+        clutter += [(*self._to_robot(x, y), r) for x, y, r in self.obstacles]
         out = []
         for i in range(s.lidar_rays):
             a_lidar = -math.pi + i * 2.0 * math.pi / s.lidar_rays
@@ -293,7 +295,7 @@ class World:
                 hit = _ray_circle(a_robot, px, py, PERSON_RADIUS_M)
                 if hit is not None and hit < best:
                     best = hit
-            if self.realism:
+            if clutter:
                 for cx_, cy_, cr in clutter:
                     hit = _ray_circle(a_robot, cx_, cy_, cr)
                     if hit is not None and hit < best:

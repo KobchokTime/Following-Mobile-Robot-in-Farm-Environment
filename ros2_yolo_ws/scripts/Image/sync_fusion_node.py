@@ -9,6 +9,7 @@ from rclpy.node import Node
 from rclpy.qos import QoSProfile, QoSReliabilityPolicy, QoSHistoryPolicy, QoSDurabilityPolicy
 from std_msgs.msg import Int32MultiArray, Float32MultiArray
 from sensor_msgs.msg import LaserScan
+from geometry_msgs.msg import Twist
 from collections import deque
 import math
 
@@ -57,17 +58,61 @@ def lidar_clusters(points, gap_m=0.15):
     return out
 
 
-def lidar_track(points, pred_bearing, pred_range, window_rad, range_tol, width_m=(0.15, 0.8)):
+class StaticMap:
+    """Remembers LiDAR clusters in an odometry frame and flags the ones that do not move.
+
+    After the idea of a dynamic-object detector that compares scans over a time window and keeps only
+    what moved: a cluster that has stayed within radius_m of where it was first seen for static_s is
+    static (a post, a bush, a crop row end). A walking person leaves that radius within a second and
+    starts a new entry, so is never static unless it stands still for static_s. The robot's pose is
+    integrated from its velocity commands, so the map only needs to hold for a few seconds.
+    """
+
+    def __init__(self, static_s=2.0, radius_m=0.3, forget_s=1.0):
+        self.static_s, self.radius, self.forget_s = static_s, radius_m, forget_s
+        self.pose = (0.0, 0.0, 0.0)
+        self.entries = []  # [x, y, first_seen, last_seen]
+
+    def move(self, v, w, dt):
+        x, y, yaw = self.pose
+        dt = max(0.0, min(dt, 0.5))
+        self.pose = (x + v * math.cos(yaw) * dt, y + v * math.sin(yaw) * dt, yaw + w * dt)
+
+    def to_world(self, bearing, rng):
+        x, y, yaw = self.pose
+        return x + rng * math.cos(yaw + bearing), y + rng * math.sin(yaw + bearing)
+
+    def update(self, now, clusters):
+        """clusters: (robot-frame bearing, range) of each cluster in the latest scan."""
+        self.entries = [e for e in self.entries if now - e[3] <= self.forget_s]
+        for b, r in clusters:
+            wx, wy = self.to_world(b, r)
+            near = min(self.entries, key=lambda e: (e[0] - wx) ** 2 + (e[1] - wy) ** 2, default=None)
+            if near is not None and math.hypot(near[0] - wx, near[1] - wy) <= self.radius:
+                near[3] = now
+            else:
+                self.entries.append([wx, wy, now, now])
+
+    def is_static(self, bearing, rng):
+        wx, wy = self.to_world(bearing, rng)
+        return any(e[3] - e[2] >= self.static_s and math.hypot(e[0] - wx, e[1] - wy) <= self.radius
+                   for e in self.entries)
+
+
+def lidar_track(points, pred_bearing, pred_range, window_rad, range_tol, width_m=(0.15, 0.8), exclude=None):
     """Where the target is in a LiDAR scan, near its predicted bearing and range.
 
     points: (robot-frame bearing, range) pairs. Only person-sized clusters count (width_m), so a thin
     post or a long crop row is not taken for the target. Returns (bearing, range) of the cluster
     nearest the prediction, or None. Used while the target is outside the camera's view.
+    exclude(bearing, range) -> True drops a cluster (StaticMap.is_static: things that never move).
     """
     best, best_cost = None, None
     for b, r, w in lidar_clusters(points):
         db = abs((b - pred_bearing + math.pi) % (2.0 * math.pi) - math.pi)
         if db > window_rad or abs(r - pred_range) > range_tol or not (width_m[0] <= w <= width_m[1]):
+            continue
+        if exclude is not None and exclude(b, r):
             continue
         cost = (db / window_rad) ** 2 + ((r - pred_range) / range_tol) ** 2
         if best is None or cost < best_cost:
@@ -218,6 +263,10 @@ class SyncFusionNode(Node):
         self.declare_parameter('lidar_track_max_s', 5.0)    # give up after this long without the camera
         self.declare_parameter('lidar_edge_deg', 8.0)  # only when last seen this close to the image edge
         self.declare_parameter('lidar_scan_max_age_s', 0.3)  # older scans are never used to track
+        # off by default: never take a cluster that has not moved for static_s as the target
+        self.declare_parameter('static_filter', False)
+        self.declare_parameter('static_s', 2.0)
+        self.declare_parameter('static_radius_m', 0.3)
 
         self.max_dt = float(self.get_parameter('max_dt').value)
         self.buffer_sec = float(self.get_parameter('buffer_sec').value)
@@ -242,6 +291,11 @@ class SyncFusionNode(Node):
         self.scan_points = []     # latest scan as (robot-frame bearing, range)
         self.scan_time = None     # when it arrived
         self.scan_max_age = float(self.get_parameter('lidar_scan_max_age_s').value)
+        self.static_map = StaticMap(float(self.get_parameter('static_s').value),
+                                    float(self.get_parameter('static_radius_m').value)) \
+            if bool(self.get_parameter('static_filter').value) else None
+        self.cmd = (0.0, 0.0)
+        self.last_scan_stamp = None
         self.last_camera_fix = None  # time of the last camera detection accepted as the target
         self.last_camera_bearing = 0.0
         self.edge_rad = math.radians(self.camera_hfov_deg / 2.0 - float(self.get_parameter('lidar_edge_deg').value))
@@ -268,6 +322,8 @@ class SyncFusionNode(Node):
             Float32MultiArray, str(self.get_parameter('lidar_angles_topic').value), self.cb_angles, qos_lidar)
         self.sub_scan = self.create_subscription(
             LaserScan, str(self.get_parameter('scan_topic').value), self.cb_scan, qos_lidar)
+        if self.static_map is not None:
+            self.sub_cmd = self.create_subscription(Twist, '/cmd_vel', self.cb_cmd, 10)
 
         # ---------- pub ----------
         self.pub_synced = self.create_publisher(
@@ -309,6 +365,9 @@ class SyncFusionNode(Node):
             return
         self.buf_lidar.append((t, list(msg.data)))
 
+    def cb_cmd(self, msg):
+        self.cmd = (msg.linear.x, msg.angular.z)
+
     def cb_scan(self, msg):
         pts = []
         for i, r in enumerate(msg.ranges):
@@ -317,6 +376,11 @@ class SyncFusionNode(Node):
                 pts.append((a, r))
         self.scan_points = pts
         self.scan_time = self.now_sec()
+        if self.static_map is not None:
+            if self.last_scan_stamp is not None:
+                self.static_map.move(self.cmd[0], self.cmd[1], self.scan_time - self.last_scan_stamp)
+            self.last_scan_stamp = self.scan_time
+            self.static_map.update(self.scan_time, [(b, r) for b, r, _ in lidar_clusters(pts)])
 
     def track_with_lidar(self):
         """The target stepped out of the camera's view: keep it with the LiDAR and turn towards it.
@@ -336,7 +400,8 @@ class SyncFusionNode(Node):
             return
         if not scan_is_fresh(now, self.scan_time, self.scan_max_age):
             return  # no recent scan: do not steer by an old one; the controller's normal stop applies
-        found = lidar_track(self.scan_points, pb, pr, math.radians(25.0), 0.5)
+        found = lidar_track(self.scan_points, pb, pr, math.radians(25.0), 0.5,
+                            exclude=self.static_map.is_static if self.static_map is not None else None)
         if found is None:
             return
         bearing, rng = found
