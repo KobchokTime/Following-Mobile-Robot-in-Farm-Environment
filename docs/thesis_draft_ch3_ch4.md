@@ -144,23 +144,31 @@ The `TargetGate` keeps one target track:
   - Only a detection with c ≤ 9 is the target.
   - The colour reference adapts slowly (rate 0.05), so it follows shade but not a different person.
 - **Guards**, each found in testing (Section 4.6):
-  1. Two boxes on one person arrive about 1 ms apart. Steps under 0.05 s update the position only,
-     because a rate taken over 1 ms would make every later prediction wrong.
+  1. Two boxes on one person arrive about 1 ms apart. Steps under 0.015 s, which is under one frame
+     even at 60 fps, update the position only. A rate taken over 1 ms would make every later
+     prediction wrong.
   2. After 5 s with no fix the track is dropped, and lock-on starts again in the start window.
      Gates widened that far would accept a false box anywhere.
+     - The first detection in the start window then becomes the target, **whoever it is**.
+     - For one person this is how following resumes. With two people, the operator must make sure
+       the right person walks back to the robot.
 - **Give-way.**
   - When a detection is *not* the target, sits in the robot's corridor (±0.7 m), and is at least
     0.2 m nearer than the target, the distance sent to the controller is that person's range minus
     0.4 m. The robot then slows or stops for them.
   - The 0.2 m minimum stops a false box drawn over the target itself, which carries the target's own
     LiDAR range, from triggering it.
+  - The cost of that minimum: someone less than 0.2 m nearer than the target is not treated as in
+    the way. This threshold needs review before two-person trials.
 - **LiDAR tracking past the image edge.** When the target leaves the image at its edge, the LiDAR
   keeps the target for up to 5 s, and the robot turns towards it:
   - "At the edge" means within 8° of the ±35° limit, or predicted to be past it by now.
   - The LiDAR fix is the person-sized cluster (end-to-end length 0.15–0.8 m) nearest the predicted
     bearing and range, in a scan at most 0.3 s old.
-  - A target that vanishes in mid-image means the detector failed. The robot does not guess; it
-    stops.
+  - A target that vanishes in mid-image while not moving sideways means the detector failed. The
+    robot does not guess; it stops.
+  - One that was moving sideways fast enough to be predicted past the edge also gets LiDAR tracking.
+    The prediction looks at most 1 s ahead, so the rule fires when |θ + θ̇·1 s| ≥ 27°.
 
 #### 3.3.5 Fused confidence
 
@@ -195,9 +203,16 @@ to decide whether to follow.
      - v = 1.5·e + u_ff when e > 0.1 m;
      - v = u_ff in the ±0.1 m band;
      - v = 1.5·e (reversing) when e < −0.1 m.
-   - **Braking cap.** v ≤ √(2·a·(e − v_prev·τ)), where a = 0.8 m/s² and τ = 0.2 s. The robot never goes
-     faster than it can stop within the gap left, allowing for the gap it closed during the
-     perception latency τ.
+   - **Braking cap.** v ≤ √(2·a·max(0, e − v̂·τ)), where a = 0.8 m/s² and τ = 0.2 s.
+     - It limits the speed to what can still stop within the gap that is left, allowing for the gap
+       closed during the perception latency τ.
+     - v̂ is the *estimated* forward wheel speed, not the last command. It is modelled as the drive
+       bridge's 1.0 m/s² ramp towards the last command, because while the robot slows down the wheels
+       still turn faster than the command.
+     - It is an estimate, not a measured wheel speed, and τ is a guess until E2. So this is a design
+       intent, not a guarantee.
+     - Reversing is limited by the gain 1.5 and the ramp: a person walking quickly up to the robot can
+       come closer than the set-point (Section 4.5).
 4. **Steering, by image sector** (centre sector 4):
    - The robot does not turn while the target stays in sectors 3–5.
    - Outside them it turns at ω = −0.3·(s − 4), limited to ±0.8 rad/s.
@@ -343,18 +358,25 @@ then fixed:
 
 | Defect | Effect | Fix |
 |---|---|---|
-| Two boxes on one person, about 1 ms apart | the track's rate exploded and the target was never accepted again | position-only update for steps under 0.05 s |
+| Two boxes on one person, about 1 ms apart | the track's rate exploded and the target was never accepted again | position-only update for steps under 0.015 s |
 | A false box over the target | read as a person in the path, so the robot backed off | give-way needs ≥ 0.2 m nearer than the target |
 | Gates widening without limit | after 7 s a false box at a post was accepted, and the robot drove at it | unlock after 5 s, then lock-on again |
-| Latency in braking | ended 1–2 cm inside the contact limit | braking cap allows for τ = 0.2 s |
+| Latency in braking | ended 1–2 cm inside the contact limit | braking cap allows for τ = 0.2 s, using the estimated wheel speed (after Codex's T11 review) |
 | Late edge exit | LiDAR tracking did not start | also use the predicted bearing |
 
 | Code | Solo (30 runs) | Identity (15 runs) | Contact |
 |---|---|---|---|
 | Before the fixes | 19 | 13 | 0 |
-| After the fixes | **27** | **15** | **0** |
+| After the fixes, first run (6 jobs in parallel) | 27 | 15 | 0 |
+| After the fixes, integration re-run (one job at a time) | 29 | 15 | **1** (`come_back` seed 2, 0.355 m) |
 
-The three remaining failures are `zigzag` ×2 and `side_step` ×1:
+- **The two runs differ.** Runs are not bit-identical: ROS timing changes with machine load. Report
+  both.
+- **The contact.** The `come_back` contact matches Gazebo, where the closest approach is 0.39 m in
+  every seed. A person walking back to the robot comes closer than the controller can reverse.
+- ⟦RE-RUN after the wheel-speed estimate in the braking cap; update this table.⟧
+
+In the first run the three failures were `zigzag` ×2 and `side_step` ×1:
 - The person weaves within 1 m of the robot, so the bearing changes at about 100°/s.
 - The sector steering turns at a fixed rate, and with 0.2 s latency it sometimes turns the wrong way.
 - This is the main limit of the current controller (Section 5).
