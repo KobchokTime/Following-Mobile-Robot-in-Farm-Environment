@@ -1,6 +1,7 @@
 """Offline tests for the follow controller's speed feed-forward (Arena 2 entry, no ROS)."""
 
 import importlib.util
+import math
 import sys
 import types
 import unittest
@@ -93,6 +94,20 @@ class SpeedFeedForwardTest(unittest.TestCase):
         # Codex T11: gap error 0.2 m, latency 0.2 s, last command 0 but wheels still at 1.0 m/s
         linear, _ = self.cmd(0.2, 1.0, 0.1, **PARAMS, max_decel=0.8, latency_s=0.2, prev_linear=1.0)
         self.assertEqual(linear, 0.0)
+
+    def test_camera_bearing_matches_the_pinhole_model(self):
+        m = _load()
+        self.assertAlmostEqual(m.camera_bearing(320, 640, 70.0), 0.0)
+        self.assertAlmostEqual(m.camera_bearing(0, 640, 70.0), math.radians(35.0))     # left edge, left positive
+        self.assertAlmostEqual(m.camera_bearing(640, 640, 70.0), -math.radians(35.0))
+
+    def test_bearing_turn_leads_the_target_and_saturates(self):
+        turn = _load().bearing_turn
+        self.assertEqual(turn(math.radians(2), 0.0, 0.2, 2.5, 1.2, math.radians(3)), 0.0)  # deadband
+        self.assertAlmostEqual(turn(0.2, 0.0, 0.2, 2.5, 1.2, 0.05), 0.5)
+        self.assertAlmostEqual(turn(0.2, 1.0, 0.2, 2.5, 1.2, 0.05), 1.0)   # moving left: turn sooner
+        self.assertAlmostEqual(turn(0.1, -1.0, 0.2, 2.5, 1.2, 0.05), -0.25)  # already swinging back
+        self.assertEqual(turn(1.0, 0.0, 0.2, 2.5, 1.2, 0.05), 1.2)
 
     def test_output_is_clamped_to_max_speed(self):
         linear, _ = self.cmd(5.0, 1.0, 0.1, **PARAMS)

@@ -17,6 +17,24 @@ def wheel_speed_estimate(v_est, last_cmd, dt, accel):
     return v_est + max(-step, min(step, last_cmd - v_est))
 
 
+def camera_bearing(cx, image_width, hfov_deg):
+    """Bearing of image column cx (left positive, radians), pinhole model as in sync_fusion."""
+    f = (image_width / 2.0) / math.tan(math.radians(hfov_deg) / 2.0)
+    return math.atan2(image_width / 2.0 - cx, f)
+
+
+def bearing_turn(bearing, rate, latency_s, gain, limit, deadband):
+    """Turn rate towards where the target will be once this frame's latency has passed.
+
+    rate is the bearing's rate of change as seen in the image (target and robot motion together),
+    so bearing + rate * latency is where the target is now rather than where the frame showed it.
+    """
+    pred = bearing + rate * latency_s
+    if abs(pred) < deadband:
+        return 0.0
+    return max(-limit, min(limit, gain * pred))
+
+
 def speed_command(error_dist, speed_ff, dt, linear_gain, tolerance, max_linear_speed,
                   ff_gain, ff_max, ff_decay_s, max_decel=0.0, latency_s=0.0, prev_linear=0.0):
     """Linear command and the updated speed feed-forward, both in /cmd_vel linear.x units.
@@ -86,6 +104,14 @@ class FollowStopNode(Node):
         self.declare_parameter('angular_gain', 0.3)
         self.declare_parameter('angular_limit', 0.8)
         self.declare_parameter('edge_consistency', 1)     # หมุนเมื่อเป้าหมายเริ่มออกจากแถบกลาง
+        # steer_mode "bearing": turn rate proportional to the target's bearing, predicted over latency_s.
+        # "sector" (default) is the original sector logic above.
+        self.declare_parameter('steer_mode', 'sector')
+        self.declare_parameter('bearing_gain', 2.5)          # rad/s per rad
+        self.declare_parameter('bearing_limit', 0.8)         # rad/s; faster turns outrun the target gate
+        self.declare_parameter('bearing_deadband_deg', 3.0)
+        self.declare_parameter('camera_hfov_deg', 70.0)
+        self.declare_parameter('image_width', 640)
 
         # ---------- Load ----------
         self.target_distance   = float(self.get_parameter('target_distance').value)
@@ -108,6 +134,17 @@ class FollowStopNode(Node):
         self.angular_gain      = float(self.get_parameter('angular_gain').value)
         self.angular_limit     = float(self.get_parameter('angular_limit').value)
         self.edge_consistency  = int(self.get_parameter('edge_consistency').value)
+        self.steer_mode        = str(self.get_parameter('steer_mode').value)
+        if self.steer_mode not in ('sector', 'bearing'):
+            raise ValueError(f"steer_mode must be 'sector' or 'bearing', got {self.steer_mode!r}")
+        self.bearing_gain      = float(self.get_parameter('bearing_gain').value)
+        self.bearing_limit     = float(self.get_parameter('bearing_limit').value)
+        self.bearing_deadband  = math.radians(float(self.get_parameter('bearing_deadband_deg').value))
+        self.camera_hfov_deg   = float(self.get_parameter('camera_hfov_deg').value)
+        self.image_width       = int(self.get_parameter('image_width').value)
+        self.prev_bearing      = None
+        self.prev_bearing_time = None
+        self.bearing_rate      = 0.0
 
         # ---------- State ----------
         self.initialized   = False
@@ -221,6 +258,25 @@ class FollowStopNode(Node):
 
         # update prior
         self.prev_sector = sector
+
+        if self.steer_mode == 'bearing' and (cx <= 0 or cx >= self.image_width - 1):
+            # LiDAR edge tracking (sync_fusion) reports the image edge, not a camera bearing: turn that
+            # way at the full sector rate and drop the rate estimate, which the jump to the edge spoils
+            angular_z = self.angular_limit if cx <= 0 else -self.angular_limit
+            self.prev_bearing = None
+            self.bearing_rate = 0.0
+        elif self.steer_mode == 'bearing':
+            bearing = camera_bearing(cx, self.image_width, self.camera_hfov_deg)
+            if self.prev_bearing is not None:
+                dtb = (now - self.prev_bearing_time).nanoseconds / 1e9
+                if 0.02 <= dtb <= 0.5:
+                    raw = max(-2.0, min(2.0, (bearing - self.prev_bearing) / dtb))
+                    self.bearing_rate = 0.5 * self.bearing_rate + 0.5 * raw
+                elif dtb > 0.5:
+                    self.bearing_rate = 0.0
+            self.prev_bearing, self.prev_bearing_time = bearing, now
+            angular_z = bearing_turn(bearing, self.bearing_rate, self.latency_s,
+                                     self.bearing_gain, self.bearing_limit, self.bearing_deadband)
 
         # ---------- Publish ----------
         twist = Twist()

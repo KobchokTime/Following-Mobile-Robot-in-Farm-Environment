@@ -18,6 +18,7 @@ Arguments (default):
     model_path (/home/yakgreen001/yolov8n_openvino_model/)
     target_distance (0.5)   follow set-point in metres
     latency_s (0.2)         capture -> /cmd_vel from E2; the braking cap allows for it
+    steer_mode (sector)     "bearing" = turn in proportion to the target bearing (experiments/sim/2026-10-25_bearing_steer.md)
     bridge (true)           false = everything but the motors (bench test)
     camera_cmd, lidar_cmd   shell commands for the drivers (empty = not started here)
 """
@@ -40,6 +41,7 @@ DEFAULTS = {
     "model_path": "/home/yakgreen001/yolov8n_openvino_model/",
     "target_distance": "0.5",
     "latency_s": "0.2",
+    "steer_mode": "sector",
     "bridge": "true",
     "camera_cmd": "",
     "lidar_cmd": "",
@@ -69,6 +71,7 @@ def actions(a):
         node("follow_stop", "MAIN/Control/follow_stop_node.py",
              {"target_distance": a["target_distance"], "latency_s": a["latency_s"],
               "bridge_accel_mps2": a["max_accel_mps2"],  # wheel-speed estimate for the braking cap
+              "steer_mode": a["steer_mode"],
               "max_decel": "0.0" if a["speed_mode"] == "legacy" else "0.8"}),
     ]
     if a["bridge"].lower() in ("true", "1", "yes"):
