@@ -75,6 +75,11 @@ def lidar_track(points, pred_bearing, pred_range, window_rad, range_tol, width_m
     return best
 
 
+def scan_is_fresh(now, scan_time, max_age):
+    """True if the latest scan arrived at most max_age seconds ago (a stopped LiDAR must not steer)."""
+    return scan_time is not None and 0.0 <= now - scan_time <= max_age
+
+
 def bearing_to_cx(bearing, image_width, hfov_deg):
     """Image column for a bearing (inverse of camera_bearing_rad), clamped to the image."""
     f = (image_width / 2.0) / math.tan(math.radians(hfov_deg) / 2.0)
@@ -97,7 +102,7 @@ class TargetGate:
 
     def __init__(self, lock_range=(0.5, 1.0), lock_bearing_deg=15.0, bearing_sigma_deg=5.0,
                  range_sigma_m=0.15, chroma_sigma=15.0, gate=9.0, widen_per_s=1.0,
-                 alpha=0.6, beta=0.2, chroma_rate=0.05):
+                 alpha=0.6, beta=0.2, chroma_rate=0.05, min_rate_dt=0.015, unlock_after_s=5.0):
         self.lock_range = lock_range
         self.lock_bearing = math.radians(lock_bearing_deg)
         self.sb = math.radians(bearing_sigma_deg)
@@ -107,6 +112,13 @@ class TargetGate:
         self.widen_per_s = widen_per_s
         self.alpha, self.beta = alpha, beta
         self.chroma_rate = chroma_rate
+        # Two boxes on one person arrive within a frame; a rate from a ~1 ms step would blow up the
+        # prediction and the target would never be accepted again, so such steps update position only.
+        # 15 ms is under one frame even at 60 fps, so real frame-to-frame steps always update the rate.
+        self.min_rate_dt = min_rate_dt
+        # After this long with no fix the widened gates would take almost anything (a false box in
+        # front of a post); start over from the lock-on window instead, like the controller does.
+        self.unlock_after_s = unlock_after_s
         self.reset()
 
     def reset(self):
@@ -137,13 +149,15 @@ class TargetGate:
         pb, pr = self._predict(t)
         eb, er = bearing - pb, rng - pr
         self.bearing, self.range = pb + self.alpha * eb, pr + self.alpha * er
-        if dt < 1.0:
+        if self.min_rate_dt <= dt < 1.0:
             self.bearing_rate += self.beta * eb / dt
             self.range_rate += self.beta * er / dt
         self.t = t
 
     def accept(self, t, bearing, rng, chroma=None):
         """True if this detection is the target; updates the track when it is."""
+        if self.locked and t - self.t > self.unlock_after_s:
+            self.reset()
         if not self.locked:
             if self.lock_range[0] <= rng <= self.lock_range[1] and abs(bearing) <= self.lock_bearing:
                 self.locked, self.t = True, t
@@ -157,11 +171,11 @@ class TargetGate:
         pb, pr = self._predict(t)
         eb, er = bearing - pb, rng - pr
         self.bearing, self.range = pb + self.alpha * eb, pr + self.alpha * er
-        if dt < 1.0:
+        if dt >= 1.0:
+            self.bearing_rate = self.range_rate = 0.0
+        elif dt >= self.min_rate_dt:
             self.bearing_rate += self.beta * eb / dt
             self.range_rate += self.beta * er / dt
-        else:
-            self.bearing_rate = self.range_rate = 0.0
         self.t = t
         if chroma is not None:
             if self.chroma is None:
@@ -193,6 +207,9 @@ class SyncFusionNode(Node):
         self.declare_parameter('path_half_width_m', 0.7)
         self.declare_parameter('path_hold_s', 0.5)
         self.declare_parameter('path_margin_m', 0.4)  # treat them as this much nearer, so the robot gives way early
+        # only someone at least this much nearer than the target is in the way; a spurious box over the
+        # target itself reads the target's own LiDAR range and must not make the robot back off
+        self.declare_parameter('path_min_gap_m', 0.2)
         # LiDAR keeps the target when it leaves the camera's view (a side step, a sharp turn)
         self.declare_parameter('lidar_track', True)
         self.declare_parameter('scan_topic', '/scan')
@@ -200,6 +217,7 @@ class SyncFusionNode(Node):
         self.declare_parameter('lidar_track_after_s', 0.3)  # camera silent this long -> use the LiDAR
         self.declare_parameter('lidar_track_max_s', 5.0)    # give up after this long without the camera
         self.declare_parameter('lidar_edge_deg', 8.0)  # only when last seen this close to the image edge
+        self.declare_parameter('lidar_scan_max_age_s', 0.3)  # older scans are never used to track
 
         self.max_dt = float(self.get_parameter('max_dt').value)
         self.buffer_sec = float(self.get_parameter('buffer_sec').value)
@@ -214,6 +232,7 @@ class SyncFusionNode(Node):
         self.path_half_width = float(self.get_parameter('path_half_width_m').value)
         self.path_hold = float(self.get_parameter('path_hold_s').value)
         self.path_margin = float(self.get_parameter('path_margin_m').value)
+        self.path_min_gap = float(self.get_parameter('path_min_gap_m').value)
         self.path_block = None  # (time, range) of the latest other person in the corridor
         self.last_target = None  # (cx, cy, sector_id, range) last published for the target
         self.use_lidar_track = bool(self.get_parameter('lidar_track').value)
@@ -221,6 +240,8 @@ class SyncFusionNode(Node):
         self.lidar_after = float(self.get_parameter('lidar_track_after_s').value)
         self.lidar_max = float(self.get_parameter('lidar_track_max_s').value)
         self.scan_points = []     # latest scan as (robot-frame bearing, range)
+        self.scan_time = None     # when it arrived
+        self.scan_max_age = float(self.get_parameter('lidar_scan_max_age_s').value)
         self.last_camera_fix = None  # time of the last camera detection accepted as the target
         self.last_camera_bearing = 0.0
         self.edge_rad = math.radians(self.camera_hfov_deg / 2.0 - float(self.get_parameter('lidar_edge_deg').value))
@@ -295,6 +316,7 @@ class SyncFusionNode(Node):
                 a = (msg.angle_min + i * msg.angle_increment + self.lidar_offset + math.pi) % (2.0 * math.pi) - math.pi
                 pts.append((a, r))
         self.scan_points = pts
+        self.scan_time = self.now_sec()
 
     def track_with_lidar(self):
         """The target stepped out of the camera's view: keep it with the LiDAR and turn towards it.
@@ -306,9 +328,14 @@ class SyncFusionNode(Node):
             return
         now = self.now_sec()
         if self.last_camera_fix is None or now - self.last_camera_fix < self.lidar_after \
-                or now - self.last_camera_fix > self.lidar_max or abs(self.last_camera_bearing) < self.edge_rad:
+                or now - self.last_camera_fix > self.lidar_max:
             return
         pb, pr = self.gate._predict(now)
+        # last seen near the edge, or moving fast enough to be past it by now (frames arrive late)
+        if abs(self.last_camera_bearing) < self.edge_rad and abs(pb) < self.edge_rad:
+            return
+        if not scan_is_fresh(now, self.scan_time, self.scan_max_age):
+            return  # no recent scan: do not steer by an old one; the controller's normal stop applies
         found = lidar_track(self.scan_points, pb, pr, math.radians(25.0), 0.5)
         if found is None:
             return
@@ -360,9 +387,9 @@ class SyncFusionNode(Node):
 
         if self.use_gate and not self.gate.accept(ty, bearing, dist, chroma):
             # another person, not the one being followed: remember them only if they are in the way
-            # Only someone in the corridor and nearer than the target is in the way
+            # Only someone in the corridor and clearly nearer than the target is in the way
             if self.last_target is not None and in_path(bearing, dist, self.path_half_width) \
-                    and dist < self.last_target[3]:
+                    and dist < self.last_target[3] - self.path_min_gap:
                 self.path_block = (ty, dist)
                 # They may hide the target, so give way now instead of waiting to see the target again
                 cx_t, cy_t, sector_t, _ = self.last_target

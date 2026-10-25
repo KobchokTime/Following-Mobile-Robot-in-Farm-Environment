@@ -137,9 +137,10 @@ def make_people(spec: dict) -> list:
             for n, tgt, wp in spec["people"]]
 
 
-def build(name: str, seed: int = 0, **robot_overrides) -> World:
+def build(name: str, seed: int = 0, realism=None, **robot_overrides) -> World:
     spec = SCENARIO_LOOKUP[name]
-    world = World(people=make_people(spec), blackouts=spec.get("blackouts", ()), shade=spec.get("shade", ()), seed=seed)
+    world = World(people=make_people(spec), blackouts=spec.get("blackouts", ()), shade=spec.get("shade", ()), seed=seed,
+                  realism=realism)
     for key, value in robot_overrides.items():
         setattr(world.robot, key, value)
     return world

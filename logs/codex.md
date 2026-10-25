@@ -118,3 +118,25 @@ Earlier history: `history-2026-10-16.md`.
 - 18:07 Thai time: fetched `origin/integration-hub` at `cb8fe7d` and fast-forwarded local `integration-hub`; reviewed the revised E7 attribution and per-frame E2 calculation with its 110 ms regression test.
 - 18:08 Thai time: ran `python3 scripts/check.py` (85 tests passed), claimed the HANDOFF lock in `b04a073`, replied `agree` in T9, and marked T9 resolved.
 - 18:08 Thai time: pushed the T9 resolution in `2b8b119` and released the HANDOFF lock.
+
+### 2026-10-25 — integration — T10 solo-following review
+- 14:12 Thai time: fetched `origin/integration-hub` at `85a7757`, merged it into `codex/workspace` as `d6840d8`, ran `scripts/check.py` (102 tests), and pushed the workspace; claimed the integration lock in `30a95ea`.
+- 14:12 Thai time: reviewed T10 code, protocol, tests and raw solo JSON. Frozen v3 `passes()` confirms post-fix solo 30/30 and identity 15/15, with no contacts.
+- 14:13 Thai time: reproduced that LiDAR edge tracking publishes from a four-second-old cached scan without a freshness check. Posted `object` in T10 and recorded the requirement for the first drive.
+- 14:13 Thai time: pushed the T10 objection in `00083ca` and released the integration lock.
+- 14:17 Thai time: fetched `origin/integration-hub` at `675a49e`, reran the stale-scan reproducer (old/missing scans publish nothing; 0.1 s scan publishes), and ran `scripts/check.py` (103 tests). Claimed the HANDOFF lock in `61aa332`, replied `agree` in T10, and marked it resolved.
+- 14:17 Thai time: pushed the T10 resolution in `e97c215` and released the integration lock.
+
+### 2026-10-25 — integration — T11 review
+- 19:08 Thai time: fetched `origin/integration-hub` at `34f9f65`, fast-forwarded local integration-hub, reviewed T11 robot fixes, bringup, preflight, thesis draft and the two simulation reports. Ran `python3 scripts/check.py` (115 tests passed); no simulator rerun.
+- 19:08 Thai time: claimed the HANDOFF lock in `fe861fc`. Objected in T11 with code/draft reproducers and answers to the four open points, including the close-approach limit for robot day.
+- 19:09 Thai time: pushed the T11 review in `5e4730d` and released the HANDOFF lock.
+- 19:42 Thai time: fetched `origin/integration-hub` at `6ca5003`, reviewed the wheel-speed model, tests, thesis edits, robot-day notes and new realism result; reran the braking reproducer (cap 0 versus the old 0.566 m/s) and `scripts/check.py` (117 tests). Claimed the HANDOFF lock in `0eb9c31` and replied `agree` in T11. No simulator rerun or feature merge.
+- 19:43 Thai time: pushed the T11 reply in `65f577a` and released the HANDOFF lock.
+
+### 2026-10-25 — integration — T12 bearing steering review
+- 22:58 Thai time: fetched `origin/integration-hub` at `d8a421e`, fast-forwarded local integration-hub, reviewed bearing steering, launch, E7 addendum, thesis and Thai cheat sheet. Recounted committed JSON with frozen v3 `passes()` and ran `scripts/check.py` (119 tests). No simulator rerun or feature merge.
+- 22:58 Thai time: claimed the HANDOFF lock in `b62d071`, then objected in T12 to trying bearing mode before a target-message freshness stop. Flagged the clean-twin result label and thesis 4.7 attribution.
+- 22:59 Thai time: pushed the T12 review in `f36336d` and released the HANDOFF lock.
+- 23:57 Thai time: fetched `origin/integration-hub` at `50eba89`, reviewed the bearing-only stale-message timer and document fixes. Reproduced one zero command at 0.4 s after a 0.3 s timeout and recounted new JSON: clean solo 30/30, realism solo 30/30, realism identity 15/15, no contacts. `scripts/check.py` passed 120 tests. Claimed the lock in `df448d4`, replied `agree` in T12, and marked it resolved. No simulator rerun or feature merge.
+- 23:58 Thai time: pushed the T12 resolution in `c9006fc` and released the HANDOFF lock.

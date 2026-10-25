@@ -7,8 +7,41 @@ import math
 from math import exp, isfinite
 
 
+def wheel_speed_estimate(v_est, last_cmd, dt, accel):
+    """Forward speed the wheels have now: the drive bridge ramps towards the last command at accel.
+
+    The braking cap needs the real speed, not the command: while the robot slows down the wheels
+    still turn faster than the (lower) command.
+    """
+    step = max(0.0, accel * dt)
+    return v_est + max(-step, min(step, last_cmd - v_est))
+
+
+def camera_bearing(cx, image_width, hfov_deg):
+    """Bearing of image column cx (left positive, radians), pinhole model as in sync_fusion."""
+    f = (image_width / 2.0) / math.tan(math.radians(hfov_deg) / 2.0)
+    return math.atan2(image_width / 2.0 - cx, f)
+
+
+def bearing_turn(bearing, rate, latency_s, gain, limit, deadband):
+    """Turn rate towards where the target will be once this frame's latency has passed.
+
+    rate is the bearing's rate of change as seen in the image (target and robot motion together),
+    so bearing + rate * latency is where the target is now rather than where the frame showed it.
+    """
+    pred = bearing + rate * latency_s
+    if abs(pred) < deadband:
+        return 0.0
+    return max(-limit, min(limit, gain * pred))
+
+
+def target_is_stale(now_s, last_msg_s, timeout_s):
+    """True once no target message has arrived for timeout_s (0 = never stale)."""
+    return timeout_s > 0.0 and last_msg_s is not None and now_s - last_msg_s > timeout_s
+
+
 def speed_command(error_dist, speed_ff, dt, linear_gain, tolerance, max_linear_speed,
-                  ff_gain, ff_max, ff_decay_s, max_decel=0.0):
+                  ff_gain, ff_max, ff_decay_s, max_decel=0.0, latency_s=0.0, prev_linear=0.0):
     """Linear command and the updated speed feed-forward, both in /cmd_vel linear.x units.
 
     The feed-forward learns the command that keeps pace with a walking target (an integral of the
@@ -19,6 +52,9 @@ def speed_command(error_dist, speed_ff, dt, linear_gain, tolerance, max_linear_s
     max_decel (in /cmd_vel units per second, 0 = off) caps the forward speed at the speed the robot
     can still stop from within the remaining gap, sqrt(2 * max_decel * error). The drive bridge
     ramps the wheels, so without this a fast robot overshoots a target that stops.
+    latency_s: the gap was measured this long ago (camera + detector), and the robot has kept moving
+    at prev_linear (its estimated wheel speed, see wheel_speed_estimate) since, so the cap uses the gap
+    that is left now.
     """
     dt = max(0.0, min(dt, 0.5))
     if error_dist > 0.0:
@@ -35,7 +71,8 @@ def speed_command(error_dist, speed_ff, dt, linear_gain, tolerance, max_linear_s
     else:
         linear_x = linear_gain * error_dist + speed_ff
     if max_decel > 0.0 and linear_x > 0.0:
-        linear_x = min(linear_x, math.sqrt(2.0 * max_decel * max(0.0, error_dist)))
+        left = error_dist - max(0.0, prev_linear) * latency_s
+        linear_x = min(linear_x, math.sqrt(2.0 * max_decel * max(0.0, left)))
     linear_x = max(min(linear_x, max_linear_speed), -max_linear_speed)
     return linear_x, speed_ff
 
@@ -58,6 +95,8 @@ class FollowStopNode(Node):
         # braking: never faster than the robot can stop from within the gap (bridge ramp is 1.0 m/s^2).
         # In m/s, for the bridge's "mps" mode; with speed_mode:=legacy set max_decel:=0.0
         self.declare_parameter('max_decel', 0.8)
+        self.declare_parameter('latency_s', 0.2)          # capture -> command; measure it as E2 on robot day
+        self.declare_parameter('bridge_accel_mps2', 1.0)  # the drive bridge's max_accel_mps2 (wheel ramp)
 
         # init dist
         self.declare_parameter('init_dist_min', 0.5)
@@ -70,6 +109,17 @@ class FollowStopNode(Node):
         self.declare_parameter('angular_gain', 0.3)
         self.declare_parameter('angular_limit', 0.8)
         self.declare_parameter('edge_consistency', 1)     # หมุนเมื่อเป้าหมายเริ่มออกจากแถบกลาง
+        # steer_mode "bearing": turn rate proportional to the target's bearing, predicted over latency_s.
+        # "sector" (default) is the original sector logic above.
+        self.declare_parameter('steer_mode', 'sector')
+        self.declare_parameter('bearing_gain', 2.5)          # rad/s per rad
+        self.declare_parameter('bearing_limit', 0.8)         # rad/s; faster turns outrun the target gate
+        self.declare_parameter('bearing_deadband_deg', 3.0)
+        self.declare_parameter('camera_hfov_deg', 70.0)
+        self.declare_parameter('image_width', 640)
+        # bearing mode only: publish a stop when target messages stop for this long, instead of leaving
+        # the bridge to repeat the last turn until its own 1 s timeout (Codex, T12)
+        self.declare_parameter('target_timeout_s', 0.3)
 
         # ---------- Load ----------
         self.target_distance   = float(self.get_parameter('target_distance').value)
@@ -81,6 +131,8 @@ class FollowStopNode(Node):
         self.speed_ff_max      = float(self.get_parameter('speed_ff_max').value)
         self.speed_ff_decay_s  = float(self.get_parameter('speed_ff_decay_s').value)
         self.max_decel         = float(self.get_parameter('max_decel').value)
+        self.latency_s         = float(self.get_parameter('latency_s').value)
+        self.bridge_accel      = float(self.get_parameter('bridge_accel_mps2').value)
         self.init_dist_min     = float(self.get_parameter('init_dist_min').value)
         self.init_dist_max     = float(self.get_parameter('init_dist_max').value)
 
@@ -90,6 +142,20 @@ class FollowStopNode(Node):
         self.angular_gain      = float(self.get_parameter('angular_gain').value)
         self.angular_limit     = float(self.get_parameter('angular_limit').value)
         self.edge_consistency  = int(self.get_parameter('edge_consistency').value)
+        self.steer_mode        = str(self.get_parameter('steer_mode').value)
+        if self.steer_mode not in ('sector', 'bearing'):
+            raise ValueError(f"steer_mode must be 'sector' or 'bearing', got {self.steer_mode!r}")
+        self.bearing_gain      = float(self.get_parameter('bearing_gain').value)
+        self.bearing_limit     = float(self.get_parameter('bearing_limit').value)
+        self.bearing_deadband  = math.radians(float(self.get_parameter('bearing_deadband_deg').value))
+        self.camera_hfov_deg   = float(self.get_parameter('camera_hfov_deg').value)
+        self.image_width       = int(self.get_parameter('image_width').value)
+        self.prev_bearing      = None
+        self.prev_bearing_time = None
+        self.bearing_rate      = 0.0
+        self.target_timeout    = float(self.get_parameter('target_timeout_s').value) if self.steer_mode == 'bearing' else 0.0
+        self.last_msg_time     = None
+        self.stale_stopped     = False
 
         # ---------- State ----------
         self.initialized   = False
@@ -97,6 +163,9 @@ class FollowStopNode(Node):
         self.last_good_time = self.get_clock().now()
         self.p_buffer      = []
         self.speed_ff      = 0.0
+        self.last_linear   = 0.0   # last forward command
+        self.v_wheels      = 0.0   # estimated forward wheel speed (bridge ramp towards last_linear)
+        self.v_wheels_time = None
         self.last_ctrl_time = None
 
         # Bayesian sector prior
@@ -106,6 +175,8 @@ class FollowStopNode(Node):
         # ---------- ROS ----------
         self.sub = self.create_subscription(Float32MultiArray, '/target_fused_prob', self.cb_fused, 10)
         self.pub = self.create_publisher(Twist, '/cmd_vel', 10)
+        if self.target_timeout > 0.0:
+            self.stale_timer = self.create_timer(0.05, self.check_stale)
 
         self.get_logger().info(
             f"FollowStopNode ✅ started | Target={self.target_distance:.2f} m "
@@ -118,6 +189,8 @@ class FollowStopNode(Node):
             return
         cx, cy, dist, sector, P_C, P_L, P_fused, dt_ms = msg.data
         sector = int(sector)
+        self.last_msg_time = self.get_clock().now().nanoseconds / 1e9
+        self.stale_stopped = False
 
         # ---------- Initial distance check ----------
         if not self.initialized:
@@ -140,6 +213,10 @@ class FollowStopNode(Node):
 
         # ---------- Confidence check ----------
         now = self.get_clock().now()
+        if self.v_wheels_time is not None:
+            dtw = min(5.0, (now - self.v_wheels_time).nanoseconds / 1e9)
+            self.v_wheels = wheel_speed_estimate(self.v_wheels, self.last_linear, dtw, self.bridge_accel)
+        self.v_wheels_time = now
         if P_fused_smooth < self.p_fused_threshold or not isfinite(dist):
             if (now - self.last_good_time).nanoseconds / 1e9 < 1.0:
                 self.pub.publish(self.last_good_cmd)
@@ -147,6 +224,7 @@ class FollowStopNode(Node):
             else:
                 self.publish_stop()
                 self.speed_ff = 0.0
+                self.last_linear = 0.0
                 self.last_ctrl_time = None
                 self.get_logger().info(f"[STOP] P_fused={P_fused_smooth:.2f} (low confidence)")
             return
@@ -157,7 +235,9 @@ class FollowStopNode(Node):
         self.last_ctrl_time = now
         linear_x, self.speed_ff = speed_command(
             error_dist, self.speed_ff, dt, self.linear_gain, self.tolerance, self.max_linear_speed,
-            self.speed_ff_gain, self.speed_ff_max, self.speed_ff_decay_s, self.max_decel)
+            self.speed_ff_gain, self.speed_ff_max, self.speed_ff_decay_s, self.max_decel,
+            self.latency_s, self.v_wheels)
+        self.last_linear = linear_x
 
         # ---------- Angular control (Bayesian / previous sector) ----------
         center = self.center_sector
@@ -194,6 +274,25 @@ class FollowStopNode(Node):
         # update prior
         self.prev_sector = sector
 
+        if self.steer_mode == 'bearing' and (cx <= 0 or cx >= self.image_width - 1):
+            # LiDAR edge tracking (sync_fusion) reports the image edge, not a camera bearing: turn that
+            # way at the full sector rate and drop the rate estimate, which the jump to the edge spoils
+            angular_z = self.angular_limit if cx <= 0 else -self.angular_limit
+            self.prev_bearing = None
+            self.bearing_rate = 0.0
+        elif self.steer_mode == 'bearing':
+            bearing = camera_bearing(cx, self.image_width, self.camera_hfov_deg)
+            if self.prev_bearing is not None:
+                dtb = (now - self.prev_bearing_time).nanoseconds / 1e9
+                if 0.02 <= dtb <= 0.5:
+                    raw = max(-2.0, min(2.0, (bearing - self.prev_bearing) / dtb))
+                    self.bearing_rate = 0.5 * self.bearing_rate + 0.5 * raw
+                elif dtb > 0.5:
+                    self.bearing_rate = 0.0
+            self.prev_bearing, self.prev_bearing_time = bearing, now
+            angular_z = bearing_turn(bearing, self.bearing_rate, self.latency_s,
+                                     self.bearing_gain, self.bearing_limit, self.bearing_deadband)
+
         # ---------- Publish ----------
         twist = Twist()
         twist.linear.x = linear_x
@@ -211,6 +310,20 @@ class FollowStopNode(Node):
         )
 
     # ==================================================
+    def check_stale(self):
+        """Stop once target messages have stopped; the next message resumes control."""
+        if self.stale_stopped or not target_is_stale(self.get_clock().now().nanoseconds / 1e9,
+                                                     self.last_msg_time, self.target_timeout):
+            return
+        self.publish_stop()
+        self.stale_stopped = True
+        self.speed_ff = 0.0
+        self.last_linear = 0.0
+        self.last_ctrl_time = None
+        self.prev_bearing = None
+        self.bearing_rate = 0.0
+        self.get_logger().info(f"[STALE] no target message for {self.target_timeout:.2f} s → stop")
+
     def publish_stop(self):
         twist = Twist()
         self.pub.publish(twist)

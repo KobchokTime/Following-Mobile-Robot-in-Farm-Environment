@@ -47,6 +47,13 @@ class TargetGateTest(unittest.TestCase):
         cls.in_path = staticmethod(module.in_path)
         cls.lidar_track = staticmethod(module.lidar_track)
         cls.bearing_to_cx = staticmethod(module.bearing_to_cx)
+        cls.scan_is_fresh = staticmethod(module.scan_is_fresh)
+
+    def test_old_or_missing_scans_are_not_used(self):
+        self.assertTrue(self.scan_is_fresh(10.0, 9.9, 0.3))
+        self.assertFalse(self.scan_is_fresh(10.0, 6.0, 0.3))   # Codex's 4 s old scan
+        self.assertFalse(self.scan_is_fresh(10.0, None, 0.3))  # never received
+        self.assertFalse(self.scan_is_fresh(10.0, 10.5, 0.3))  # clock went backwards
 
     @staticmethod
     def _blob(centre_deg, rng, width_m, step_deg=0.5):
@@ -143,6 +150,30 @@ class TargetGateTest(unittest.TestCase):
         g.accept(0.1, 0.0, 0.8)
         self.assertFalse(g.accept(0.2, D(8), 1.6))  # a jump of 0.8 m at once is not the target
         self.assertTrue(g.accept(4.1, D(8), 1.9))    # after 4 s unseen the target may have walked on
+
+    def test_two_boxes_in_one_frame_do_not_lose_the_target(self):
+        g = self.Gate()
+        for i in range(5):
+            self.assertTrue(g.accept(0.1 * i, 0.0, 0.8))
+        self.assertTrue(g.accept(0.5, 0.0, 0.8))
+        g.accept(0.501, D(4), 0.8)  # a second, offset box on the same person, 1 ms later
+        for i in range(6, 30):
+            self.assertTrue(g.accept(0.1 * i, 0.0, 0.8), i)
+
+    def test_rate_is_estimated_at_high_frame_rates(self):
+        for fps in (10, 30, 60):
+            g = self.Gate()
+            for i in range(3 * fps):
+                g.accept(i / fps, 0.3 * i / fps, 0.8)
+            self.assertAlmostEqual(g.bearing_rate, 0.3, delta=0.02, msg=fps)
+
+    def test_long_loss_returns_to_the_lock_on_window(self):
+        g = self.Gate()
+        g.accept(0.0, 0.0, 0.8)
+        g.accept(0.1, 0.0, 0.8)
+        self.assertFalse(g.accept(7.0, D(20), 3.5))  # a false box 3.5 m away after 7 s unseen
+        self.assertFalse(g.locked)
+        self.assertTrue(g.accept(9.0, D(2), 0.8))     # the person walks back to the robot
 
     def test_old_three_value_messages_work(self):
         g = self.Gate()

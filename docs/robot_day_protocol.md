@@ -20,7 +20,7 @@ ros2_yolo_ws/scripts/record_robot_day.sh --scenario e3_d0.5_front --countdown 10
 | Order | What | Alone? | Time |
 |---|---|---|---|
 | 0 | `turn_check.py`, wheels lifted (T6) | yes | 10 min |
-| 1 | Measure the wheel radius, track width and camera height. Then on the ground run `speed_check.py --speed 0.4` and correct `wheel_radius_m` | yes | 20 min |
+| 1 | Measure the wheel radius, track width and camera height. Then on the ground run `speed_check.py --speed 0.4`, correct `wheel_radius_m`, and write it in `config/motor_wheel_calibration.md` as `wheel_radius_m = 0.083 (measured 2026-11-02)` (`preflight.py` looks for that line) | yes | 20 min |
 | 2 | First drive at `max_speed_mps:=0.5`; raise it to 1.0, then 1.4, once following looks right | yes | — |
 | 3 | E3: you stand at each distance, with a countdown | yes | 30 min |
 | 4 | E1: you stand on each tape mark, with a countdown | yes | 40 min |
@@ -39,6 +39,19 @@ The E6 moves match the twin's `solo` set:
 | `come_back` | walk away, turn and come back towards the robot to load it |
 | `zigzag` | weave left and right |
 
+Notes from the T11 review (Codex, 2026-10-25):
+- **First drive.** Start with `straight` at `max_speed_mps:=0.5`, after the turn check, the wheel
+  measurement and `speed_check.py`.
+- **`come_back`.**
+  - Do it last, at 0.5 m/s, and walk back slowly at first.
+  - In simulation a person walking back reached 0.36–0.39 m from the robot, because reversing is
+    slower than walking.
+  - The braking cap now uses an estimate of the wheel speed (a model of the bridge ramp), not the
+    measured speed.
+- **Locking on again.** After about 5 s without seeing you, the robot locks on to the first person
+  who stands 0.5–1.0 m in front of it, whoever that is. When working alone that is you. Before trials
+  with two people, review this rule and the 0.2 m give-way threshold.
+
 `analyze.py` reports for each run:
 - the share of time the target was tracked;
 - the longest dropout;
@@ -46,6 +59,27 @@ The E6 moves match the twin's `solo` set:
 - the highest forward command.
 
 A phone video from behind helps with the notes.
+
+## Starting the robot (one command)
+
+```bash
+python3 tools/robot_day/preflight.py --max-speed 0.5          # files, serial port, disk, parameters
+ros2 launch ros2_yolo_ws/launch/follow_bringup.launch.py max_speed_mps:=0.5 \
+    camera_cmd:="<camera driver command>" lidar_cmd:="<LiDAR driver command>"
+python3 tools/robot_day/preflight.py --live --max-speed 0.5   # in a second terminal: every topic's rate
+```
+
+- **What the launch starts:** YOLO, `lidar_sectorizer`, `sync_fusion`, `fusion_prob`, `follow_stop` and
+  the ZLAC bridge.
+- **Drivers:** the camera (`/image_raw`) and LiDAR (`/scan`) drivers are not in the repository. Pass
+  their commands as above, or start them yourself before the launch.
+- **Parameters:** `wheel_radius_m:=`, `turn_dir:=`, `port:=` and `model_path:=` override the defaults.
+  `bridge:=false` starts everything except the motors, for a bench test.
+- **Legacy bridge:** `speed_mode:=legacy` also sets `follow_stop` `max_decel` to 0.0 by itself.
+- **`--live`:**
+  - FAILs if a topic is missing or too slow, or if `/cmd_vel` has no bridge or no `follow_stop`;
+  - warns if most LiDAR rays return nothing.
+- **Exit code:** 1 on any FAIL.
 
 ## Before the day
 
@@ -145,6 +179,8 @@ capture stamp, published by `ros2_yolo_live.py`.
 
 - **Output:** capture → detection, detection → next `/cmd_vel`, and the end-to-end capture → `/cmd_vel` of each frame, each as median and p95.
 - **Answers:** review A3. It replaces "dt 4–6 ms".
+- **Then:** set `follow_stop` `latency_s` (default 0.2) to the median capture → `/cmd_vel`. The braking
+  cap uses it.
 
 ## Robot day 2
 

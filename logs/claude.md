@@ -776,3 +776,168 @@ Earlier history: `history-2026-10-16.md`.
 ### 2026-10-25 — integration — Merge T10 cluster length fix (13:55 Thai time)
 - Lock `2611587`; merged `origin/claude/workspace` (`38bccba`, fix `d25d3b1`) with `--no-ff`: merge `9915563`; `check.py` PASS (102).
   Row reproducer now 1.40 m long and rejected; a person at 2 m still tracked. T10 one-line note; HANDOFF 102 tests; lock released.
+
+### 2026-10-25 — robot — Codex T10 objection: stale scan (14:15 Thai time)
+- Codex (hub `ef3292a`) showed a 4-s-old cached scan still produced a LiDAR-only fix. `2eaba0b`: scans are timestamped and only a scan at most 0.3 s old is used. Codex's case is a test.
+- Twin (mps): side_step and turn_90 still pass. `check.py` passes 103 tests.
+
+### 2026-10-25 — integration — Merge T10 stale-scan fix (14:16 Thai time)
+- Codex objected in T10 (`00083ca`). Lock `d68b076`; merged `origin/claude/workspace` (`42cc22e`, fix `2eaba0b`) with `--no-ff`: merge `7e79cea`;
+  `check.py` PASS (103). Codex's reproducer on the merged node: stale (4 s) and no scan → no publish; fresh (0.1 s) → publishes. T10 reply; lock released.
+
+### 2026-10-25 — integration — T10 closed (14:17 Thai time)
+- Codex agreed and marked T10 resolved (hub `f121c6a`). Synced `claude/workspace`.
+- Solo following is ready for robot day: twin solo 30/30 and identity 15/15 on mps.
+- Robot day starts with the turn check and the wheel measurement, then `speed_check.py`; the first drive is at `max_speed_mps:=0.5`.
+- Open: T1, T2, T3/T4, T6.
+
+### 2026-10-25 — research + robot — Twin realism profile and the fixes it found (Offline 1, 14:56 Thai time)
+- `44eddb7`: the twin gains an optional `Realism` profile (`run_scenario --realism`):
+  - 0.15 s detection latency, 10% missed detections, 3% false positives;
+  - LiDAR noise and ray dropout, 5% wheel slip, posts and bushes beside the path.
+- With realism off the runs stay bit-identical (hash over every Arena 2 scenario). Unit tests in `tests/test_sim_twin.py`.
+- First realism run on hub code (mps, seeds 0–2): solo 19/30, identity 13/15.
+- `45d9d29` fixes these robot-code bugs:
+  - **TargetGate rate blow-up:** two boxes on one person, about 1 ms apart, lost the target for good. Steps under 0.05 s now update position only.
+  - **Gate never unlocked:** it widened with no limit. It now unlocks after 5 s with no fix and locks again only in the start window.
+  - **Give-way phantom:** a false box over the target made the robot reverse. It now needs someone ≥ 0.2 m nearer than the target.
+  - **Late edge exit:** LiDAR edge tracking also starts when the predicted bearing is past the edge.
+  - **Braking:** the cap allows for latency (`latency_s` 0.2).
+- After the fixes:
+  - realism: solo 27/30, identity 15/15, no contact;
+  - clean twin: solo 29/30 (one side_step timing flake, passes on reruns; side_step and zigzag repeats 6/6) and identity 15/15.
+- Still failing with realism: zigzag ×2 and side_step ×1. Fixed turn rates plus 0.2 s latency make the robot turn the wrong way. A proportional bearing controller is left for after E2.
+- Write-up: `experiments/sim/2026-10-25_twin_realism.md` and `twin_realism_2026-10-25.json`. `check.py` passes 114 tests.
+
+### 2026-10-25 — robot — One-command bringup and preflight (Offline 2, 14:56 Thai time)
+- `4fbfc8d`, `ros2_yolo_ws/launch/follow_bringup.launch.py`:
+  - starts YOLO, lidar_sectorizer, sync_fusion, fusion_prob, follow_stop and the ZLAC bridge;
+  - arguments: speed_mode, max_speed_mps, wheel_radius_m, turn_dir, port, model_path, target_distance, latency_s, bridge:=false (bench), camera_cmd and lidar_cmd;
+  - `speed_mode:=legacy` sets max_decel 0.0 by itself, and numbers are always passed as floats.
+- New parameters (defaults unchanged): the bridge's `port` and YOLO's `model_path`.
+- `tools/robot_day/preflight.py` checks:
+  - the model, the serial port, disk space and the parameters;
+  - that `wheel_radius_m = X (measured DATE)` is written in `config/motor_wheel_calibration.md`;
+  - with `--live`, every topic's rate, the LiDAR content, and `/cmd_vel` publisher and subscriber.
+- Tests in `tests/test_preflight.py`. Smoke test in the twin image: every node starts (YOLO only lacks cv_bridge in the image).
+- `docs/robot_day_protocol.md`: section "Starting the robot (one command)". E2 now sets `latency_s`.
+- For Codex to review: both items above (T11).
+
+### 2026-10-25 — research — Gazebo solo set, thesis ch3–4 draft, dashboard (Offline 3–5, 18:15 Thai time)
+- **Gazebo solo set** (`bb24efd`), on `mps`, seeds 0–2, run one at a time: **27/30**.
+  - All 3 failures are `come_back`. The person walks back to the robot and comes within 0.39 m, centre to centre, against the 0.40 m contact limit, in every seed. Reversing (1.5·e plus the ramp) is slower than the person walking up.
+  - Left for the user to decide whether the robot should back away faster.
+  - A first attempt with three Gazebo containers in parallel overloaded the 4-CPU machine (timeouts, nonsense results). It is discarded and noted in the write-up.
+  - Write-up: `experiments/sim/2026-10-25_gazebo_solo.md`.
+- **Thesis chapters 3–4 draft** (`4d6c584`), `docs/thesis_draft_ch3_ch4.md`:
+  - describes what the code runs: YOLOv8n, bearing association, TargetGate, fused confidence (not Bayes), Follow–Stop with the braking cap, and the m/s bridge;
+  - drops the circular correlations and the dt claim;
+  - reports simulation results as simulation, with ⟦ROBOT DAY⟧ placeholders for E1–E6.
+  - The thesis .docx is not committed.
+- **Dashboard:**
+  - new section "ตามคนเดียว: ทุกท่าเดิน" (solo following, every walking move): scenario × condition, for twin realism before and after the fixes, the plain twin, and Gazebo;
+  - new dataset `solo_runs` (120 runs).
+- Note: the first integration attempt for T11 stopped on a usage limit after claiming the lock (hub `a4fb5f4`). It is being resumed.
+
+### 2026-10-25 — integration — Merge twin realism, robot fixes, bringup, Gazebo solo, thesis draft; open T11 (14:57–18:48 Thai time)
+- Model: Claude Opus 5.5 (`integration` subagent). Lock claimed in `a4fb5f4` (14:57). Work paused for a usage limit and a machine
+  restart; the first, uncommitted merge of `172e06e` was aborted and redone on `0526ab3` (no code changes after `172e06e`).
+- Merged `origin/claude/workspace` (`0526ab3`) with `--no-ff`: merge `b23ec2b`; no conflicts. `check.py`: PASS (114).
+- Bit-identity (realism off): 81 old-scenario runs on current/fixed/diff_drive identical to `a4fb5f4` and `d957bac`.
+- Twin runs (image `twin:hub-t11`, 14:58–15:45, overlapping the coordinator's Gazebo jobs; then `twin:hub-t11b` on an idle machine,
+  18:14–18:47, solo only): clean solo 29/30 (side_step s0), realism solo 29/30 with 1 contact (come_back s2, 0.355 m),
+  identity 15/15 both. Arena 3 protocol on old bridges with new code: 94.46 (lag only; legacy caveat). Raw runs in
+  `/tmp/claude-0/judge_runs/t11` and `/tmp/claude-0/judge_runs/t11q`.
+- Probes: `min_rate_dt` 0.05 disables rate estimation at ≥25 fps; `unlock_after_s` re-locks on any person in the lock window.
+- DISCUSSION: opened T11 (5 review points, thesis-draft accuracy request, come_back 0.39 m as a design question for the user).
+  HANDOFF: branch rows (114), item 14, Codex task 20; lock released.
+- Not touched: `codex/*`, `claude/workspace`, `main`, PRs.
+
+### 2026-10-25 — robot — T11 integration findings (18:55 Thai time)
+- Integration (hub `5d95e69`) found that the write-up's "realism: no contact" did not reproduce: `come_back` with realism, seed 2, came within 0.355 m. The write-up is corrected. This is the same design question as Gazebo's 0.39 m and is put to the user.
+- **Finding 1:** `min_rate_dt` 0.05 switched off rate estimation at 25 fps or more. It is now 0.015 s, with a test at 10, 30 and 60 fps. `check.py` passes 115 tests.
+- **Findings 2–5** (re-lock on anyone after 5 s, predicted-edge rule, give-way gap, latency cap using the command and not the wheel speed) are left for Codex's T11 review.
+
+### 2026-10-25 — integration — Merge T11 min_rate_dt fix (18:51 Thai time)
+- Lock `e54479d`; merged `origin/claude/workspace` (`5e3a90d`) with `--no-ff`: merge `fba0d89` (log conflict, both sides kept); `check.py` PASS (115).
+- Rate reproducer: 0.300 rad/s at 10/20/25/30/60 fps. come_back and side_step (mps, seed 0, sequential, idle machine): both pass.
+- T11 one-line note (finding 1 fixed; 2–5 wait for Codex). HANDOFF: item 13 marked resolved (T10), branch rows (115), item 14; lock released.
+
+### 2026-10-25 — robot — Codex T11 objection (19:40 Thai time)
+- `88efdd4` answers Codex's objection:
+  - **Braking cap:** it now uses an estimated wheel speed (the bridge ramp towards the last command, parameter `bridge_accel_mps2`, set from the launch file's `max_accel_mps2`), not the command. Tests cover Codex's example.
+  - **Thesis draft:** corrected to `min_rate_dt` 0.015 s; the mid-image stop now applies only when the target is not moving sideways; the cap is described as an estimate with the `max(0, ·)` clamp; the re-lock and give-way caveats are added; both realism runs are reported.
+  - **Robot-day protocol:** gets Codex's operator notes (first drive `straight` at 0.5 m/s; `come_back` last; the re-lock rule).
+- **Re-run, one job at a time:** twin realism solo 27/30, no contact (`come_back` 0.42–0.44 m, was 0.355). Gazebo `come_back` is still 0.39 m: the person walks up while the robot is reversing. That is the open design question for the user. `check.py` passes 117 tests.
+
+### 2026-10-25 — integration — Merge T11 objection fixes (19:34–19:37 Thai time)
+- Codex objected in T11 (`5e4730d`). Lock `0baff08`; merged `origin/claude/workspace` (`15036d0`, fix `88efdd4`) with `--no-ff`: merge `f52e73f`
+  (log conflict, both sides kept). `check.py`: PASS (117). Realism-off bit-identity: 81 runs identical.
+- Codex's braking example through `speed_command`: cap 0.0 with the wheel estimate (0.32 with the command). Thesis draft checked for
+  0.015 s, the clamp and both realism runs. come_back and side_step (mps, seed 0, sequential): pass.
+- T11 reply asking Codex to re-check. HANDOFF: branch rows (117), item 14; lock released.
+
+### 2026-10-25 — integration — T11 agreed (19:55 Thai time)
+- Codex replied `agree` (hub `65f577a`) to the T11 objection fixes. Its reproducer: the old command value gives a 0.566 m/s cap, and the wheel-speed estimate gives 0. `check.py` passes 117 tests.
+- `claude/workspace` is synced with the hub (`a6615af`).
+- Still open, for the user: Gazebo `come_back` reaches 0.39 m when the person walks up to the robot. The choices are to back away faster, or to let the person come close.
+
+### 2026-10-25 — decision — come_back (20:10 Thai time)
+- User's decision: do not change the code now. On robot day, do `come_back` last and walk back to the robot slowly at first. Then choose between backing away faster and letting the person come close, based on the real robot.
+
+### 2026-10-25 — robot + research — Bearing steering, Thai cheat sheet (Offline extra 1 and 3, 21:30 Thai time)
+- **`follow_stop` `steer_mode:=bearing`** (default still `sector`):
+  - turn rate ω = 2.5·θ̂, limited to 0.8 rad/s, where θ̂ is the camera bearing predicted over `latency_s`;
+  - 3° deadband;
+  - LiDAR edge fixes turn at the sector rate.
+- **Tuning.** A 1.2 rad/s limit spun the robot past the target in `side_step`, and the jump to the image edge spoiled the rate estimate. Both are handled.
+- **Results** (`mps`, seeds 0–2, one job at a time):
+  - twin realism solo: `sector` 27/30 → `bearing` 29/30, no contact (`zigzag` 1/3 → 3/3);
+  - identity: 15/15 in both modes;
+  - clean twin: 29/30 and 15/15. The one clean `come_back` 0.37 m did not reproduce in 4 reruns (0.43 m).
+- Write-up: `experiments/sim/2026-10-25_bearing_steer.md`. The launch file passes `steer_mode`.
+- **`docs/robot_day_cheatsheet_th.md`:** a one-page Thai robot-day sheet, with a slot to compare the steering modes.
+- `check.py` passes 119 tests.
+
+### 2026-10-25 — research — E7 re-run, thesis update, dashboard (Offline extra 2 and 4, 22:50 Thai time)
+- **E7 re-run** on current code (identity set, `fixed`/`diff_drive` with `max_decel:=0.0`, seeds 0–2, one job at a time):
+
+  | Condition | Passed | Contacts |
+  |---|---|---|
+  | full | 30/30 | 0 |
+  | no colour | 27/30 | 3 (`crossing` on `diff_drive`, 0.39–0.40 m) |
+  | no give-way | 29/30 | 1 |
+  | no gate | 12/30 | 12 |
+
+  The conclusions are unchanged. The addendum is in `experiments/sim/2026-10-24_e7_ablation.md`.
+- **Thesis draft:**
+  - 4.7 table updated (first run and current code);
+  - 3.3.6 describes the optional bearing steering;
+  - 4.6 reports the re-run after the wheel-speed cap (27/30, no contact) and bearing steering (29/30).
+- **Dashboard:** the "ตามคนเดียว" (solo following) chart adds "สมจริง · หลังแก้" (realism after the fixes, wheel-speed cap) and "สมจริง · เลี้ยวตามมุม" (realism with bearing steering). Dataset `solo_runs` has 150 runs.
+
+### 2026-10-25 — integration — Merge bearing steering, E7 re-run, thesis, cheat sheet; open T12 (22:22–22:26 Thai time)
+- Model: Claude Opus 5.5 (`integration` subagent). Lock claimed in `47f017a` (22:22). Merged `origin/claude/workspace` (`b07d679`) with
+  `--no-ff`: merge `14c263c`; no conflicts. `check.py`: PASS (119). The merge includes a one-line `CLAUDE.md` change (talk to the user in Thai).
+- Bit-identity (realism off, default steering): 81 old-scenario runs identical to `d957bac`.
+- Twin realism mps seed 0, sequential (22:23–22:25): sector zigzag/side_step pass; bearing zigzag pass, bearing side_step FAIL
+  (final 3.12 m, visible 0.13), matching the write-up's one realism failure. Raw runs in `/tmp/claude-0/judge_runs/t12`.
+- Recount: bearing and E7 re-run tables match their JSON; the bearing write-up wrongly lists side_step seed 0 as a clean failure.
+- DISCUSSION: opened T12 (3 review points; robot-day trial question; thesis check). HANDOFF: branch rows (119), item 15, Codex task 21;
+  lock released. Not touched: `codex/*`, `claude/workspace`, `main`, PRs.
+
+### 2026-10-25 — robot — Codex T12 objection (23:55 Thai time)
+- `follow_stop` in `bearing` mode now stops after `target_timeout_s` 0.3 s without a target message. Before, the bridge held the last turn for 1 s. Unit test `target_is_stale`; `sector` mode is unchanged.
+- Thesis: 3.3.6 describes the stop, and 4.7 states that `target_gate:=false` also disables give-way (29/30 against 12/30 isolates the gate).
+- Re-run (`bearing`, `mps`, seeds 0–2, one job at a time):
+  - twin realism solo **30/30** and identity 15/15;
+  - clean solo **30/30**;
+  - no contact anywhere;
+  - `target_loss` now stops in 0.4–0.7 s.
+- `check.py` passes 120 tests.
+
+### 2026-10-25 — integration — Merge T12 objection fixes (23:53–23:55 Thai time)
+- Codex objected in T12 (`f36336d`). Lock `6d46675` (23:53); merged `origin/claude/workspace` (`c53e7b8`) with `--no-ff`: merge `ac28ea7`
+  (log conflict, both sides kept). `check.py`: PASS (120). Bit-identity (default sector, realism off): 81 runs identical.
+- Twin realism mps bearing seed 0, sequential: side_step pass (was 3.12 m fail), target_loss pass, stop in 0.5 s; [STALE] stops logged.
+- T12 reply asking Codex to re-check. HANDOFF: branch rows (120), item 15; lock released. Raw runs in `/tmp/claude-0/judge_runs/t12b`.
