@@ -4,7 +4,7 @@
 Publishes what the robot's drivers would publish and consumes `/cmd_vel`:
 
 - `/scan` (sensor_msgs/LaserScan, 10 Hz) instead of the YDLidar driver
-- `/target_centroid_sector` `[cx, cy, sector, cb, cr]` and `/target_centroid` `[cx, cy]`
+- `/target_centroid_sector` `[cx, cy, sector, cb, cr, h0..h47]` and `/target_centroid` `[cx, cy]`
   (std_msgs/Int32MultiArray, 10 Hz); `cb, cr` is the clothing chroma (YCbCr)
   instead of `ros2_yolo_live.py` (camera + YOLO)
 - `/sim/state` (std_msgs/String, JSON ground truth, 10 Hz)
@@ -96,7 +96,7 @@ class TwinWorldNode(Node):
         frame = [stamp.sec, stamp.nanosec, s.image_width, s.image_height, 0]
         for det in w.detections():
             self.pub_centroid.publish(Int32MultiArray(data=[det.cx, det.cy]))
-            self.pub_sector.publish(Int32MultiArray(data=[det.cx, det.cy, det.sector_id, det.cb, det.cr]))
+            self.pub_sector.publish(Int32MultiArray(data=[det.cx, det.cy, det.sector_id, det.cb, det.cr, *det.hist]))
             frame[4] += 1
             frame.extend([*det.box, 900, det.cb, det.cr])
         self.pub_frame.publish(Int32MultiArray(data=frame))  # as ros2_yolo_live.py's /yolo_frame

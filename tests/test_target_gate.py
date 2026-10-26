@@ -48,6 +48,7 @@ class TargetGateTest(unittest.TestCase):
         cls.lidar_track = staticmethod(module.lidar_track)
         cls.bearing_to_cx = staticmethod(module.bearing_to_cx)
         cls.scan_is_fresh = staticmethod(module.scan_is_fresh)
+        cls.parse_hist = staticmethod(module.parse_hist)
 
     def test_old_or_missing_scans_are_not_used(self):
         self.assertTrue(self.scan_is_fresh(10.0, 9.9, 0.3))
@@ -131,6 +132,56 @@ class TargetGateTest(unittest.TestCase):
         g.accept(0.1, 0.0, 0.8, RED)
         self.assertFalse(g.accept(0.2, D(2), 0.85, BLUE))
         self.assertTrue(g.accept(0.2, D(2), 0.85, RED))
+
+    @staticmethod
+    def _hist(hue_bin, sat_bin, grey=0.0):
+        """A 12 x 4 hue-saturation histogram: mostly one colour, plus a share of grey (low saturation)."""
+        h = [0.0] * 48
+        h[hue_bin * 4 + sat_bin] = 1.0 - grey
+        for b in range(12):
+            h[b * 4] += grey / 12.0
+        return h
+
+    def test_histogram_rejects_another_colour_at_the_same_place(self):
+        g = self.Gate()
+        blue, grey = self._hist(8, 2), self._hist(0, 0, grey=1.0)
+        g.accept(0.0, 0.0, 0.8, (139, 125), blue)
+        g.accept(0.1, 0.0, 0.8, (139, 125), blue)
+        self.assertFalse(g.accept(0.2, D(2), 0.85, (131, 128), grey))
+        shade = [0.5 * a + 0.2 * b + 0.3 * c for a, b, c in zip(blue, self._hist(8, 1), grey)]
+        self.assertAlmostEqual(sum(shade), 1.0)
+        self.assertTrue(g.accept(0.2, D(2), 0.85, (131, 128), shade))  # the target in shade: half its pixels move
+
+    def test_histogram_learns_the_target_but_not_a_wrong_pick(self):
+        g = self.Gate()
+        blue = self._hist(8, 2)
+        g.accept(0.0, 0.0, 0.8, None, blue)
+        for i in range(1, 6):
+            g.accept(0.1 * i, 0.0, 0.8, None, self._hist(8, 2, grey=0.1 * (i % 2)))
+        n = len(g.hists)
+        g.accept(0.6, 0.0, 0.8, None, self._hist(8, 2, grey=0.6))  # close in place, far in colour: in the gate, not learned
+        self.assertEqual(len(g.hists), n)
+        self.assertLessEqual(len(g.hists), g.hist_window)
+
+    def test_histogram_window_is_capped(self):
+        g = self.Gate()
+        for i in range(25):
+            g.accept(0.1 * i, 0.0, 0.8, None, self._hist(8, 2))
+        self.assertEqual(len(g.hists), g.hist_window)
+
+    def test_hist_is_read_after_cb_cr_and_normalised(self):
+        msg = [320, 240, 4, 139, 125] + [0] * 47 + [500]
+        h = self.parse_hist(msg[5:])
+        self.assertAlmostEqual(sum(h), 1.0)
+        self.assertEqual(h[47], 1.0)
+        self.assertIsNone(self.parse_hist([320, 240, 4, 139, 125][5:]))  # old 5-value message
+        self.assertIsNone(self.parse_hist([0] * 48))
+
+    def test_without_histogram_the_chroma_still_decides(self):
+        g = self.Gate()
+        g.accept(0.0, 0.0, 0.8, RED, None)
+        g.accept(0.1, 0.0, 0.8, RED, None)
+        self.assertFalse(g.accept(0.2, D(2), 0.85, BLUE, None))
 
     def test_shade_on_the_target_is_tolerated(self):
         g = self.Gate()

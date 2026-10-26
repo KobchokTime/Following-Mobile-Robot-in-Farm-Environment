@@ -26,6 +26,26 @@ def torso_chroma(frame_bgr, x1, y1, x2, y2):
     return int(round(float(np.median(cb)))), int(round(float(np.median(cr))))
 
 
+HS_BINS = (12, 4)  # hue x saturation bins of the torso histogram sent after cb, cr
+
+
+def torso_hs_hist(frame_bgr, x1, y1, x2, y2, bins=HS_BINS):
+    """Torso hue-saturation histogram in per mille (sums to about 1000), hue-major, OpenCV HSV ranges.
+
+    Same torso region as torso_chroma. Value (brightness) is left out because it changes most with
+    light, as in Kim, Suh and Kwon (2024). Hue survives shade better than Cb/Cr, which go grey.
+    All zeros for an empty region.
+    """
+    h, w = y2 - y1, x2 - x1
+    roi = frame_bgr[max(0, y1 + int(0.20 * h)):max(0, y1 + int(0.55 * h)),
+                    max(0, x1 + w // 4):max(0, x2 - w // 4)]
+    if roi.size == 0:
+        return [0] * (bins[0] * bins[1])
+    hsv = cv2.cvtColor(roi, cv2.COLOR_BGR2HSV).reshape(-1, 3)
+    hist, _, _ = np.histogram2d(hsv[:, 0], hsv[:, 1], bins=bins, range=((0, 180), (0, 256)))
+    return [int(round(1000.0 * v)) for v in (hist.ravel() / max(1.0, hist.sum()))]
+
+
 def frame_summary(stamp_sec, stamp_nsec, width, height, boxes):
     """One /yolo_frame message per processed image, even with no person in it.
 
@@ -56,7 +76,8 @@ class YoloROSNode(Node):
 
         # Pub เดิม (compat)
         self.centroid_pub = self.create_publisher(Int32MultiArray, '/target_centroid', 10)
-        # Pub ใหม่: [cx, cy, sector_id, cb, cr]; cb/cr = clothing chroma of the torso (YCbCr)
+        # Pub ใหม่: [cx, cy, sector_id, cb, cr, h0..h47]; cb/cr = clothing chroma of the torso (YCbCr),
+        # h = torso hue-saturation histogram (torso_hs_hist); readers of the first 5 values are unaffected
         self.centroid_sector_pub = self.create_publisher(Int32MultiArray, '/target_centroid_sector', 10)
         # Per processed frame: capture stamp and every box (robot-day experiments E2-E4)
         self.frame_pub = self.create_publisher(Int32MultiArray, '/yolo_frame', 10)
@@ -120,7 +141,7 @@ class YoloROSNode(Node):
                 # ---- Publish: centroid + sector ----
                 centroid_sector_msg = Int32MultiArray()
                 cb, cr = torso_chroma(frame, x1, y1, x2, y2)
-                centroid_sector_msg.data = [cx, cy, sector_id, cb, cr]
+                centroid_sector_msg.data = [cx, cy, sector_id, cb, cr, *torso_hs_hist(frame, x1, y1, x2, y2)]
                 frame_boxes.append((x1, y1, x2, y2, round(conf * 1000), cb, cr))
                 self.centroid_sector_pub.publish(centroid_sector_msg)
 

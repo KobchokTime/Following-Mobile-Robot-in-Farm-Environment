@@ -88,21 +88,42 @@ def bearing_to_cx(bearing, image_width, hfov_deg):
     return int(round(min(image_width - 1, max(0, image_width / 2.0 - f * math.tan(b)))))
 
 
+def bhattacharyya(a, b):
+    """Overlap of two normalised histograms: 1 identical, 0 disjoint."""
+    return sum(math.sqrt(max(0.0, x) * max(0.0, y)) for x, y in zip(a, b))
+
+
+def parse_hist(values, bins=48):
+    """The torso histogram after cb, cr in a camera message, normalised; None if absent or empty."""
+    if len(values) < bins:
+        return None
+    h = [max(0.0, float(v)) for v in values[:bins]]
+    total = sum(h)
+    return [v / total for v in h] if total > 0 else None
+
+
 class TargetGate:
     """Keeps one person as the target when several are detected (Arena 3).
 
     The camera node publishes one message per person, with no identity. Each detection gets a cost
     against the target track: bearing and range against an alpha-beta prediction, plus the clothing
-    chroma when the message carries it. Only a detection within the gate is the target. Colour is
-    a soft cost, so shade or matching clothes leave the decision to geometry. The gates widen while
+    clothing colour when the message carries it. Only a detection within the gate is the target. Colour
+    is a soft cost, so shade or matching clothes leave the decision to geometry. The gates widen while
     the target is not seen, so it can be found again after a short loss.
+
+    Colour is the torso hue-saturation histogram when the camera sends one, else the Cb/Cr chroma.
+    The histogram model follows Kim, Suh and Kwon (2024): no brightness channel, and it is re-learned
+    from the target's last hist_window boxes. A box is learned only if it is at least as close to the
+    model as the boxes already learned, less hist_learn_slack, so one wrong pick does not teach the
+    model the other person's colours (lab videos: experiments/identity/lab_videos_2025-04-08).
 
     Lock-on uses the controller's start window: range 0.5-1.0 m, near the image centre.
     """
 
     def __init__(self, lock_range=(0.5, 1.0), lock_bearing_deg=15.0, bearing_sigma_deg=5.0,
                  range_sigma_m=0.15, chroma_sigma=15.0, gate=9.0, widen_per_s=1.0,
-                 alpha=0.6, beta=0.2, chroma_rate=0.05, min_rate_dt=0.015, unlock_after_s=5.0):
+                 alpha=0.6, beta=0.2, chroma_rate=0.05, min_rate_dt=0.015, unlock_after_s=5.0,
+                 hist_sigma=0.2, hist_window=10, hist_learn_slack=0.1):
         self.lock_range = lock_range
         self.lock_bearing = math.radians(lock_bearing_deg)
         self.sb = math.radians(bearing_sigma_deg)
@@ -112,6 +133,10 @@ class TargetGate:
         self.widen_per_s = widen_per_s
         self.alpha, self.beta = alpha, beta
         self.chroma_rate = chroma_rate
+        # Hellinger distance between histograms: about 0.2 for the same person, 0.5-0.7 for another
+        self.hist_sigma = hist_sigma
+        self.hist_window = hist_window
+        self.hist_learn_slack = hist_learn_slack
         # Two boxes on one person arrive within a frame; a rate from a ~1 ms step would blow up the
         # prediction and the target would never be accepted again, so such steps update position only.
         # 15 ms is under one frame even at 60 fps, so real frame-to-frame steps always update the rate.
@@ -127,19 +152,35 @@ class TargetGate:
         self.bearing = self.bearing_rate = 0.0
         self.range = self.range_rate = 0.0
         self.chroma = None
+        self.hists = []  # the target's last learned torso histograms (normalised)
+
+    def hist_model(self):
+        return [sum(col) / len(self.hists) for col in zip(*self.hists)]
+
+    def _learn_hist(self, hist):
+        if not self.hists:
+            self.hists = [hist]
+            return
+        model = self.hist_model()
+        floor = min(bhattacharyya(h, model) for h in self.hists) - self.hist_learn_slack
+        if bhattacharyya(hist, model) >= floor:
+            self.hists = (self.hists + [hist])[-self.hist_window:]
 
     def _predict(self, t):
         dt = max(0.0, min(t - self.t, 1.0))
         return self.bearing + self.bearing_rate * dt, self.range + self.range_rate * dt
 
-    def cost(self, t, bearing, rng, chroma=None):
+    def cost(self, t, bearing, rng, chroma=None, hist=None):
         """Normalised squared distance of a detection from the target (inf before lock-on)."""
         if not self.locked:
             return math.inf
         pb, pr = self._predict(t)
         widen = 1.0 + self.widen_per_s * max(0.0, t - self.t - 0.2)
         c = ((bearing - pb) / (self.sb * widen)) ** 2 + ((rng - pr) / (self.sr * widen)) ** 2
-        if chroma is not None and self.chroma is not None:
+        if hist is not None and self.hists:
+            d = math.sqrt(max(0.0, 1.0 - bhattacharyya(hist, self.hist_model())))
+            c += (d / self.hist_sigma) ** 2
+        elif chroma is not None and self.chroma is not None:
             c += ((chroma[0] - self.chroma[0]) ** 2 + (chroma[1] - self.chroma[1]) ** 2) / self.sc ** 2
         return c
 
@@ -154,7 +195,7 @@ class TargetGate:
             self.range_rate += self.beta * er / dt
         self.t = t
 
-    def accept(self, t, bearing, rng, chroma=None):
+    def accept(self, t, bearing, rng, chroma=None, hist=None):
         """True if this detection is the target; updates the track when it is."""
         if self.locked and t - self.t > self.unlock_after_s:
             self.reset()
@@ -163,9 +204,10 @@ class TargetGate:
                 self.locked, self.t = True, t
                 self.bearing, self.range = bearing, rng
                 self.chroma = tuple(chroma) if chroma is not None else None
+                self.hists = [hist] if hist is not None else []
                 return True
             return False
-        if self.cost(t, bearing, rng, chroma) > self.gate:
+        if self.cost(t, bearing, rng, chroma, hist) > self.gate:
             return False
         dt = max(1e-3, t - self.t)
         pb, pr = self._predict(t)
@@ -184,6 +226,8 @@ class TargetGate:
                 k = self.chroma_rate
                 self.chroma = (self.chroma[0] + k * (chroma[0] - self.chroma[0]),
                                self.chroma[1] + k * (chroma[1] - self.chroma[1]))
+        if hist is not None:
+            self._learn_hist(hist)
         return True
 
 
@@ -203,6 +247,7 @@ class SyncFusionNode(Node):
         # Target gate (Arena 3): publish only the person being followed
         self.declare_parameter('target_gate', True)
         self.declare_parameter('use_chroma', True)
+        self.declare_parameter('use_hs_hist', True)  # torso hue-saturation histogram, when the camera sends it
         # Someone else in the corridor and nearer than the target sets the distance the controller sees
         self.declare_parameter('path_half_width_m', 0.7)
         self.declare_parameter('path_hold_s', 0.5)
@@ -228,6 +273,7 @@ class SyncFusionNode(Node):
         self.lidar_angles = []  # centre angle of each LiDAR sector, robot frame, left positive
         self.use_gate = bool(self.get_parameter('target_gate').value)
         self.use_chroma = bool(self.get_parameter('use_chroma').value)
+        self.use_hs_hist = bool(self.get_parameter('use_hs_hist').value)
         self.gate = TargetGate()
         self.path_half_width = float(self.get_parameter('path_half_width_m').value)
         self.path_hold = float(self.get_parameter('path_hold_s').value)
@@ -298,10 +344,11 @@ class SyncFusionNode(Node):
         if len(msg.data) < 3:
             return
         cx, cy, sector_id = msg.data[:3]
-        # [cx, cy, sector, cb, cr] carries the clothing chroma; old 3-value messages have none
+        # [cx, cy, sector, cb, cr, h0..h47] carries the clothing colour; old 3-value messages have none
         chroma = (msg.data[3], msg.data[4]) if len(msg.data) >= 5 and self.use_chroma else None
+        hist = parse_hist(msg.data[5:]) if self.use_chroma and self.use_hs_hist else None
         self.buf_yolo.append((t, {'cx': cx, 'cy': cy, 'sector_id': sector_id}))
-        self.try_sync_from_yolo(t, cx, cy, sector_id, chroma)
+        self.try_sync_from_yolo(t, cx, cy, sector_id, chroma, hist)
 
     def cb_lidar(self, msg):
         t = self.now_sec()
@@ -356,7 +403,7 @@ class SyncFusionNode(Node):
         out.data = [float(cx), float(cy), float(dist), float(sector_id), float(best_dt * 1000.0), float(stamp)]
         self.pub_synced.publish(out)
 
-    def try_sync_from_yolo(self, ty, cx, cy, sector_id, chroma=None):
+    def try_sync_from_yolo(self, ty, cx, cy, sector_id, chroma=None, hist=None):
         if not self.buf_lidar or not self.lidar_angles:
             return
 
@@ -385,7 +432,7 @@ class SyncFusionNode(Node):
             self.get_logger().debug(f"Skip frame: invalid LiDAR dist in sector {sector_id}")
             return
 
-        if self.use_gate and not self.gate.accept(ty, bearing, dist, chroma):
+        if self.use_gate and not self.gate.accept(ty, bearing, dist, chroma, hist):
             # another person, not the one being followed: remember them only if they are in the way
             # Only someone in the corridor and clearly nearer than the target is in the way
             if self.last_target is not None and in_path(bearing, dist, self.path_half_width) \
