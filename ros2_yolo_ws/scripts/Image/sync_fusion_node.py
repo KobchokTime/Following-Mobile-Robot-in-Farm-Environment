@@ -117,7 +117,13 @@ class TargetGate:
     as close to the model as the boxes already learned, less hist_learn_slack, so one wrong pick does
     not teach the model the other person's colours. Hue keeps a blue top blue in shade, where Cb/Cr
     turns grey; Cb/Cr keeps black, grey and beige tops steady, where hue is noise. On video
-    (experiments/identity/lab_videos_2025-04-08) neither alone did well on both.
+    (experiments/identity/clothing_colour_videos) neither alone did well on both.
+
+    Re-acquisition, after Algorithm 1 of Kim, Suh and Kwon (2024): once the target has been unseen for
+    reacquire_after_s, a detection whose colour matches the model (colour cost at most
+    reacquire_colour_max) and that lies within reacquire_bearing_deg of the predicted bearing is taken
+    as the target again, at any range, and the track restarts there. Only with a histogram: Cb/Cr
+    alone cannot tell a blue top in shade from a grey one.
 
     Lock-on uses the controller's start window: range 0.5-1.0 m, near the image centre.
     """
@@ -125,7 +131,8 @@ class TargetGate:
     def __init__(self, lock_range=(0.5, 1.0), lock_bearing_deg=15.0, bearing_sigma_deg=5.0,
                  range_sigma_m=0.15, chroma_sigma=15.0, gate=9.0, widen_per_s=1.0,
                  alpha=0.6, beta=0.2, chroma_rate=0.05, min_rate_dt=0.015, unlock_after_s=5.0,
-                 hist_sigma=0.2, hist_window=10, hist_learn_slack=0.1, hist_weight=0.5):
+                 hist_sigma=0.2, hist_window=10, hist_learn_slack=0.1, hist_weight=0.5,
+                 reacquire_after_s=1.0, reacquire_colour_max=2.0, reacquire_bearing_deg=35.0):
         self.lock_range = lock_range
         self.lock_bearing = math.radians(lock_bearing_deg)
         self.sb = math.radians(bearing_sigma_deg)
@@ -140,6 +147,9 @@ class TargetGate:
         self.hist_window = hist_window
         self.hist_learn_slack = hist_learn_slack
         self.hist_weight = hist_weight  # share of the colour cost from the histogram; the rest from Cb/Cr
+        self.reacquire_after_s = reacquire_after_s
+        self.reacquire_colour_max = reacquire_colour_max
+        self.reacquire_bearing = math.radians(reacquire_bearing_deg)
         # Two boxes on one person arrive within a frame; a rate from a ~1 ms step would blow up the
         # prediction and the target would never be accepted again, so such steps update position only.
         # 15 ms is under one frame even at 60 fps, so real frame-to-frame steps always update the rate.
@@ -180,6 +190,11 @@ class TargetGate:
         pb, pr = self._predict(t)
         widen = 1.0 + self.widen_per_s * max(0.0, t - self.t - 0.2)
         c = ((bearing - pb) / (self.sb * widen)) ** 2 + ((rng - pr) / (self.sr * widen)) ** 2
+        return c + self.colour_cost(chroma, hist)
+
+    def colour_cost(self, chroma=None, hist=None):
+        """The colour part of the cost: Cb/Cr and, when both sides have one, the histogram."""
+        c = 0.0
         w = self.hist_weight if hist is not None and self.hists else 0.0
         if w:
             d = math.sqrt(max(0.0, 1.0 - bhattacharyya(hist, self.hist_model())))
@@ -187,6 +202,29 @@ class TargetGate:
         if chroma is not None and self.chroma is not None:
             c += (1.0 - w) * ((chroma[0] - self.chroma[0]) ** 2 + (chroma[1] - self.chroma[1]) ** 2) / self.sc ** 2
         return c
+
+    def _reacquire(self, t, bearing, rng, chroma, hist):
+        """Take a lost target back by colour near its predicted bearing (see the class docstring)."""
+        if hist is None or not self.hists or t - self.t < self.reacquire_after_s:
+            return False
+        pb, _ = self._predict(t)
+        if abs(bearing - pb) > self.reacquire_bearing or self.colour_cost(chroma, hist) > self.reacquire_colour_max:
+            return False
+        self.t, self.bearing, self.range = t, bearing, rng
+        self.bearing_rate = self.range_rate = 0.0
+        self._learn_colour(chroma, hist)
+        return True
+
+    def _learn_colour(self, chroma, hist):
+        if chroma is not None:
+            if self.chroma is None:
+                self.chroma = tuple(chroma)
+            else:
+                k = self.chroma_rate
+                self.chroma = (self.chroma[0] + k * (chroma[0] - self.chroma[0]),
+                               self.chroma[1] + k * (chroma[1] - self.chroma[1]))
+        if hist is not None:
+            self._learn_hist(hist)
 
     def accept_lidar(self, t, bearing, rng):
         """Update the track from a LiDAR-only fix (the caller already matched it to the prediction)."""
@@ -212,7 +250,7 @@ class TargetGate:
                 return True
             return False
         if self.cost(t, bearing, rng, chroma, hist) > self.gate:
-            return False
+            return self._reacquire(t, bearing, rng, chroma, hist)
         dt = max(1e-3, t - self.t)
         pb, pr = self._predict(t)
         eb, er = bearing - pb, rng - pr
@@ -223,15 +261,7 @@ class TargetGate:
             self.bearing_rate += self.beta * eb / dt
             self.range_rate += self.beta * er / dt
         self.t = t
-        if chroma is not None:
-            if self.chroma is None:
-                self.chroma = tuple(chroma)
-            else:
-                k = self.chroma_rate
-                self.chroma = (self.chroma[0] + k * (chroma[0] - self.chroma[0]),
-                               self.chroma[1] + k * (chroma[1] - self.chroma[1]))
-        if hist is not None:
-            self._learn_hist(hist)
+        self._learn_colour(chroma, hist)
         return True
 
 

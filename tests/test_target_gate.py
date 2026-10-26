@@ -177,6 +177,26 @@ class TargetGateTest(unittest.TestCase):
         self.assertIsNone(self.parse_hist([320, 240, 4, 139, 125][5:]))  # old 5-value message
         self.assertIsNone(self.parse_hist([0] * 48))
 
+    def test_lost_target_is_taken_back_by_colour_near_its_bearing(self):
+        g = self.Gate()
+        blue, grey = self._hist(8, 2), self._hist(0, 0, grey=1.0)
+        for i in range(5):
+            g.accept(0.1 * i, D(1), 0.8, (139, 125), blue)
+        g.bearing_rate, g.range_rate = D(-25), -1.0  # a bad fix sent the prediction away
+        self.assertFalse(g.accept(0.6, D(1), 2.0, (139, 125), blue))   # too soon: the normal gate decides
+        self.assertFalse(g.accept(1.8, D(1), 2.0, (131, 128), grey))   # someone else, at the same place
+        self.assertFalse(g.accept(1.8, D(60), 2.0, (139, 125), blue))  # same colours, far off the bearing
+        self.assertTrue(g.accept(1.8, D(1), 2.0, (139, 125), blue))    # the target, 2 m away
+        self.assertEqual((g.bearing_rate, g.range_rate), (0.0, 0.0))
+        self.assertAlmostEqual(g.range, 2.0)
+
+    def test_no_colour_reacquisition_without_histogram(self):
+        g = self.Gate()
+        for i in range(5):
+            g.accept(0.1 * i, D(1), 0.8, RED)
+        g.bearing_rate, g.range_rate = D(-40), -1.0
+        self.assertFalse(g.accept(1.8, D(1), 2.0, RED))
+
     def test_without_histogram_the_chroma_still_decides(self):
         g = self.Gate()
         g.accept(0.0, 0.0, 0.8, RED, None)
