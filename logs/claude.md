@@ -1039,7 +1039,7 @@ Earlier history: `history-2026-10-16.md`.
   - Write-up: `experiments/sim/2026-10-26_static_filter.md` (Update 2).
   - Dashboard v2, filter tab: new card, dataset `icp_trial_runs`, page version 11.
 
-### 2026-10-26 — research — Clothing colour on the two 2025-04-08 lab videos (22:15 Thai time)
+### 2026-10-26 — research — Clothing colour on the two 2025-04-08 lab videos (22:05 Thai time)
 - **Task:** at the user's request, I used `Videos/WIN_20250408_14_00_41_Pro.mp4` and `WIN_20250408_14_10_21_Pro.mp4` from `codex/robot-backup-quarantine`.
   - They came through Git LFS into a scratch copy. That branch is untouched and the videos are not copied into the repository.
 - **Data:**
