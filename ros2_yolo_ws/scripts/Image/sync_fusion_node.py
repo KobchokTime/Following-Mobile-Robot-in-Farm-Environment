@@ -111,11 +111,13 @@ class TargetGate:
     is a soft cost, so shade or matching clothes leave the decision to geometry. The gates widen while
     the target is not seen, so it can be found again after a short loss.
 
-    Colour is the torso hue-saturation histogram when the camera sends one, else the Cb/Cr chroma.
-    The histogram model follows Kim, Suh and Kwon (2024): no brightness channel, and it is re-learned
-    from the target's last hist_window boxes. A box is learned only if it is at least as close to the
-    model as the boxes already learned, less hist_learn_slack, so one wrong pick does not teach the
-    model the other person's colours (lab videos: experiments/identity/lab_videos_2025-04-08).
+    Colour is the Cb/Cr chroma and, when the camera sends one, the torso hue-saturation histogram,
+    each at half weight. The histogram follows Kim, Suh and Kwon (2024): no brightness channel, and
+    it is re-learned from the target's last hist_window boxes. A box is learned only if it is at least
+    as close to the model as the boxes already learned, less hist_learn_slack, so one wrong pick does
+    not teach the model the other person's colours. Hue keeps a blue top blue in shade, where Cb/Cr
+    turns grey; Cb/Cr keeps black, grey and beige tops steady, where hue is noise. On video
+    (experiments/identity/lab_videos_2025-04-08) neither alone did well on both.
 
     Lock-on uses the controller's start window: range 0.5-1.0 m, near the image centre.
     """
@@ -123,7 +125,7 @@ class TargetGate:
     def __init__(self, lock_range=(0.5, 1.0), lock_bearing_deg=15.0, bearing_sigma_deg=5.0,
                  range_sigma_m=0.15, chroma_sigma=15.0, gate=9.0, widen_per_s=1.0,
                  alpha=0.6, beta=0.2, chroma_rate=0.05, min_rate_dt=0.015, unlock_after_s=5.0,
-                 hist_sigma=0.2, hist_window=10, hist_learn_slack=0.1):
+                 hist_sigma=0.2, hist_window=10, hist_learn_slack=0.1, hist_weight=0.5):
         self.lock_range = lock_range
         self.lock_bearing = math.radians(lock_bearing_deg)
         self.sb = math.radians(bearing_sigma_deg)
@@ -137,6 +139,7 @@ class TargetGate:
         self.hist_sigma = hist_sigma
         self.hist_window = hist_window
         self.hist_learn_slack = hist_learn_slack
+        self.hist_weight = hist_weight  # share of the colour cost from the histogram; the rest from Cb/Cr
         # Two boxes on one person arrive within a frame; a rate from a ~1 ms step would blow up the
         # prediction and the target would never be accepted again, so such steps update position only.
         # 15 ms is under one frame even at 60 fps, so real frame-to-frame steps always update the rate.
@@ -177,11 +180,12 @@ class TargetGate:
         pb, pr = self._predict(t)
         widen = 1.0 + self.widen_per_s * max(0.0, t - self.t - 0.2)
         c = ((bearing - pb) / (self.sb * widen)) ** 2 + ((rng - pr) / (self.sr * widen)) ** 2
-        if hist is not None and self.hists:
+        w = self.hist_weight if hist is not None and self.hists else 0.0
+        if w:
             d = math.sqrt(max(0.0, 1.0 - bhattacharyya(hist, self.hist_model())))
-            c += (d / self.hist_sigma) ** 2
-        elif chroma is not None and self.chroma is not None:
-            c += ((chroma[0] - self.chroma[0]) ** 2 + (chroma[1] - self.chroma[1]) ** 2) / self.sc ** 2
+            c += w * (d / self.hist_sigma) ** 2
+        if chroma is not None and self.chroma is not None:
+            c += (1.0 - w) * ((chroma[0] - self.chroma[0]) ** 2 + (chroma[1] - self.chroma[1]) ** 2) / self.sc ** 2
         return c
 
     def accept_lidar(self, t, bearing, rng):
