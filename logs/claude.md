@@ -1075,3 +1075,23 @@ Earlier history: `history-2026-10-16.md`.
   - **Caveat:** half-and-half was chosen after seeing the held-out clips, with 5 variants tried. E4 on robot day is the real test.
 - **Twin closed-loop runs** (colour set, plus identity/solo regression, histogram on and off) are still running. They will be added here and to the dashboard.
 - **Dashboard v2:** new tab "สีเสื้อ" (clothing colour) with a crop montage, a Cb/Cr scatter, the methods chart and the held-out chart (page version 12).
+
+### 2026-10-27 — robot + research + dashboard — Colour histogram: twin fixes and results (02:51 Thai time)
+- **Branch `claude/robot/hs-colour`:**
+  - `34fdcdf`: the twin histogram keeps saturation in shade, calibrated on the lab video.
+  - `2547f8b`: `TargetGate` takes a lost target back by colour (paper Algorithm 1): unseen ≥ 1 s, colour cost ≤ 2.0, within 35° of the predicted bearing, histogram only.
+  - 127 tests pass.
+- **Root cause found with a gate debug log:**
+  1. A crosser in shade was accepted once (Cb/Cr cost 1.5).
+  2. The track's rates ran off to −30° and −0.27 m.
+  3. After the 5 s unlock, the target could only be re-locked at 0.5–1.0 m.
+  - This is an old gate weakness and happens with Cb/Cr only too.
+- **Twin (`2547f8b`, histogram off → on):**
+  - `shade_crossing` realism: 5/10 → 10/10;
+  - solo realism: 26/30 (1 contact) → 29/30 (no contact);
+  - identity: 15/15 → 15/15;
+  - the other colour-set rows: 10/10 both ways;
+  - with bearing steering and the histogram on: solo 29/30 (`come_back` s2 contact), identity 15/15.
+- **Write-up:** `experiments/sim/2026-10-27_hs_colour_twin.md` and `.json`.
+- **Dashboard v2:** "สีเสื้อ" (clothing colour) tab gains a twin card (dataset `colour_twin`, page version 13).
+- **Status:** the branch is still not merged. It needs Codex review and E4 on robot day. I have authorisation from the user to keep running and fixing.
