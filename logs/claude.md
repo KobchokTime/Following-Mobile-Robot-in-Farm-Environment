@@ -1005,3 +1005,12 @@ Earlier history: `history-2026-10-16.md`.
 - **End-of-run pose error:** ICP 0.02–0.11 m in all 18 runs. Dead reckoning is 0.03–0.17 m in most runs but up to 1.3 m in some.
 - **Bug found and fixed on `claude/robot/static-filter` (`08eb36b`):** `StaticMap` kept integrating the last `/cmd_vel` after follow_stop went quiet, while the bridge had stopped the wheels after 1 s. It now ignores commands older than 1 s. The trial runs on the dashboard predate this fix.
 - **Next, if wanted:** put ICP scan matching into `StaticMap` instead of dead reckoning and rerun the trial.
+
+### 2026-10-26 — research — Static filter re-run after the stale-command fix (07:35 Thai time)
+- With `08eb36b` (ignore `/cmd_vel` older than 1 s), filter off and on were both re-run from one image, one job at a time:
+  - `side_step_bush`: off **5/9**, on **9/9**;
+  - the 10 solo moves with realism: off 26/30, no contact; on 25/30, 3 contacts.
+- The contacts are not the filter: `walk_1p0` seeds 0 and 2 re-ran at ≥ 0.52 m, seeds 3–7 pass 5/5 both ways, and `come_back` is the known open question.
+- Write-up updated (`experiments/sim/2026-10-26_static_filter.md`).
+- The dashboard filter tab is rebuilt from the new runs and adds a "ท่าคนเดียว 10 ท่า" (10 solo moves) row. The point-cloud maps now come from these runs: ICP ends within 0.02–0.12 m, dead reckoning within 0.06–1.16 m.
+- The filter stays off by default on its branch; it needs review and a robot check.
