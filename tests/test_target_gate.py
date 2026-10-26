@@ -239,6 +239,16 @@ class TargetGateTest(unittest.TestCase):
         self.assertFalse(ok)
         self.assertEqual(est, (0.1, 0.0, 0.0))
 
+    def test_icp_keyframe_leaves_out_a_walking_person(self):
+        m = self.m
+        wall = [(D(-60 + i), 2.0 / math.cos(D(-60 + i))) for i in range(0, 121)]  # a long wall 2 m ahead
+        person = [(D(80 + 0.5 * i), 1.5) for i in range(-10, 11)]               # person-sized, 1.5 m away
+        bush = [(D(-120 + 0.5 * i), 3.0) for i in range(-4, 5)]
+        static = lambda b, r: abs(b - D(-120)) < 0.05                        # only the bush stayed put
+        kept = m.static_points(wall + person + bush, static)
+        self.assertEqual(len(kept), len(wall) + len(bush))
+        self.assertTrue(all(abs(b - D(80)) > D(10) for b, _ in kept))
+
     def test_old_three_value_messages_work(self):
         g = self.Gate()
         self.assertTrue(g.accept(0.0, 0.0, 0.8, None))

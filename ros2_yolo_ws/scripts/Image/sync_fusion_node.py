@@ -32,23 +32,30 @@ def in_path(bearing, rng, half_width_m):
     return rng * math.cos(bearing) > 0.0 and abs(rng * math.sin(bearing)) <= half_width_m
 
 
-def lidar_clusters(points, gap_m=0.15):
-    """Group a scan, sorted by bearing, into clusters of neighbouring returns.
+def lidar_groups(points, gap_m=0.15):
+    """Split a scan, sorted by bearing, into runs of neighbouring (bearing, range) returns.
 
-    Two neighbours belong together when their ranges differ by less than gap_m. Returns a list of
-    (bearing of the middle return, closest range, length in metres from the first to the last return).
+    Two neighbours belong together when their ranges differ by less than gap_m.
     """
-    pts = sorted(points)
     clusters, cur = [], []
-    for b, r in pts:
+    for b, r in sorted(points):
         if cur and (abs(r - cur[-1][1]) > gap_m or b - cur[-1][0] > math.radians(3.0)):
             clusters.append(cur)
             cur = []
         cur.append((b, r))
     if cur:
         clusters.append(cur)
+    return clusters
+
+
+def lidar_clusters(points, gap_m=0.15):
+    """Group a scan into clusters of neighbouring returns (see lidar_groups).
+
+    Returns a list of (bearing of the middle return, closest range, length in metres from the first to
+    the last return).
+    """
     out = []
-    for c in clusters:
+    for c in lidar_groups(points, gap_m):
         rmin = min(r for _, r in c)
         # straight-line distance between the first and last return, so depth counts too: a crop row
         # seen at an angle is long even when it spans a narrow angle
@@ -134,6 +141,20 @@ def icp_2d(points, ref, init, gates=(0.5, 0.4, 0.3, 0.25, 0.2, 0.15, 0.12, 0.1, 
         if abs(dth) < 1e-4 and abs(tx) < 1e-4 and abs(ty) < 1e-4:
             break
     return T, True
+
+
+def static_points(points, is_static, person_width_m=(0.15, 0.8)):
+    """The (bearing, range) points of a scan that ICP may use as fixed structure.
+
+    A person-sized cluster counts only once is_static(bearing, range) says it has stayed put, so a
+    walking person is left out. Other clusters (walls, crop rows, thin posts) always count: their
+    cluster position shifts as the robot drives past, so StaticMap cannot vouch for them.
+    """
+    out = []
+    for c, (b, r, width) in zip(lidar_groups(points), lidar_clusters(points)):
+        if not (person_width_m[0] <= width <= person_width_m[1]) or is_static(b, r):
+            out.extend(c)
+    return out
 
 
 class StaticMap:
@@ -483,8 +504,13 @@ class SyncFusionNode(Node):
                                        f"icp_ok={self.icp_ok} icp_fail={self.icp_fail}")
 
     def match_scan(self, pts):
-        """Correct the filter's pose by matching this scan against the keyframe (refreshed every second)."""
-        xy = [(r * math.cos(b), r * math.sin(b)) for i, (b, r) in enumerate(pts) if i % 2 == 0 and r < 10.0]
+        """Correct the filter's pose by matching this scan against the keyframe (refreshed every second).
+
+        The keyframe leaves out person-sized clusters the map does not yet call static. Otherwise, with
+        little fixed structure around (one bush), ICP matches the walking person and the pose follows them.
+        """
+        to_xy = lambda ps: [(r * math.cos(b), r * math.sin(b)) for i, (b, r) in enumerate(ps) if i % 2 == 0 and r < 10.0]
+        xy = to_xy(pts)
         if self.key is not None:
             _, grid, key_pose, _ = self.key
             rel, ok = icp_2d(xy, grid, pose_relative(key_pose, self.static_map.pose))
@@ -494,7 +520,8 @@ class SyncFusionNode(Node):
             else:
                 self.icp_fail += 1  # too little static structure: keep the command-based guess
         if self.key is None or self.scan_time - self.key[3] >= 1.0:
-            self.key = (xy, PointGrid(xy), self.static_map.pose, self.scan_time)
+            key_xy = to_xy(static_points(pts, self.static_map.is_static))
+            self.key = (key_xy, PointGrid(key_xy), self.static_map.pose, self.scan_time)
 
     def track_with_lidar(self):
         """The target stepped out of the camera's view: keep it with the LiDAR and turn towards it.
