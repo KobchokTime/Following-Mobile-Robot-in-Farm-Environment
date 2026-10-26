@@ -405,6 +405,7 @@ class SyncFusionNode(Node):
         self.key = None          # (scan points, PointGrid, pose, time) of the ICP keyframe
         self.icp_fail = 0
         self.icp_ok = 0
+        self.static_dropped = 0
         self.static_log_time = None
         self.last_camera_fix = None  # time of the last camera detection accepted as the target
         self.last_camera_bearing = 0.0
@@ -501,7 +502,13 @@ class SyncFusionNode(Node):
                 self.static_log_time = self.scan_time
                 x, y, th = self.static_map.pose
                 self.get_logger().info(f"[STATIC] t={self.scan_time:.2f} pose=({x:.3f},{y:.3f},{math.degrees(th):.1f}deg) "
-                                       f"icp_ok={self.icp_ok} icp_fail={self.icp_fail}")
+                                       f"icp_ok={self.icp_ok} icp_fail={self.icp_fail} dropped={self.static_dropped}")
+
+    def excluded(self, bearing, rng):
+        """StaticMap.is_static, counting the clusters it keeps from LiDAR tracking (logged with [STATIC])."""
+        static = self.static_map.is_static(bearing, rng)
+        self.static_dropped += static
+        return static
 
     def match_scan(self, pts):
         """Correct the filter's pose by matching this scan against the keyframe (refreshed every second).
@@ -542,7 +549,7 @@ class SyncFusionNode(Node):
         if not scan_is_fresh(now, self.scan_time, self.scan_max_age):
             return  # no recent scan: do not steer by an old one; the controller's normal stop applies
         found = lidar_track(self.scan_points, pb, pr, math.radians(25.0), 0.5,
-                            exclude=self.static_map.is_static if self.static_map is not None else None)
+                            exclude=self.excluded if self.static_map is not None else None)
         if found is None:
             return
         bearing, rng = found
