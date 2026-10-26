@@ -1014,3 +1014,12 @@ Earlier history: `history-2026-10-16.md`.
 - Write-up updated (`experiments/sim/2026-10-26_static_filter.md`).
 - The dashboard filter tab is rebuilt from the new runs and adds a "ท่าคนเดียว 10 ท่า" (10 solo moves) row. The point-cloud maps now come from these runs: ICP ends within 0.02–0.12 m, dead reckoning within 0.06–1.16 m.
 - The filter stays off by default on its branch; it needs review and a robot check.
+
+### 2026-10-26 — research — Read the Kim, Suh and Kwon (2024) paper (12:35 Thai time)
+- The user pushed the paper to `codex/robot-backup-quarantine:Paper/` (Git LFS). I read it from a scratch copy; that branch is untouched and the PDF is not copied elsewhere.
+- `docs/paper_comparison_kim2024.md` covers:
+  - what the paper does: online GMM colour re-identification, ICP-based dynamic non-target detection with a wheel-odometry guess, GNN tracking, and a particle filter with a negative factor for non-targets;
+  - how our system compares;
+  - what to take from it: wheel odometry as the ICP guess, CT/CL/WT/WL states for E5 and E6, the negative factor, online colour learning;
+  - a draft paragraph for thesis chapter 2.
+- The paper is an SSRN preprint and has not been peer reviewed.
