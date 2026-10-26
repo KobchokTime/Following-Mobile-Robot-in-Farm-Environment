@@ -1,6 +1,9 @@
-# Clothing colour on two lab videos (2025-04-08)
+# Clothing colour on video: two lab clips and five held-out clips
 
 - **Date of analysis:** 2026-10-26.
+- **Folder:** renamed from `lab_videos_2025-04-08` when the held-out clips were added. The robot-side
+  change is on branch `claude/robot/hs-colour`. `gate_replay.py`, `heldout.py` and
+  `variants_heldout.py` load the gate from that branch through `$SYNC_FUSION`.
 - **Videos:** `Videos/WIN_20250408_14_00_41_Pro.mp4` and `WIN_20250408_14_10_21_Pro.mp4` on
   `codex/robot-backup-quarantine` (Git LFS).
   - 1080p, 60 fps, 52 s and 54 s long.
@@ -124,3 +127,73 @@ CT/CL/WT/WL with the blue top as target:
    - Colour only, without the bearing and range gate.
    - The labels are by eye.
    - The GMM threshold is ours, not the paper's.
+
+## Follow-up: an H,S histogram in the robot's TargetGate (branch `claude/robot/hs-colour`)
+
+- **The paper's GMM is too slow to re-fit on the robot**, so a lighter model was built with the same
+  ideas: H,S only and re-learned from the last 10 boxes.
+  - The camera node sends a 12 × 4 H,S histogram of the torso (per mille) after `cb, cr`.
+  - The gate compares it with the mean of the target's last 10 learned histograms (Hellinger
+    distance, σ = 0.2).
+  - A box is learned only if it is about as close to that mean as the boxes already learned (slack
+    0.1). Without this guard the model drifted to the other person (dark target ranked first in 20 %
+    of frames).
+  - All settings were chosen on the two lab clips (`hist_variants.py`, `results_hist_variants.txt`).
+
+### Held-out clips (`heldout.py`, `results_heldout.txt`)
+
+The settings were then frozen and checked on five clips from the same branch that had not been used
+yet. Each clip has one person, filmed outdoors.
+
+| Clip | Video | Person |
+|---|---|---|
+| `park_black_1`, `park_black_2` | `WIN_20241126_14_23_33`, `14_24_34` | black tee, parking lot in sun |
+| `park_pattern` | `WIN_20241126_14_26_37` | patterned shirt, parking lot |
+| `farm_beige_1`, `farm_beige_2` | `WIN_20241210_13_47_33`, `13_51_31` | beige tee, greenhouse path in sun and shade |
+
+- In `farm_beige_1` a second worker (hat, light blue top) walks through the frame for a few seconds.
+- `WIN_20241126_14_39_25` (1.5 s, a desk, nobody in it) was not used.
+- **Labels:** every box was checked by eye, and boxes showing only an arm or a blur were left out
+  (`labels_*.json`).
+- **Two checks:**
+  - **A. Kept own:** the share of the person's frames the gate keeps accepting.
+  - **B. Strangers:** each frame also shows a box of a different person from another clip. The check
+    is whether the gate still scores its own person highest.
+
+**The histogram alone failed the held-out check:**
+
+| | Cb/Cr | Histogram alone | Histogram + Cb/Cr, half each (adopted) |
+|---|---|---|---|
+| A. Kept own, worst clip | 99.7 % | **37.4 %** (black tee) | 89.8 % (black tee) |
+| A. Kept own, mean of 5 | 99.9 % | 85.0 % | 97.7 % |
+| B. Strangers ranked first, all pairs | 60.1 % | 54.3 % | **65.9 %** |
+| Lab clips: blue target ranked first | 14–26 % | 97–99 % | **97–99 %** |
+| Lab clips: grey target ranked first | 88–99 % | 97–99 % | **97–99 %** |
+
+- **Why the histogram alone fails:** hue is noise on black, grey, beige and sun-bleached white.
+  - The black tee's histogram moved between frames, and the guard then refused to learn it.
+  - Cb/Cr is steady on such tops but fails on a blue top in shade.
+  - Half of each kept the strengths of both (`variants_heldout.py`, `results_variants.txt`).
+- **Caveat: half-and-half was chosen after seeing the held-out results.**
+  - Five variants were tried, and the half-and-half mix is the plainest of them.
+  - So the held-out clips are no longer fully unseen. Robot-day E4 data is the real test.
+- **"Strangers" is a harsh, artificial test.**
+  - The stranger comes from another clip with other light and another camera position.
+  - No colour model separates the lab's dark grey top from the black tee (21–35 %) or the patterned
+    shirt (2–4 %).
+  - On the robot the bearing and range gate decides in such cases.
+- **The real second person in `farm_beige_1`** was never ranked above the target by any of the three gate models.
+
+### In the robot
+
+- **Camera:** `ros2_yolo_live.torso_hs_hist` appends 48 values to `/target_centroid_sector`. Readers
+  of the first five values are unaffected.
+- **Gate:** `TargetGate` with `hist_weight` 0.5. With no histogram, Cb/Cr counts in full as before.
+  `use_hs_hist:=false` turns the histogram off.
+- **Twin:** draws a matching histogram from the observed chroma on its own random stream. Every other
+  twin value is bit-identical to before, checked open-loop over all scenarios with and without
+  realism. Two new scenarios form the `colour` set, apart from the frozen identity set:
+  - `shade_crossing`: a grey-top person crosses in deep shade in front of a blue-top target;
+  - `shade_side_by_side`.
+- **Gate replay** (`gate_replay.py`, `results_gate_replay.txt`) gives the same numbers as the offline
+  model.

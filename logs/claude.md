@@ -1055,3 +1055,23 @@ Earlier history: `history-2026-10-16.md`.
 - **Next, if wanted:**
   - try an H,S colour model in `TargetGate`, re-fit once a second or with a fixed k;
   - re-check on E4 robot-day data.
+
+### 2026-10-26 — robot + research + dashboard — H,S colour histogram in the target gate (23:10 Thai time)
+- **Branch `claude/robot/hs-colour` (`f28b011`, `a936d3f`). It is not merged.**
+  - `ros2_yolo_live` appends a 12×4 torso hue-saturation histogram after `cb, cr`.
+  - `TargetGate` scores colour as half Cb/Cr and half histogram.
+    - The histogram is a Hellinger distance to the mean of the target's last 10 learned boxes, with σ 0.2.
+    - A box is learned only if it is about as close as those already learned (slack 0.1).
+    - `use_hs_hist:=false` goes back to Cb/Cr only. Without a histogram, Cb/Cr counts in full.
+  - **Twin:** a matching histogram is drawn from the observed chroma on its own random stream. Every other value is bit-identical, checked open-loop over all scenarios with and without realism.
+  - **New `colour` scenario set:** `shade_crossing` and `shade_side_by_side`. The identity set is untouched.
+  - 125 tests pass.
+- **Evidence:** `experiments/identity/clothing_colour_videos/`, renamed from `lab_videos_2025-04-08`.
+  - **Lab clips, colour only, target ranked first:** blue target 14–26 % → 97–99 %; grey target 88–99 % → 97–99 %.
+  - **Five held-out clips from `Videos/`** (parking lot, greenhouse path):
+    - the histogram alone lost a black tee (37 % kept), so half-and-half was adopted;
+    - kept own person 90–100 % (Cb/Cr 99.7–100 %);
+    - strangers from other clips ranked below own person 65.9 % (Cb/Cr 60.1 %).
+  - **Caveat:** half-and-half was chosen after seeing the held-out clips, with 5 variants tried. E4 on robot day is the real test.
+- **Twin closed-loop runs** (colour set, plus identity/solo regression, histogram on and off) are still running. They will be added here and to the dashboard.
+- **Dashboard v2:** new tab "สีเสื้อ" (clothing colour) with a crop montage, a Cb/Cr scatter, the methods chart and the held-out chart (page version 12).

@@ -1,0 +1,34 @@
+A. stability: share of the person's frames the gate accepts (CT / (CT + WL))
+  park_black_1  Cb,Cr 100.0% | Cb,Cr + H,S hist  89.8%
+  park_black_2  Cb,Cr 100.0% | Cb,Cr + H,S hist 100.0%
+  park_pattern  Cb,Cr 100.0% | Cb,Cr + H,S hist 100.0%
+  farm_beige_1  Cb,Cr  99.7% (real other person ranked below: 100.0%) | Cb,Cr + H,S hist  98.7% (real other person ranked below: 100.0%)
+  farm_beige_2  Cb,Cr 100.0% | Cb,Cr + H,S hist 100.0%
+B. strangers: own person ranked first / stranger taken (WT share of frames)
+  park_black_1  vs park_pattern  Cb,Cr  52.4% /  50.3% | Cb,Cr + H,S hist  29.9% /  71.6%
+  park_black_1  vs farm_beige_1  Cb,Cr  97.3% /   7.7% | Cb,Cr + H,S hist  31.3% /  70.3%
+  park_black_1  vs farm_beige_2  Cb,Cr  76.9% /  27.1% | Cb,Cr + H,S hist  34.7% /  67.1%
+  park_black_1  vs lab_blue      Cb,Cr  81.0% /  23.2% | Cb,Cr + H,S hist  43.5% /  56.8%
+  park_black_1  vs lab_grey      Cb,Cr  21.1% /  80.0% | Cb,Cr + H,S hist  25.9% /  75.5%
+  park_black_2  vs park_pattern  Cb,Cr  97.7% /  21.2% | Cb,Cr + H,S hist  38.3% /  69.1%
+  park_black_2  vs farm_beige_1  Cb,Cr  88.0% /  29.1% | Cb,Cr + H,S hist 100.0% /  19.4%
+  park_black_2  vs farm_beige_2  Cb,Cr  75.9% /  38.8% | Cb,Cr + H,S hist  97.0% /  21.8%
+  park_black_2  vs lab_blue      Cb,Cr  91.0% /  26.7% | Cb,Cr + H,S hist  46.6% /  62.4%
+  park_black_2  vs lab_grey      Cb,Cr  32.3% /  73.9% | Cb,Cr + H,S hist  34.6% /  72.1%
+  park_pattern  vs park_black_1  Cb,Cr  88.8% /  13.7% | Cb,Cr + H,S hist  98.8% /   4.0%
+  park_pattern  vs park_black_2  Cb,Cr   4.1% /  96.0% | Cb,Cr + H,S hist  98.2% /   4.6%
+  park_pattern  vs farm_beige_1  Cb,Cr  75.9% /  26.3% | Cb,Cr + H,S hist  22.9% /  77.7%
+  park_pattern  vs farm_beige_2  Cb,Cr  52.9% /  48.6% | Cb,Cr + H,S hist  84.1% /  18.3%
+  park_pattern  vs lab_blue      Cb,Cr  99.4% /   3.4% | Cb,Cr + H,S hist  99.4% /   3.4%
+  park_pattern  vs lab_grey      Cb,Cr   2.4% /  97.7% | Cb,Cr + H,S hist   3.5% /  96.6%
+  farm_beige_1  vs park_black_1  Cb,Cr  18.0% /  82.6% | Cb,Cr + H,S hist  19.1% /  61.4%
+  farm_beige_1  vs park_black_2  Cb,Cr  13.6% /  86.8% | Cb,Cr + H,S hist  88.5% /  13.9%
+  farm_beige_1  vs park_pattern  Cb,Cr  42.4% /  58.9% | Cb,Cr + H,S hist  33.0% /  67.9%
+  farm_beige_1  vs lab_blue      Cb,Cr  98.1% /   4.7% | Cb,Cr + H,S hist  95.7% /   6.6%
+  farm_beige_1  vs lab_grey      Cb,Cr  98.1% /   4.7% | Cb,Cr + H,S hist  92.4% /   9.8%
+  farm_beige_2  vs park_black_1  Cb,Cr  63.4% /  36.6% | Cb,Cr + H,S hist  99.5% /   0.5%
+  farm_beige_2  vs park_black_2  Cb,Cr  48.1% /  51.9% | Cb,Cr + H,S hist  99.5% /   0.5%
+  farm_beige_2  vs park_pattern  Cb,Cr  60.7% /  39.3% | Cb,Cr + H,S hist  65.0% /  35.0%
+  farm_beige_2  vs lab_blue      Cb,Cr  97.8% /   2.2% | Cb,Cr + H,S hist 100.0% /   0.0%
+  farm_beige_2  vs lab_grey      Cb,Cr  95.6% /   4.4% | Cb,Cr + H,S hist 100.0% /   0.0%
+  all pairs ranked first: Cb,Cr  60.1% | Cb,Cr + H,S hist  65.9%
