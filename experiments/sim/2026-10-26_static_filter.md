@@ -88,3 +88,70 @@
   - a review (Codex);
   - a robot-day check;
   - preferably real ego-motion: ZLAC wheel feedback or ICP in `StaticMap`.
+
+## Update 2: ICP pose in the node (`4e365a9`, `c14fb1f`, `1e802dc`)
+
+- **What changed on `claude/robot/static-filter`:**
+  - `static_pose:=icp` (the default when the filter is on) corrects `StaticMap`'s pose with 2D
+    point-to-point ICP against a keyframe refreshed every second. The `/cmd_vel` pose is the initial
+    guess and the fallback when fewer than 40 points match.
+  - The twin gains LiDAR-only walls and `side_step_rows`: `side_step_bush` between two crop-row walls.
+  - Every 2 s `sync_fusion` logs the filter's pose, ICP matches and failures, and how many clusters it
+    kept from LiDAR tracking as static (`[STATIC]`).
+- **All runs:** `mps`, `steer_mode:=bearing`, one job at a time. The pose error compares the logged pose
+  with the twin's true pose.
+
+### First run: ICP matched the walking person (`4e365a9`, seeds 0–4)
+
+| Set | Off | `/cmd_vel` pose | ICP pose | ICP pose error at the end |
+|---|---|---|---|---|
+| `side_step_rows`, clean | 4/5 | 3/5 | 4/5 | 0.07–0.11 m |
+| `side_step_rows`, realism | 5/5 | 4/5 | 4/5 | 0.07–0.18 m (`/cmd_vel`: 0.20–1.62 m) |
+| `side_step_bush`, clean | 4/5 | 5/5 | 4/5 | **1.3–3.5 m, 66–110°** |
+| `side_step_bush`, realism | 3/5 | 3/5 | 5/5 | 0.65–0.99 m |
+
+- **With walls ICP is accurate** and never fell back to the guess.
+- **With only one bush and the target in range, ICP locked onto the walking person** and the pose
+  followed them.
+- **Fix (`c14fb1f`):**
+  - A person-sized cluster (0.15–0.8 m) enters the keyframe only after `StaticMap` calls it static.
+  - Walls and rows always count. Their cluster position shifts as the robot drives past, so
+    `StaticMap` cannot vouch for them.
+  - With too little left, ICP fails and the guess is kept.
+
+### After the fix (`c14fb1f` + `1e802dc`, seeds 0–4, each run twice)
+
+| Set | Off | ICP | ICP failed (kept the guess) | ICP pose error, median of the run maxima (worst) |
+|---|---|---|---|---|
+| `side_step_rows`, clean | 9/10 | 6/10 | 0% | 0.34 m (0.69) |
+| `side_step_rows`, realism | 4/10 | 5/10 | 0% | 0.07 m (0.38) |
+| `side_step_bush`, clean | 9/10 | 10/10 | 54% | 0.19 m (0.75) |
+| `side_step_bush`, realism | 5/10 | 6/10 | 28% | 0.41 m (0.60) |
+| **Total** | **27/40** | **27/40** | | |
+
+- **No contact in any run.**
+- **Regression (`c14fb1f`, realism, `bearing`, seeds 0–2):**
+  - solo: 28/30, against 30/30 with the filter off in `2026-10-25_bearing_steer.md`;
+  - identity: 15/15;
+  - the two solo failures are `come_back` seed 2 (contact, closest 0.40 m, the known `come_back`
+    question) and `side_step` seed 2 (target lost).
+- **The bush no longer drags the pose away**, but the fallback is used for half the scans there.
+- **In the clean rows the pose got worse than before the fix** (median 0.34 m against 0.07–0.11 m).
+  The likely cause, not checked: parts of a wall cut by occlusion look person-sized and are dropped.
+- **The runs are too random to separate the filter's effect.**
+  - The same seed passed in one repeat and failed in the other in 1–4 of 5 seeds, in every set but
+    ICP in the clean bush.
+  - Every failure, filter on or off, is the same: the target is lost when it steps out of view
+    (target visible about 20% of the run).
+- **The diagnostic log gives a hint, not proof.** ICP runs that lost the target dropped somewhat more
+  clusters as static than runs that passed: 1–13 against 1–3 in the bush with realism, and up to 49
+  in one rows run. A dropped cluster may be the target.
+
+## Conclusion (update 2)
+
+- **Keep the filter off.** In the twin it gives no measurable gain: 27/40 both ways.
+- **ICP is a good pose source where there is fixed structure** (walls: 0.07 m against up to 1.6 m for
+  `/cmd_vel` with slip), and a poor one in an open field.
+- **For the thesis:** a tried-and-measured extension. The paper's idea needs both wheel odometry and
+  enough fixed structure. Report it as future work together with ZLAC wheel feedback as the ICP guess.
+- **Data:** dashboard v2, filter tab ("รอบล่าสุด" card, dataset `icp_trial_runs`).

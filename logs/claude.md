@@ -1023,3 +1023,18 @@ Earlier history: `history-2026-10-16.md`.
   - what to take from it: wheel odometry as the ICP guess, CT/CL/WT/WL states for E5 and E6, the negative factor, online colour learning;
   - a draft paragraph for thesis chapter 2.
 - The paper is an SSRN preprint and has not been peer reviewed.
+
+### 2026-10-26 — robot + research — ICP pose in the static filter, measured (15:15 Thai time)
+- **Branch `claude/robot/static-filter`. It is not merged, and the filter stays off by default.**
+  - `4e365a9`: `static_pose:=icp` corrects `StaticMap`'s pose with keyframe ICP, using `/cmd_vel` as the guess and fallback. It also adds twin walls and the `side_step_rows` scenario.
+  - `1dd263a`, `1e802dc`: `[STATIC]` log every 2 s with the pose, ICP match and failure counts, and the clusters dropped from LiDAR tracking.
+  - `c14fb1f`: the ICP keyframe leaves out person-sized clusters that are not static yet. In the clean `side_step_bush` the pose had locked onto the walking person (3.5 m and 110° off). With the fix it stays at 0.11–0.48 m and falls back to the guess instead. `lidar_clusters` is split into `lidar_groups` for reuse.
+  - 127 tests pass.
+- **Twin (`mps`, `bearing`, seeds 0–4 × 2 repeats):** filter off 27/40, ICP 27/40, no contact.
+  - The same seed often flips between repeats, so the filter's effect cannot be separated.
+  - Every failure is the target lost after it steps out of view.
+- **ICP pose with walls:** about 0.07 m, against up to 1.6 m for `/cmd_vel` with slip.
+- **Regression with ICP:** solo 28/30, where the two failures are `come_back` s2 (contact, 0.40 m) and `side_step` s2. Identity 15/15.
+- **Conclusion:** keep it off. For the thesis it is future work, with ZLAC wheel feedback as the ICP guess.
+  - Write-up: `experiments/sim/2026-10-26_static_filter.md` (Update 2).
+  - Dashboard v2, filter tab: new card, dataset `icp_trial_runs`, page version 11.
