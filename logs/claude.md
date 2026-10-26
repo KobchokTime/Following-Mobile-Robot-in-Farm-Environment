@@ -1038,3 +1038,20 @@ Earlier history: `history-2026-10-16.md`.
 - **Conclusion:** keep it off. For the thesis it is future work, with ZLAC wheel feedback as the ICP guess.
   - Write-up: `experiments/sim/2026-10-26_static_filter.md` (Update 2).
   - Dashboard v2, filter tab: new card, dataset `icp_trial_runs`, page version 11.
+
+### 2026-10-26 — research — Clothing colour on the two 2025-04-08 lab videos (22:15 Thai time)
+- **Task:** at the user's request, I used `Videos/WIN_20250408_14_00_41_Pro.mp4` and `WIN_20250408_14_10_21_Pro.mp4` from `codex/robot-backup-quarantine`.
+  - They came through Git LFS into a scratch copy. That branch is untouched and the videos are not copied into the repository.
+- **Data:**
+  - Ran the project's YOLOv8n OpenVINO model at 10 fps (914 person boxes) and took each box's torso Cb/Cr, as in `ros2_yolo_live`.
+  - Labelled every box by eye: blue top, dark top, or other.
+- **Result:** with colour only, the blue-top person is the target and both people are in view.
+  - Our Cb/Cr reference ranks the target first in **14–26 %** of frames.
+  - The paper's H,S GMM, re-learned from the last 10 boxes, ranks it first in **78–92 %**. Learned once, 58–67 %.
+  - With the dark top as the target, both methods reach 88–100 %.
+- **Cause:** the blue top reads grey (Cb 128–132) in shade and backlight, which is 26–28 % of its boxes. Lock-on also happened in backlight.
+- **Cost:** the GMM re-fit with BIC takes about 0.7 s on 4 cores, so it cannot re-fit every frame.
+- **Files:** `experiments/identity/lab_videos_2025-04-08/` (README, scripts, labels, detections, H,S samples).
+- **Next, if wanted:**
+  - try an H,S colour model in `TargetGate`, re-fit once a second or with a fixed k;
+  - re-check on E4 robot-day data.
