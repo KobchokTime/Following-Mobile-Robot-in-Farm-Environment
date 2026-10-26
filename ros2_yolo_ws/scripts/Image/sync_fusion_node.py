@@ -383,6 +383,8 @@ class SyncFusionNode(Node):
             raise ValueError(f"static_pose must be 'icp' or 'cmd', got {self.static_pose!r}")
         self.key = None          # (scan points, PointGrid, pose, time) of the ICP keyframe
         self.icp_fail = 0
+        self.icp_ok = 0
+        self.static_log_time = None
         self.last_camera_fix = None  # time of the last camera detection accepted as the target
         self.last_camera_bearing = 0.0
         self.edge_rad = math.radians(self.camera_hfov_deg / 2.0 - float(self.get_parameter('lidar_edge_deg').value))
@@ -474,6 +476,11 @@ class SyncFusionNode(Node):
             if self.static_pose == 'icp':
                 self.match_scan(pts)
             self.static_map.update(self.scan_time, [(b, r) for b, r, _ in lidar_clusters(pts)])
+            if self.static_log_time is None or self.scan_time - self.static_log_time >= 2.0:
+                self.static_log_time = self.scan_time
+                x, y, th = self.static_map.pose
+                self.get_logger().info(f"[STATIC] t={self.scan_time:.2f} pose=({x:.3f},{y:.3f},{math.degrees(th):.1f}deg) "
+                                       f"icp_ok={self.icp_ok} icp_fail={self.icp_fail}")
 
     def match_scan(self, pts):
         """Correct the filter's pose by matching this scan against the keyframe (refreshed every second)."""
@@ -482,6 +489,7 @@ class SyncFusionNode(Node):
             _, grid, key_pose, _ = self.key
             rel, ok = icp_2d(xy, grid, pose_relative(key_pose, self.static_map.pose))
             if ok:
+                self.icp_ok += 1
                 self.static_map.pose = pose_compose(key_pose, rel)
             else:
                 self.icp_fail += 1  # too little static structure: keep the command-based guess
