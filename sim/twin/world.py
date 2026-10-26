@@ -17,7 +17,8 @@ Each detection also carries the clothing chroma `(Cb, Cr)` that the thesis's app
 uses (YCbCr, 0-255, 128 = grey). It is observed with noise, and shade pulls it towards grey. It
 comes from its own random stream, so adding it does not change any other simulated value. A torso
 hue-saturation histogram (12 x 4 bins, per mille, as `ros2_yolo_live.torso_hs_hist`) is drawn from
-that observed chroma, again from its own stream.
+the clothing colour, again from its own stream. Shade lowers its saturation far less than it pulls
+Cb/Cr towards grey: Cb/Cr shrink with brightness, HSV saturation does not.
 
 Frames: x forward, y left, yaw counter-clockwise (ROS REP-103). Image x grows to
 the right, so a person on the robot's left has a small `cx`.
@@ -115,12 +116,14 @@ def observe_clothing(people: Sequence["Person"], world_x: Dict[str, float], shad
 HS_BINS = (12, 4)
 
 
-def clothing_hist(cb: int, cr: int, rng: random.Random, pixels: int = 60,
+def clothing_hist(cb: float, cr: float, rng: random.Random, shade: float = 1.0, pixels: int = 60,
                   hue_noise: float = 4.0, sat_noise: float = 18.0) -> Tuple[int, ...]:
-    """Torso H,S histogram (OpenCV ranges, per mille) for an observed chroma.
+    """Torso H,S histogram (OpenCV ranges, per mille) for a full-light clothing chroma.
 
-    The colour is taken at a mid brightness (Y = 120). Hue is kept as the chroma fades towards grey,
-    while saturation drops, which is what the lab videos show in shade.
+    The colour is taken at a mid brightness (Y = 120). In shade (factor < 1) hue is kept and
+    saturation scales by 0.6 + 0.4 * shade. Calibrated on the 2025-04-08 lab video: a blue top in
+    shade read grey in Cb/Cr, yet its histogram stayed about 0.57 (Hellinger) from the top in good
+    light (experiments/identity/clothing_colour_videos); here deep shade gives about 0.5.
     """
     y = 120.0
     rgb = [max(0.0, min(255.0, v)) / 255.0 for v in
@@ -129,7 +132,7 @@ def clothing_hist(cb: int, cr: int, rng: random.Random, pixels: int = 60,
     counts = [0] * (HS_BINS[0] * HS_BINS[1])
     for _ in range(pixels):
         hue = (h * 180.0 + rng.gauss(0.0, hue_noise)) % 180.0
-        sat = max(0.0, min(255.0, s * 255.0 + rng.gauss(0.0, sat_noise)))
+        sat = max(0.0, min(255.0, s * (0.6 + 0.4 * shade) * 255.0 + rng.gauss(0.0, sat_noise)))
         counts[min(HS_BINS[0] - 1, int(hue * HS_BINS[0] / 180.0)) * HS_BINS[1]
                + min(HS_BINS[1] - 1, int(sat * HS_BINS[1] / 256.0))] += 1
     return tuple(int(round(1000.0 * c / pixels)) for c in counts)
@@ -343,8 +346,10 @@ class World:
         chroma = observe_clothing(self.people, {p.name: p.position(self.t)[0] for p in self.people},
                                   self.shade, self.sensors.chroma_noise, self.color_rng)
         dets = project_detections(self.people_robot_frame(), self.sensors, self.rng, chroma)
+        people = {p.name: p for p in self.people}
         for d in dets:
-            d.hist = clothing_hist(d.cb, d.cr, self.hist_rng)
+            p = people[d.person]
+            d.hist = clothing_hist(*p.clothing, self.hist_rng, shade_factor(p.position(self.t)[0], self.shade))
         if not self.realism:
             return dets
         return self._realistic(dets)
