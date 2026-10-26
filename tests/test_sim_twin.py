@@ -137,3 +137,8 @@ class RealismTest(unittest.TestCase):
         w = world_with()
         w.obstacles = ((1.0, 0.0, 0.1),)
         self.assertAlmostEqual(w.scan()[0], 0.9, places=2)
+
+    def test_scenario_walls_show_in_scan(self):
+        w = world_with()
+        w.walls = ((1.0, -1.0, 1.0, 1.0),)   # a wall 1 m ahead, across the path
+        self.assertAlmostEqual(w.scan()[0], 1.0, places=2)

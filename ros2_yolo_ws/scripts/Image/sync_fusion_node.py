@@ -58,6 +58,84 @@ def lidar_clusters(points, gap_m=0.15):
     return out
 
 
+def pose_apply(pose, x, y):
+    """A robot-frame point (x, y) in the frame where the robot is at pose (x, y, yaw)."""
+    px, py, th = pose
+    c, s = math.cos(th), math.sin(th)
+    return px + c * x - s * y, py + s * x + c * y
+
+
+def pose_compose(a, b):
+    """Pose b, given in the frame of pose a, expressed in a's parent frame."""
+    x, y = pose_apply(a, b[0], b[1])
+    return x, y, a[2] + b[2]
+
+
+def pose_relative(a, b):
+    """Pose b expressed in the frame of pose a (the inverse of pose_compose)."""
+    dx, dy = b[0] - a[0], b[1] - a[1]
+    c, s = math.cos(a[2]), math.sin(a[2])
+    return c * dx + s * dy, -s * dx + c * dy, b[2] - a[2]
+
+
+class PointGrid:
+    """Nearest-neighbour lookup for a 2D scan, bucketed in square cells."""
+
+    def __init__(self, points, cell=0.15):
+        self.cell = cell
+        self.cells = {}
+        for p in points:
+            self.cells.setdefault((math.floor(p[0] / cell), math.floor(p[1] / cell)), []).append(p)
+
+    def nearest(self, x, y, max_d):
+        i, j, n = math.floor(x / self.cell), math.floor(y / self.cell), int(math.ceil(max_d / self.cell))
+        best, best_d2 = None, max_d * max_d
+        for di in range(-n, n + 1):
+            for dj in range(-n, n + 1):
+                for q in self.cells.get((i + di, j + dj), ()):
+                    d2 = (q[0] - x) ** 2 + (q[1] - y) ** 2
+                    if d2 < best_d2:
+                        best, best_d2 = q, d2
+        return best
+
+
+def icp_2d(points, ref, init, gates=(0.5, 0.4, 0.3, 0.25, 0.2, 0.15, 0.12, 0.1, 0.1, 0.1), min_pairs=40):
+    """Point-to-point ICP: the pose of the current scan in the reference scan's frame.
+
+    points: the current scan as robot-frame (x, y); ref: a PointGrid of the reference scan; init: a guess
+    (x, y, yaw), e.g. from the velocity commands. Each pass pairs every point with its nearest reference
+    point within a shrinking gate (moving people fall out as outliers) and solves the best rotation and
+    translation in closed form. Returns (pose, ok); ok is False when too few points matched, and then
+    the caller should keep its guess.
+    """
+    T = init
+    n = 0
+    for gate in gates:
+        pairs = []
+        for px, py in points:
+            wx, wy = pose_apply(T, px, py)
+            q = ref.nearest(wx, wy, gate)
+            if q is not None:
+                pairs.append((wx, wy, q[0], q[1]))
+        n = len(pairs)
+        if n < min_pairs:
+            return T, False
+        mx = sum(p[0] for p in pairs) / n
+        my = sum(p[1] for p in pairs) / n
+        qx = sum(p[2] for p in pairs) / n
+        qy = sum(p[3] for p in pairs) / n
+        sxx = sum((p[0] - mx) * (p[2] - qx) + (p[1] - my) * (p[3] - qy) for p in pairs)
+        sxy = sum((p[0] - mx) * (p[3] - qy) - (p[1] - my) * (p[2] - qx) for p in pairs)
+        dth = math.atan2(sxy, sxx)
+        c, s = math.cos(dth), math.sin(dth)
+        tx, ty = qx - (c * mx - s * my), qy - (s * mx + c * my)
+        x, y, th = T
+        T = (c * x - s * y + tx, s * x + c * y + ty, th + dth)
+        if abs(dth) < 1e-4 and abs(tx) < 1e-4 and abs(ty) < 1e-4:
+            break
+    return T, True
+
+
 class StaticMap:
     """Remembers LiDAR clusters in an odometry frame and flags the ones that do not move.
 
@@ -267,6 +345,9 @@ class SyncFusionNode(Node):
         self.declare_parameter('static_filter', False)
         self.declare_parameter('static_s', 2.0)
         self.declare_parameter('static_radius_m', 0.3)
+        # how the filter knows where the robot is: "icp" matches each scan against a keyframe (no odometry
+        # needed, after the paper's point-cloud matching); "cmd" integrates the velocity commands
+        self.declare_parameter('static_pose', 'icp')
 
         self.max_dt = float(self.get_parameter('max_dt').value)
         self.buffer_sec = float(self.get_parameter('buffer_sec').value)
@@ -297,6 +378,11 @@ class SyncFusionNode(Node):
         self.cmd = (0.0, 0.0)
         self.cmd_time = None
         self.last_scan_stamp = None
+        self.static_pose = str(self.get_parameter('static_pose').value)
+        if self.static_pose not in ('icp', 'cmd'):
+            raise ValueError(f"static_pose must be 'icp' or 'cmd', got {self.static_pose!r}")
+        self.key = None          # (scan points, PointGrid, pose, time) of the ICP keyframe
+        self.icp_fail = 0
         self.last_camera_fix = None  # time of the last camera detection accepted as the target
         self.last_camera_bearing = 0.0
         self.edge_rad = math.radians(self.camera_hfov_deg / 2.0 - float(self.get_parameter('lidar_edge_deg').value))
@@ -383,9 +469,24 @@ class SyncFusionNode(Node):
                 # the drive bridge stops the wheels 1 s after its last command, so an old command means standing still
                 fresh = self.cmd_time is not None and self.scan_time - self.cmd_time <= 1.0
                 v, w = self.cmd if fresh else (0.0, 0.0)
-                self.static_map.move(v, w, self.scan_time - self.last_scan_stamp)
+                self.static_map.move(v, w, self.scan_time - self.last_scan_stamp)  # the guess
             self.last_scan_stamp = self.scan_time
+            if self.static_pose == 'icp':
+                self.match_scan(pts)
             self.static_map.update(self.scan_time, [(b, r) for b, r, _ in lidar_clusters(pts)])
+
+    def match_scan(self, pts):
+        """Correct the filter's pose by matching this scan against the keyframe (refreshed every second)."""
+        xy = [(r * math.cos(b), r * math.sin(b)) for i, (b, r) in enumerate(pts) if i % 2 == 0 and r < 10.0]
+        if self.key is not None:
+            _, grid, key_pose, _ = self.key
+            rel, ok = icp_2d(xy, grid, pose_relative(key_pose, self.static_map.pose))
+            if ok:
+                self.static_map.pose = pose_compose(key_pose, rel)
+            else:
+                self.icp_fail += 1  # too little static structure: keep the command-based guess
+        if self.key is None or self.scan_time - self.key[3] >= 1.0:
+            self.key = (xy, PointGrid(xy), self.static_map.pose, self.scan_time)
 
     def track_with_lidar(self):
         """The target stepped out of the camera's view: keep it with the LiDAR and turn towards it.

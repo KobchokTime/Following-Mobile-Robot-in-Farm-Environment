@@ -51,6 +51,7 @@ class TargetGateTest(unittest.TestCase):
         cls.bearing_to_cx = staticmethod(module.bearing_to_cx)
         cls.scan_is_fresh = staticmethod(module.scan_is_fresh)
         cls.StaticMap = module.StaticMap
+        cls.m = module
 
     def test_old_or_missing_scans_are_not_used(self):
         self.assertTrue(self.scan_is_fresh(10.0, 9.9, 0.3))
@@ -197,6 +198,46 @@ class TargetGateTest(unittest.TestCase):
         pts = [(D(40 + i * 0.5), 1.2) for i in range(-12, 13)]  # one person-sized cluster at 40 deg
         self.assertIsNotNone(self.lidar_track(pts, D(40), 1.2, D(25), 0.5))
         self.assertIsNone(self.lidar_track(pts, D(40), 1.2, D(25), 0.5, exclude=lambda b, r: True))
+
+    def _row_scene(self, pose):
+        """Robot-frame points of two walls and a back fence, as seen from pose (x, y, yaw) in the world."""
+        m = self.m
+        pts = []
+        for i in range(0, 360, 2):
+            a = math.radians(i - 180)
+            best = None
+            for (x0, y0, x1, y1) in ((-1, -2, 9, -2), (-1, 2.6, 9, 2.6), (-1, -2, -1, 2.6)):
+                a0 = m.pose_relative(pose, (x0, y0, 0.0)); a1 = m.pose_relative(pose, (x1, y1, 0.0))
+                dx, dy = math.cos(a), math.sin(a); ex, ey = a1[0] - a0[0], a1[1] - a0[1]
+                den = dx * ey - dy * ex
+                if abs(den) < 1e-12:
+                    continue
+                t = (a0[0] * ey - a0[1] * ex) / den; u = (a0[0] * dy - a0[1] * dx) / den
+                if t > 0 and 0 <= u <= 1 and (best is None or t < best):
+                    best = t
+            if best is not None and best < 10:
+                pts.append((best * math.cos(a), best * math.sin(a)))
+        return pts
+
+    def test_icp_recovers_the_robot_motion_between_two_scans(self):
+        m = self.m
+        key_pose, now_pose = (1.0, 0.2, 0.1), (1.6, 0.35, 0.35)
+        ref = m.PointGrid(self._row_scene(key_pose))
+        cur = self._row_scene(now_pose) + [(1.0, 0.1 * k, ) for k in range(3)]  # plus a few points of a person
+        truth = m.pose_relative(key_pose, now_pose)
+        guess = (truth[0] - 0.15, truth[1] + 0.1, truth[2] - 0.08)          # a command-based guess, off
+        est, ok = m.icp_2d(cur, ref, guess)
+        self.assertTrue(ok)
+        self.assertAlmostEqual(est[0], truth[0], delta=0.03)
+        self.assertAlmostEqual(est[1], truth[1], delta=0.03)
+        self.assertAlmostEqual(est[2], truth[2], delta=0.01)
+
+    def test_icp_reports_failure_without_structure(self):
+        m = self.m
+        ref = m.PointGrid([(1.0, 0.0), (1.0, 0.05)])
+        est, ok = m.icp_2d([(1.0, 0.0), (1.0, 0.05)], ref, (0.1, 0.0, 0.0))
+        self.assertFalse(ok)
+        self.assertEqual(est, (0.1, 0.0, 0.0))
 
     def test_old_three_value_messages_work(self):
         g = self.Gate()

@@ -166,6 +166,18 @@ def _ray_circle(angle: float, cx: float, cy: float, r: float) -> Optional[float]
     return t if t > 0 else None
 
 
+def _ray_segment(angle: float, x0: float, y0: float, x1: float, y1: float) -> Optional[float]:
+    """Distance along a ray from the origin to a segment, or None."""
+    dx, dy = math.cos(angle), math.sin(angle)
+    ex, ey = x1 - x0, y1 - y0
+    den = dx * ey - dy * ex
+    if abs(den) < 1e-12:
+        return None
+    t = (x0 * ey - y0 * ex) / den
+    u = (x0 * dy - y0 * dx) / den
+    return t if t > 0 and 0.0 <= u <= 1.0 else None
+
+
 def project_detections(people: Dict[str, Tuple[float, float]], s: "SensorParams",
                        rng: random.Random, chroma: Optional[Dict[str, Tuple[int, int]]] = None) -> List["Detection"]:
     """What ros2_yolo_live.py would publish for people at robot-frame positions."""
@@ -228,6 +240,7 @@ class World:
     blackouts: Sequence[Tuple[float, float]] = ()  # detector blind windows (t_start, t_end)
     shade: Sequence[Tuple[float, float, float]] = ()  # (x0, x1, saturation factor) bands in world x
     obstacles: Sequence[Tuple[float, float, float]] = ()  # static (x, y, radius) the LiDAR sees and the camera ignores
+    walls: Sequence[Tuple[float, float, float, float]] = ()  # static segments (x0, y0, x1, y1), LiDAR only
     seed: int = 0
     realism: Optional[Realism] = None
 
@@ -286,6 +299,7 @@ class World:
         people = list(self.people_robot_frame().values())
         clutter = [(*self._to_robot(x, y), r) for x, y, r in self.realism.clutter] if self.realism else []
         clutter += [(*self._to_robot(x, y), r) for x, y, r in self.obstacles]
+        walls = [(*self._to_robot(x0, y0), *self._to_robot(x1, y1)) for x0, y0, x1, y1 in self.walls]
         out = []
         for i in range(s.lidar_rays):
             a_lidar = -math.pi + i * 2.0 * math.pi / s.lidar_rays
@@ -297,6 +311,10 @@ class World:
                     best = hit
             for cx_, cy_, cr in clutter:
                 hit = _ray_circle(a_robot, cx_, cy_, cr)
+                if hit is not None and hit < best:
+                    best = hit
+            for w in walls:
+                hit = _ray_segment(a_robot, *w)
                 if hit is not None and hit < best:
                     best = hit
             if self.realism:

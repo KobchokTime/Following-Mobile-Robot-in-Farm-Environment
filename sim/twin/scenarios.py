@@ -129,6 +129,14 @@ CLUTTER_SCENARIOS: Dict[str, dict] = {  # static-filter tests; not part of the s
                                       (14, 5.0, 1.0)])],
         "obstacles": [(2.2, 1.6, 0.25)],
     },
+    "side_step_rows": {
+        "doc": "side_step_bush between two crop rows (straight LiDAR-only walls) with a fence behind the start.",
+        "duration_s": 30.0,
+        "people": [("target", True, [(0, 1.0, 0.0), (3, 1.0, 0.0), (6, 2.2, 0.0), (7, 2.2, 1.0),
+                                      (14, 5.0, 1.0)])],
+        "obstacles": [(2.2, 1.6, 0.25)],
+        "walls": [(-1.0, -2.0, 9.0, -2.0), (-1.0, 2.6, 9.0, 2.6), (-1.0, -2.0, -1.0, 2.6)],
+    },
 }
 
 SCENARIO_LOOKUP: Dict[str, dict] = {**ALL_SCENARIOS, **SOLO_SCENARIOS, **CLUTTER_SCENARIOS}  # every scenario that can be run
@@ -150,7 +158,7 @@ def make_people(spec: dict) -> list:
 def build(name: str, seed: int = 0, realism=None, **robot_overrides) -> World:
     spec = SCENARIO_LOOKUP[name]
     world = World(people=make_people(spec), blackouts=spec.get("blackouts", ()), shade=spec.get("shade", ()),
-                  obstacles=spec.get("obstacles", ()), seed=seed,
+                  obstacles=spec.get("obstacles", ()), walls=spec.get("walls", ()), seed=seed,
                   realism=realism)
     for key, value in robot_overrides.items():
         setattr(world.robot, key, value)
