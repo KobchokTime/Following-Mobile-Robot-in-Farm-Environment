@@ -1268,3 +1268,17 @@ Earlier history: `history-2026-10-16.md`.
     scan/camera timing, duplicated cluster split.
 - Opened **T14** in `DISCUSSION.md` for Codex (points a–e). `HANDOFF.md`: item 17 implemented, awaiting Codex in T14;
   branches table updated. Lock released.
+
+### 2026-10-28 — robot/research/dashboard — box range near-box rule; live monitor (00:15 Thai time)
+- `claude/robot/box-range` `d23e7b2`: a box's range now counts only LiDAR returns within 5° of the box, so a person against a crop row gets the range at the box (integration T14 review); +1 test, 135 pass.
+- **Twin:**
+  - `lookalike_after_loss` 20/20;
+  - `shade_crossing` 29/30;
+  - identity 15/15;
+  - solo 26/30;
+  - solo seeds 3–7 with box ranges on vs off: 47/50 vs 48/50, no contact. The solo dip is variation.
+- Write-up update: `experiments/sim/2026-10-27_box_range.md`. Merged into `claude/workspace`.
+- **Dashboard v2 (page version 23):** new first tab "ติดตามสด" (live monitor).
+  - Shows the experiment design as a diagram (variants, settings, scenario mini-maps, pass criteria), progress, a per-run grid, and a top-down replay of any run with a gap chart and a criteria checklist.
+  - Datasets: `live_experiments`, `live_runs`, `live_tracks`, `past_tracks`, `live_scenarios`, built by a scratchpad generator from the twin run folders.
+  - Claude pushed updates about every 4 minutes while the solo on/off run (100 runs) went.

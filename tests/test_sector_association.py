@@ -121,6 +121,16 @@ class SectorAssociationTest(unittest.TestCase):
         scan = [p for p in target + other if not any(abs(p[0] - q[0]) < 1e-9 and q[1] < p[1] for q in target + other)]
         self.assertAlmostEqual(self.m.box_range(scan, math.radians(-12.0)), 0.65, delta=0.05)
 
+    def test_a_person_against_a_crop_row_gets_the_range_at_the_box(self):
+        """Person 2 m ahead touching a row that runs past them from 1.2 m away on the right."""
+        person = self._person(2.0, 0.0)
+        row = []
+        for i in range(60):  # the row: a line y = -0.2, x from 1.2 to 2.0 m, joined to the person
+            x = 1.2 + i * 0.8 / 60
+            row.append((math.atan2(-0.2, x), math.hypot(x, -0.2)))
+        scan = sorted(person + row)
+        self.assertAlmostEqual(self.m.box_range(scan, 0.0), 1.8, delta=0.05)
+
     def test_no_cluster_near_the_box_gives_none(self):
         self.assertIsNone(self.m.box_range(self._person(2.0, 0.0), math.radians(30.0)))
         self.assertIsNone(self.m.box_range([], 0.0))

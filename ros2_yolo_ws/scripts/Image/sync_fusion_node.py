@@ -82,7 +82,9 @@ def box_range(points, bearing, margin_rad=math.radians(5.0)):
     one whose edge is nearest, within margin_rad. A near person fills a wide angle, so the minimum of
     a fixed sector next to them is their range even for a box on someone far behind (T13 follow-up).
     A cluster beside the box is never preferred to the one the box looks at: a person crossing in
-    front would otherwise lend their range to the target's box before they cover it.
+    front would otherwise lend their range to the target's box before they cover it. Only returns
+    within margin_rad of the box (beyond the edge gap) count, so a long cluster (a person against a
+    crop row) gives the range at the box, not the row's nearest point.
     """
     pts = sorted(points)
     best, best_gap = None, None
@@ -94,7 +96,8 @@ def box_range(points, bearing, margin_rad=math.radians(5.0)):
         start = i
         gap = max(c[0][0] - bearing, bearing - c[-1][0], 0.0)
         if gap <= margin_rad and (best is None or gap < best_gap):
-            best, best_gap = min(r for _, r in c), gap
+            # only the returns near the box: a person against a crop row chains into one long cluster
+            best, best_gap = min(r for b, r in c if abs(b - bearing) <= gap + margin_rad), gap
     return best
 
 
