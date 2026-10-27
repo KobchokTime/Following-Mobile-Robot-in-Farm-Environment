@@ -15,7 +15,10 @@ show what the follower would do once the bridge forwards turning commands.
 
 Each detection also carries the clothing chroma `(Cb, Cr)` that the thesis's appearance model
 uses (YCbCr, 0-255, 128 = grey). It is observed with noise, and shade pulls it towards grey. It
-comes from its own random stream, so adding it does not change any other simulated value.
+comes from its own random stream, so adding it does not change any other simulated value. A torso
+hue-saturation histogram (12 x 4 bins, per mille, as `ros2_yolo_live.torso_hs_hist`) is drawn from
+the clothing colour, again from its own stream. Shade lowers its saturation far less than it pulls
+Cb/Cr towards grey: Cb/Cr shrink with brightness, HSV saturation does not.
 
 Frames: x forward, y left, yaw counter-clockwise (ROS REP-103). Image x grows to
 the right, so a person on the robot's left has a small `cx`.
@@ -23,6 +26,7 @@ the right, so a person on the robot's left has a small `cx`.
 
 from __future__ import annotations
 
+import colorsys
 import math
 import random
 from dataclasses import dataclass, field
@@ -90,6 +94,7 @@ class Detection:
     cb: int = 128
     cr: int = 128
     box: Tuple[int, int, int, int] = (0, 0, 0, 0)  # x1, y1, x2, y2, clipped to the image
+    hist: Tuple[int, ...] = ()  # torso hue-saturation histogram, per mille (empty: not drawn)
 
 
 def shade_factor(x: float, shade: Sequence[Tuple[float, float, float]]) -> float:
@@ -106,6 +111,31 @@ def observe_clothing(people: Sequence["Person"], world_x: Dict[str, float], shad
         cb, cr = (128.0 + f * (c - 128.0) + rng.gauss(0.0, noise) for c in p.clothing)
         out[p.name] = (int(round(max(0.0, min(255.0, cb)))), int(round(max(0.0, min(255.0, cr)))))
     return out
+
+
+HS_BINS = (12, 4)
+
+
+def clothing_hist(cb: float, cr: float, rng: random.Random, shade: float = 1.0, pixels: int = 60,
+                  hue_noise: float = 4.0, sat_noise: float = 18.0) -> Tuple[int, ...]:
+    """Torso H,S histogram (OpenCV ranges, per mille) for a full-light clothing chroma.
+
+    The colour is taken at a mid brightness (Y = 120). In shade (factor < 1) hue is kept and
+    saturation scales by 0.6 + 0.4 * shade. Calibrated on the 2025-04-08 lab video: a blue top in
+    shade read grey in Cb/Cr, yet its histogram stayed about 0.57 (Hellinger) from the top in good
+    light (experiments/identity/clothing_colour_videos); here deep shade gives about 0.5.
+    """
+    y = 120.0
+    rgb = [max(0.0, min(255.0, v)) / 255.0 for v in
+           (y + 1.402 * (cr - 128.0), y - 0.344136 * (cb - 128.0) - 0.714136 * (cr - 128.0), y + 1.772 * (cb - 128.0))]
+    h, s, _ = colorsys.rgb_to_hsv(*rgb)
+    counts = [0] * (HS_BINS[0] * HS_BINS[1])
+    for _ in range(pixels):
+        hue = (h * 180.0 + rng.gauss(0.0, hue_noise)) % 180.0
+        sat = max(0.0, min(255.0, s * (0.6 + 0.4 * shade) * 255.0 + rng.gauss(0.0, sat_noise)))
+        counts[min(HS_BINS[0] - 1, int(hue * HS_BINS[0] / 180.0)) * HS_BINS[1]
+               + min(HS_BINS[1] - 1, int(sat * HS_BINS[1] / 256.0))] += 1
+    return tuple(int(round(1000.0 * c / pixels)) for c in counts)
 
 
 def bridge_rpm(r: RobotParams, cmd: Tuple[float, float], age_s: Optional[float]) -> Tuple[float, float]:
@@ -233,6 +263,7 @@ class World:
     def __post_init__(self) -> None:
         self.rng = random.Random(self.seed)
         self.color_rng = random.Random(self.seed + 7919)  # separate stream: chroma never shifts other noise
+        self.hist_rng = random.Random(self.seed + 15485863)  # torso histograms: their own stream too
         self.real_rng = random.Random(self.seed + 104729)  # realism only; never touched when it is off
         self._pending: List[Tuple[float, List["Detection"]]] = []  # delayed detections (realism)
         self.t = 0.0
@@ -315,6 +346,10 @@ class World:
         chroma = observe_clothing(self.people, {p.name: p.position(self.t)[0] for p in self.people},
                                   self.shade, self.sensors.chroma_noise, self.color_rng)
         dets = project_detections(self.people_robot_frame(), self.sensors, self.rng, chroma)
+        people = {p.name: p for p in self.people}
+        for d in dets:
+            p = people[d.person]
+            d.hist = clothing_hist(*p.clothing, self.hist_rng, shade_factor(p.position(self.t)[0], self.shade))
         if not self.realism:
             return dets
         return self._realistic(dets)
@@ -329,6 +364,7 @@ class World:
             dets.append(Detection("false_positive", cx, s.image_height // 2, sector,
                                   self.real_rng.randrange(90, 170), self.real_rng.randrange(90, 170),
                                   (max(0, cx - 40), 100, min(s.image_width - 1, cx + 40), 400)))
+            dets[-1].hist = clothing_hist(dets[-1].cb, dets[-1].cr, self.hist_rng)
         self._pending.append((self.t + r.detect_latency_s, dets))
         ready = [d for t, d in self._pending if t <= self.t + 1e-9]
         self._pending = [(t, d) for t, d in self._pending if t > self.t + 1e-9]

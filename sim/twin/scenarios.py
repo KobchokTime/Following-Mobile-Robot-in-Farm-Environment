@@ -120,13 +120,37 @@ SOLO_SCENARIOS: Dict[str, dict] = {
     },
 }
 
+# Clothing colour in shade, as in the 2025-04-08 lab videos: a blue top fades towards grey in shade,
+# next to someone in a dark grey top. Not in the identity set, which stays as Arena 3 froze it.
+BLUE_TOP = (160.0, 110.0)
+GREY_TOP = (131.0, 128.0)
+COLOUR_SCENARIOS: Dict[str, dict] = {
+    "shade_crossing": {
+        "doc": "As crossing, but the target wears blue, the crosser dark grey, and both are in deep shade there.",
+        "duration_s": 30.0,
+        "people": [("target", True, [(0, 1.0, 0.0), (3, 1.0, 0.0), (23, 7.0, 0.0)]),
+                   ("distractor", False, [(0, 3.4, -2.5), (10, 3.4, -2.5), (14, 3.4, 2.5)])],
+        "clothing": {"target": BLUE_TOP, "distractor": GREY_TOP},
+        "shade": [(2.5, 6.0, 0.3)],
+    },
+    "shade_side_by_side": {
+        "doc": "As side_by_side, but the target wears blue, the other person dark grey, and the start is in shade.",
+        "duration_s": 32.0,
+        "people": [("target", True, [(0, 1.0, 0.0), (3, 1.0, 0.0), (13, 4.0, 0.0), (23, 5.5, 2.6)]),
+                   ("distractor", False, [(0, 1.8, -0.7), (3, 1.8, -0.7), (13, 4.8, -0.7), (23, 7.5, -3.0)])],
+        "clothing": {"target": BLUE_TOP, "distractor": GREY_TOP},
+        "shade": [(0.0, 5.0, 0.3)],
+    },
+}
+
 ALL_SCENARIOS: Dict[str, dict] = {**SCENARIOS, **IDENTITY_SCENARIOS}  # frozen: the Arena 3 scorer checks runs against it
-SCENARIO_LOOKUP: Dict[str, dict] = {**ALL_SCENARIOS, **SOLO_SCENARIOS}  # every scenario that can be run
+SCENARIO_LOOKUP: Dict[str, dict] = {**ALL_SCENARIOS, **SOLO_SCENARIOS, **COLOUR_SCENARIOS}  # every scenario that can be run
 SCENARIO_SETS: Dict[str, list] = {
     "all": sorted(SCENARIOS),  # the Arena 2 set; kept as "all" so existing commands mean the same
     "identity": ["crossing", *sorted(IDENTITY_SCENARIOS)],
     "everything": sorted(ALL_SCENARIOS),
     "solo": ["straight", "stop_and_go", "curve_left", "target_loss", *sorted(SOLO_SCENARIOS)],
+    "colour": sorted(COLOUR_SCENARIOS),
 }
 
 

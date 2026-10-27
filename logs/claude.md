@@ -941,3 +941,240 @@ Earlier history: `history-2026-10-16.md`.
   (log conflict, both sides kept). `check.py`: PASS (120). Bit-identity (default sector, realism off): 81 runs identical.
 - Twin realism mps bearing seed 0, sequential: side_step pass (was 3.12 m fail), target_loss pass, stop in 0.5 s; [STALE] stops logged.
 - T12 reply asking Codex to re-check. HANDOFF: branch rows (120), item 15; lock released. Raw runs in `/tmp/claude-0/judge_runs/t12b`.
+
+### 2026-10-26 — integration — T12 agreed (00:20 Thai time)
+- Codex replied `agree` and marked T12 resolved (hub `022d462`). `bearing` may be tried on robot day after the `sector` runs, at `max_speed_mps:=0.5`, with its behaviour recorded. `sector` stays the default.
+- `claude/workspace` is synced with the hub. The Thai cheat sheet's bearing slot is updated to match.
+
+### 2026-10-26 — dashboard — Follower Test Bench v2 (00:30 Thai time)
+- The user asked for a better UI, built separately so the old one can be compared; the old dashboard is not changed.
+- New dashboard: https://claude.ai/artifact/HTGBVGXXgFjr4S39zD1qA1. Its tabs are พร้อมลงพื้นที่ (ready for robot day), ตามคนเดียว (solo following), เลือกให้ถูกคน (target identity), เล่นซ้ำ (replay), ประวัติ Arena (Arena history) and เทสต์และ CI (tests and CI).
+- **First page:** solo-following pass counts and the closest approach to the person per walking move (against the 0.40 m contact line), plus robot-day steps and open questions.
+- **Data:** the same as the old dashboard, plus the latest bearing-steering run (30/30), the E7 re-run (with a toggle between the first run and current code) and the current unit tests (120).
+
+### 2026-10-26 — research — Static-object filter from the re-identification paper (01:40 Thai time)
+- The user asked whether the system uses the paper *Multi-modal Bayesian Learning, Re-identification and Tracking of a Target Person for Mobile Robots*.
+  - Answer: segmentation yes; scan registration, the dynamic-object filter and online re-identification no.
+  - The user asked to try the filter.
+- Built on `claude/robot/static-filter` (not merged):
+  - `StaticMap` in `sync_fusion`, off by default;
+  - twin scenario obstacles and the `side_step_bush` scenario;
+  - unit tests (123 pass). Old scenarios are bit-identical.
+- **Result:** not adopted. The robot never chased the bush without the filter. The filter made the clean twin worse (3/3 → 1/3), likely because dead reckoning from `/cmd_vel` makes a followed person look static. It needs real wheel odometry or scan registration first.
+- Write-up: `experiments/sim/2026-10-26_static_filter.md`.
+
+### 2026-10-26 — dashboard — Static-filter trial as a graphic (05:55 Thai time)
+- Dashboard v2 gets a "ทดลองตัวกรอง" (filter trial) tab:
+  - a pass bar chart, filter off against on, for the three test sets;
+  - side-by-side top-down maps of `side_step_bush` (robot path, target path, bush), with test-set and seed buttons and a time slider with play.
+- New datasets: `static_filter_paths` and `static_filter_runs`.
+
+### 2026-10-26 — dashboard — Paper-style LiDAR view in the filter trial (06:05 Thai time)
+- The "ทดลองตัวกรอง" (filter trial) tab now draws, under each top-down map, the LiDAR frame at the chosen time, in the style of the paper's Figure 5:
+  - black background;
+  - static points white, moving points green;
+  - person-sized clusters boxed: the target in yellow, static person-sized clusters in red;
+  - the camera's field of view shaded.
+- The frames are rebuilt from the logged poses with the twin geometry (no noise) and labelled by the branch's own `StaticMap`; dataset `static_filter_scans`.
+- The frames show the failure: at the start the standing target is "static", and while the robot turns the bush reads as "moving" (dead reckoning from `/cmd_vel`).
+
+### 2026-10-26 — dashboard — Fix: filter-trial LiDAR pane stopped the page (06:15 Thai time)
+- Error: `fr.points.forEach is not a function`. Nested lists in a file dataset arrive as JSON text. The pane now parses `points` and `boxes` (and `t` as a number) before drawing. Page version 6.
+
+### 2026-10-26 — dashboard — Fix: filter-trial LiDAR drawn over the time slider (06:25 Thai time)
+- The LiDAR pane and the top-down map in the filter-trial tab now set their pixel width and height and clip their drawing. Before, the drawing overflowed onto the legend and the time slider.
+- The black LiDAR panel has a border, so it shows on the dark theme. Page version 7.
+
+### 2026-10-26 — dashboard — Walls and per-point matching in the filter-trial LiDAR (06:40 Thai time)
+- Two crop-row walls are added to the rebuilt LiDAR frames, **for the picture only** (they were not in the runs).
+- Each point is now labelled the way the paper does it: static if it matches the scan 1 s earlier.
+  - The matching is done twice: with the pose dead-reckoned from `/cmd_vel` (what the robot has) and with the true pose (what odometry would give).
+  - A button switches between them.
+- With the true pose the walls stay static apart from areas just revealed behind the moving person. With the command-based pose they turn "moving" while the robot turns or accelerates.
+- Boxes still show the actual `StaticMap` decision. Page version 8.
+
+### 2026-10-26 — research + dashboard — 2D point-cloud maps and scan matching (07:20 Thai time)
+- The filter-trial tab now draws a world-frame 2D point-cloud map per pane, as the user asked:
+  - scans once a second over the last 3 s;
+  - three crop-row walls added for the picture only;
+  - each point is white (static) or green (moving), matched against scans 0.5–1.5 s earlier.
+- The pose that lays the scans down can be switched between:
+  - dead reckoning from `/cmd_vel`;
+  - 2D ICP scan matching against a keyframe refreshed every second, as in the paper;
+  - the true pose.
+- **End-of-run pose error:** ICP 0.02–0.11 m in all 18 runs. Dead reckoning is 0.03–0.17 m in most runs but up to 1.3 m in some.
+- **Bug found and fixed on `claude/robot/static-filter` (`08eb36b`):** `StaticMap` kept integrating the last `/cmd_vel` after follow_stop went quiet, while the bridge had stopped the wheels after 1 s. It now ignores commands older than 1 s. The trial runs on the dashboard predate this fix.
+- **Next, if wanted:** put ICP scan matching into `StaticMap` instead of dead reckoning and rerun the trial.
+
+### 2026-10-26 — research — Static filter re-run after the stale-command fix (07:35 Thai time)
+- With `08eb36b` (ignore `/cmd_vel` older than 1 s), filter off and on were both re-run from one image, one job at a time:
+  - `side_step_bush`: off **5/9**, on **9/9**;
+  - the 10 solo moves with realism: off 26/30, no contact; on 25/30, 3 contacts.
+- The contacts are not the filter: `walk_1p0` seeds 0 and 2 re-ran at ≥ 0.52 m, seeds 3–7 pass 5/5 both ways, and `come_back` is the known open question.
+- Write-up updated (`experiments/sim/2026-10-26_static_filter.md`).
+- The dashboard filter tab is rebuilt from the new runs and adds a "ท่าคนเดียว 10 ท่า" (10 solo moves) row. The point-cloud maps now come from these runs: ICP ends within 0.02–0.12 m, dead reckoning within 0.06–1.16 m.
+- The filter stays off by default on its branch; it needs review and a robot check.
+
+### 2026-10-26 — research — Read the Kim, Suh and Kwon (2024) paper (12:35 Thai time)
+- The user pushed the paper to `codex/robot-backup-quarantine:Paper/` (Git LFS). I read it from a scratch copy; that branch is untouched and the PDF is not copied elsewhere.
+- `docs/paper_comparison_kim2024.md` covers:
+  - what the paper does: online GMM colour re-identification, ICP-based dynamic non-target detection with a wheel-odometry guess, GNN tracking, and a particle filter with a negative factor for non-targets;
+  - how our system compares;
+  - what to take from it: wheel odometry as the ICP guess, CT/CL/WT/WL states for E5 and E6, the negative factor, online colour learning;
+  - a draft paragraph for thesis chapter 2.
+- The paper is an SSRN preprint and has not been peer reviewed.
+
+### 2026-10-26 — robot + research — ICP pose in the static filter, measured (15:15 Thai time)
+- **Branch `claude/robot/static-filter`. It is not merged, and the filter stays off by default.**
+  - `4e365a9`: `static_pose:=icp` corrects `StaticMap`'s pose with keyframe ICP, using `/cmd_vel` as the guess and fallback. It also adds twin walls and the `side_step_rows` scenario.
+  - `1dd263a`, `1e802dc`: `[STATIC]` log every 2 s with the pose, ICP match and failure counts, and the clusters dropped from LiDAR tracking.
+  - `c14fb1f`: the ICP keyframe leaves out person-sized clusters that are not static yet. In the clean `side_step_bush` the pose had locked onto the walking person (3.5 m and 110° off). With the fix it stays at 0.11–0.48 m and falls back to the guess instead. `lidar_clusters` is split into `lidar_groups` for reuse.
+  - 127 tests pass.
+- **Twin (`mps`, `bearing`, seeds 0–4 × 2 repeats):** filter off 27/40, ICP 27/40, no contact.
+  - The same seed often flips between repeats, so the filter's effect cannot be separated.
+  - Every failure is the target lost after it steps out of view.
+- **ICP pose with walls:** about 0.07 m, against up to 1.6 m for `/cmd_vel` with slip.
+- **Regression with ICP:** solo 28/30, where the two failures are `come_back` s2 (contact, 0.40 m) and `side_step` s2. Identity 15/15.
+- **Conclusion:** keep it off. For the thesis it is future work, with ZLAC wheel feedback as the ICP guess.
+  - Write-up: `experiments/sim/2026-10-26_static_filter.md` (Update 2).
+  - Dashboard v2, filter tab: new card, dataset `icp_trial_runs`, page version 11.
+
+### 2026-10-26 — research — Clothing colour on the two 2025-04-08 lab videos (22:05 Thai time)
+- **Task:** at the user's request, I used `Videos/WIN_20250408_14_00_41_Pro.mp4` and `WIN_20250408_14_10_21_Pro.mp4` from `codex/robot-backup-quarantine`.
+  - They came through Git LFS into a scratch copy. That branch is untouched and the videos are not copied into the repository.
+- **Data:**
+  - Ran the project's YOLOv8n OpenVINO model at 10 fps (914 person boxes) and took each box's torso Cb/Cr, as in `ros2_yolo_live`.
+  - Labelled every box by eye: blue top, dark top, or other.
+- **Result:** with colour only, the blue-top person is the target and both people are in view.
+  - Our Cb/Cr reference ranks the target first in **14–26 %** of frames.
+  - The paper's H,S GMM, re-learned from the last 10 boxes, ranks it first in **78–92 %**. Learned once, 58–67 %.
+  - With the dark top as the target, both methods reach 88–100 %.
+- **Cause:** the blue top reads grey (Cb 128–132) in shade and backlight, which is 26–28 % of its boxes. Lock-on also happened in backlight.
+- **Cost:** the GMM re-fit with BIC takes about 0.7 s on 4 cores, so it cannot re-fit every frame.
+- **Files:** `experiments/identity/lab_videos_2025-04-08/` (README, scripts, labels, detections, H,S samples).
+- **Next, if wanted:**
+  - try an H,S colour model in `TargetGate`, re-fit once a second or with a fixed k;
+  - re-check on E4 robot-day data.
+
+### 2026-10-26 — robot + research + dashboard — H,S colour histogram in the target gate (23:10 Thai time)
+- **Branch `claude/robot/hs-colour` (`f28b011`, `a936d3f`). It is not merged.**
+  - `ros2_yolo_live` appends a 12×4 torso hue-saturation histogram after `cb, cr`.
+  - `TargetGate` scores colour as half Cb/Cr and half histogram.
+    - The histogram is a Hellinger distance to the mean of the target's last 10 learned boxes, with σ 0.2.
+    - A box is learned only if it is about as close as those already learned (slack 0.1).
+    - `use_hs_hist:=false` goes back to Cb/Cr only. Without a histogram, Cb/Cr counts in full.
+  - **Twin:** a matching histogram is drawn from the observed chroma on its own random stream. Every other value is bit-identical, checked open-loop over all scenarios with and without realism.
+  - **New `colour` scenario set:** `shade_crossing` and `shade_side_by_side`. The identity set is untouched.
+  - 125 tests pass.
+- **Evidence:** `experiments/identity/clothing_colour_videos/`, renamed from `lab_videos_2025-04-08`.
+  - **Lab clips, colour only, target ranked first:** blue target 14–26 % → 97–99 %; grey target 88–99 % → 97–99 %.
+  - **Five held-out clips from `Videos/`** (parking lot, greenhouse path):
+    - the histogram alone lost a black tee (37 % kept), so half-and-half was adopted;
+    - kept own person 90–100 % (Cb/Cr 99.7–100 %);
+    - strangers from other clips ranked below own person 65.9 % (Cb/Cr 60.1 %).
+  - **Caveat:** half-and-half was chosen after seeing the held-out clips, with 5 variants tried. E4 on robot day is the real test.
+- **Twin closed-loop runs** (colour set, plus identity/solo regression, histogram on and off) are still running. They will be added here and to the dashboard.
+- **Dashboard v2:** new tab "สีเสื้อ" (clothing colour) with a crop montage, a Cb/Cr scatter, the methods chart and the held-out chart (page version 12).
+
+### 2026-10-27 — robot + research + dashboard — Colour histogram: twin fixes and results (02:51 Thai time)
+- **Branch `claude/robot/hs-colour`:**
+  - `34fdcdf`: the twin histogram keeps saturation in shade, calibrated on the lab video.
+  - `2547f8b`: `TargetGate` takes a lost target back by colour (paper Algorithm 1): unseen ≥ 1 s, colour cost ≤ 2.0, within 35° of the predicted bearing, histogram only.
+  - 127 tests pass.
+- **Root cause found with a gate debug log:**
+  1. A crosser in shade was accepted once (Cb/Cr cost 1.5).
+  2. The track's rates ran off to −30° and −0.27 m.
+  3. After the 5 s unlock, the target could only be re-locked at 0.5–1.0 m.
+  - This is an old gate weakness and happens with Cb/Cr only too.
+- **Twin (`2547f8b`, histogram off → on):**
+  - `shade_crossing` realism: 5/10 → 10/10;
+  - solo realism: 26/30 (1 contact) → 29/30 (no contact);
+  - identity: 15/15 → 15/15;
+  - the other colour-set rows: 10/10 both ways;
+  - with bearing steering and the histogram on: solo 29/30 (`come_back` s2 contact), identity 15/15.
+- **Write-up:** `experiments/sim/2026-10-27_hs_colour_twin.md` and `.json`.
+- **Dashboard v2:** "สีเสื้อ" (clothing colour) tab gains a twin card (dataset `colour_twin`, page version 13).
+- **Status:** the branch is still not merged. It needs Codex review and E4 on robot day. I have authorisation from the user to keep running and fixing.
+
+### 2026-10-27 — research + robot + dashboard — Crowd video, histogram weight 0.25, dashboard fixes (13:53 Thai time)
+- **Dashboard v2, "สีเสื้อ" (clothing colour) tab:**
+  - the Cb/Cr scatter no longer spills over the card: axes now come from the data, and the dots are clipped;
+  - bar-chart legends wrap as HTML instead of overlapping;
+  - all colour cards were rendered in Chromium (wide and phone width) with the real data before publishing;
+  - new cards: the vtest crowd and the weight sweep (page version 15).
+- **No other videos exist on any branch**, and MOT Challenge and Hugging Face are blocked by the network policy.
+  - Used OpenCV's `vtest.avi` from raw.githubusercontent.com, which is PETS 2009 S2.L1 view 1.
+  - Labelled 5 recognisable people by eye after splitting the swapping tracklets; the rest are "other".
+  - Colour only, own person ranked first (chance 17 %): Cb/Cr 25.9 %, histogram alone 69.8 %, histogram + Cb/Cr 52.8 %, GMM 13.1 %.
+- **Weight sweep over all three video sets** (`weight_sweep.py`).
+  - `hist_weight` 0.25 keeps every held-out person as well as Cb/Cr (worst 99.7 % vs 89.8 % at 0.5) and keeps the lab gain (96.9 %).
+  - Chosen after seeing every set; robot-day E4 is the real test.
+- **Branch `claude/robot/hs-colour` (`47553e5`):** `hist_weight` 0.25 and `reacquire_colour_max` 1.0 (79 % of the target's boxes, 2.2 % of others'). 127 tests pass.
+- **Twin rerun with `47553e5` is running** (same 215 runs as before). Results and the dashboard twin card follow.
+- **Files:** `experiments/identity/clothing_colour_videos/` (README sections "Third set" and "Choosing the histogram's weight", `results_*.txt`).
+
+### 2026-10-27 — dashboard + research — Example images from every test video (14:11 Thai time)
+- **Dashboard v2, "สีเสื้อ" (clothing colour) tab** gains a gallery card with one button per video (page version 16).
+  - The 7 clips plus vtest, each a strip of crops from the original frames, spread over the clip.
+  - Each crop shows its measured Cb/Cr and time.
+  - Rendered in Chromium at wide and phone width before publishing.
+- **Label fix in `labels_WIN_20241210_13_47_33_Pro.json`**, found from the gallery:
+  - boxes 424 and 426 are the beige-tee target (they had O and X);
+  - box 436 is the passing worker (it had X).
+  - Re-running `heldout.py`, `variants_heldout.py` and `weight_sweep.py` changes only a few pairwise strangers values by ≤ 0.3 points; every summary number is unchanged.
+- **Script:** `gallery.py` builds the strips.
+
+### 2026-10-27 — research + dashboard — Colour separability per clip (14:42 Thai time)
+- The user asked for a per-clip analysis of how far colour can tell the target from others. Added `separability.py`, which reports the AUC of the gate's colour cost (target box vs other people's boxes) per clip, for Cb/Cr, histogram and the gate's mix.
+- **Mix (`hist_weight` 0.25):**
+  - ≥ 0.85 in 11 of 14 clip/target cases;
+  - fails on black tee 1 (0.36: hue is noise on black) and on the crowd's red top (0.06: Cb/Cr's grey bias on tiny crops);
+  - Cb/Cr alone is below 0.5 in 5 cases.
+- **Dashboard v2, "สีเสื้อ" (clothing colour) tab:** new card with an AUC overview for every clip, and a per-clip view (page version 17).
+  - The per-clip view shows the AUC verdict, the target's and nearest other's colour cost over time with confusion shaded, and the Cb/Cr scatter.
+  - Rendered in Chromium before publishing. A bug where the time axis ran backwards on one-person clips was found and fixed: stranger boxes carried another clip's time.
+
+### 2026-10-27 — dashboard — One "photo + Cb/Cr" view per clip (15:09 Thai time)
+- At the user's request, the first "สีเสื้อ" (clothing colour) card is now a per-clip viewer covering all 8 videos (page version 18). For each clip it shows:
+  - crops from the original frames with their Cb/Cr;
+  - the clip's Cb/Cr scatter, coloured per person after their clothes;
+  - for one-person clips, other clips' people as faint grey for reference;
+  - a short verdict with the separability AUCs.
+- The separate gallery card was merged into it.
+- **New dataset:** `colour_clip_points`.
+- Rendered in Chromium for every clip at wide and phone width: no dots outside the plot, no page errors.
+
+### 2026-10-27 — robot + research — "Bayesian" naming fixed; identity belief tried and not adopted (16:22 Thai time)
+- **The user asked whether the system uses anything Bayesian. It does not**, although two places were named so.
+  - `fusion_prob` is a weighted mean of two heuristic scores with time smoothing.
+  - `follow_stop`'s "sector prior" is turn hysteresis.
+  - The thesis draft already said so.
+- **The user chose: (1) fix the naming, then (2) try a light, real Bayesian piece.**
+  1. `claude/robot/naming` (`27fb26d`): comments only. 120 tests pass.
+  2. `claude/robot/identity-belief` (`d282995`, `003f033`, `6102615`), built on `claude/robot/hs-colour`.
+     - What it adds: a recursive Bayes belief that the gate's box is still the locked-on person.
+       - Likelihood ratio = geometry (χ²(2) vs uniform, held to 0.3–1.5) × a colour table measured on the videos.
+       - Switch probability 0.01.
+       - With `identity_belief:=true` (default false), the gate waits for a colour match below 0.15.
+     - 131 tests pass.
+- **Videos** (leave one clip out):
+  - wrong takes fall from 29.2 % to 20.0 %, but the target is kept in only 87 % of frames (worst 10.9 %);
+  - no threshold avoids this;
+  - as a report-only signal, AUC 0.50.
+- **Twin, realism, belief on vs off:**
+  - `shade_crossing` 1/10 vs 10/10;
+  - `shade_side_by_side` 9/10 (1 contact) vs 10/10;
+  - identity 15/15 both;
+  - solo 28/30 vs 27/30.
+- **Cause:** the belief rests on the same colour evidence the gate uses to choose, so it rises with a wrong pick and falls when the target's own colour changes (deep shade). It needs an independent cue.
+- **Decision:** keep it off; the branch stays as a measured negative result. Write-up: `experiments/sim/2026-10-27_identity_belief.md` (+ `.json`).
+- **Twin with the histogram at 0.25 (`47553e5`, belief off):** `shade_crossing` realism 10/10 (9/10 without histogram), solo 27/30 (24/30). Dashboard twin card updated (page version 19).
+
+### 2026-10-27 — workspace — Colour gate and naming merged into the workspace for review (16:50 Thai time)
+- The user asked to send the colour work to Codex for review.
+- Merged into `claude/workspace`:
+  - `claude/robot/hs-colour` (`815ec79`): H,S histogram at a quarter weight, colour re-acquisition and the twin `colour` set;
+  - `claude/robot/naming` (`ad9cafb`): comments only.
+  - 127 tests pass.
+- Not merged, kept as measured negative results: `claude/robot/identity-belief` and `claude/robot/static-filter`.
+- Next: the `integration` subagent merges `claude/workspace` into `integration-hub` and opens T13 for Codex.
