@@ -1178,3 +1178,62 @@ Earlier history: `history-2026-10-16.md`.
   - 127 tests pass.
 - Not merged, kept as measured negative results: `claude/robot/identity-belief` and `claude/robot/static-filter`.
 - Next: the `integration` subagent merges `claude/workspace` into `integration-hub` and opens T13 for Codex.
+
+### 2026-10-27 — integration — Colour gate and naming merged into `integration-hub`, T13 opened (16:55 Thai time)
+- Lock claimed on `integration-hub` in `4a80e8d` and pushed before the merge.
+- Merged `claude/workspace` (`fbf3e73`) into `integration-hub` with `--no-ff`: merge `e48ae4c`. No conflicts.
+- Checks on the merged hub:
+  - `python3 scripts/check.py` passes, 127 tests.
+  - Open-loop twin, hub before (`4a80e8d`) vs after (`e48ae4c`): all 15 pre-merge scenarios, seed 3, 150 steps,
+    scan + detections without `hist` + state hashed at every step. Bit-identical: plain `e8cb4b58…`, realism `f749aa20…`.
+  - Diff review: no new publishers or wheel commands; no machine paths or secrets.
+  - Docker closed-loop spot-check not run (Docker is not running in this session).
+- Opened **T13** in `DISCUSSION.md` (`44021e4`) for Codex, with five review points.
+- `HANDOFF.md` updated (T12 marked resolved, T13 added, branches table) and lock released in `1636bfd`.
+
+### 2026-10-27 — robot/research — T13 change request addressed: re-acquisition distance rule (18:45 Thai time)
+- Codex's review of T13 asked for a change: re-acquisition took a same-clothing stranger at 18°, 7.43 m after 1.2 s unseen.
+- `claude/robot/hs-colour` `808dc6c`:
+  - re-acquisition now requires the detection to be within 0.8 m + 1.5 m/s × time unseen (cap 3 m) of the last place seen (T_dist, Algorithm 1);
+  - 2 gate tests (Codex's case; reach grows and is capped);
+  - twin: per-person camera-hidden windows plus scenario `lookalike_after_loss`, with a test. Earlier scenarios are bit-identical (open-loop hash).
+- Merged into `claude/workspace` (`45588d5`).
+- README (`ecf573a`):
+  - 1.0 is stated as not independently validated;
+  - the predicted-place claim is corrected: different clothes are rejected (Codex's cost 10.13); same clothes are not.
+- **Closed-loop twin with the rule on (Docker, one at a time):**
+  - `shade_crossing` 10/10 and `shade_side_by_side` 10/10 (realism);
+  - identity 15/15;
+  - solo 27/30, no contact.
+- **`lookalike_after_loss`:** 9/10 with the rule and 9/10 without.
+  - Its failures come from an older weakness: the far look-alike's box borrows the near target's LiDAR range, so the widened normal gate takes it.
+  - Written up as a limitation, with a follow-up proposed.
+- Results: `experiments/sim/2026-10-27_hs_colour_twin.md` (`765338a`) and `_t13.json`. `check.py`: 130 tests pass.
+
+### 2026-10-27 — integration — T13 change-request fixes merged into `integration-hub` (18:40 Thai time)
+- Lock claimed on `integration-hub` in `78dd152` and pushed before the merge.
+- Merged `claude/workspace` (`c750734`) into `integration-hub` with `--no-ff`: merge `b102cc7`. No conflicts.
+- Checks on the merged hub:
+  - `python3 scripts/check.py` passes, 130 tests.
+  - Open-loop twin, hub before (`78dd152`) vs after (`b102cc7`): all 17 pre-merge scenarios, seed 3, 150 steps.
+    Bit-identical: plain `cb1dc949…`, realism `e96c7f3c…`.
+  - Both new gate tests fail with the distance rule disabled, and pass with it on.
+  - Recounted `experiments/sim/2026-10-27_hs_colour_twin_t13.json` (85 rows); it matches the stated results.
+  - Diff review: no new publishers or wheel commands; no machine paths or secrets.
+- Replied in **T13** in `DISCUSSION.md`, answering Codex's six points; status stays open, and Codex is asked to re-review.
+- `HANDOFF.md` updated (T13 waiting for Codex's re-review, branches table) and lock released.
+
+### 2026-10-27 — integration — Codex's T13 re-review recorded; T13 resolved (18:55 Thai time)
+- Lock claimed on `integration-hub` in `6b6c0d5` and pushed before editing.
+- Codex re-reviewed T13 but could not commit (its worktree could not write `.git/worktrees` metadata; GitHub
+  unreachable). The user relayed Codex's reply as a screenshot in Thai; recorded it in English in **T13** in
+  `DISCUSSION.md`, marked as relayed by the user and recorded by Claude integration.
+- Codex: `agree`. On `808dc6c` the same-clothing stranger (18°, 7.43 m, 1.2 s unseen) is rejected: 6.489 m from
+  the last-seen place against 2.6 m allowed; both regression tests pass. The LiDAR range borrowing is a separate
+  follow-up. Condition: `lookalike_after_loss` is 9/10 with the rule on and off, so there is no end-to-end evidence
+  yet; the limitation stays stated.
+- T13 status set to resolved (agree) with that condition.
+- `HANDOFF.md`: T13 resolved; new open item 17, the follow-up "camera boxes get their own LiDAR range (box-height
+  check or nearest LiDAR cluster)", not started, owner Claude; Codex asked to reconcile its uncommitted
+  `HANDOFF.md` and `logs/codex.md` drafts. Lock released.
+- No code merged; `python3 scripts/check.py` run on the hub before push.
