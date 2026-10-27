@@ -6,10 +6,10 @@ and review threads in [`DISCUSSION.md`](DISCUSSION.md).
 
 ## Integration lock
 
-- **Current owner:** Claude Code (integration)
-- **Status:** editing
-- **Files being edited:** `DISCUSSION.md` (T13), `HANDOFF.md`, `logs/claude.md`
-- **Last updated:** 2026-10-27 by Claude Code (18:53 Thai time)
+- **Current owner:** none
+- **Status:** ready
+- **Files being edited:** none
+- **Last updated:** 2026-10-27 by Claude Code (18:55 Thai time)
 
 ## Branches
 
@@ -143,7 +143,7 @@ The 12-week plan is in [`docs/PLAN.md`](docs/PLAN.md) (20 Oct 2026 to about 15 J
    solo: `sector` 27/30, `bearing` 29/30. `bearing` fails `side_step` seed 0 with realism (reproduced).
    Three review points for Codex: the rate mixes ego motion and box jitter; the bridge holds a turn
    for 1 s; the `side_step` regression. Codex objected (the turn held for 1 s when messages stop); fixed in `ac28ea7` with a 0.3 s stale-message stop in `bearing` mode. `side_step` now passes. Codex agreed: `bearing` may be tried on robot day after the `sector` runs at `max_speed_mps:=0.5`, as an observational trial; `sector` stays the default.
-16. **T13** in `DISCUSSION.md`: torso hue-saturation histogram in the target gate (weight 0.25 against Cb/Cr),
+16. **T13 — resolved 2026-10-27** (Codex `agree`, relayed by the user; recorded by Claude integration) in `DISCUSSION.md`: torso hue-saturation histogram in the target gate (weight 0.25 against Cb/Cr),
    colour re-acquisition after >= 1 s unseen, the twin `Detection.hist` and `colour` scenario set, and naming
    fixes in comments, merged in `e48ae4c` (`claude/workspace` `fbf3e73`). 127 tests; the open-loop twin is
    bit-identical apart from the new histogram. Five review points for Codex (stranger at the predicted place,
@@ -157,7 +157,16 @@ The 12-week plan is in [`docs/PLAN.md`](docs/PLAN.md) (20 Oct 2026 to about 15 J
    Codex's case. The README and docstring are corrected (`ecf573a`). Closed-loop twin with the rule on: shade sets 10/10
    each, identity 15/15, solo 27/30 with no contact. The new `lookalike_after_loss` gives 9/10 with the rule on and 9/10
    with it off, so it does not test the rule: the far box borrows the near target's LiDAR range (limitation and follow-up
-   in `765338a`). Robot-PC timing is still outstanding. **Waiting for Codex's re-review.**
+   in `765338a`). Robot-PC timing is still outstanding. **Resolved 2026-10-27**: Codex agreed with `808dc6c` (the
+   stranger at 18°, 7.43 m after 1.2 s is rejected: 6.489 m from the last-seen place against 2.6 m allowed). Condition:
+   the limitation stays stated, since `lookalike_after_loss` is 9/10 with the rule on and off, so there is no end-to-end
+   evidence yet that the same-clothing stranger problem is solved. Codex could not commit; its drafts of `HANDOFF.md`
+   and `logs/codex.md` stayed uncommitted in its worktree. **Codex: reconcile them against this file and push them
+   to `codex/workspace`.**
+17. **T13 follow-up — not started, owner Claude, reviewer Codex:** camera boxes get their own LiDAR range
+   (box-height check or nearest LiDAR cluster), so a far look-alike's box cannot borrow the near target's LiDAR
+   range and bypass the re-acquisition rule. Open a new branch and `DISCUSSION.md` thread when it starts;
+   success means `lookalike_after_loss` shows a difference with the rule on.
 
 ## Codex — week 1 tasks
 

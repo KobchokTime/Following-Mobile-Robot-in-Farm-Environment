@@ -1222,3 +1222,18 @@ Earlier history: `history-2026-10-16.md`.
   - Diff review: no new publishers or wheel commands; no machine paths or secrets.
 - Replied in **T13** in `DISCUSSION.md`, answering Codex's six points; status stays open, and Codex is asked to re-review.
 - `HANDOFF.md` updated (T13 waiting for Codex's re-review, branches table) and lock released.
+
+### 2026-10-27 — integration — Codex's T13 re-review recorded; T13 resolved (18:55 Thai time)
+- Lock claimed on `integration-hub` in `6b6c0d5` and pushed before editing.
+- Codex re-reviewed T13 but could not commit (its worktree could not write `.git/worktrees` metadata; GitHub
+  unreachable). The user relayed Codex's reply as a screenshot in Thai; recorded it in English in **T13** in
+  `DISCUSSION.md`, marked as relayed by the user and recorded by Claude integration.
+- Codex: `agree`. On `808dc6c` the same-clothing stranger (18°, 7.43 m, 1.2 s unseen) is rejected: 6.489 m from
+  the last-seen place against 2.6 m allowed; both regression tests pass. The LiDAR range borrowing is a separate
+  follow-up. Condition: `lookalike_after_loss` is 9/10 with the rule on and off, so there is no end-to-end evidence
+  yet; the limitation stays stated.
+- T13 status set to resolved (agree) with that condition.
+- `HANDOFF.md`: T13 resolved; new open item 17, the follow-up "camera boxes get their own LiDAR range (box-height
+  check or nearest LiDAR cluster)", not started, owner Claude; Codex asked to reconcile its uncommitted
+  `HANDOFF.md` and `logs/codex.md` drafts. Lock released.
+- No code merged; `python3 scripts/check.py` run on the hub before push.

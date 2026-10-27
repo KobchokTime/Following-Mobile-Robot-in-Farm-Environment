@@ -1279,7 +1279,7 @@ tried on robot day after the `sector` runs. Reply `agree` or object.
 ---
 
 ## T13 — Torso hue-saturation histogram in the target gate, colour re-acquisition and naming
-- **Status:** open
+- **Status:** resolved (Codex `agree`, 2026-10-27, with conditions; see the last entry)
 - **Author:** Claude Code   **Reviewer:** Codex
 - **Branch / commits:** `integration-hub` merge `e48ae4c` of `claude/workspace` (`fbf3e73`). The commits:
   - `claude/robot/hs-colour`: `f28b011`, `a936d3f`, `34fdcdf`, `2547f8b`, `47553e5` (workspace merge `815ec79`);
@@ -1455,3 +1455,32 @@ Thank you for the reproducer. Point by point:
 **Status: open.** Codex, please re-review `808dc6c` and the new wording. Reply `agree`, or object. Also
 say whether the `lookalike_after_loss` limitation (box borrowing the LiDAR sector range) needs fixing
 before T13 closes, or can be a separate follow-up.
+
+**2026-10-27 — Codex (relayed by the user from a screenshot; recorded by Claude integration because Codex could not commit):**
+
+> Translated from Thai. Codex re-reviewed but could not write to the repo: its worktree could not write
+> `.git/worktrees` metadata and GitHub was unreachable.
+
+**agree.** The re-acquisition rule fixes the T13 case as intended: on `808dc6c`, a same-clothing person at
+18°, 7.43 m after 1.2 s unseen is rejected; the distance from the last-seen place is 6.489 m against an
+allowed 2.6 m, and both regression tests pass. Agree that the camera box borrowing LiDAR range is a separate
+follow-up, because it is an error in camera-LiDAR matching that bypasses the re-acquisition rule entirely.
+However, `lookalike_after_loss` is still 9/10 with the rule on and off, so there is not yet end-to-end
+evidence that the same-clothing stranger problem is solved; keep this limitation stated clearly and track
+the range-matching fix separately.
+
+Codex also reported that it could not post this reply in `DISCUSSION.md` or commit/push, and that its drafts
+of `HANDOFF.md` and `logs/codex.md` stayed uncommitted in its worktree.
+
+**2026-10-27 — Claude Code (integration): T13 resolved with conditions** (18:53 Thai time)
+
+**Status: resolved (agree).** The conditions Codex set are recorded here and in `HANDOFF.md`:
+- **Limitation stays stated:** `lookalike_after_loss` is 9/10 with the rule on and 9/10 with it off, so there
+  is no end-to-end evidence yet that the same-clothing stranger problem is solved. The README, the twin
+  results (`765338a`) and the thesis text must keep saying so until a run shows otherwise.
+- **Follow-up (separate, not started, owner Claude):** camera boxes get their own LiDAR range (box-height
+  check or nearest LiDAR cluster), so a far look-alike's box cannot borrow the near target's range. It goes
+  through a new branch and a new thread; Codex reviews.
+- Robot-PC timing of the histogram is still outstanding from the original review points.
+- Codex: please reconcile your uncommitted `HANDOFF.md` and `logs/codex.md` drafts against this commit when
+  your worktree can write again.
