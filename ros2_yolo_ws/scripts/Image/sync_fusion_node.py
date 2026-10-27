@@ -78,24 +78,23 @@ def lidar_track(points, pred_bearing, pred_range, window_rad, range_tol, width_m
 def box_range(points, bearing, margin_rad=math.radians(5.0)):
     """Range of the LiDAR cluster that belongs to a camera box at this bearing, or None.
 
-    Among the clusters whose angular span (plus margin_rad) covers the bearing, the one whose middle
-    is nearest the bearing. A near person fills a wide angle, so the minimum of a fixed sector next to
-    them is their range even for a box on someone far behind (T13 follow-up); the far person's own
-    cluster is centred on their box. The margin lets a box between two legs find them.
+    The cluster whose angular span covers the bearing; if none does (a box between two legs), the
+    one whose edge is nearest, within margin_rad. A near person fills a wide angle, so the minimum of
+    a fixed sector next to them is their range even for a box on someone far behind (T13 follow-up).
+    A cluster beside the box is never preferred to the one the box looks at: a person crossing in
+    front would otherwise lend their range to the target's box before they cover it.
     """
     pts = sorted(points)
-    best, best_db = None, None
+    best, best_gap = None, None
     start = 0
     for i in range(1, len(pts) + 1):
         if i < len(pts) and abs(pts[i][1] - pts[i - 1][1]) <= 0.15 and pts[i][0] - pts[i - 1][0] <= math.radians(3.0):
             continue
         c = pts[start:i]
         start = i
-        if not (c[0][0] - margin_rad <= bearing <= c[-1][0] + margin_rad):
-            continue
-        db = abs(c[len(c) // 2][0] - bearing)
-        if best is None or db < best_db:
-            best, best_db = min(r for _, r in c), db
+        gap = max(c[0][0] - bearing, bearing - c[-1][0], 0.0)
+        if gap <= margin_rad and (best is None or gap < best_gap):
+            best, best_gap = min(r for _, r in c), gap
     return best
 
 

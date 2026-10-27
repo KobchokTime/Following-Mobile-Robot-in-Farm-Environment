@@ -113,6 +113,14 @@ class SectorAssociationTest(unittest.TestCase):
         legs = self._person(1.0, 0.1, radius=0.06) + self._person(1.0, -0.1, radius=0.06)
         self.assertAlmostEqual(self.m.box_range(legs, 0.0), 0.94, delta=0.03)
 
+    def test_a_person_beside_the_box_does_not_lend_their_range(self):
+        """The box looks at the target's edge; a person just beside it has the nearer cluster middle."""
+        target = self._person(0.85, 0.0)
+        side = math.radians(-20.0)
+        other = self._person(1.5 * math.cos(side), 1.5 * math.sin(side))
+        scan = [p for p in target + other if not any(abs(p[0] - q[0]) < 1e-9 and q[1] < p[1] for q in target + other)]
+        self.assertAlmostEqual(self.m.box_range(scan, math.radians(-12.0)), 0.65, delta=0.05)
+
     def test_no_cluster_near_the_box_gives_none(self):
         self.assertIsNone(self.m.box_range(self._person(2.0, 0.0), math.radians(30.0)))
         self.assertIsNone(self.m.box_range([], 0.0))
