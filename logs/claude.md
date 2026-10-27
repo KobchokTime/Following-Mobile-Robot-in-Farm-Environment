@@ -1320,3 +1320,33 @@ Earlier history: `history-2026-10-16.md`.
 - Added a Claude Code entry to **T14** with the answer; status stays open for Codex (a)–(e).
 - `HANDOFF.md`: item 17 updated; new item 18 "gate on lateral distance (`side_step`)", not started, owner Claude.
   Lock released.
+
+### 2026-10-28 — research — side_step count corrected (01:00 Thai time)
+- Integration found a miscount in the side_step answer: off is 19/28, not 18/28. The off seeds 0–2 come from the T13 run, `808dc6c`, where they pass 1/3.
+- Corrected values:
+  - Fisher p = 0.41; still no difference;
+  - integration's question was on 3/8 vs off 5/5, not "2 of 8".
+- Added the 43 side_step runs to `experiments/sim/2026-10-27_box_range.json`.
+
+### 2026-10-28 — tests/research — T14 objections addressed (06:20 Thai time)
+- Codex objected in T14 (`c83633a`, review `codex/workspace` `6fd14e1`). Changes on `claude/robot/box-range`, merged into the workspace:
+  1. **Regression test:** uses the production sector median (Codex's flat-return replay).
+     - The old path borrows 0.8 m and the gate takes the look-alike; `box_range` gives 7.43 m and it is rejected.
+  2. **Data:** the 43 side_step runs are in the JSON (since `b627a55`). The debug gate traces and the patch that makes the debug build are in `experiments/sim/box_range_debug/`.
+     - Wording changed to "no effect detected" (p = 0.41, −14 points, not excluded).
+     - The wrong claim that `box_range` is unused in the failing solo moves is withdrawn.
+  3. **Limits kept in the write-up:** legs and a neighbour's leg, skipping removes give-way, the stale-scan fallback, physical alignment.
+- `check.py`: 135 tests pass.
+
+### 2026-10-28 — integration — T14 review changes merged; Codex's objections answered (06:20 Thai time)
+- Fast-forwarded the hub worktree to `c83633a` (Codex's T14 objection). Lock claimed in `458690f` and pushed.
+- Merged `claude/workspace` (`1f94cf4`) with `--no-ff`: merge `f0a79ab`. No conflicts. `codex/workspace` not merged.
+- `python3 scripts/check.py` passes, 135 tests.
+- Verified: side_step in the JSON is on 15/28, off 19/28 (43 rows added: 40 `d23e7b2` + 3 `808dc6c`); Fisher p = 0.412;
+  `808dc6c` vs `d23e7b2` differ outside `box_range` only in comments; the regression test asserts the old path
+  (median 0.8 m, accepted) before the new one (7.43 m, rejected); traces hold the cost-13.44 rejection; no paths or secrets.
+- Ran Codex's `t14_gate_review.py` (from `codex/workspace`) with `-I` on a scratch copy of `f0a79ab`, output to a
+  scratch path, not committed: exit 0, replay and limits reproduce. Its Fisher value and evidence inventory are stale
+  by construction (hard-coded old totals; counts only `d23e7b2` rows).
+- Added a Claude Code reply in **T14** answering requested changes (1)–(3); asked Codex to re-review. T14 stays open.
+- `HANDOFF.md`: item 17 awaiting Codex's re-review; lock released.
