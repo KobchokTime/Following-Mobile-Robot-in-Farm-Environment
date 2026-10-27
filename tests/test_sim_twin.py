@@ -71,6 +71,14 @@ class SensorModelTest(unittest.TestCase):
         w.blackouts = [(0.0, 1.0)]
         self.assertEqual(w.detections(), [])
 
+    def test_hidden_window_hides_one_person_from_the_camera_only(self):
+        w = world_with(Person("t", [(0, 2.0, 0.0)], True), Person("d", [(0, 4.0, 2.0)]))
+        w.hidden = {"t": [(0.0, 1.0)]}
+        self.assertEqual([d.person for d in w.detections()], ["d"])
+        self.assertLess(min(w.scan()), 2.0)  # the LiDAR still sees the target
+        w.step(1.0)
+        self.assertEqual(sorted(d.person for d in w.detections()), ["d", "t"])
+
 
 class ScenarioAndScoreTest(unittest.TestCase):
     def test_every_scenario_starts_inside_controller_init_window(self):

@@ -257,6 +257,7 @@ class World:
     sensors: SensorParams = field(default_factory=SensorParams)
     blackouts: Sequence[Tuple[float, float]] = ()  # detector blind windows (t_start, t_end)
     shade: Sequence[Tuple[float, float, float]] = ()  # (x0, x1, saturation factor) bands in world x
+    hidden: Dict[str, Sequence[Tuple[float, float]]] = field(default_factory=dict)  # per person: camera-blind windows
     seed: int = 0
     realism: Optional[Realism] = None
 
@@ -346,6 +347,7 @@ class World:
         chroma = observe_clothing(self.people, {p.name: p.position(self.t)[0] for p in self.people},
                                   self.shade, self.sensors.chroma_noise, self.color_rng)
         dets = project_detections(self.people_robot_frame(), self.sensors, self.rng, chroma)
+        dets = [d for d in dets if not any(a <= self.t < b for a, b in self.hidden.get(d.person, ()))]
         people = {p.name: p for p in self.people}
         for d in dets:
             p = people[d.person]

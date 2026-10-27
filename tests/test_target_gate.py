@@ -193,6 +193,24 @@ class TargetGateTest(unittest.TestCase):
         self.assertEqual((g.bearing_rate, g.range_rate), (0.0, 0.0))
         self.assertAlmostEqual(g.range, 2.0)
 
+    def test_a_look_alike_far_away_is_not_taken_back(self):
+        """T13: target hidden for 1.2 s, then someone in the same clothes appears at 18 deg, 7.43 m."""
+        g = self.Gate()
+        blue = self._hist(8, 2)
+        for i in range(5):
+            self.assertTrue(g.accept(0.1 * i, D(2), 0.8 + 0.05 * i, (139, 125), blue))
+        self.assertFalse(g.accept(1.6, D(18), 7.43, (139, 125), blue))
+        self.assertTrue(g.accept(1.6, D(4), 1.6, (139, 125), blue))  # the target, a step further on
+
+    def test_reacquisition_reach_grows_with_time_but_is_capped(self):
+        g = self.Gate()
+        blue = self._hist(8, 2)
+        for i in range(5):
+            g.accept(0.1 * i, 0.0, 0.8, (139, 125), blue)
+        far = 0.8 + 3.2  # 3.2 m beyond the last place: more than the 3 m cap
+        self.assertFalse(g.accept(4.0, 0.0, far, (139, 125), blue))
+        self.assertTrue(g.accept(4.0, 0.0, 0.8 + 2.8, (139, 125), blue))
+
     def test_no_colour_reacquisition_without_histogram(self):
         g = self.Gate()
         for i in range(5):

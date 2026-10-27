@@ -124,10 +124,14 @@ class TargetGate:
     tee (weight_sweep.py).
 
     Re-acquisition, after Algorithm 1 of Kim, Suh and Kwon (2024): once the target has been unseen for
-    reacquire_after_s, a detection whose colour matches the model (colour cost at most
-    reacquire_colour_max) and that lies within reacquire_bearing_deg of the predicted bearing is taken
-    as the target again, at any range, and the track restarts there. Only with a histogram: Cb/Cr
-    alone cannot tell a blue top in shade from a grey one.
+    reacquire_after_s, a detection is taken as the target again, and the track restarts there, when
+    its colour matches the model (colour cost at most reacquire_colour_max), it lies within
+    reacquire_bearing_deg of the predicted bearing, and it is where the target could have walked to:
+    within reacquire_dist_m + reacquire_speed_mps x (time unseen) of the last place the target was
+    seen, at most reacquire_dist_max_m (the paper's T_dist). Clothing alone cannot tell two people in
+    the same clothes apart; the distance rule keeps a look-alike elsewhere in the scene out (T13). Only
+    with a histogram: Cb/Cr alone cannot tell a blue top in shade from a grey one. The colour
+    threshold was chosen on the same seven videos as hist_weight; it is not an identity guarantee.
 
     Lock-on uses the controller's start window: range 0.5-1.0 m, near the image centre.
     """
@@ -136,7 +140,8 @@ class TargetGate:
                  range_sigma_m=0.15, chroma_sigma=15.0, gate=9.0, widen_per_s=1.0,
                  alpha=0.6, beta=0.2, chroma_rate=0.05, min_rate_dt=0.015, unlock_after_s=5.0,
                  hist_sigma=0.2, hist_window=10, hist_learn_slack=0.1, hist_weight=0.25,
-                 reacquire_after_s=1.0, reacquire_colour_max=1.0, reacquire_bearing_deg=35.0):
+                 reacquire_after_s=1.0, reacquire_colour_max=1.0, reacquire_bearing_deg=35.0,
+                 reacquire_dist_m=0.8, reacquire_speed_mps=1.5, reacquire_dist_max_m=3.0):
         self.lock_range = lock_range
         self.lock_bearing = math.radians(lock_bearing_deg)
         self.sb = math.radians(bearing_sigma_deg)
@@ -154,6 +159,9 @@ class TargetGate:
         self.reacquire_after_s = reacquire_after_s
         self.reacquire_colour_max = reacquire_colour_max
         self.reacquire_bearing = math.radians(reacquire_bearing_deg)
+        self.reacquire_dist = reacquire_dist_m
+        self.reacquire_speed = reacquire_speed_mps
+        self.reacquire_dist_max = reacquire_dist_max_m
         # Two boxes on one person arrive within a frame; a rate from a ~1 ms step would blow up the
         # prediction and the target would never be accepted again, so such steps update position only.
         # 15 ms is under one frame even at 60 fps, so real frame-to-frame steps always update the rate.
@@ -212,7 +220,15 @@ class TargetGate:
         if hist is None or not self.hists or t - self.t < self.reacquire_after_s:
             return False
         pb, _ = self._predict(t)
-        if abs(bearing - pb) > self.reacquire_bearing or self.colour_cost(chroma, hist) > self.reacquire_colour_max:
+        if abs(bearing - pb) > self.reacquire_bearing \
+                or self.colour_cost(chroma, hist) > self.reacquire_colour_max:
+            return False
+        # where the target could have walked to since it was last seen (robot frame; the robot stops
+        # or holds while the target is lost, so its own motion is small against this allowance)
+        reach = min(self.reacquire_dist_max, self.reacquire_dist + self.reacquire_speed * (t - self.t))
+        dx = rng * math.cos(bearing) - self.range * math.cos(self.bearing)
+        dy = rng * math.sin(bearing) - self.range * math.sin(self.bearing)
+        if math.hypot(dx, dy) > reach:
             return False
         self.t, self.bearing, self.range = t, bearing, rng
         self.bearing_rate = self.range_rate = 0.0
