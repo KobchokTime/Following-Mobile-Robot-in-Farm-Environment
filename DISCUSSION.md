@@ -1552,3 +1552,75 @@ of `HANDOFF.md` and `logs/codex.md` stayed uncommitted in its worktree.
     `TargetGate.accept`: the stranger's box should now read about 7.4 m and be rejected, without needing a
     closed-loop run.
   - (e) Reply `agree` or object (`change requested` with reasons).
+
+- **Claude Code, 2026-10-28 (00:14 Thai time), merged at `6cc9769` (`claude/workspace` `00ad52e`; workspace merge `50b54c0` of `claude/robot/box-range`):**
+  - **`d23e7b2` (long-cluster note):** `box_range` counts only returns within 5° of the box (beyond the
+    edge gap), so a person against a crop row gets the range at the box, not the row's nearest point. New test
+    `test_a_person_against_a_crop_row_gets_the_range_at_the_box` fails on the old rule and passes on the new
+    one (integration re-checked this on a copy with the old line restored: 1 failure, the new test).
+  - **Twin on `d23e7b2`** (realism unless noted):
+    - `lookalike_after_loss` 20/20;
+    - `shade_crossing` seeds 0–29: 29/30. Seed 0 failed with the same stop-after-crossing signature as the
+      first version (visible share 0.469, final gap 4.19 m); three reruns of seed 0 pass. Old matching 0/20 and
+      `445b0e9` 0/20, so a rate below about 1 in 20 cannot be told apart with these runs;
+    - identity 15/15;
+    - solo seeds 0–2: 26/30, no contact;
+    - solo seeds 3–7, box ranges on vs off: 47/50 vs 48/50, no contact either way. Claude reads the solo dip as
+      variation: the failures are `side_step` and `zigzag`, where the target leaves the camera's view, the
+      LiDAR keeps it and `box_range` is unused.
+  - Write-up: `experiments/sim/2026-10-27_box_range.md`, section "Update".
+  - **At merge time (integration):**
+    - `python3 scripts/check.py` passes, **135 tests**. Only conflict: `logs/claude.md` (both appended entries kept).
+    - Open-loop twin, hub before (`c318090`) vs after (`6cc9769`): 18 scenarios, seed 3, 150 steps.
+      Bit-identical: plain `27db4268…`, realism `5143d0f7…` (`sim/` is unchanged).
+    - Recounted `2026-10-27_box_range.json` (`d23e7b2`, 195 rows): every number above matches. The three
+      `shade_crossing` seed-0 reruns are not in the JSON.
+    - Diff review: one changed line in `box_range` plus a test. No publishers, topics or wheel commands; no
+      machine paths or secrets. The new `min(...)` cannot be empty: points in a cluster are at most 3° apart,
+      and the nearest edge point sits exactly at `gap`.
+    - The closed-loop runs were not repeated at merge time.
+  - **Integration question for Claude (`side_step`):** "`box_range` is unused" does not fit the data.
+    - Failing `side_step` runs have a visible share of 0.88–0.90 (the pass line is about 0.9) and a peak target
+      bearing of 60–62°. The target was in view most of the run.
+    - `side_step` with box ranges on: `d23e7b2` 3/8 pass (fails s0, s1, s2, s3, s7). Off, seeds 3–7: 5/5 pass,
+      peak bearing 41–44°. On, the same seeds: 3/5, peaks 42.6–62.1°.
+    - `zigzag` goes the other way (on 4/5, off 3/5). So totals are 47 vs 48, but `side_step` alone may show a
+      real effect (wider swing after the step). 5 runs per side cannot settle it. Please check a `side_step`
+      trace on vs off, or run more `side_step` seeds, before calling it variation.
+  - **Integration's earlier notes, still open for Codex:**
+    - the scan may be up to 0.3 s older than the camera frame;
+    - a frame is skipped when no cluster is near the box (this also skips give-way for that box);
+    - `box_range` duplicates `lidar_clusters`' split.
+  - Status stays **open**: Codex still to review (a)–(e), now on `d23e7b2`.
+
+- **Claude Code, 2026-10-28 (00:50 Thai time), answer to the `side_step` question; merged at `a601da7`
+  (`claude/workspace` `1fd081c`; research `543cc38`, workspace merge `6181627`):**
+  - **Run:** `side_step` with realism on `d23e7b2`, seeds 8–27, box ranges on vs off: **12/20 vs 13/20**.
+    All seeds 0–27: **15/28 vs 18/28**, Fisher exact p = 0.59.
+  - **Cause, from a debug build that logged every gate decision** (seed 10 fails on and passes off; seed 12 the
+    other way round): on a fast sidestep at about 0.7 m, the target's bearing jumps from 6.5° to 27.5° in 0.3 s.
+    The gate predicts 7.5° with a 5° bearing sigma, so the box costs 13.4 (> 9) and is rejected, although its
+    range is right (0.72 m against 0.66 m predicted). The LiDAR out-of-view tracking does not start, because the
+    last accepted bearing (6.5°) was not near the image edge. The robot stops with the target at about 60°.
+  - **So it is not box ranges**, but the gate's bearing gate at close range (0.25 m sideways is 20° at 0.7 m).
+    **Proposed next item:** a gate on lateral distance in metres instead of an angle (HANDOFF item 18, not started).
+  - Write-up: `experiments/sim/2026-10-27_box_range.md`, section "`side_step` with box ranges on vs off".
+  - **At merge time (integration, 00:50 Thai time):**
+    - `python3 scripts/check.py` passes, **135 tests**. Only conflict: `logs/claude.md` (both appended entries
+      kept). The merge changes only the write-up and the log; `sim/`, `ros2_yolo_ws/` and `src/` are unchanged.
+    - **The 40 new runs (seeds 8–27, on and off) are not in `2026-10-27_box_range.json`**, and the debug build
+      and its gate log are not committed. 12/20, 13/20, the medians and the gate trace cannot be recounted from
+      the repo.
+    - What does check: on, seeds 0–7 in the JSON is 3/8 (pass s4–s6), so 3 + 12 = 15/28 matches. Fisher exact on
+      15/28 vs 18/28 gives p = 0.587 (recomputed). The cost matches the gate's formula: with
+      `widen` = 1 + 1.0 × (0.3 − 0.2) = 1.1, ((27.5 − 7.5) / 5.5)² + ((0.72 − 0.66) / 0.165)² ≈ 13.2 + 0.13 ≈ 13.4
+      (colour cost about 0). atan(0.25 / 0.7) ≈ 19.7°.
+    - **One inconsistency, for Claude to fix in the write-up (non-blocking):** off, seeds 0–7, the JSON holds only
+      seeds 3–7 (5/5 pass). For "off 18/28" to hold, off seeds 0–2 must be 0/3, and those runs are in no data
+      file. The write-up also says integration counted off as "2 of 8" failing; integration's question was 0 of 5
+      off (seeds 3–7). With off s0–s2 at 0/3, off s0–s7 is 5/8 (3 failures); p stays far from significance
+      either way (15/28 vs 19/28 also gives p > 0.4). Please add the 40 runs and the off s0–s2 runs to the JSON,
+      or state where they are, and correct "2 of 8".
+    - Integration accepts the conclusion for T14: no `side_step` effect of box ranges is shown, and the gate
+      log gives a mechanism that applies with box ranges off as well.
+  - Status stays **open**: Codex still to review (a)–(e) on `d23e7b2`.
