@@ -1143,3 +1143,29 @@ Earlier history: `history-2026-10-16.md`.
 - The separate gallery card was merged into it.
 - **New dataset:** `colour_clip_points`.
 - Rendered in Chromium for every clip at wide and phone width: no dots outside the plot, no page errors.
+
+### 2026-10-27 — robot + research — "Bayesian" naming fixed; identity belief tried and not adopted (16:22 Thai time)
+- **The user asked whether the system uses anything Bayesian. It does not**, although two places were named so.
+  - `fusion_prob` is a weighted mean of two heuristic scores with time smoothing.
+  - `follow_stop`'s "sector prior" is turn hysteresis.
+  - The thesis draft already said so.
+- **The user chose: (1) fix the naming, then (2) try a light, real Bayesian piece.**
+  1. `claude/robot/naming` (`27fb26d`): comments only. 120 tests pass.
+  2. `claude/robot/identity-belief` (`d282995`, `003f033`, `6102615`), built on `claude/robot/hs-colour`.
+     - What it adds: a recursive Bayes belief that the gate's box is still the locked-on person.
+       - Likelihood ratio = geometry (χ²(2) vs uniform, held to 0.3–1.5) × a colour table measured on the videos.
+       - Switch probability 0.01.
+       - With `identity_belief:=true` (default false), the gate waits for a colour match below 0.15.
+     - 131 tests pass.
+- **Videos** (leave one clip out):
+  - wrong takes fall from 29.2 % to 20.0 %, but the target is kept in only 87 % of frames (worst 10.9 %);
+  - no threshold avoids this;
+  - as a report-only signal, AUC 0.50.
+- **Twin, realism, belief on vs off:**
+  - `shade_crossing` 1/10 vs 10/10;
+  - `shade_side_by_side` 9/10 (1 contact) vs 10/10;
+  - identity 15/15 both;
+  - solo 28/30 vs 27/30.
+- **Cause:** the belief rests on the same colour evidence the gate uses to choose, so it rises with a wrong pick and falls when the target's own colour changes (deep shade). It needs an independent cue.
+- **Decision:** keep it off; the branch stays as a measured negative result. Write-up: `experiments/sim/2026-10-27_identity_belief.md` (+ `.json`).
+- **Twin with the histogram at 0.25 (`47553e5`, belief off):** `shade_crossing` realism 10/10 (9/10 without histogram), solo 27/30 (24/30). Dashboard twin card updated (page version 19).
