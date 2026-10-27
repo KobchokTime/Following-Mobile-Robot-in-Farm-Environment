@@ -1,0 +1,336 @@
+{
+  "code_revision": "d23e7b2",
+  "sync_fusion_sha256": "15ed39707c5a94a794ca18f96490b4a7e9ce8ea135ead83183d1e8ce954558e9",
+  "observation_type": "synthetic gate-level; not a ROS closed-loop or hardware run",
+  "borrowed_flat_returns": {
+    "old_sector_median_m": 0.8,
+    "box_range_m": 7.43,
+    "unseen_s": 1.2000000000000002,
+    "reach_m": 2.6000000000000005,
+    "separation_m": 6.489181360198667,
+    "old_accepted": true,
+    "new_accepted": false,
+    "rejected_track_unchanged": true
+  },
+  "borrowed_circle_returns": {
+    "old_sector_median_m": 7.230000000000034,
+    "box_range_m": 7.230000000000034,
+    "unseen_s": 1.2000000000000002,
+    "reach_m": 2.6000000000000005,
+    "separation_m": 6.289361924079877,
+    "old_accepted": false,
+    "new_accepted": false,
+    "rejected_track_unchanged": true
+  },
+  "leg_cases": [
+    {
+      "distance_m": 0.5,
+      "leg_centre_separation_m": 0.2,
+      "leg_radius_m": 0.06,
+      "box_range_m": 0.4509119048548173
+    },
+    {
+      "distance_m": 0.75,
+      "leg_centre_separation_m": 0.2,
+      "leg_radius_m": 0.06,
+      "box_range_m": 0.6966492842061045
+    },
+    {
+      "distance_m": 1.0,
+      "leg_centre_separation_m": 0.2,
+      "leg_radius_m": 0.06,
+      "box_range_m": 0.945094587029567
+    },
+    {
+      "distance_m": 1.5,
+      "leg_centre_separation_m": 0.2,
+      "leg_radius_m": 0.06,
+      "box_range_m": 1.443520367139314
+    },
+    {
+      "distance_m": 2.0,
+      "leg_centre_separation_m": 0.2,
+      "leg_radius_m": 0.06,
+      "box_range_m": 1.9426856930211787
+    },
+    {
+      "distance_m": 3.0,
+      "leg_centre_separation_m": 0.2,
+      "leg_radius_m": 0.06,
+      "box_range_m": 2.941851494928577
+    },
+    {
+      "distance_m": 0.5,
+      "leg_centre_separation_m": 0.3,
+      "leg_radius_m": 0.06,
+      "box_range_m": null
+    },
+    {
+      "distance_m": 0.75,
+      "leg_centre_separation_m": 0.3,
+      "leg_radius_m": 0.06,
+      "box_range_m": null
+    },
+    {
+      "distance_m": 1.0,
+      "leg_centre_separation_m": 0.3,
+      "leg_radius_m": 0.06,
+      "box_range_m": null
+    },
+    {
+      "distance_m": 1.5,
+      "leg_centre_separation_m": 0.3,
+      "leg_radius_m": 0.06,
+      "box_range_m": 1.4477275455016971
+    },
+    {
+      "distance_m": 2.0,
+      "leg_centre_separation_m": 0.3,
+      "leg_radius_m": 0.06,
+      "box_range_m": 1.9460592048861716
+    },
+    {
+      "distance_m": 3.0,
+      "leg_centre_separation_m": 0.3,
+      "leg_radius_m": 0.06,
+      "box_range_m": 2.944174190097177
+    }
+  ],
+  "neighbouring_leg_ambiguity": {
+    "target_only_m": null,
+    "with_neighbour_leg_m": 0.7599999999999999,
+    "neighbour_centre_bearing_deg": 6,
+    "neighbour_centre_range_m": 0.8
+  },
+  "bearing_frame": {
+    "scan_cases": [
+      {
+        "increment_deg": 30,
+        "robot_bearings_deg": [
+          -30.0,
+          -0.0,
+          30.0
+        ]
+      },
+      {
+        "increment_deg": -30,
+        "robot_bearings_deg": [
+          30.0,
+          0.0,
+          -30.0
+        ]
+      }
+    ],
+    "camera_roundtrip_deg": {
+      "-30": -30.01378988644562,
+      "0": 0.0,
+      "30": 30.01378988644562
+    }
+  },
+  "skip_vs_fallback": [
+    {
+      "case": "fresh_no_cluster",
+      "gate_calls": 0,
+      "publications": 0,
+      "give_way_range_m": null
+    },
+    {
+      "case": "disabled_sector_fallback",
+      "gate_calls": 1,
+      "publications": 1,
+      "give_way_range_m": 0.4
+    },
+    {
+      "case": "stale_scan_sector_fallback",
+      "gate_calls": 1,
+      "publications": 1,
+      "give_way_range_m": 0.4
+    }
+  ],
+  "side_step": {
+    "predicted_bearing_deg": 7.500000000000003,
+    "last_bearing_deg": 6.5,
+    "lidar_edge_threshold_deg": 27,
+    "lateral_step_angle_deg": 19.653824058053313,
+    "costs": [
+      {
+        "measured_range_m": 0.66,
+        "total_cost": 13.223140495867746,
+        "accepted": false
+      },
+      {
+        "measured_range_m": 0.72,
+        "total_cost": 13.355371900826423,
+        "accepted": false
+      }
+    ],
+    "fisher_p_if_reported_totals_correct": 0.5874826430537712,
+    "reported_pass_rate_difference_pp": -10.71428571428572
+  },
+  "evidence": {
+    "total_rows": 417,
+    "d23e7b2_rows": 195,
+    "groups": {
+      "box_range on/shade_crossing": {
+        "n": 30,
+        "passed": 29,
+        "contacts": 0
+      },
+      "box_range on/lookalike_after_loss": {
+        "n": 20,
+        "passed": 20,
+        "contacts": 0
+      },
+      "box_range on/crossing": {
+        "n": 3,
+        "passed": 3,
+        "contacts": 0
+      },
+      "box_range on/head_on": {
+        "n": 3,
+        "passed": 3,
+        "contacts": 0
+      },
+      "box_range on/side_by_side": {
+        "n": 3,
+        "passed": 3,
+        "contacts": 0
+      },
+      "box_range on/side_by_side_same": {
+        "n": 3,
+        "passed": 3,
+        "contacts": 0
+      },
+      "box_range on/stand_aside": {
+        "n": 3,
+        "passed": 3,
+        "contacts": 0
+      },
+      "box_range on/straight": {
+        "n": 8,
+        "passed": 8,
+        "contacts": 0
+      },
+      "box_range on/stop_and_go": {
+        "n": 8,
+        "passed": 8,
+        "contacts": 0
+      },
+      "box_range on/curve_left": {
+        "n": 8,
+        "passed": 8,
+        "contacts": 0
+      },
+      "box_range on/target_loss": {
+        "n": 8,
+        "passed": 8,
+        "contacts": 0
+      },
+      "box_range on/come_back": {
+        "n": 8,
+        "passed": 8,
+        "contacts": 0
+      },
+      "box_range on/side_step": {
+        "n": 8,
+        "passed": 3,
+        "contacts": 0
+      },
+      "box_range on/turn_90": {
+        "n": 8,
+        "passed": 8,
+        "contacts": 0
+      },
+      "box_range on/walk_0p6": {
+        "n": 8,
+        "passed": 8,
+        "contacts": 0
+      },
+      "box_range on/walk_1p0": {
+        "n": 8,
+        "passed": 8,
+        "contacts": 0
+      },
+      "box_range on/zigzag": {
+        "n": 8,
+        "passed": 6,
+        "contacts": 0
+      },
+      "box_range off/straight": {
+        "n": 5,
+        "passed": 5,
+        "contacts": 0
+      },
+      "box_range off/stop_and_go": {
+        "n": 5,
+        "passed": 5,
+        "contacts": 0
+      },
+      "box_range off/curve_left": {
+        "n": 5,
+        "passed": 5,
+        "contacts": 0
+      },
+      "box_range off/target_loss": {
+        "n": 5,
+        "passed": 5,
+        "contacts": 0
+      },
+      "box_range off/come_back": {
+        "n": 5,
+        "passed": 5,
+        "contacts": 0
+      },
+      "box_range off/side_step": {
+        "n": 5,
+        "passed": 5,
+        "contacts": 0
+      },
+      "box_range off/turn_90": {
+        "n": 5,
+        "passed": 5,
+        "contacts": 0
+      },
+      "box_range off/walk_0p6": {
+        "n": 5,
+        "passed": 5,
+        "contacts": 0
+      },
+      "box_range off/walk_1p0": {
+        "n": 5,
+        "passed": 5,
+        "contacts": 0
+      },
+      "box_range off/zigzag": {
+        "n": 5,
+        "passed": 3,
+        "contacts": 0
+      }
+    },
+    "side_step_seed_coverage": {
+      "box_range on": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "box_range off": [
+        3,
+        4,
+        5,
+        6,
+        7
+      ]
+    },
+    "missing_new_trials": 40,
+    "missing_off_early_seeds": [
+      0,
+      1,
+      2
+    ]
+  }
+}
