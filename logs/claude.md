@@ -1123,3 +1123,13 @@ Earlier history: `history-2026-10-16.md`.
   - box 436 is the passing worker (it had X).
   - Re-running `heldout.py`, `variants_heldout.py` and `weight_sweep.py` changes only a few pairwise strangers values by ≤ 0.3 points; every summary number is unchanged.
 - **Script:** `gallery.py` builds the strips.
+
+### 2026-10-27 — research + dashboard — Colour separability per clip (14:42 Thai time)
+- The user asked for a per-clip analysis of how far colour can tell the target from others. Added `separability.py`, which reports the AUC of the gate's colour cost (target box vs other people's boxes) per clip, for Cb/Cr, histogram and the gate's mix.
+- **Mix (`hist_weight` 0.25):**
+  - ≥ 0.85 in 11 of 14 clip/target cases;
+  - fails on black tee 1 (0.36: hue is noise on black) and on the crowd's red top (0.06: Cb/Cr's grey bias on tiny crops);
+  - Cb/Cr alone is below 0.5 in 5 cases.
+- **Dashboard v2, "สีเสื้อ" (clothing colour) tab:** new card with an AUC overview for every clip, and a per-clip view (page version 17).
+  - The per-clip view shows the AUC verdict, the target's and nearest other's colour cost over time with confusion shaded, and the Cb/Cr scatter.
+  - Rendered in Chromium before publishing. A bug where the time axis ran backwards on one-person clips was found and fixed: stranger boxes carried another clip's time.

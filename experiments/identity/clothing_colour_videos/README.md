@@ -264,3 +264,45 @@ The same gate is used with only `hist_weight` changed.
 - **By design, at 0.25 colour alone cannot reject someone standing exactly where the target is
   predicted:** the histogram adds at most 6.25 of the 9 budget. A small miss in bearing or range
   together with a different colour does reject.
+
+## Separability, clip by clip (`separability.py`, `results_separability.txt`, `separability.json`)
+
+- **Method.** The gate follows the target (colour only, `hist_weight` 0.25), and at each step every
+  box's colour cost against the gate's current model is recorded.
+- **AUC** is the chance that a target box costs less than another person's box: 1 means always
+  apart, 0.5 is a coin toss, and below 0.5 means colour points to the wrong person more often than
+  the right one.
+- **Others** are:
+  - the other person, in the lab clips;
+  - strangers from other clips, in the one-person clips (plus the real passer-by in `farm_beige_1`);
+  - everyone in view, in the vtest crowd.
+
+| Clip (target) | Cb/Cr | Histogram | Mix (gate) |
+|---|---|---|---|
+| Lab 1, blue top | 0.39 | 1.00 | 0.99 |
+| Lab 1, dark grey top | 0.66 | 0.99 | 0.99 |
+| Lab 2, blue top | 0.24 | 0.98 | 0.97 |
+| Lab 2, dark grey top | 0.87 | 0.98 | 0.98 |
+| Parking, black tee 1 | 0.67 | **0.36** | **0.36** |
+| Parking, black tee 2 | 0.92 | 0.92 | 0.94 |
+| Parking, patterned shirt | 0.50 | 0.98 | 0.98 |
+| Greenhouse, beige tee 1 | 0.73 | 0.87 | 0.88 |
+| Greenhouse, beige tee 2 | 0.77 | 0.94 | 0.94 |
+| Crowd RN (red/navy) | 0.20 | 0.93 | 0.85 |
+| Crowd LB (light blue) | 0.99 | 1.00 | 1.00 |
+| Crowd BL (blonde, black coat) | 0.80 | 0.92 | 0.91 |
+| Crowd RD (red top) | **0.02** | 0.79 | **0.06** |
+| Crowd BJ (blue jacket) | 1.00 | 1.00 | 1.00 |
+
+- **The mix separates well (≥ 0.85) in 11 of 14 cases.**
+- **It fails in two:**
+  - **Black tee 1 (0.36):** hue is noise on black. The gate still kept this person in every frame,
+    since all costs stay under its budget, but colour would not tell them from a stranger.
+  - **Red top in the crowd (0.06):** there the quarter histogram cannot outvote Cb/Cr's grey bias on
+    tiny, flickering crops.
+- **Cb/Cr alone is below a coin toss in 5 cases**, the blue top in the lab among them.
+- The dashboard "สีเสื้อ" (clothing colour) tab shows, for each clip:
+  - the AUCs;
+  - the target's and the nearest other's colour cost over time, with the stretches where someone else
+    looks more like the target shaded;
+  - the clip's Cb/Cr scatter.
