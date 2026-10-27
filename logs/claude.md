@@ -1238,3 +1238,10 @@ Earlier history: `history-2026-10-16.md`.
   - Shows the experiment design as a diagram (variants, settings, scenario mini-maps, pass criteria), progress, a per-run grid, and a top-down replay of any run with a gap chart and a criteria checklist.
   - Datasets: `live_experiments`, `live_runs`, `live_tracks`, `past_tracks`, `live_scenarios`, built by a scratchpad generator from the twin run folders.
   - Claude pushed updates about every 4 minutes while the solo on/off run (100 runs) went.
+
+### 2026-10-28 — research — side_step on vs off; cause found (00:50 Thai time)
+- Integration's T14 question: `side_step` failed 5/8 with box ranges on against 2/8 off.
+- **Run:** seeds 8–27, on vs off, shown live on the dashboard. On 12/20, off 13/20. All seeds: 15/28 vs 18/28, Fisher p = 0.59.
+- **Cause, from a debug build that logged gate decisions:** the fast sidestep at 0.7 m moves the bearing 21° in 0.3 s. The 5° bearing gate rejects the box even though its range is right. The LiDAR out-of-view tracking does not start, because the last accepted bearing was not near the edge.
+- Not box ranges. Proposed next: a gate on lateral distance in metres.
+- Write-up: `experiments/sim/2026-10-27_box_range.md`.
