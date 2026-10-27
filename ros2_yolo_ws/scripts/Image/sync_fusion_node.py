@@ -75,6 +75,29 @@ def lidar_track(points, pred_bearing, pred_range, window_rad, range_tol, width_m
     return best
 
 
+def box_range(points, bearing, margin_rad=math.radians(5.0)):
+    """Range of the LiDAR cluster that belongs to a camera box at this bearing, or None.
+
+    The cluster whose angular span covers the bearing; if none does (a box between two legs), the
+    one whose edge is nearest, within margin_rad. A near person fills a wide angle, so the minimum of
+    a fixed sector next to them is their range even for a box on someone far behind (T13 follow-up).
+    A cluster beside the box is never preferred to the one the box looks at: a person crossing in
+    front would otherwise lend their range to the target's box before they cover it.
+    """
+    pts = sorted(points)
+    best, best_gap = None, None
+    start = 0
+    for i in range(1, len(pts) + 1):
+        if i < len(pts) and abs(pts[i][1] - pts[i - 1][1]) <= 0.15 and pts[i][0] - pts[i - 1][0] <= math.radians(3.0):
+            continue
+        c = pts[start:i]
+        start = i
+        gap = max(c[0][0] - bearing, bearing - c[-1][0], 0.0)
+        if gap <= margin_rad and (best is None or gap < best_gap):
+            best, best_gap = min(r for _, r in c), gap
+    return best
+
+
 def scan_is_fresh(now, scan_time, max_age):
     """True if the latest scan arrived at most max_age seconds ago (a stopped LiDAR must not steer)."""
     return scan_time is not None and 0.0 <= now - scan_time <= max_age
@@ -317,6 +340,8 @@ class SyncFusionNode(Node):
         self.declare_parameter('lidar_track_max_s', 5.0)    # give up after this long without the camera
         self.declare_parameter('lidar_edge_deg', 8.0)  # only when last seen this close to the image edge
         self.declare_parameter('lidar_scan_max_age_s', 0.3)  # older scans are never used to track
+        # a box's range from the LiDAR cluster centred on it, not the nearest return in its sector
+        self.declare_parameter('box_range_from_scan', True)
 
         self.max_dt = float(self.get_parameter('max_dt').value)
         self.buffer_sec = float(self.get_parameter('buffer_sec').value)
@@ -342,6 +367,7 @@ class SyncFusionNode(Node):
         self.scan_points = []     # latest scan as (robot-frame bearing, range)
         self.scan_time = None     # when it arrived
         self.scan_max_age = float(self.get_parameter('lidar_scan_max_age_s').value)
+        self.box_range_from_scan = bool(self.get_parameter('box_range_from_scan').value)
         self.last_camera_fix = None  # time of the last camera detection accepted as the target
         self.last_camera_bearing = 0.0
         self.edge_rad = math.radians(self.camera_hfov_deg / 2.0 - float(self.get_parameter('lidar_edge_deg').value))
@@ -480,6 +506,9 @@ class SyncFusionNode(Node):
         dist = float('inf')
         if lidar_sector is not None:
             dist = lidar_data[lidar_sector]
+        if self.box_range_from_scan and scan_is_fresh(ty, self.scan_time, self.scan_max_age):
+            own = box_range(self.scan_points, bearing)
+            dist = own if own is not None else float('inf')
 
         # ✅ skip inf distance
         if not math.isfinite(dist):

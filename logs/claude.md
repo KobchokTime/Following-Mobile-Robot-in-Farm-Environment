@@ -1191,7 +1191,7 @@ Earlier history: `history-2026-10-16.md`.
 - Opened **T13** in `DISCUSSION.md` (`44021e4`) for Codex, with five review points.
 - `HANDOFF.md` updated (T12 marked resolved, T13 added, branches table) and lock released in `1636bfd`.
 
-### 2026-10-27 — robot/research — T13 change request addressed: re-acquisition distance rule (18:45 Thai time)
+### 2026-10-27 — robot/research — T13 change request addressed: re-acquisition distance rule (18:35 Thai time)
 - Codex's review of T13 asked for a change: re-acquisition took a same-clothing stranger at 18°, 7.43 m after 1.2 s unseen.
 - `claude/robot/hs-colour` `808dc6c`:
   - re-acquisition now requires the detection to be within 0.8 m + 1.5 m/s × time unseen (cap 3 m) of the last place seen (T_dist, Algorithm 1);
@@ -1237,3 +1237,34 @@ Earlier history: `history-2026-10-16.md`.
   check or nearest LiDAR cluster)", not started, owner Claude; Codex asked to reconcile its uncommitted
   `HANDOFF.md` and `logs/codex.md` drafts. Lock released.
 - No code merged; `python3 scripts/check.py` run on the hub before push.
+
+### 2026-10-27 — dashboard — T13 card (18:45 Thai time)
+- Dashboard v2 (page version 20): added the T13 card under the twin colour results. It shows the distance rule, the twin table with the rule off and on, and the borrowed-LiDAR-range limitation.
+- `integration` merged the workspace into the hub (`b102cc7`) and replied in T13 (`58dcdc3`); T13 awaits Codex's re-review.
+
+### 2026-10-27 — robot/research — T13 follow-up: camera boxes take their own LiDAR range (22:10 Thai time)
+- The user asked to continue with HANDOFF item 17.
+- `claude/robot/box-range`:
+  - `adac5b5`: `box_range` takes a box's range from the LiDAR cluster at its bearing instead of the sector minimum; parameter `box_range_from_scan`.
+  - `445b0e9`: prefers the covering cluster after the first version (nearest middle) failed `shade_crossing` 2/20 (found with a debug build that logged gate decisions); +4 tests.
+- **Twin:**
+  - `lookalike_after_loss` 20/20, against 17/20 with the old matching;
+  - `shade_crossing` 20/20; side_by_side 10/10; identity 15/15;
+  - solo 29/30, no contact.
+- Write-up: `experiments/sim/2026-10-27_box_range.md` (+ `.json`). Merged into `claude/workspace`. `check.py` passes 134 tests.
+
+### 2026-10-27 — integration — box range merged into `integration-hub`; T14 opened (22:17 Thai time)
+- Lock claimed on `integration-hub` in `59d19f4` and pushed before the merge.
+- Merged `claude/workspace` (`f6035f9`; `claude/robot/box-range` `adac5b5`, `445b0e9`; workspace merge `24e0d4e`)
+  with `--no-ff`: merge `059c549`. Only conflict: `logs/claude.md`, both appended entries kept.
+- `codex/workspace` (`86a2201`) not merged; its `HANDOFF.md` is identical to the hub's at `5d8e62e`, so no conflict.
+- Checks on the merged hub:
+  - `python3 scripts/check.py` passes, 134 tests.
+  - Open-loop twin, hub before (`59d19f4`) vs after (`059c549`): 18 scenarios, seed 3, 150 steps. Bit-identical:
+    plain `27db4268…`, realism `5143d0f7…`.
+  - Recounted `experiments/sim/2026-10-27_box_range.json` (222 rows); it matches the write-up.
+  - Diff review: no new publishers or wheel commands; no machine paths or secrets. Noted for Codex: default true,
+    frames skipped when no cluster is near the box (also skips give-way for that box), long chained clusters,
+    scan/camera timing, duplicated cluster split.
+- Opened **T14** in `DISCUSSION.md` for Codex (points a–e). `HANDOFF.md`: item 17 implemented, awaiting Codex in T14;
+  branches table updated. Lock released.
