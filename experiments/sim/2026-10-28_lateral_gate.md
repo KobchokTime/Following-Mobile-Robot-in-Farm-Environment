@@ -30,21 +30,38 @@ continue from the "Next steps" list below. Every step is committed and pushed on
 
 ## Next steps (tick as done; commit after each)
 
-- [ ] 1. Code: `lateral_sigma_m` in `TargetGate`, declared as a ROS parameter in `SyncFusionNode`, and
+- [x] 1. Code (`efa24f1`): `lateral_sigma_m` in `TargetGate`, declared as a ROS parameter in `SyncFusionNode`, and
       a docstring.
-- [ ] 2. Tests in `tests/test_target_gate.py`:
+- [x] 2. Tests in `tests/test_target_gate.py`:
       - the traced `side_step` box is accepted;
       - a person 0.6 m to the side at the same range is still rejected;
       - with 0, the old cost is reproduced.
-- [ ] 3. `python3 scripts/check.py` passes. Commit and push.
+- [x] 3. `python3 scripts/check.py` passes (138). Committed and pushed.
 - [ ] 4. Twin (Docker, `--bridge-mode mps`, one run at a time):
       - `side_step` seeds 8–27, realism, `lateral_sigma_m` 0.15 vs 0;
       - then regressions with 0.15: identity s0–2, solo s0–2, `shade_crossing` s0–9,
         `shade_side_by_side` s0–9, and `lookalike_after_loss` s0–9 clean and realism.
+      - T13 correction: `lookalike_after_loss` s0–9, clean and realism, with the re-acquisition rule really
+        off (`reacquire_dist_m` / `reacquire_dist_max_m` 100).
       - Script: `experiments/sim/scripts/run_lateral_gate.sh`. Results go in
         `2026-10-28_lateral_gate.json`, via `experiments/sim/scripts/collect_runs.py`.
 - [ ] 5. Write the results here. Merge into `claude/workspace` and log in `logs/claude.md`.
 - [ ] 6. Integration: merge into `integration-hub` and open a thread for Codex. Update HANDOFF item 18.
+
+## Found on the way: T13's "rule off" runs had the rule on
+
+- `TargetGate` settings were not ROS parameters. ROS 2 silently ignores an undeclared `-p`.
+- So the T13 runs with `--ros-param reacquire_dist_m:=100.0 reacquire_dist_max_m:=100.0`
+  (`experiments/sim/2026-10-27_hs_colour_twin.md`, "rule off" column) ran with the rule on.
+  - The table's two columns are both "rule on": `lookalike_after_loss` 18/20 on.
+  - There was no closed-loop "rule off" data.
+- The gate-level evidence for the rule (unit tests, Codex's 6.489 m vs 2.6 m replay) and the
+  borrowed-range diagnosis (debug gate log) are unaffected. So are the `box_range_from_scan`,
+  `use_hs_hist` and `identity_belief` comparisons: those parameters were declared.
+- **Fix:**
+  - the tunables are declared (`GATE_PARAMS`);
+  - `test_gate_ros_parameters_match_the_gate_defaults` keeps them in step with `TargetGate`;
+  - step 4 reruns the rule-off case for real.
 
 ## How to resume
 

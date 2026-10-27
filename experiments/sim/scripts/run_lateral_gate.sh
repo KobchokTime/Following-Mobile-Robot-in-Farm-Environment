@@ -4,11 +4,12 @@
 # Usage: bash experiments/sim/scripts/run_lateral_gate.sh <out_dir> [image]
 set -u
 OUT=$(realpath -m "${1:?out dir}"); IMG=${2:-twin:lateral}; mkdir -p "$OUT"
-run() {  # tag scenario seed realism(0/1) lateral_sigma_m
-  local R=""; [ "$4" = 1 ] && R=--realism
-  [ -f "$OUT/$1/summary.json" ] && return  # resumable: finished runs are skipped
-  docker run --rm -v "$OUT":/repo/sim_runs "$IMG" python3 -m sim.twin.run_scenario --scenario "$2" \
-    --bridge-mode mps $R --ros-param lateral_sigma_m:=$5 --seed "$3" --out "sim_runs/$1" > /dev/null 2>&1
+run() {  # tag scenario seed realism(0/1) lateral_sigma_m [extra NAME:=VALUE ...]
+  local tag=$1 sc=$2 sd=$3 R="" ls=$5; [ "$4" = 1 ] && R=--realism; shift 5
+  local extra=(); for p in "$@"; do extra+=(--ros-param "$p"); done
+  [ -f "$OUT/$tag/summary.json" ] && return  # resumable: finished runs are skipped
+  docker run --rm -v "$OUT":/repo/sim_runs "$IMG" python3 -m sim.twin.run_scenario --scenario "$sc" \
+    --bridge-mode mps $R --ros-param lateral_sigma_m:=$ls "${extra[@]}" --seed "$sd" --out "sim_runs/$tag" > /dev/null 2>&1
 }
 for sd in $(seq 8 27); do
   run "ss_on_s$sd" side_step "$sd" 1 0.15; run "ss_off_s$sd" side_step "$sd" 1 0.0
@@ -21,4 +22,10 @@ for sd in $(seq 0 9); do
   run "look_clean_s$sd" lookalike_after_loss "$sd" 0 0.15
   run "look_real_s$sd" lookalike_after_loss "$sd" 1 0.15
 done; echo "colour done $(date -u +%H:%MZ)"
+# T13 correction: the re-acquisition distance rule really off (these parameters are now declared)
+OFF=(reacquire_dist_m:=100.0 reacquire_dist_max_m:=100.0)
+for sd in $(seq 0 9); do
+  run "look_ruleoff_clean_s$sd" lookalike_after_loss "$sd" 0 0.15 "${OFF[@]}"
+  run "look_ruleoff_real_s$sd" lookalike_after_loss "$sd" 1 0.15 "${OFF[@]}"
+done; echo "rule-off done $(date -u +%H:%MZ)"
 echo ALLDONE
