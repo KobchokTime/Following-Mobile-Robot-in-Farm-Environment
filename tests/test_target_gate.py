@@ -200,6 +200,45 @@ class TargetGateTest(unittest.TestCase):
         g.bearing_rate, g.range_rate = D(-40), -1.0
         self.assertFalse(g.accept(1.8, D(1), 2.0, RED))
 
+    def _drift_onto_other(self, use_belief):
+        """Lock on blue, then a grey top keeps getting through the gate near the predicted place."""
+        g = self.Gate(use_belief=use_belief)
+        blue, grey = self._hist(8, 2), self._hist(0, 0, grey=1.0)
+        for i in range(5):
+            g.accept(0.1 * i, 0.0, 0.8, (139, 125), blue)
+        high = g.belief
+        took = [g.accept(0.5 + 0.1 * i, D(3), 0.85, (131, 128), grey) for i in range(8)]
+        return g, high, took
+
+    def test_belief_stays_high_on_the_target(self):
+        g = self.Gate()
+        blue = self._hist(8, 2)
+        for i in range(30):
+            g.accept(0.1 * i, D(1 if i % 2 else -1), 0.8 + 0.02 * (i % 3), (139, 125), blue)
+        self.assertGreater(g.belief, 0.9)
+
+    def test_belief_falls_on_another_colour_and_the_gate_waits(self):
+        g, high, took = self._drift_onto_other(True)
+        self.assertGreater(high, 0.9)
+        self.assertLess(g.belief, g.belief_low)
+        self.assertTrue(g.suspect)
+        self.assertFalse(took[-1])  # no longer taken on geometry
+        # the target comes back in colour after a second: taken back, no longer in doubt
+        self.assertTrue(g.accept(2.5, D(2), 1.0, (139, 125), self._hist(8, 2)))
+        self.assertFalse(g.suspect)
+
+    def test_belief_is_only_reported_when_off(self):
+        g, _, took = self._drift_onto_other(False)
+        self.assertLess(g.belief, g.belief_low)
+        self.assertFalse(g.suspect)
+        self.assertTrue(all(took))  # as before: the gate keeps taking the grey top
+
+    def test_colour_likelihood_table(self):
+        g = self.Gate()
+        self.assertAlmostEqual(g.colour_lr(0.0), 3.8)
+        self.assertAlmostEqual(g.colour_lr(0.75), 2.0)
+        self.assertAlmostEqual(g.colour_lr(9.0), 0.2)
+
     def test_without_histogram_the_chroma_still_decides(self):
         g = self.Gate()
         g.accept(0.0, 0.0, 0.8, RED, None)

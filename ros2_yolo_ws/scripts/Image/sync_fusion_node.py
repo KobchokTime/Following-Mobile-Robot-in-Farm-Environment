@@ -129,14 +129,27 @@ class TargetGate:
     as the target again, at any range, and the track restarts there. Only with a histogram: Cb/Cr
     alone cannot tell a blue top in shade from a grey one.
 
+    Identity belief (use_belief, off by default): a recursive Bayes estimate that the box the gate
+    takes is still the person it locked on. Each accepted box multiplies the odds by a likelihood
+    ratio, target against the nearest other person: geometry, chi-square with 2 degrees of freedom for
+    the target against uniform over the gate for someone else, held to 0.3-1.5; and colour, a table
+    measured on the labelled videos (COLOUR_LR). Between boxes the identity may switch with probability
+    belief_switch. When the belief falls below belief_low the gate stops taking boxes on geometry and
+    waits for colour re-acquisition, so a wrong person picked up in a crossing is not followed on.
+
     Lock-on uses the controller's start window: range 0.5-1.0 m, near the image centre.
     """
+
+    # colour cost -> likelihood ratio (target : nearest other person), linear in between, flat outside;
+    # from experiments/identity/clothing_colour_videos/separability.json at hist_weight 0.25
+    COLOUR_LR = ((0.0, 3.8), (0.5, 3.0), (1.0, 1.0), (2.0, 0.36), (3.0, 0.2))
 
     def __init__(self, lock_range=(0.5, 1.0), lock_bearing_deg=15.0, bearing_sigma_deg=5.0,
                  range_sigma_m=0.15, chroma_sigma=15.0, gate=9.0, widen_per_s=1.0,
                  alpha=0.6, beta=0.2, chroma_rate=0.05, min_rate_dt=0.015, unlock_after_s=5.0,
                  hist_sigma=0.2, hist_window=10, hist_learn_slack=0.1, hist_weight=0.25,
-                 reacquire_after_s=1.0, reacquire_colour_max=1.0, reacquire_bearing_deg=35.0):
+                 reacquire_after_s=1.0, reacquire_colour_max=1.0, reacquire_bearing_deg=35.0,
+                 use_belief=False, belief_switch=0.01, belief_low=0.15, belief_lock=0.9):
         self.lock_range = lock_range
         self.lock_bearing = math.radians(lock_bearing_deg)
         self.sb = math.radians(bearing_sigma_deg)
@@ -154,6 +167,10 @@ class TargetGate:
         self.reacquire_after_s = reacquire_after_s
         self.reacquire_colour_max = reacquire_colour_max
         self.reacquire_bearing = math.radians(reacquire_bearing_deg)
+        self.use_belief = use_belief
+        self.belief_switch = belief_switch
+        self.belief_low = belief_low
+        self.belief_lock = belief_lock
         # Two boxes on one person arrive within a frame; a rate from a ~1 ms step would blow up the
         # prediction and the target would never be accepted again, so such steps update position only.
         # 15 ms is under one frame even at 60 fps, so real frame-to-frame steps always update the rate.
@@ -170,6 +187,8 @@ class TargetGate:
         self.range = self.range_rate = 0.0
         self.chroma = None
         self.hists = []  # the target's last learned torso histograms (normalised)
+        self.belief = 0.0  # P(the box the gate takes is the locked-on person); see the class docstring
+        self.suspect = False  # belief fell below belief_low: only colour re-acquisition may take a box
 
     def hist_model(self):
         return [sum(col) / len(self.hists) for col in zip(*self.hists)]
@@ -217,7 +236,32 @@ class TargetGate:
         self.t, self.bearing, self.range = t, bearing, rng
         self.bearing_rate = self.range_rate = 0.0
         self._learn_colour(chroma, hist)
+        self.belief, self.suspect = max(self.belief, 0.5), False  # a colour match: undecided at worst
         return True
+
+    def colour_lr(self, cost):
+        knots = self.COLOUR_LR
+        if cost <= knots[0][0]:
+            return knots[0][1]
+        for (c0, r0), (c1, r1) in zip(knots, knots[1:]):
+            if cost <= c1:
+                return r0 + (r1 - r0) * (cost - c0) / (c1 - c0)
+        return knots[-1][1]
+
+    def _update_belief(self, t, bearing, rng, chroma, hist):
+        """One Bayes step for an accepted box (computed always, acted on only with use_belief)."""
+        geo = self.cost(t, bearing, rng)
+        # target: chi-square(2) density 0.5 exp(-c/2); someone else in the gate: uniform, 1 / gate.
+        # Held to 0.3-1.5: the gate has already used geometry to take the box, and a switch happens
+        # when two people are close, where geometry says little. Colour carries the evidence.
+        lr = min(1.5, max(0.3, 0.5 * self.gate * math.exp(-geo / 2.0)))
+        if hist is not None and self.hists:  # the colour table was measured with the histogram on
+            lr *= self.colour_lr(self.colour_cost(chroma, hist))
+        b = self.belief * (1.0 - self.belief_switch) + (1.0 - self.belief) * self.belief_switch
+        self.belief = b * lr / (b * lr + (1.0 - b))
+        # only with a histogram: without one nothing could take the target back by colour
+        if self.use_belief and self.belief < self.belief_low and hist is not None:
+            self.suspect = True
 
     def _learn_colour(self, chroma, hist):
         if chroma is not None:
@@ -251,10 +295,12 @@ class TargetGate:
                 self.bearing, self.range = bearing, rng
                 self.chroma = tuple(chroma) if chroma is not None else None
                 self.hists = [hist] if hist is not None else []
+                self.belief, self.suspect = self.belief_lock, False
                 return True
             return False
-        if self.cost(t, bearing, rng, chroma, hist) > self.gate:
+        if self.suspect or self.cost(t, bearing, rng, chroma, hist) > self.gate:
             return self._reacquire(t, bearing, rng, chroma, hist)
+        self._update_belief(t, bearing, rng, chroma, hist)
         dt = max(1e-3, t - self.t)
         pb, pr = self._predict(t)
         eb, er = bearing - pb, rng - pr
@@ -286,6 +332,7 @@ class SyncFusionNode(Node):
         self.declare_parameter('target_gate', True)
         self.declare_parameter('use_chroma', True)
         self.declare_parameter('use_hs_hist', True)  # torso hue-saturation histogram, when the camera sends it
+        self.declare_parameter('identity_belief', False)  # act on TargetGate's identity belief (see its docstring)
         # Someone else in the corridor and nearer than the target sets the distance the controller sees
         self.declare_parameter('path_half_width_m', 0.7)
         self.declare_parameter('path_hold_s', 0.5)
@@ -312,7 +359,8 @@ class SyncFusionNode(Node):
         self.use_gate = bool(self.get_parameter('target_gate').value)
         self.use_chroma = bool(self.get_parameter('use_chroma').value)
         self.use_hs_hist = bool(self.get_parameter('use_hs_hist').value)
-        self.gate = TargetGate()
+        self.gate = TargetGate(use_belief=bool(self.get_parameter('identity_belief').value))
+        self.gate_suspect = False
         self.path_half_width = float(self.get_parameter('path_half_width_m').value)
         self.path_hold = float(self.get_parameter('path_hold_s').value)
         self.path_margin = float(self.get_parameter('path_margin_m').value)
@@ -470,7 +518,12 @@ class SyncFusionNode(Node):
             self.get_logger().debug(f"Skip frame: invalid LiDAR dist in sector {sector_id}")
             return
 
-        if self.use_gate and not self.gate.accept(ty, bearing, dist, chroma, hist):
+        accepted = not self.use_gate or self.gate.accept(ty, bearing, dist, chroma, hist)
+        if self.use_gate and self.gate.suspect != self.gate_suspect:
+            self.gate_suspect = self.gate.suspect
+            self.get_logger().info(f"[BELIEF] {'doubt: waiting for a colour match' if self.gate.suspect else 'target taken back'} "
+                                   f"(belief {self.gate.belief:.2f})")
+        if not accepted:
             # another person, not the one being followed: remember them only if they are in the way
             # Only someone in the corridor and clearly nearer than the target is in the way
             if self.last_target is not None and in_path(bearing, dist, self.path_half_width) \
