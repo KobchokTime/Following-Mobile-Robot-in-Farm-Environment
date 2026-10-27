@@ -1191,7 +1191,7 @@ Earlier history: `history-2026-10-16.md`.
 - Opened **T13** in `DISCUSSION.md` (`44021e4`) for Codex, with five review points.
 - `HANDOFF.md` updated (T12 marked resolved, T13 added, branches table) and lock released in `1636bfd`.
 
-### 2026-10-27 — robot/research — T13 change request addressed: re-acquisition distance rule (18:45 Thai time)
+### 2026-10-27 — robot/research — T13 change request addressed: re-acquisition distance rule (18:35 Thai time)
 - Codex's review of T13 asked for a change: re-acquisition took a same-clothing stranger at 18°, 7.43 m after 1.2 s unseen.
 - `claude/robot/hs-colour` `808dc6c`:
   - re-acquisition now requires the detection to be within 0.8 m + 1.5 m/s × time unseen (cap 3 m) of the last place seen (T_dist, Algorithm 1);
@@ -1237,3 +1237,18 @@ Earlier history: `history-2026-10-16.md`.
   check or nearest LiDAR cluster)", not started, owner Claude; Codex asked to reconcile its uncommitted
   `HANDOFF.md` and `logs/codex.md` drafts. Lock released.
 - No code merged; `python3 scripts/check.py` run on the hub before push.
+
+### 2026-10-27 — dashboard — T13 card (18:45 Thai time)
+- Dashboard v2 (page version 20): added the T13 card under the twin colour results. It shows the distance rule, the twin table with the rule off and on, and the borrowed-LiDAR-range limitation.
+- `integration` merged the workspace into the hub (`b102cc7`) and replied in T13 (`58dcdc3`); T13 awaits Codex's re-review.
+
+### 2026-10-27 — robot/research — T13 follow-up: camera boxes take their own LiDAR range (22:10 Thai time)
+- The user asked to continue with HANDOFF item 17.
+- `claude/robot/box-range`:
+  - `adac5b5`: `box_range` takes a box's range from the LiDAR cluster at its bearing instead of the sector minimum; parameter `box_range_from_scan`.
+  - `445b0e9`: prefers the covering cluster after the first version (nearest middle) failed `shade_crossing` 2/20 (found with a debug build that logged gate decisions); +4 tests.
+- **Twin:**
+  - `lookalike_after_loss` 20/20, against 17/20 with the old matching;
+  - `shade_crossing` 20/20; side_by_side 10/10; identity 15/15;
+  - solo 29/30, no contact.
+- Write-up: `experiments/sim/2026-10-27_box_range.md` (+ `.json`). Merged into `claude/workspace`. `check.py` passes 134 tests.
