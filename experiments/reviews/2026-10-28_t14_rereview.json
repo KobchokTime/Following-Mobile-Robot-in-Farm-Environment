@@ -1,0 +1,1178 @@
+{
+  "code_revision": "d23e7b2",
+  "sync_fusion_sha256": "15ed39707c5a94a794ca18f96490b4a7e9ce8ea135ead83183d1e8ce954558e9",
+  "observation_type": "synthetic gate-level; not a ROS closed-loop or hardware run",
+  "borrowed_flat_returns": {
+    "old_sector_median_m": 0.8,
+    "box_range_m": 7.43,
+    "unseen_s": 1.2000000000000002,
+    "reach_m": 2.6000000000000005,
+    "separation_m": 6.489181360198667,
+    "old_accepted": true,
+    "new_accepted": false,
+    "rejected_track_unchanged": true
+  },
+  "borrowed_circle_returns": {
+    "old_sector_median_m": 7.230000000000034,
+    "box_range_m": 7.230000000000034,
+    "unseen_s": 1.2000000000000002,
+    "reach_m": 2.6000000000000005,
+    "separation_m": 6.289361924079877,
+    "old_accepted": false,
+    "new_accepted": false,
+    "rejected_track_unchanged": true
+  },
+  "leg_cases": [
+    {
+      "distance_m": 0.5,
+      "leg_centre_separation_m": 0.2,
+      "leg_radius_m": 0.06,
+      "box_range_m": 0.4509119048548173
+    },
+    {
+      "distance_m": 0.75,
+      "leg_centre_separation_m": 0.2,
+      "leg_radius_m": 0.06,
+      "box_range_m": 0.6966492842061045
+    },
+    {
+      "distance_m": 1.0,
+      "leg_centre_separation_m": 0.2,
+      "leg_radius_m": 0.06,
+      "box_range_m": 0.945094587029567
+    },
+    {
+      "distance_m": 1.5,
+      "leg_centre_separation_m": 0.2,
+      "leg_radius_m": 0.06,
+      "box_range_m": 1.443520367139314
+    },
+    {
+      "distance_m": 2.0,
+      "leg_centre_separation_m": 0.2,
+      "leg_radius_m": 0.06,
+      "box_range_m": 1.9426856930211787
+    },
+    {
+      "distance_m": 3.0,
+      "leg_centre_separation_m": 0.2,
+      "leg_radius_m": 0.06,
+      "box_range_m": 2.941851494928577
+    },
+    {
+      "distance_m": 0.5,
+      "leg_centre_separation_m": 0.3,
+      "leg_radius_m": 0.06,
+      "box_range_m": null
+    },
+    {
+      "distance_m": 0.75,
+      "leg_centre_separation_m": 0.3,
+      "leg_radius_m": 0.06,
+      "box_range_m": null
+    },
+    {
+      "distance_m": 1.0,
+      "leg_centre_separation_m": 0.3,
+      "leg_radius_m": 0.06,
+      "box_range_m": null
+    },
+    {
+      "distance_m": 1.5,
+      "leg_centre_separation_m": 0.3,
+      "leg_radius_m": 0.06,
+      "box_range_m": 1.4477275455016971
+    },
+    {
+      "distance_m": 2.0,
+      "leg_centre_separation_m": 0.3,
+      "leg_radius_m": 0.06,
+      "box_range_m": 1.9460592048861716
+    },
+    {
+      "distance_m": 3.0,
+      "leg_centre_separation_m": 0.3,
+      "leg_radius_m": 0.06,
+      "box_range_m": 2.944174190097177
+    }
+  ],
+  "neighbouring_leg_ambiguity": {
+    "target_only_m": null,
+    "with_neighbour_leg_m": 0.7599999999999999,
+    "neighbour_centre_bearing_deg": 6,
+    "neighbour_centre_range_m": 0.8
+  },
+  "bearing_frame": {
+    "scan_cases": [
+      {
+        "increment_deg": 30,
+        "robot_bearings_deg": [
+          -30.0,
+          -0.0,
+          30.0
+        ]
+      },
+      {
+        "increment_deg": -30,
+        "robot_bearings_deg": [
+          30.0,
+          0.0,
+          -30.0
+        ]
+      }
+    ],
+    "camera_roundtrip_deg": {
+      "-30": -30.01378988644562,
+      "0": 0.0,
+      "30": 30.01378988644562
+    }
+  },
+  "skip_vs_fallback": [
+    {
+      "case": "fresh_no_cluster",
+      "gate_calls": 0,
+      "publications": 0,
+      "give_way_range_m": null
+    },
+    {
+      "case": "disabled_sector_fallback",
+      "gate_calls": 1,
+      "publications": 1,
+      "give_way_range_m": 0.4
+    },
+    {
+      "case": "stale_scan_sector_fallback",
+      "gate_calls": 1,
+      "publications": 1,
+      "give_way_range_m": 0.4
+    }
+  ],
+  "side_step": {
+    "predicted_bearing_deg": 7.500000000000003,
+    "last_bearing_deg": 6.5,
+    "lidar_edge_threshold_deg": 27,
+    "lateral_step_angle_deg": 19.653824058053313,
+    "costs": [
+      {
+        "measured_range_m": 0.66,
+        "total_cost": 13.223140495867746,
+        "accepted": false
+      },
+      {
+        "measured_range_m": 0.72,
+        "total_cost": 13.355371900826423,
+        "accepted": false
+      }
+    ]
+  },
+  "evidence": {
+    "total_rows": 460,
+    "d23e7b2_rows": 235,
+    "groups": {
+      "box_range on/shade_crossing": {
+        "n": 30,
+        "passed": 29,
+        "contacts": 0
+      },
+      "box_range on/lookalike_after_loss": {
+        "n": 20,
+        "passed": 20,
+        "contacts": 0
+      },
+      "box_range on/crossing": {
+        "n": 3,
+        "passed": 3,
+        "contacts": 0
+      },
+      "box_range on/head_on": {
+        "n": 3,
+        "passed": 3,
+        "contacts": 0
+      },
+      "box_range on/side_by_side": {
+        "n": 3,
+        "passed": 3,
+        "contacts": 0
+      },
+      "box_range on/side_by_side_same": {
+        "n": 3,
+        "passed": 3,
+        "contacts": 0
+      },
+      "box_range on/stand_aside": {
+        "n": 3,
+        "passed": 3,
+        "contacts": 0
+      },
+      "box_range on/straight": {
+        "n": 8,
+        "passed": 8,
+        "contacts": 0
+      },
+      "box_range on/stop_and_go": {
+        "n": 8,
+        "passed": 8,
+        "contacts": 0
+      },
+      "box_range on/curve_left": {
+        "n": 8,
+        "passed": 8,
+        "contacts": 0
+      },
+      "box_range on/target_loss": {
+        "n": 8,
+        "passed": 8,
+        "contacts": 0
+      },
+      "box_range on/come_back": {
+        "n": 8,
+        "passed": 8,
+        "contacts": 0
+      },
+      "box_range on/side_step": {
+        "n": 28,
+        "passed": 15,
+        "contacts": 0
+      },
+      "box_range on/turn_90": {
+        "n": 8,
+        "passed": 8,
+        "contacts": 0
+      },
+      "box_range on/walk_0p6": {
+        "n": 8,
+        "passed": 8,
+        "contacts": 0
+      },
+      "box_range on/walk_1p0": {
+        "n": 8,
+        "passed": 8,
+        "contacts": 0
+      },
+      "box_range on/zigzag": {
+        "n": 8,
+        "passed": 6,
+        "contacts": 0
+      },
+      "box_range off/straight": {
+        "n": 5,
+        "passed": 5,
+        "contacts": 0
+      },
+      "box_range off/stop_and_go": {
+        "n": 5,
+        "passed": 5,
+        "contacts": 0
+      },
+      "box_range off/curve_left": {
+        "n": 5,
+        "passed": 5,
+        "contacts": 0
+      },
+      "box_range off/target_loss": {
+        "n": 5,
+        "passed": 5,
+        "contacts": 0
+      },
+      "box_range off/come_back": {
+        "n": 5,
+        "passed": 5,
+        "contacts": 0
+      },
+      "box_range off/side_step": {
+        "n": 25,
+        "passed": 18,
+        "contacts": 0
+      },
+      "box_range off/turn_90": {
+        "n": 5,
+        "passed": 5,
+        "contacts": 0
+      },
+      "box_range off/walk_0p6": {
+        "n": 5,
+        "passed": 5,
+        "contacts": 0
+      },
+      "box_range off/walk_1p0": {
+        "n": 5,
+        "passed": 5,
+        "contacts": 0
+      },
+      "box_range off/zigzag": {
+        "n": 5,
+        "passed": 3,
+        "contacts": 0
+      }
+    },
+    "side_step_seed_coverage": {
+      "on": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27
+      ],
+      "off": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27
+      ]
+    },
+    "missing_seeds": {
+      "on": [],
+      "off": []
+    },
+    "duplicate_keys": [],
+    "available_numeric_pass_mismatches": [],
+    "pass_limit": "summary rows lack final bearing/FOV; only stored numeric conditions can be rechecked",
+    "side_step_records": {
+      "on": [
+        {
+          "code": "d23e7b2",
+          "run": "box_v3|reg_solo_s0|side_step",
+          "variant": "box_range on",
+          "scenario": "side_step",
+          "seed": 0,
+          "pass_": false,
+          "contact": false,
+          "final_gap_m": 0.51,
+          "max_abs_target_bearing_deg": 59.8,
+          "target_visible_share": 0.897
+        },
+        {
+          "code": "d23e7b2",
+          "run": "box_v3|reg_solo_s1|side_step",
+          "variant": "box_range on",
+          "scenario": "side_step",
+          "seed": 1,
+          "pass_": false,
+          "contact": false,
+          "final_gap_m": 2.62,
+          "max_abs_target_bearing_deg": 61.5,
+          "target_visible_share": 0.185
+        },
+        {
+          "code": "d23e7b2",
+          "run": "box_v3|reg_solo_s2|side_step",
+          "variant": "box_range on",
+          "scenario": "side_step",
+          "seed": 2,
+          "pass_": false,
+          "contact": false,
+          "final_gap_m": 0.53,
+          "max_abs_target_bearing_deg": 62.1,
+          "target_visible_share": 0.882
+        },
+        {
+          "code": "d23e7b2",
+          "run": "box_v3_solo|reg_solo_true_s3|side_step",
+          "variant": "box_range on",
+          "scenario": "side_step",
+          "seed": 3,
+          "pass_": false,
+          "contact": false,
+          "final_gap_m": 0.54,
+          "max_abs_target_bearing_deg": 61.5,
+          "target_visible_share": 0.889
+        },
+        {
+          "code": "d23e7b2",
+          "run": "box_v3_solo|reg_solo_true_s4|side_step",
+          "variant": "box_range on",
+          "scenario": "side_step",
+          "seed": 4,
+          "pass_": true,
+          "contact": false,
+          "final_gap_m": 0.52,
+          "max_abs_target_bearing_deg": 44.5,
+          "target_visible_share": 0.974
+        },
+        {
+          "code": "d23e7b2",
+          "run": "box_v3_solo|reg_solo_true_s5|side_step",
+          "variant": "box_range on",
+          "scenario": "side_step",
+          "seed": 5,
+          "pass_": true,
+          "contact": false,
+          "final_gap_m": 0.53,
+          "max_abs_target_bearing_deg": 46.0,
+          "target_visible_share": 0.974
+        },
+        {
+          "code": "d23e7b2",
+          "run": "box_v3_solo|reg_solo_true_s6|side_step",
+          "variant": "box_range on",
+          "scenario": "side_step",
+          "seed": 6,
+          "pass_": true,
+          "contact": false,
+          "final_gap_m": 0.51,
+          "max_abs_target_bearing_deg": 42.6,
+          "target_visible_share": 0.978
+        },
+        {
+          "code": "d23e7b2",
+          "run": "box_v3_solo|reg_solo_true_s7|side_step",
+          "variant": "box_range on",
+          "scenario": "side_step",
+          "seed": 7,
+          "pass_": false,
+          "contact": false,
+          "final_gap_m": 0.5,
+          "max_abs_target_bearing_deg": 62.1,
+          "target_visible_share": 0.889
+        },
+        {
+          "code": "d23e7b2",
+          "run": "side_step_check|ss_true_s8|side_step",
+          "variant": "box_range on",
+          "scenario": "side_step",
+          "seed": 8,
+          "pass_": true,
+          "contact": false,
+          "final_gap_m": 0.53,
+          "max_abs_target_bearing_deg": 44.8,
+          "target_visible_share": 0.974
+        },
+        {
+          "code": "d23e7b2",
+          "run": "side_step_check|ss_true_s9|side_step",
+          "variant": "box_range on",
+          "scenario": "side_step",
+          "seed": 9,
+          "pass_": true,
+          "contact": false,
+          "final_gap_m": 0.52,
+          "max_abs_target_bearing_deg": 43.7,
+          "target_visible_share": 0.978
+        },
+        {
+          "code": "d23e7b2",
+          "run": "side_step_check|ss_true_s10|side_step",
+          "variant": "box_range on",
+          "scenario": "side_step",
+          "seed": 10,
+          "pass_": false,
+          "contact": false,
+          "final_gap_m": 0.53,
+          "max_abs_target_bearing_deg": 62.8,
+          "target_visible_share": 0.875
+        },
+        {
+          "code": "d23e7b2",
+          "run": "side_step_check|ss_true_s11|side_step",
+          "variant": "box_range on",
+          "scenario": "side_step",
+          "seed": 11,
+          "pass_": true,
+          "contact": false,
+          "final_gap_m": 0.53,
+          "max_abs_target_bearing_deg": 42.5,
+          "target_visible_share": 0.978
+        },
+        {
+          "code": "d23e7b2",
+          "run": "side_step_check|ss_true_s12|side_step",
+          "variant": "box_range on",
+          "scenario": "side_step",
+          "seed": 12,
+          "pass_": false,
+          "contact": false,
+          "final_gap_m": 2.73,
+          "max_abs_target_bearing_deg": 100.1,
+          "target_visible_share": 0.173
+        },
+        {
+          "code": "d23e7b2",
+          "run": "side_step_check|ss_true_s13|side_step",
+          "variant": "box_range on",
+          "scenario": "side_step",
+          "seed": 13,
+          "pass_": true,
+          "contact": false,
+          "final_gap_m": 0.53,
+          "max_abs_target_bearing_deg": 44.8,
+          "target_visible_share": 0.978
+        },
+        {
+          "code": "d23e7b2",
+          "run": "side_step_check|ss_true_s14|side_step",
+          "variant": "box_range on",
+          "scenario": "side_step",
+          "seed": 14,
+          "pass_": true,
+          "contact": false,
+          "final_gap_m": 0.53,
+          "max_abs_target_bearing_deg": 44.1,
+          "target_visible_share": 0.978
+        },
+        {
+          "code": "d23e7b2",
+          "run": "side_step_check|ss_true_s15|side_step",
+          "variant": "box_range on",
+          "scenario": "side_step",
+          "seed": 15,
+          "pass_": true,
+          "contact": false,
+          "final_gap_m": 0.53,
+          "max_abs_target_bearing_deg": 42.3,
+          "target_visible_share": 0.978
+        },
+        {
+          "code": "d23e7b2",
+          "run": "side_step_check|ss_true_s16|side_step",
+          "variant": "box_range on",
+          "scenario": "side_step",
+          "seed": 16,
+          "pass_": true,
+          "contact": false,
+          "final_gap_m": 0.54,
+          "max_abs_target_bearing_deg": 45.2,
+          "target_visible_share": 0.974
+        },
+        {
+          "code": "d23e7b2",
+          "run": "side_step_check|ss_true_s17|side_step",
+          "variant": "box_range on",
+          "scenario": "side_step",
+          "seed": 17,
+          "pass_": false,
+          "contact": false,
+          "final_gap_m": 1.57,
+          "max_abs_target_bearing_deg": 179.5,
+          "target_visible_share": 0.214
+        },
+        {
+          "code": "d23e7b2",
+          "run": "side_step_check|ss_true_s18|side_step",
+          "variant": "box_range on",
+          "scenario": "side_step",
+          "seed": 18,
+          "pass_": false,
+          "contact": false,
+          "final_gap_m": 0.52,
+          "max_abs_target_bearing_deg": 62.2,
+          "target_visible_share": 0.882
+        },
+        {
+          "code": "d23e7b2",
+          "run": "side_step_check|ss_true_s19|side_step",
+          "variant": "box_range on",
+          "scenario": "side_step",
+          "seed": 19,
+          "pass_": true,
+          "contact": false,
+          "final_gap_m": 0.54,
+          "max_abs_target_bearing_deg": 45.5,
+          "target_visible_share": 0.974
+        },
+        {
+          "code": "d23e7b2",
+          "run": "side_step_check|ss_true_s20|side_step",
+          "variant": "box_range on",
+          "scenario": "side_step",
+          "seed": 20,
+          "pass_": true,
+          "contact": false,
+          "final_gap_m": 0.53,
+          "max_abs_target_bearing_deg": 46.5,
+          "target_visible_share": 0.97
+        },
+        {
+          "code": "d23e7b2",
+          "run": "side_step_check|ss_true_s21|side_step",
+          "variant": "box_range on",
+          "scenario": "side_step",
+          "seed": 21,
+          "pass_": false,
+          "contact": false,
+          "final_gap_m": 0.53,
+          "max_abs_target_bearing_deg": 59.7,
+          "target_visible_share": 0.893
+        },
+        {
+          "code": "d23e7b2",
+          "run": "side_step_check|ss_true_s22|side_step",
+          "variant": "box_range on",
+          "scenario": "side_step",
+          "seed": 22,
+          "pass_": true,
+          "contact": false,
+          "final_gap_m": 0.53,
+          "max_abs_target_bearing_deg": 44.0,
+          "target_visible_share": 0.978
+        },
+        {
+          "code": "d23e7b2",
+          "run": "side_step_check|ss_true_s23|side_step",
+          "variant": "box_range on",
+          "scenario": "side_step",
+          "seed": 23,
+          "pass_": false,
+          "contact": false,
+          "final_gap_m": 0.54,
+          "max_abs_target_bearing_deg": 64.5,
+          "target_visible_share": 0.875
+        },
+        {
+          "code": "d23e7b2",
+          "run": "side_step_check|ss_true_s24|side_step",
+          "variant": "box_range on",
+          "scenario": "side_step",
+          "seed": 24,
+          "pass_": false,
+          "contact": false,
+          "final_gap_m": 0.53,
+          "max_abs_target_bearing_deg": 63.7,
+          "target_visible_share": 0.878
+        },
+        {
+          "code": "d23e7b2",
+          "run": "side_step_check|ss_true_s25|side_step",
+          "variant": "box_range on",
+          "scenario": "side_step",
+          "seed": 25,
+          "pass_": true,
+          "contact": false,
+          "final_gap_m": 0.53,
+          "max_abs_target_bearing_deg": 58.9,
+          "target_visible_share": 0.904
+        },
+        {
+          "code": "d23e7b2",
+          "run": "side_step_check|ss_true_s26|side_step",
+          "variant": "box_range on",
+          "scenario": "side_step",
+          "seed": 26,
+          "pass_": true,
+          "contact": false,
+          "final_gap_m": 0.51,
+          "max_abs_target_bearing_deg": 44.2,
+          "target_visible_share": 0.978
+        },
+        {
+          "code": "d23e7b2",
+          "run": "side_step_check|ss_true_s27|side_step",
+          "variant": "box_range on",
+          "scenario": "side_step",
+          "seed": 27,
+          "pass_": false,
+          "contact": false,
+          "final_gap_m": 2.04,
+          "max_abs_target_bearing_deg": 168.2,
+          "target_visible_share": 0.214
+        }
+      ],
+      "off": [
+        {
+          "code": "808dc6c",
+          "run": "t13_rule|reg_solo_s0|side_step",
+          "variant": "before box_range (T13 run)",
+          "scenario": "side_step",
+          "seed": 0,
+          "pass_": false,
+          "contact": false,
+          "final_gap_m": 2.58,
+          "max_abs_target_bearing_deg": 108.3,
+          "target_visible_share": 0.181
+        },
+        {
+          "code": "808dc6c",
+          "run": "t13_rule|reg_solo_s1|side_step",
+          "variant": "before box_range (T13 run)",
+          "scenario": "side_step",
+          "seed": 1,
+          "pass_": false,
+          "contact": false,
+          "final_gap_m": 2.37,
+          "max_abs_target_bearing_deg": 41.8,
+          "target_visible_share": 0.299
+        },
+        {
+          "code": "808dc6c",
+          "run": "t13_rule|reg_solo_s2|side_step",
+          "variant": "before box_range (T13 run)",
+          "scenario": "side_step",
+          "seed": 2,
+          "pass_": true,
+          "contact": false,
+          "final_gap_m": 0.47,
+          "max_abs_target_bearing_deg": 58.5,
+          "target_visible_share": 0.904
+        },
+        {
+          "code": "d23e7b2",
+          "run": "box_v3_solo|reg_solo_false_s3|side_step",
+          "variant": "box_range off",
+          "scenario": "side_step",
+          "seed": 3,
+          "pass_": true,
+          "contact": false,
+          "final_gap_m": 0.47,
+          "max_abs_target_bearing_deg": 41.5,
+          "target_visible_share": 0.978
+        },
+        {
+          "code": "d23e7b2",
+          "run": "box_v3_solo|reg_solo_false_s4|side_step",
+          "variant": "box_range off",
+          "scenario": "side_step",
+          "seed": 4,
+          "pass_": true,
+          "contact": false,
+          "final_gap_m": 0.49,
+          "max_abs_target_bearing_deg": 42.1,
+          "target_visible_share": 0.974
+        },
+        {
+          "code": "d23e7b2",
+          "run": "box_v3_solo|reg_solo_false_s5|side_step",
+          "variant": "box_range off",
+          "scenario": "side_step",
+          "seed": 5,
+          "pass_": true,
+          "contact": false,
+          "final_gap_m": 0.47,
+          "max_abs_target_bearing_deg": 43.7,
+          "target_visible_share": 0.978
+        },
+        {
+          "code": "d23e7b2",
+          "run": "box_v3_solo|reg_solo_false_s6|side_step",
+          "variant": "box_range off",
+          "scenario": "side_step",
+          "seed": 6,
+          "pass_": true,
+          "contact": false,
+          "final_gap_m": 0.46,
+          "max_abs_target_bearing_deg": 41.3,
+          "target_visible_share": 0.974
+        },
+        {
+          "code": "d23e7b2",
+          "run": "box_v3_solo|reg_solo_false_s7|side_step",
+          "variant": "box_range off",
+          "scenario": "side_step",
+          "seed": 7,
+          "pass_": true,
+          "contact": false,
+          "final_gap_m": 0.47,
+          "max_abs_target_bearing_deg": 40.9,
+          "target_visible_share": 0.978
+        },
+        {
+          "code": "d23e7b2",
+          "run": "side_step_check|ss_false_s8|side_step",
+          "variant": "box_range off",
+          "scenario": "side_step",
+          "seed": 8,
+          "pass_": false,
+          "contact": false,
+          "final_gap_m": 0.44,
+          "max_abs_target_bearing_deg": 59.9,
+          "target_visible_share": 0.897
+        },
+        {
+          "code": "d23e7b2",
+          "run": "side_step_check|ss_false_s9|side_step",
+          "variant": "box_range off",
+          "scenario": "side_step",
+          "seed": 9,
+          "pass_": true,
+          "contact": false,
+          "final_gap_m": 0.48,
+          "max_abs_target_bearing_deg": 40.4,
+          "target_visible_share": 0.978
+        },
+        {
+          "code": "d23e7b2",
+          "run": "side_step_check|ss_false_s10|side_step",
+          "variant": "box_range off",
+          "scenario": "side_step",
+          "seed": 10,
+          "pass_": true,
+          "contact": false,
+          "final_gap_m": 0.48,
+          "max_abs_target_bearing_deg": 40.2,
+          "target_visible_share": 0.978
+        },
+        {
+          "code": "d23e7b2",
+          "run": "side_step_check|ss_false_s11|side_step",
+          "variant": "box_range off",
+          "scenario": "side_step",
+          "seed": 11,
+          "pass_": true,
+          "contact": false,
+          "final_gap_m": 0.46,
+          "max_abs_target_bearing_deg": 51.2,
+          "target_visible_share": 0.97
+        },
+        {
+          "code": "d23e7b2",
+          "run": "side_step_check|ss_false_s12|side_step",
+          "variant": "box_range off",
+          "scenario": "side_step",
+          "seed": 12,
+          "pass_": true,
+          "contact": false,
+          "final_gap_m": 0.48,
+          "max_abs_target_bearing_deg": 42.5,
+          "target_visible_share": 0.974
+        },
+        {
+          "code": "d23e7b2",
+          "run": "side_step_check|ss_false_s13|side_step",
+          "variant": "box_range off",
+          "scenario": "side_step",
+          "seed": 13,
+          "pass_": true,
+          "contact": false,
+          "final_gap_m": 0.48,
+          "max_abs_target_bearing_deg": 41.7,
+          "target_visible_share": 0.974
+        },
+        {
+          "code": "d23e7b2",
+          "run": "side_step_check|ss_false_s14|side_step",
+          "variant": "box_range off",
+          "scenario": "side_step",
+          "seed": 14,
+          "pass_": false,
+          "contact": false,
+          "final_gap_m": 0.48,
+          "max_abs_target_bearing_deg": 61.3,
+          "target_visible_share": 0.889
+        },
+        {
+          "code": "d23e7b2",
+          "run": "side_step_check|ss_false_s15|side_step",
+          "variant": "box_range off",
+          "scenario": "side_step",
+          "seed": 15,
+          "pass_": true,
+          "contact": false,
+          "final_gap_m": 0.47,
+          "max_abs_target_bearing_deg": 49.5,
+          "target_visible_share": 0.967
+        },
+        {
+          "code": "d23e7b2",
+          "run": "side_step_check|ss_false_s16|side_step",
+          "variant": "box_range off",
+          "scenario": "side_step",
+          "seed": 16,
+          "pass_": false,
+          "contact": false,
+          "final_gap_m": 0.48,
+          "max_abs_target_bearing_deg": 66.2,
+          "target_visible_share": 0.871
+        },
+        {
+          "code": "d23e7b2",
+          "run": "side_step_check|ss_false_s17|side_step",
+          "variant": "box_range off",
+          "scenario": "side_step",
+          "seed": 17,
+          "pass_": false,
+          "contact": false,
+          "final_gap_m": 0.45,
+          "max_abs_target_bearing_deg": 65.4,
+          "target_visible_share": 0.878
+        },
+        {
+          "code": "d23e7b2",
+          "run": "side_step_check|ss_false_s18|side_step",
+          "variant": "box_range off",
+          "scenario": "side_step",
+          "seed": 18,
+          "pass_": true,
+          "contact": false,
+          "final_gap_m": 0.46,
+          "max_abs_target_bearing_deg": 40.1,
+          "target_visible_share": 0.978
+        },
+        {
+          "code": "d23e7b2",
+          "run": "side_step_check|ss_false_s19|side_step",
+          "variant": "box_range off",
+          "scenario": "side_step",
+          "seed": 19,
+          "pass_": true,
+          "contact": false,
+          "final_gap_m": 0.46,
+          "max_abs_target_bearing_deg": 38.9,
+          "target_visible_share": 0.982
+        },
+        {
+          "code": "d23e7b2",
+          "run": "side_step_check|ss_false_s20|side_step",
+          "variant": "box_range off",
+          "scenario": "side_step",
+          "seed": 20,
+          "pass_": false,
+          "contact": false,
+          "final_gap_m": 0.48,
+          "max_abs_target_bearing_deg": 60.2,
+          "target_visible_share": 0.897
+        },
+        {
+          "code": "d23e7b2",
+          "run": "side_step_check|ss_false_s21|side_step",
+          "variant": "box_range off",
+          "scenario": "side_step",
+          "seed": 21,
+          "pass_": true,
+          "contact": false,
+          "final_gap_m": 0.43,
+          "max_abs_target_bearing_deg": 42.2,
+          "target_visible_share": 0.974
+        },
+        {
+          "code": "d23e7b2",
+          "run": "side_step_check|ss_false_s22|side_step",
+          "variant": "box_range off",
+          "scenario": "side_step",
+          "seed": 22,
+          "pass_": true,
+          "contact": false,
+          "final_gap_m": 0.48,
+          "max_abs_target_bearing_deg": 46.3,
+          "target_visible_share": 0.97
+        },
+        {
+          "code": "d23e7b2",
+          "run": "side_step_check|ss_false_s23|side_step",
+          "variant": "box_range off",
+          "scenario": "side_step",
+          "seed": 23,
+          "pass_": false,
+          "contact": false,
+          "final_gap_m": 0.46,
+          "max_abs_target_bearing_deg": 62.4,
+          "target_visible_share": 0.886
+        },
+        {
+          "code": "d23e7b2",
+          "run": "side_step_check|ss_false_s24|side_step",
+          "variant": "box_range off",
+          "scenario": "side_step",
+          "seed": 24,
+          "pass_": true,
+          "contact": false,
+          "final_gap_m": 0.46,
+          "max_abs_target_bearing_deg": 45.8,
+          "target_visible_share": 0.97
+        },
+        {
+          "code": "d23e7b2",
+          "run": "side_step_check|ss_false_s25|side_step",
+          "variant": "box_range off",
+          "scenario": "side_step",
+          "seed": 25,
+          "pass_": false,
+          "contact": false,
+          "final_gap_m": 0.92,
+          "max_abs_target_bearing_deg": 59.6,
+          "target_visible_share": 0.273
+        },
+        {
+          "code": "d23e7b2",
+          "run": "side_step_check|ss_false_s26|side_step",
+          "variant": "box_range off",
+          "scenario": "side_step",
+          "seed": 26,
+          "pass_": true,
+          "contact": false,
+          "final_gap_m": 0.46,
+          "max_abs_target_bearing_deg": 39.7,
+          "target_visible_share": 0.978
+        },
+        {
+          "code": "d23e7b2",
+          "run": "side_step_check|ss_false_s27|side_step",
+          "variant": "box_range off",
+          "scenario": "side_step",
+          "seed": 27,
+          "pass_": true,
+          "contact": false,
+          "final_gap_m": 0.47,
+          "max_abs_target_bearing_deg": 43.8,
+          "target_visible_share": 0.974
+        }
+      ]
+    },
+    "pooled_side_step": {
+      "seeds": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27
+      ],
+      "on_passed": 15,
+      "off_passed": 19,
+      "per_mode_n": 28,
+      "fisher_p": 0.41211294541479465,
+      "difference_pp": -14.28571428571429,
+      "seed_paired_on_only": 5,
+      "seed_paired_off_only": 9,
+      "seed_paired_exact_mcnemar_p": 0.4239501953125,
+      "on_visible_median": 0.937,
+      "off_visible_median": 0.972,
+      "on_peak_bearing_median": 52.7,
+      "off_peak_bearing_median": 43.75
+    },
+    "current_code_matched_side_step": {
+      "seeds": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27
+      ],
+      "on_passed": 15,
+      "off_passed": 18,
+      "per_mode_n": 25,
+      "fisher_p": 0.5512246257901201,
+      "difference_pp": -12.0,
+      "seed_paired_on_only": 5,
+      "seed_paired_off_only": 8,
+      "seed_paired_exact_mcnemar_p": 0.5810546875,
+      "on_visible_median": 0.974,
+      "off_visible_median": 0.974,
+      "on_peak_bearing_median": 46.0,
+      "off_peak_bearing_median": 43.7
+    },
+    "new_side_step_trials": {
+      "seeds": [
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27
+      ],
+      "on_passed": 12,
+      "off_passed": 13,
+      "per_mode_n": 20,
+      "fisher_p": 1.0,
+      "difference_pp": -5.000000000000004,
+      "seed_paired_on_only": 5,
+      "seed_paired_off_only": 6,
+      "seed_paired_exact_mcnemar_p": 1.0,
+      "on_visible_median": 0.972,
+      "off_visible_median": 0.97,
+      "on_peak_bearing_median": 46.0,
+      "off_peak_bearing_median": 46.05
+    },
+    "historical_off_source": "808dc6c T13 seeds 0\u20132; earlier session/image, not a fresh randomized paired comparison"
+  }
+}

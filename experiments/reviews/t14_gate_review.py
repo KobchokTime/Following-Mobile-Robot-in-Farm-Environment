@@ -1,9 +1,10 @@
 """Reproduce T14 review checks without ROS or hardware (synthetic observations).
 
 Run from the repository root:
-  python experiments/reviews/t14_gate_review.py --out experiments/reviews/2026-10-28_t14_review.json
+  python experiments/reviews/t14_gate_review.py --out experiments/reviews/2026-10-28_t14_rereview.json
 
-The Fisher calculation checks the reported totals, not the missing trial records.
+Side-step totals and Fisher tests are derived from the committed per-seed records.
+The off cohort explicitly includes the historical 808dc6c T13 rows for seeds 0–2.
 """
 import argparse
 import copy
@@ -119,12 +120,12 @@ def skip_cases():
     return results
 
 
-def fisher_two_sided(a=15, b=13, c=18, d=10):
+def fisher_two_sided(a, b, c, d):
     total, successes, sample = a+b+c+d, a+c, a+b
     lo, hi = max(0, sample-(total-successes)), min(sample, successes)
-    probability = lambda k: math.comb(successes, k)*math.comb(total-successes, sample-k)/math.comb(total, sample)
-    observed = probability(a)
-    return sum(probability(k) for k in range(lo, hi+1) if probability(k) <= observed+1e-12)
+    weight = lambda k: math.comb(successes, k)*math.comb(total-successes, sample-k)
+    observed = weight(a)
+    return sum(weight(k) for k in range(lo, hi+1) if weight(k) <= observed)/math.comb(total, sample)
 
 
 def sidestep_case():
@@ -139,9 +140,7 @@ def sidestep_case():
                          accepted=trial.accept(10.3, D(27.5), rng, CHROMA, HIST)))
     return dict(predicted_bearing_deg=math.degrees(g._predict(10.3)[0]),
                 last_bearing_deg=6.5, lidar_edge_threshold_deg=27,
-                lateral_step_angle_deg=math.degrees(math.atan2(0.25, 0.7)), costs=rows,
-                fisher_p_if_reported_totals_correct=fisher_two_sided(),
-                reported_pass_rate_difference_pp=100*(15/28-18/28))
+                lateral_step_angle_deg=math.degrees(math.atan2(0.25, 0.7)), costs=rows)
 
 
 def evidence_inventory():
@@ -155,15 +154,57 @@ def evidence_inventory():
         v["n"] += 1
         v["passed"] += bool(r["pass_"])
         v["contacts"] += bool(r["contact"])
-    side = [r for r in selected if r["scenario"] == "side_step"]
+    cohorts = {"on": {}, "off": {}}
+    duplicate_keys = []
+    for r in rows:
+        if r["scenario"] != "side_step" or r["seed"] not in range(28):
+            continue
+        mode = None
+        if r["code"] == "d23e7b2" and r["variant"] in ("box_range on", "box_range off"):
+            mode = "on" if r["variant"] == "box_range on" else "off"
+        elif r["code"] == "808dc6c" and r["variant"] == "before box_range (T13 run)" and r["seed"] < 3:
+            mode = "off"
+        if mode is not None:
+            if r["seed"] in cohorts[mode]:
+                duplicate_keys.append([mode, r["seed"]])
+            cohorts[mode][r["seed"]] = r
+    assert not duplicate_keys, duplicate_keys
+
+    def compare(seeds):
+        on, off = ([cohorts[m][s] for s in seeds] for m in ("on", "off"))
+        a, c, n = sum(r["pass_"] for r in on), sum(r["pass_"] for r in off), len(seeds)
+        on_only = sum(bool(x["pass_"]) and not y["pass_"] for x, y in zip(on, off))
+        off_only = sum(bool(y["pass_"]) and not x["pass_"] for x, y in zip(on, off))
+        discordant = on_only + off_only
+        paired_p = min(1.0, 2*sum(math.comb(discordant, k) for k in range(min(on_only, off_only)+1))/2**discordant)
+        return dict(seeds=list(seeds), on_passed=a, off_passed=c, per_mode_n=n,
+                    fisher_p=fisher_two_sided(a, n-a, c, n-c), difference_pp=100*(a/n-c/n),
+                    seed_paired_on_only=on_only, seed_paired_off_only=off_only,
+                    seed_paired_exact_mcnemar_p=paired_p,
+                    on_visible_median=statistics.median(r["target_visible_share"] for r in on),
+                    off_visible_median=statistics.median(r["target_visible_share"] for r in off),
+                    on_peak_bearing_median=statistics.median(r["max_abs_target_bearing_deg"] for r in on),
+                    off_peak_bearing_median=statistics.median(r["max_abs_target_bearing_deg"] for r in off))
+
+    coverage = {m:sorted(rs) for m, rs in cohorts.items()}
+    missing = {m:sorted(set(range(28))-set(rs)) for m, rs in cohorts.items()}
+    complete = not any(missing.values())
+    numeric_mismatches = []
+    for mode, rs in cohorts.items():
+        for seed, r in rs.items():
+            partial_pass = not r["contact"] and r["final_gap_m"] <= 1.5 and r["target_visible_share"] >= 0.9
+            if bool(r["pass_"]) != partial_pass:
+                numeric_mismatches.append([mode, seed])
+    assert not numeric_mismatches, numeric_mismatches
     return dict(total_rows=len(rows), d23e7b2_rows=len(selected), groups=groups,
-                side_step_seed_coverage={variant:sorted(r["seed"] for r in side if r["variant"]==variant)
-                                         for variant in ("box_range on", "box_range off")},
-                missing_new_trials=sum(1 for variant in ("box_range on", "box_range off")
-                                       for seed in range(8, 28)
-                                       if not any(r["variant"]==variant and r["seed"]==seed for r in side)),
-                missing_off_early_seeds=[seed for seed in range(3)
-                                        if not any(r["variant"]=="box_range off" and r["seed"]==seed for r in side)])
+                side_step_seed_coverage=coverage, missing_seeds=missing, duplicate_keys=duplicate_keys,
+                available_numeric_pass_mismatches=numeric_mismatches,
+                pass_limit="summary rows lack final bearing/FOV; only stored numeric conditions can be rechecked",
+                side_step_records={m:[rs[s] for s in sorted(rs)] for m,rs in cohorts.items()},
+                pooled_side_step=compare(range(28)) if complete else None,
+                current_code_matched_side_step=compare(range(3,28)) if complete else None,
+                new_side_step_trials=compare(range(8,28)) if complete else None,
+                historical_off_source="808dc6c T13 seeds 0–2; earlier session/image, not a fresh randomized paired comparison")
 
 
 def main():
@@ -186,6 +227,7 @@ def main():
                   borrowed_flat_returns=flat, borrowed_circle_returns=circles,
                   leg_cases=legs, neighbouring_leg_ambiguity=ambiguity, bearing_frame=frame_cases(),
                   skip_vs_fallback=skip_cases(), side_step=sidestep_case(), evidence=evidence_inventory())
+    assert not any(result["evidence"]["missing_seeds"].values()), result["evidence"]["missing_seeds"]
     encoded = json.dumps(result, indent=2, allow_nan=False)+"\n"
     if args.out:
         args.out.parent.mkdir(parents=True, exist_ok=True)
