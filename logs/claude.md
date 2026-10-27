@@ -1133,3 +1133,13 @@ Earlier history: `history-2026-10-16.md`.
 - **Dashboard v2, "สีเสื้อ" (clothing colour) tab:** new card with an AUC overview for every clip, and a per-clip view (page version 17).
   - The per-clip view shows the AUC verdict, the target's and nearest other's colour cost over time with confusion shaded, and the Cb/Cr scatter.
   - Rendered in Chromium before publishing. A bug where the time axis ran backwards on one-person clips was found and fixed: stranger boxes carried another clip's time.
+
+### 2026-10-27 — dashboard — One "photo + Cb/Cr" view per clip (15:09 Thai time)
+- At the user's request, the first "สีเสื้อ" (clothing colour) card is now a per-clip viewer covering all 8 videos (page version 18). For each clip it shows:
+  - crops from the original frames with their Cb/Cr;
+  - the clip's Cb/Cr scatter, coloured per person after their clothes;
+  - for one-person clips, other clips' people as faint grey for reference;
+  - a short verdict with the separability AUCs.
+- The separate gallery card was merged into it.
+- **New dataset:** `colour_clip_points`.
+- Rendered in Chromium for every clip at wide and phone width: no dots outside the plot, no page errors.
