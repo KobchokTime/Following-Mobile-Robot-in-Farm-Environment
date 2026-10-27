@@ -85,6 +85,46 @@ class SectorAssociationTest(unittest.TestCase):
     def test_no_angles_yet_returns_none(self):
         self.assertIsNone(self.m.nearest_sector(0.1, []))
 
+    @staticmethod
+    def _person(x, y, radius=0.2, step_deg=0.5):
+        """Scan returns (bearing, range) off a round person at (x, y), as the twin draws them."""
+        pts = []
+        for i in range(-180, 181):
+            b = math.radians(i * step_deg)
+            ux, uy = math.cos(b), math.sin(b)
+            t = x * ux + y * uy
+            d2 = x * x + y * y - t * t
+            if t > 0 and d2 <= radius * radius:
+                pts.append((b, t - math.sqrt(radius * radius - d2)))
+        return pts
+
+    def test_a_box_far_behind_a_near_person_gets_its_own_range(self):
+        near = self._person(0.8, 0.0)
+        far_b = math.radians(18.0)
+        far = self._person(7.0 * math.cos(far_b), 7.0 * math.sin(far_b))
+        scan = [p for p in near + far if not any(abs(p[0] - q[0]) < 1e-9 and q[1] < p[1] for q in near + far)]
+        mids = sectorizer_mids()
+        sector_min = min(r for b, r in scan if abs(b - mids[self.m.nearest_sector(far_b, mids)]) <= math.radians(3.9))
+        self.assertLess(sector_min, 1.0)  # the old sector minimum is the near person's range
+        self.assertAlmostEqual(self.m.box_range(scan, far_b), 6.8, delta=0.1)
+        self.assertAlmostEqual(self.m.box_range(scan, 0.0), 0.6, delta=0.05)
+
+    def test_a_box_between_two_legs_finds_them(self):
+        legs = self._person(1.0, 0.1, radius=0.06) + self._person(1.0, -0.1, radius=0.06)
+        self.assertAlmostEqual(self.m.box_range(legs, 0.0), 0.94, delta=0.03)
+
+    def test_a_person_beside_the_box_does_not_lend_their_range(self):
+        """The box looks at the target's edge; a person just beside it has the nearer cluster middle."""
+        target = self._person(0.85, 0.0)
+        side = math.radians(-20.0)
+        other = self._person(1.5 * math.cos(side), 1.5 * math.sin(side))
+        scan = [p for p in target + other if not any(abs(p[0] - q[0]) < 1e-9 and q[1] < p[1] for q in target + other)]
+        self.assertAlmostEqual(self.m.box_range(scan, math.radians(-12.0)), 0.65, delta=0.05)
+
+    def test_no_cluster_near_the_box_gives_none(self):
+        self.assertIsNone(self.m.box_range(self._person(2.0, 0.0), math.radians(30.0)))
+        self.assertIsNone(self.m.box_range([], 0.0))
+
 
 if __name__ == "__main__":
     unittest.main()
