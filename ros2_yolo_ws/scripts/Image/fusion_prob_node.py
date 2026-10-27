@@ -1,10 +1,15 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-FusionProbNode v3.0 — Async-aware Bayesian smoothing
+FusionProbNode v3.0 — weighted confidence with time smoothing (not a Bayesian filter)
 ----------------------------------------------------
 รวมข้อมูล YOLO–LiDAR แบบ weighted + temporal fusion
 รองรับความถี่ไม่เท่ากัน (dt_ms) และทำ smoothing จากเฟรมก่อนหน้า
+
+P_C (how near the image centre) and P_L (how near the robot) are heuristic scores, not likelihoods;
+P_fused is their weighted mean, smoothed by an exponential moving average whose weight falls with
+the gap between messages. There is no prior, likelihood or Bayes' rule. follow_stop uses P_fused
+only as a confidence threshold (hold or stop below it).
 
 Sub:
   /synced_target : std_msgs/msg/Float32MultiArray
