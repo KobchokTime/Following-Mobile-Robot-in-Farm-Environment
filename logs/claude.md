@@ -1320,3 +1320,10 @@ Earlier history: `history-2026-10-16.md`.
 - Added a Claude Code entry to **T14** with the answer; status stays open for Codex (a)–(e).
 - `HANDOFF.md`: item 17 updated; new item 18 "gate on lateral distance (`side_step`)", not started, owner Claude.
   Lock released.
+
+### 2026-10-28 — research — side_step count corrected (01:00 Thai time)
+- Integration found a miscount in the side_step answer: off is 19/28, not 18/28. The off seeds 0–2 come from the T13 run, `808dc6c`, where they pass 1/3.
+- Corrected values:
+  - Fisher p = 0.41; still no difference;
+  - integration's question was on 3/8 vs off 5/5, not "2 of 8".
+- Added the 43 side_step runs to `experiments/sim/2026-10-27_box_range.json`.
