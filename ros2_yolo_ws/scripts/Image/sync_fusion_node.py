@@ -112,12 +112,16 @@ class TargetGate:
     the target is not seen, so it can be found again after a short loss.
 
     Colour is the Cb/Cr chroma and, when the camera sends one, the torso hue-saturation histogram,
-    each at half weight. The histogram follows Kim, Suh and Kwon (2024): no brightness channel, and
-    it is re-learned from the target's last hist_window boxes. A box is learned only if it is at least
-    as close to the model as the boxes already learned, less hist_learn_slack, so one wrong pick does
-    not teach the model the other person's colours. Hue keeps a blue top blue in shade, where Cb/Cr
-    turns grey; Cb/Cr keeps black, grey and beige tops steady, where hue is noise. On video
-    (experiments/identity/clothing_colour_videos) neither alone did well on both.
+    weighted hist_weight (0.25) against 1 - hist_weight. The histogram follows Kim, Suh and Kwon
+    (2024): no brightness channel, and it is re-learned from the target's last hist_window boxes. A
+    box is learned only if it is at least as close to the model as the boxes already learned, less
+    hist_learn_slack, so one wrong pick does not teach the model the other person's colours.
+
+    Hue keeps a blue top blue in shade, where Cb/Cr turns grey; Cb/Cr keeps black, grey and beige tops
+    steady, where hue is noise. On video (experiments/identity/clothing_colour_videos) neither alone
+    did well on both. A quarter histogram kept every held-out person as well as Cb/Cr alone did and
+    still picked the blue top out in the lab clips; more histogram helped in a crowd but lost a black
+    tee (weight_sweep.py).
 
     Re-acquisition, after Algorithm 1 of Kim, Suh and Kwon (2024): once the target has been unseen for
     reacquire_after_s, a detection whose colour matches the model (colour cost at most
@@ -131,8 +135,8 @@ class TargetGate:
     def __init__(self, lock_range=(0.5, 1.0), lock_bearing_deg=15.0, bearing_sigma_deg=5.0,
                  range_sigma_m=0.15, chroma_sigma=15.0, gate=9.0, widen_per_s=1.0,
                  alpha=0.6, beta=0.2, chroma_rate=0.05, min_rate_dt=0.015, unlock_after_s=5.0,
-                 hist_sigma=0.2, hist_window=10, hist_learn_slack=0.1, hist_weight=0.5,
-                 reacquire_after_s=1.0, reacquire_colour_max=2.0, reacquire_bearing_deg=35.0):
+                 hist_sigma=0.2, hist_window=10, hist_learn_slack=0.1, hist_weight=0.25,
+                 reacquire_after_s=1.0, reacquire_colour_max=1.0, reacquire_bearing_deg=35.0):
         self.lock_range = lock_range
         self.lock_bearing = math.radians(lock_bearing_deg)
         self.sb = math.radians(bearing_sigma_deg)

@@ -142,15 +142,18 @@ class TargetGateTest(unittest.TestCase):
             h[b * 4] += grey / 12.0
         return h
 
-    def test_histogram_rejects_another_colour_at_the_same_place(self):
+    def test_histogram_ranks_and_with_geometry_rejects_another_colour(self):
         g = self.Gate()
         blue, grey = self._hist(8, 2), self._hist(0, 0, grey=1.0)
         g.accept(0.0, 0.0, 0.8, (139, 125), blue)
         g.accept(0.1, 0.0, 0.8, (139, 125), blue)
-        self.assertFalse(g.accept(0.2, D(2), 0.85, (131, 128), grey))
         shade = [0.5 * a + 0.2 * b + 0.3 * c for a, b, c in zip(blue, self._hist(8, 1), grey)]
         self.assertAlmostEqual(sum(shade), 1.0)
-        self.assertTrue(g.accept(0.2, D(2), 0.85, (131, 128), shade))  # the target in shade: half its pixels move
+        # colour alone may not veto (a quarter weight), but it ranks the target in shade first ...
+        self.assertLess(g.cost(0.2, D(8), 1.0, (131, 128), shade), g.cost(0.2, D(8), 1.0, (131, 128), grey))
+        # ... and together with a small miss in place it rejects the other colour, not the target
+        self.assertFalse(g.accept(0.2, D(8), 1.0, (131, 128), grey))
+        self.assertTrue(g.accept(0.2, D(8), 1.0, (131, 128), shade))
 
     def test_histogram_learns_the_target_but_not_a_wrong_pick(self):
         g = self.Gate()
