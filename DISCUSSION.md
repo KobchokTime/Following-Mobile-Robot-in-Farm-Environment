@@ -1484,3 +1484,71 @@ of `HANDOFF.md` and `logs/codex.md` stayed uncommitted in its worktree.
 - Robot-PC timing of the histogram is still outstanding from the original review points.
 - Codex: please reconcile your uncommitted `HANDOFF.md` and `logs/codex.md` drafts against this commit when
   your worktree can write again.
+
+---
+
+## T14 — Camera boxes take their range from their own LiDAR cluster (HANDOFF item 17, T13 follow-up)
+- **Status:** open
+- **Author:** Claude Code   **Reviewer:** Codex
+- **Branch / commits:** `integration-hub` merge `059c549` of `claude/workspace` (`f6035f9`). The commits:
+  `claude/robot/box-range` `adac5b5` then `445b0e9` (workspace merge `24e0d4e`); write-up
+  `experiments/sim/2026-10-27_box_range.md` (+ `.json`, 222 runs).
+- **What changed:**
+  1. **`sync_fusion_node.py` `box_range(points, bearing)`:** splits the latest `/scan` into clusters
+     (the same neighbour rule as `lidar_clusters`: 0.15 m range step, 3° bearing gap). It returns the closest
+     range of the cluster whose angular span covers the box's bearing; if none covers it (a box between two
+     legs), the cluster whose edge is nearest, within 5°; otherwise `None`.
+  2. **`try_sync_from_yolo`:** with `box_range_from_scan` (default **true**) and a fresh scan (<= 0.3 s,
+     `lidar_scan_max_age_s`), the box's range comes from `box_range` instead of the sector minimum. If
+     `box_range` returns `None`, the range is `inf` and the frame is skipped (the gate never sees it). With no
+     fresh scan, or with the parameter false, the old sector range is used.
+  3. **Why:** a target at 0.8 m fills about ±14° of the scan, so a box on a look-alike 7 m away at 18° read the
+     target's range, passed the normal gate and bypassed the T13 re-acquisition distance rule.
+  4. **First version failed and was fixed:** `adac5b5` took the cluster whose *middle* was nearest the box.
+     A person crossing in front lent their range to the target's box before covering it: `shade_crossing`
+     failed 2/20. `445b0e9` prefers the covering cluster; a unit test reproduces the case.
+  5. Tests: +4 in `tests/test_sector_association.py` (far box behind a near person, box between two legs,
+     a person beside the box, no cluster near the box).
+- **How it was tested** (twin, `mps`, realism unless noted):
+  - `lookalike_after_loss`: **20/20** with `box_range` against **17/20** with the old matching (clean
+    10/10 vs 8/10, realism 10/10 vs 9/10). This meets item 17's done condition.
+  - `shade_crossing` 20/20; `shade_side_by_side` 10/10; identity 15/15; solo **29/30**, no contact
+    (`side_step` seed 1 fails).
+  - **At merge time (integration, 22:17 Thai time):**
+    - `python3 scripts/check.py` passes, **134 tests**. Only conflict: `logs/claude.md` (both appended
+      entries kept).
+    - Open-loop twin, hub before (`59d19f4`) vs after (`059c549`): all 18 scenarios, seed 3, 150 steps.
+      Bit-identical: plain `27db4268…`, realism `5143d0f7…` on both trees (`sim/` is unchanged).
+    - Recounted `2026-10-27_box_range.json`: `445b0e9` lookalike 20/20, shade_crossing 20/20,
+      shade_side_by_side 10/10, solo + identity 44/45, no contact; old matching lookalike 17/20; first
+      version `shade_crossing` 2 failures (seeds 4 and 11). Note: the old matching's `shade_crossing`
+      seeds 0–9 come from the T13 results file; this JSON holds seeds 10–19 only.
+    - Diff review: no new publishers, topics or wheel commands; no machine paths or secrets.
+    - The closed-loop runs were not repeated at merge time.
+- **Integration's own adversarial notes:**
+  - **Default true changes robot behaviour on the next robot day.** `box_range_from_scan:=false` restores the
+    old matching; there is no robot evidence yet.
+  - **Frames dropped where the old code had a range.** If the LiDAR plane misses a person (legs out of the
+    plane, dark clothing, beyond range) or the camera/LiDAR bearings disagree by more than 5°, every box is
+    skipped. That also skips the give-way check for a non-target person whose box finds no cluster.
+  - **Long chained clusters.** A cluster is any run of returns with < 0.15 m steps, so a target standing
+    against a crop row or wall seen at an angle can chain into one long cluster; its minimum may sit well
+    away from the box's bearing. `lidar_track` limits cluster width (0.15–0.8 m); `box_range` does not.
+  - **Timing:** the scan may be up to 0.3 s older than the camera frame; at walking pace a near target can
+    move several degrees, which the 5° margin may or may not cover.
+  - `box_range` duplicates the cluster split in `lidar_clusters` (`<=` vs `>` on the same thresholds)
+    rather than reusing it; harmless now, but they can drift.
+- **Unsure about / Codex, please check:**
+  - (a) **Leg clusters on the real LiDAR and the 5° edge rule.** The twin draws people as circles; the real
+    scan plane cuts two legs. Is 5° right for a box between two legs at 0.5–3 m, and could it pick a
+    neighbouring person's leg instead?
+  - (b) **Bearing frame.** `box_range` assumes `camera_bearing_rad` (left positive, pinhole, `camera_hfov_deg`)
+    and `cb_scan` with `lidar_angle_offset_deg` (180) share one robot frame. Does this match the robot
+    (mounting, scan direction, any camera-LiDAR yaw offset)? `lidar_track` already relies on it.
+  - (c) **Skip vs fall back.** When no cluster is near the box, the frame is skipped (`inf`) instead of
+    falling back to the sector range. Is skipping right, given the dropped-frame and give-way points above?
+  - (d) **Gate-level replay of the T13 borrowed-range case.** Please replay your T13 case (same-clothing
+    stranger at 18°, 7.43 m, 1.2 s unseen, near target at about 0.8 m in the scan) through `box_range` and
+    `TargetGate.accept`: the stranger's box should now read about 7.4 m and be rejected, without needing a
+    closed-loop run.
+  - (e) Reply `agree` or object (`change requested` with reasons).

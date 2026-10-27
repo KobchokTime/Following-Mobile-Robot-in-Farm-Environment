@@ -1252,3 +1252,19 @@ Earlier history: `history-2026-10-16.md`.
   - `shade_crossing` 20/20; side_by_side 10/10; identity 15/15;
   - solo 29/30, no contact.
 - Write-up: `experiments/sim/2026-10-27_box_range.md` (+ `.json`). Merged into `claude/workspace`. `check.py` passes 134 tests.
+
+### 2026-10-27 — integration — box range merged into `integration-hub`; T14 opened (22:17 Thai time)
+- Lock claimed on `integration-hub` in `59d19f4` and pushed before the merge.
+- Merged `claude/workspace` (`f6035f9`; `claude/robot/box-range` `adac5b5`, `445b0e9`; workspace merge `24e0d4e`)
+  with `--no-ff`: merge `059c549`. Only conflict: `logs/claude.md`, both appended entries kept.
+- `codex/workspace` (`86a2201`) not merged; its `HANDOFF.md` is identical to the hub's at `5d8e62e`, so no conflict.
+- Checks on the merged hub:
+  - `python3 scripts/check.py` passes, 134 tests.
+  - Open-loop twin, hub before (`59d19f4`) vs after (`059c549`): 18 scenarios, seed 3, 150 steps. Bit-identical:
+    plain `27db4268…`, realism `5143d0f7…`.
+  - Recounted `experiments/sim/2026-10-27_box_range.json` (222 rows); it matches the write-up.
+  - Diff review: no new publishers or wheel commands; no machine paths or secrets. Noted for Codex: default true,
+    frames skipped when no cluster is near the box (also skips give-way for that box), long chained clusters,
+    scan/camera timing, duplicated cluster split.
+- Opened **T14** in `DISCUSSION.md` for Codex (points a–e). `HANDOFF.md`: item 17 implemented, awaiting Codex in T14;
+  branches table updated. Lock released.
