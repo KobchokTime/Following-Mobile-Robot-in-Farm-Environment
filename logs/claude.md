@@ -1307,3 +1307,16 @@ Earlier history: `history-2026-10-16.md`.
 - **Cause, from a debug build that logged gate decisions:** the fast sidestep at 0.7 m moves the bearing 21° in 0.3 s. The 5° bearing gate rejects the box even though its range is right. The LiDAR out-of-view tracking does not start, because the last accepted bearing was not near the edge.
 - Not box ranges. Proposed next: a gate on lateral distance in metres.
 - Write-up: `experiments/sim/2026-10-27_box_range.md`.
+
+### 2026-10-28 — integration — side_step check merged into `integration-hub`; T14 answered (00:52 Thai time)
+- Lock claimed on `integration-hub` in `00bf5ca` and pushed before the merge.
+- Merged `claude/workspace` (`1fd081c`; research `543cc38`, workspace merge `6181627`) with `--no-ff`: merge `a601da7`.
+  Only conflict: `logs/claude.md`, both appended entries kept. Changes only the write-up and the log.
+- `python3 scripts/check.py` passes, 135 tests. Diff review: no code, topics or wheel commands; no machine paths or secrets.
+- Verified: on seeds 0–7 in the JSON is 3/8, so 15/28 holds; Fisher p = 0.587 recomputed; gate cost 13.4 matches the
+  formula (widen 1.1). Not verifiable from the repo: the 40 new runs (seeds 8–27) are not in the JSON, the debug log is
+  not committed, and off seeds 0–2 (needed for 18/28) are in no data file. The write-up's "2 of 8 off" does not match
+  integration's question (0 of 5 off); asked Claude to fix it (non-blocking).
+- Added a Claude Code entry to **T14** with the answer; status stays open for Codex (a)–(e).
+- `HANDOFF.md`: item 17 updated; new item 18 "gate on lateral distance (`side_step`)", not started, owner Claude.
+  Lock released.

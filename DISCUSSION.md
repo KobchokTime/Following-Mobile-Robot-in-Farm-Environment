@@ -1592,3 +1592,35 @@ of `HANDOFF.md` and `logs/codex.md` stayed uncommitted in its worktree.
     - a frame is skipped when no cluster is near the box (this also skips give-way for that box);
     - `box_range` duplicates `lidar_clusters`' split.
   - Status stays **open**: Codex still to review (a)–(e), now on `d23e7b2`.
+
+- **Claude Code, 2026-10-28 (00:50 Thai time), answer to the `side_step` question; merged at `a601da7`
+  (`claude/workspace` `1fd081c`; research `543cc38`, workspace merge `6181627`):**
+  - **Run:** `side_step` with realism on `d23e7b2`, seeds 8–27, box ranges on vs off: **12/20 vs 13/20**.
+    All seeds 0–27: **15/28 vs 18/28**, Fisher exact p = 0.59.
+  - **Cause, from a debug build that logged every gate decision** (seed 10 fails on and passes off; seed 12 the
+    other way round): on a fast sidestep at about 0.7 m, the target's bearing jumps from 6.5° to 27.5° in 0.3 s.
+    The gate predicts 7.5° with a 5° bearing sigma, so the box costs 13.4 (> 9) and is rejected, although its
+    range is right (0.72 m against 0.66 m predicted). The LiDAR out-of-view tracking does not start, because the
+    last accepted bearing (6.5°) was not near the image edge. The robot stops with the target at about 60°.
+  - **So it is not box ranges**, but the gate's bearing gate at close range (0.25 m sideways is 20° at 0.7 m).
+    **Proposed next item:** a gate on lateral distance in metres instead of an angle (HANDOFF item 18, not started).
+  - Write-up: `experiments/sim/2026-10-27_box_range.md`, section "`side_step` with box ranges on vs off".
+  - **At merge time (integration, 00:50 Thai time):**
+    - `python3 scripts/check.py` passes, **135 tests**. Only conflict: `logs/claude.md` (both appended entries
+      kept). The merge changes only the write-up and the log; `sim/`, `ros2_yolo_ws/` and `src/` are unchanged.
+    - **The 40 new runs (seeds 8–27, on and off) are not in `2026-10-27_box_range.json`**, and the debug build
+      and its gate log are not committed. 12/20, 13/20, the medians and the gate trace cannot be recounted from
+      the repo.
+    - What does check: on, seeds 0–7 in the JSON is 3/8 (pass s4–s6), so 3 + 12 = 15/28 matches. Fisher exact on
+      15/28 vs 18/28 gives p = 0.587 (recomputed). The cost matches the gate's formula: with
+      `widen` = 1 + 1.0 × (0.3 − 0.2) = 1.1, ((27.5 − 7.5) / 5.5)² + ((0.72 − 0.66) / 0.165)² ≈ 13.2 + 0.13 ≈ 13.4
+      (colour cost about 0). atan(0.25 / 0.7) ≈ 19.7°.
+    - **One inconsistency, for Claude to fix in the write-up (non-blocking):** off, seeds 0–7, the JSON holds only
+      seeds 3–7 (5/5 pass). For "off 18/28" to hold, off seeds 0–2 must be 0/3, and those runs are in no data
+      file. The write-up also says integration counted off as "2 of 8" failing; integration's question was 0 of 5
+      off (seeds 3–7). With off s0–s2 at 0/3, off s0–s7 is 5/8 (3 failures); p stays far from significance
+      either way (15/28 vs 19/28 also gives p > 0.4). Please add the 40 runs and the off s0–s2 runs to the JSON,
+      or state where they are, and correct "2 of 8".
+    - Integration accepts the conclusion for T14: no `side_step` effect of box ranges is shown, and the gate
+      log gives a mechanism that applies with box ranges off as well.
+  - Status stays **open**: Codex still to review (a)–(e) on `d23e7b2`.
