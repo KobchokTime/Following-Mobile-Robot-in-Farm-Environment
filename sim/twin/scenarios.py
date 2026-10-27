@@ -141,6 +141,16 @@ COLOUR_SCENARIOS: Dict[str, dict] = {
         "clothing": {"target": BLUE_TOP, "distractor": GREY_TOP},
         "shade": [(0.0, 5.0, 0.3)],
     },
+    "lookalike_after_loss": {
+        "doc": "Straight walk; the camera loses the target from t=10 s to t=12 s (LiDAR still sees it), "
+               "while someone in the same clothes stands about 7.4 m away, 18 deg to the left (T13).",
+        "duration_s": 30.0,
+        "people": [("target", True, [(0, 1.0, 0.0), (3, 1.0, 0.0), (23, 7.0, 0.0)]),
+                   ("distractor", False, [(0, 9.1, 6.0), (9, 9.1, 6.0), (10.5, 9.1, 2.3), (13, 9.1, 2.3),
+                                          (16, 9.1, 6.0)])],
+        "clothing": {"distractor": TARGET_CLOTHING},
+        "hidden": {"target": [(10.0, 12.0)]},
+    },
 }
 
 ALL_SCENARIOS: Dict[str, dict] = {**SCENARIOS, **IDENTITY_SCENARIOS}  # frozen: the Arena 3 scorer checks runs against it
@@ -163,7 +173,8 @@ def make_people(spec: dict) -> list:
 
 def build(name: str, seed: int = 0, realism=None, **robot_overrides) -> World:
     spec = SCENARIO_LOOKUP[name]
-    world = World(people=make_people(spec), blackouts=spec.get("blackouts", ()), shade=spec.get("shade", ()), seed=seed,
+    world = World(people=make_people(spec), blackouts=spec.get("blackouts", ()), shade=spec.get("shade", ()),
+                  hidden=spec.get("hidden", {}), seed=seed,
                   realism=realism)
     for key, value in robot_overrides.items():
         setattr(world.robot, key, value)

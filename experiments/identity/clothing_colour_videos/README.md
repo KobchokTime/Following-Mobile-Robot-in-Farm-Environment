@@ -261,9 +261,16 @@ The same gate is used with only `hist_weight` changed.
   real test.
 - **The re-acquisition threshold was re-derived for the smaller colour costs:** 1.0 lets 79 % of the
   target's boxes and 2.2 % of others' through. At 0.5 the matching threshold was 2.0.
-- **By design, at 0.25 colour alone cannot reject someone standing exactly where the target is
-  predicted:** the histogram adds at most 6.25 of the 9 budget. A small miss in bearing or range
-  together with a different colour does reject.
+  - **Not independently validated:** 1.0 was chosen on the same seven videos it is reported on, as
+    was the 0.25 weight. No unseen video is left; robot-day E4 is the first independent test.
+  - **Colour cannot tell two people in the same clothes apart.** For a look-alike the colour cost is
+    about 0, so re-acquisition also requires a plausible place: within 0.8 m + 1.5 m/s x time unseen
+    (at most 3 m) of where the target was last seen (T13, after Codex's 18 deg, 7.43 m case).
+- **At the predicted place, colour rejects different clothes but not the same clothes.** The
+  histogram part adds at most 6.25 of the 9 budget, but the Cb/Cr part has no cap: Codex measured a
+  cost of 10.13 for a differently dressed person at exactly the predicted place, so that person is
+  rejected (T13). Someone in the same or similar clothes costs about 0 and is not; there, geometry
+  alone decides.
 
 ## Separability, clip by clip (`separability.py`, `results_separability.txt`, `separability.json`)
 

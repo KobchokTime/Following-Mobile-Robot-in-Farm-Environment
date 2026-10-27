@@ -91,3 +91,47 @@
   shade.
 - **Run-to-run variation is large:** with the histogram off, `shade_crossing` with realism went 5/10
   in the previous run and 9/10 now, on the same code for that setting.
+
+## Update: re-acquisition distance rule (T13, `808dc6c`)
+
+- **Codex's review (T13):** re-acquisition took a stranger in the same clothes at 18°, 7.43 m, after the
+  target had been unseen for 1.2 s, in 5 of 5 seeds (gate-level check).
+- **Fix:** a detection is taken back only within 0.8 m + 1.5 m/s × time unseen (at most 3 m) of the
+  last place the target was seen. This is T_dist in Algorithm 1 of Kim, Suh and Kwon (2024), which the
+  first version left out.
+  - Unit tests: Codex's case is rejected, and the target a step further on is taken back. With the rule
+    switched off, the same stranger is taken.
+  - The reach grows with time unseen and is capped at 3 m.
+- **New twin scenario `lookalike_after_loss`** (in the `colour` set):
+  - straight walk; the camera loses the target from 10 to 12 s, while the LiDAR still sees it;
+  - meanwhile someone in the same clothes stands about 7.4 m away, 18° to the left;
+  - the twin gains per-person camera-hidden windows for this. All earlier scenarios stay
+    bit-identical (open-loop hash, seed 3, plain and realism).
+- **Runs:** `mps`, one at a time. "Old" means the same code with the distance rule switched off
+  (`reacquire_dist_m` and `reacquire_dist_max_m` set to 100). Data: `2026-10-27_hs_colour_twin_t13.json`.
+
+| Set | Rule off | Rule on (`808dc6c`) |
+|---|---|---|
+| `lookalike_after_loss`, clean, seeds 0–4 | 5/5 | 4/5 |
+| `lookalike_after_loss`, realism, seeds 0–4 | 4/5 | 5/5 |
+| `shade_crossing`, realism, seeds 0–9 | — | 10/10 |
+| `shade_side_by_side`, realism, seeds 0–9 | — | 10/10 |
+| Identity, realism, seeds 0–2 | — | 15/15 |
+| Solo, realism, seeds 0–2 | — | 27/30, no contact (`side_step` s0, s1, `zigzag` s2) |
+
+- **The rule costs nothing elsewhere.** The colour set, identity and solo results match `47553e5`.
+- **`lookalike_after_loss` is not a test of the rule.** It goes 9/10 either way, and the failures
+  come from a different, older weakness:
+  1. A camera box takes its range from the LiDAR sector in its direction.
+  2. The target, 0.8 m away, fills about ±17° of the scan, so the look-alike's box at 18° reads the
+     target's range (about 0.7 m), not its own 7 m.
+  3. That box sits near the predicted range. While the target is unseen, the bearing gate widens,
+     so the normal gate accepts the box. Re-acquisition is never reached.
+  4. The robot then turns towards the look-alike for about a second. Whether the target is still in
+     view after that turn decides the run.
+- **So the distance rule closes Codex's case** (the look-alike's own range is measured), **not this
+  one** (the range is borrowed). Fixing it needs a range that belongs to the box: for example a check
+  of LiDAR range against box height, or the nearest LiDAR cluster to the box's bearing. That is a
+  separate change to how boxes and LiDAR are matched, proposed as follow-up.
+- **The twin histogram** checks only wiring and shade behaviour. It does not measure how well colour
+  separates people; that evidence is the video work, and E4 on robot day.
