@@ -1169,3 +1169,12 @@ Earlier history: `history-2026-10-16.md`.
 - **Cause:** the belief rests on the same colour evidence the gate uses to choose, so it rises with a wrong pick and falls when the target's own colour changes (deep shade). It needs an independent cue.
 - **Decision:** keep it off; the branch stays as a measured negative result. Write-up: `experiments/sim/2026-10-27_identity_belief.md` (+ `.json`).
 - **Twin with the histogram at 0.25 (`47553e5`, belief off):** `shade_crossing` realism 10/10 (9/10 without histogram), solo 27/30 (24/30). Dashboard twin card updated (page version 19).
+
+### 2026-10-27 — workspace — Colour gate and naming merged into the workspace for review (16:50 Thai time)
+- The user asked to send the colour work to Codex for review.
+- Merged into `claude/workspace`:
+  - `claude/robot/hs-colour` (`815ec79`): H,S histogram at a quarter weight, colour re-acquisition and the twin `colour` set;
+  - `claude/robot/naming` (`ad9cafb`): comments only.
+  - 127 tests pass.
+- Not merged, kept as measured negative results: `claude/robot/identity-belief` and `claude/robot/static-filter`.
+- Next: the `integration` subagent merges `claude/workspace` into `integration-hub` and opens T13 for Codex.
