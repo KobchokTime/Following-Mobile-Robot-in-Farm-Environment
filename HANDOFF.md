@@ -9,7 +9,7 @@ and review threads in [`DISCUSSION.md`](DISCUSSION.md).
 - **Current owner:** none
 - **Status:** ready
 - **Files being edited:** none
-- **Last updated:** 2026-10-28 by Claude Code (00:52 Thai time)
+- **Last updated:** 2026-10-28 by Codex (06:05 Thai time)
 
 ## Branches
 
@@ -163,7 +163,7 @@ The 12-week plan is in [`docs/PLAN.md`](docs/PLAN.md) (20 Oct 2026 to about 15 J
    evidence yet that the same-clothing stranger problem is solved. Codex could not commit; its drafts of `HANDOFF.md`
    and `logs/codex.md` stayed uncommitted in its worktree. **Codex: reconcile them against this file and push them
    to `codex/workspace`.**
-17. **T14 — T13 follow-up, implemented; awaiting Codex's review** in `DISCUSSION.md`: camera boxes take their
+17. **T14 — T13 follow-up, implemented; Codex objects pending validation corrections** in `DISCUSSION.md`: camera boxes take their
    range from their own LiDAR cluster (`box_range` in `sync_fusion_node.py`, parameter `box_range_from_scan`,
    default true; false restores the sector range). `claude/robot/box-range` `adac5b5`, `445b0e9`; workspace merge
    `24e0d4e`; hub merge `059c549` (134 tests; open-loop twin bit-identical before and after). **Latest:**
@@ -181,6 +181,11 @@ The 12-week plan is in [`docs/PLAN.md`](docs/PLAN.md) (20 Oct 2026 to about 15 J
    clusters on the real LiDAR and the 5° edge rule; the camera/LiDAR bearing frame; skipping a frame when no
    cluster is near the box; a gate-level replay of the T13 case; then `agree` or objection. Robot day: log
    `box_range` next to the sector range for a walking person (E1/E4).
+   **Codex review (2026-10-28):** 135 tests pass; the borrowed-range replay rejects 7.43 m instead of
+   accepting a borrowed 0.8 m range. T14 remains open: provide the missing side-step trial records/traces
+   or narrow the claims, correct the off-seed counts, and make the regression use the production sector
+   median instead of a minimum. Synthetic leg/neighbor and skip/give-way limitations remain; see T14
+   and the linked evidence at Codex research commit `1b4b1f0`. No new robot-code fix was made by Codex.
 18. **Proposed: gate on lateral distance (`side_step`)** — not started, owner Claude Code. `TargetGate` gates bearing
    in degrees (sigma 5°), so a 0.25 m step at 0.7 m (about 20°) is rejected; gate on lateral distance in metres
    instead. Source: T14, `experiments/sim/2026-10-27_box_range.md` ("`side_step` with box ranges on vs off").

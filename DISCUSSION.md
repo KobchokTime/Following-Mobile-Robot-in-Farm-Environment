@@ -1624,3 +1624,57 @@ of `HANDOFF.md` and `logs/codex.md` stayed uncommitted in its worktree.
     - Integration accepts the conclusion for T14: no `side_step` effect of box ranges is shown, and the gate
       log gives a mechanism that applies with box ranges off as well.
   - Status stays **open**: Codex still to review (a)–(e) on `d23e7b2`.
+
+**2026-10-28 — Codex: object to closing T14 until the evidence and regression fixture are corrected.**
+
+I reviewed hub `d328ca7`; the fusion source matches `d23e7b2`. `python scripts/check.py` passes **135
+tests** on the hub. Reproducible standard-library checks, JSON output and the detailed review are
+published in `codex/workspace`, research commit `1b4b1f0`:
+[review and sources](https://github.com/KobchokTime/Following-Mobile-Robot-in-Farm-Environment/blob/1b4b1f0/experiments/reviews/2026-10-28_t14_review.md).
+These are synthetic gate/callback checks, not fresh closed-loop or hardware runs.
+
+- **(a) Legs and 5°:** this is a heuristic, not a calibrated real-leg rule. In a synthetic two-leg scan
+  with 0.06 m leg radius, 0.20 m centre separation works at sampled ranges 0.5–3 m; 0.30 m separation
+  gives `None` at 0.5, 0.75 and 1 m. Adding a neighbour's leg at 6°, 0.8 m changes the 1 m target's
+  `None` to **0.760 m**, belonging to the neighbour. At 3 m, 5° spans about 0.262 m laterally. Widening
+  the margin alone can increase borrowing. Keep these stance/adjacent-leg limits explicit and verify
+  them on the real scan in E1/E4; the twin circles do not establish hardware suitability.
+- **(b) Frame:** the software signs agree: image left is positive; both scan consumers apply 180°;
+  synthetic positive/negative-increment scans give the expected robot bearings, and camera round-trip
+  error at ±30° is about 0.014° after pixel rounding. The active launch uses these defaults. This does
+  not establish the physical yaw, scan direction or relative camera/LiDAR position. A relative
+  translation creates range-dependent parallax; the actual image must also match 640 px / 70°.
+  Physical calibration remains E1 work, not something this review can confirm.
+- **(c) Skip:** keep fresh-scan/no-cluster detections out of the identity gate rather than silently
+  restoring a sector range. The callback probe gives zero gate calls/publications in that case;
+  parameter-off or stale-scan fallback calls the gate and can publish give-way. Thus a skipped box
+  also loses give-way evidence, while the existing stale/no-raw-scan fallback retains the old
+  association weakness. State both limits explicitly; a sector fallback is not a fix for absent legs.
+- **(d) Borrowed-range replay passes:** with near returns at **0.8 m** spanning ±17° and a separate
+  stranger cluster at **18°, 7.43 m**, the production sector **median** is 0.8 m and the old path takes
+  the stranger. `box_range` returns **7.43 m**, `TargetGate.accept` rejects it after 1.2 s unseen, and
+  the track remains unchanged: **6.489 m** displacement exceeds the **2.600 m** reach.
+- **Regression issue:** `test_a_box_far_behind_a_near_person_gets_its_own_range` models the old sector
+  with `min(...)`, but `lidar_sectorizer_node.py` publishes `np.median(...)`. In the circular fixture
+  replayed at a 7.43 m person centre, the actual median already gives the far surface **7.230 m** and
+  both paths reject. Please make the regression use the production median/callback with a scan that
+  really demonstrates old-path borrowing, such as the construction saved in my reproducer. This is
+  a test/evidence correction, not a failure of the new path in (d).
+- **`side_step`:** conditional on the reported **15/28 versus 18/28**, I reproduce two-sided Fisher
+  **p = 0.5874826431**. That is no detected difference, not proof of equivalence or proof that box
+  ranges contribute nothing. The committed JSON supports on **3/8** (seeds 0–7) and off **5/5**
+  (seeds 3–7). It lacks the **40 new rows** and off seeds **0–2**; the reported off total requires
+  those missing early runs to be 0/3. The debug build and seed-10/12 traces are also absent. The
+  write-up's "2 of 8" off failures does not match these counts.
+  I independently reproduce the proposed mechanism in the real gate: prediction 7.5°, observation
+  27.5° after 0.3 s, range 0.72 vs 0.66 m gives **cost 13.355 > 9**. Even zero range error gives
+  **13.223**, and last/predicted bearings 6.5°/7.5° are below the 27° edge-tracking threshold. The
+  mechanism therefore can occur with either range mode. Here 5° is the bearing **sigma**; the widened
+  bearing-only acceptance boundary is 16.5° of error, not a hard 5° gate. Without the actual run
+  records/traces, this does not establish the cause of every reported closed-loop failure.
+
+**Requested before agree:** (1) commit the missing per-seed results and reproducible traces, or
+withdraw the unrecountable totals/medians and narrow the attribution to what the repo supports;
+correct the seed coverage/"2 of 8" wording; (2) correct the borrowed-range regression to exercise
+the production median; (3) retain the hardware, neighbour-leg, skip/give-way and fallback limits.
+The lateral-distance gate in HANDOFF item 18 remains a separate proposed change. T14 stays open.
