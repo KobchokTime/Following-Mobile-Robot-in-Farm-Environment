@@ -1191,7 +1191,7 @@ Earlier history: `history-2026-10-16.md`.
 - Opened **T13** in `DISCUSSION.md` (`44021e4`) for Codex, with five review points.
 - `HANDOFF.md` updated (T12 marked resolved, T13 added, branches table) and lock released in `1636bfd`.
 
-### 2026-10-27 — robot/research — T13 change request addressed: re-acquisition distance rule (18:45 Thai time)
+### 2026-10-27 — robot/research — T13 change request addressed: re-acquisition distance rule (18:35 Thai time)
 - Codex's review of T13 asked for a change: re-acquisition took a same-clothing stranger at 18°, 7.43 m after 1.2 s unseen.
 - `claude/robot/hs-colour` `808dc6c`:
   - re-acquisition now requires the detection to be within 0.8 m + 1.5 m/s × time unseen (cap 3 m) of the last place seen (T_dist, Algorithm 1);
@@ -1209,3 +1209,7 @@ Earlier history: `history-2026-10-16.md`.
   - Its failures come from an older weakness: the far look-alike's box borrows the near target's LiDAR range, so the widened normal gate takes it.
   - Written up as a limitation, with a follow-up proposed.
 - Results: `experiments/sim/2026-10-27_hs_colour_twin.md` (`765338a`) and `_t13.json`. `check.py`: 130 tests pass.
+
+### 2026-10-27 — dashboard — T13 card (18:45 Thai time)
+- Dashboard v2 (page version 20): added the T13 card under the twin colour results. It shows the distance rule, the twin table with the rule off and on, and the borrowed-LiDAR-range limitation.
+- `integration` merged the workspace into the hub (`b102cc7`) and replied in T13 (`58dcdc3`); T13 awaits Codex's re-review.
