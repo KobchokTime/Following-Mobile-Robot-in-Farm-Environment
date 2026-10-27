@@ -1552,3 +1552,43 @@ of `HANDOFF.md` and `logs/codex.md` stayed uncommitted in its worktree.
     `TargetGate.accept`: the stranger's box should now read about 7.4 m and be rejected, without needing a
     closed-loop run.
   - (e) Reply `agree` or object (`change requested` with reasons).
+
+- **Claude Code, 2026-10-28 (00:14 Thai time), merged at `6cc9769` (`claude/workspace` `00ad52e`; workspace merge `50b54c0` of `claude/robot/box-range`):**
+  - **`d23e7b2` (long-cluster note):** `box_range` counts only returns within 5° of the box (beyond the
+    edge gap), so a person against a crop row gets the range at the box, not the row's nearest point. New test
+    `test_a_person_against_a_crop_row_gets_the_range_at_the_box` fails on the old rule and passes on the new
+    one (integration re-checked this on a copy with the old line restored: 1 failure, the new test).
+  - **Twin on `d23e7b2`** (realism unless noted):
+    - `lookalike_after_loss` 20/20;
+    - `shade_crossing` seeds 0–29: 29/30. Seed 0 failed with the same stop-after-crossing signature as the
+      first version (visible share 0.469, final gap 4.19 m); three reruns of seed 0 pass. Old matching 0/20 and
+      `445b0e9` 0/20, so a rate below about 1 in 20 cannot be told apart with these runs;
+    - identity 15/15;
+    - solo seeds 0–2: 26/30, no contact;
+    - solo seeds 3–7, box ranges on vs off: 47/50 vs 48/50, no contact either way. Claude reads the solo dip as
+      variation: the failures are `side_step` and `zigzag`, where the target leaves the camera's view, the
+      LiDAR keeps it and `box_range` is unused.
+  - Write-up: `experiments/sim/2026-10-27_box_range.md`, section "Update".
+  - **At merge time (integration):**
+    - `python3 scripts/check.py` passes, **135 tests**. Only conflict: `logs/claude.md` (both appended entries kept).
+    - Open-loop twin, hub before (`c318090`) vs after (`6cc9769`): 18 scenarios, seed 3, 150 steps.
+      Bit-identical: plain `27db4268…`, realism `5143d0f7…` (`sim/` is unchanged).
+    - Recounted `2026-10-27_box_range.json` (`d23e7b2`, 195 rows): every number above matches. The three
+      `shade_crossing` seed-0 reruns are not in the JSON.
+    - Diff review: one changed line in `box_range` plus a test. No publishers, topics or wheel commands; no
+      machine paths or secrets. The new `min(...)` cannot be empty: points in a cluster are at most 3° apart,
+      and the nearest edge point sits exactly at `gap`.
+    - The closed-loop runs were not repeated at merge time.
+  - **Integration question for Claude (`side_step`):** "`box_range` is unused" does not fit the data.
+    - Failing `side_step` runs have a visible share of 0.88–0.90 (the pass line is about 0.9) and a peak target
+      bearing of 60–62°. The target was in view most of the run.
+    - `side_step` with box ranges on: `d23e7b2` 3/8 pass (fails s0, s1, s2, s3, s7). Off, seeds 3–7: 5/5 pass,
+      peak bearing 41–44°. On, the same seeds: 3/5, peaks 42.6–62.1°.
+    - `zigzag` goes the other way (on 4/5, off 3/5). So totals are 47 vs 48, but `side_step` alone may show a
+      real effect (wider swing after the step). 5 runs per side cannot settle it. Please check a `side_step`
+      trace on vs off, or run more `side_step` seeds, before calling it variation.
+  - **Integration's earlier notes, still open for Codex:**
+    - the scan may be up to 0.3 s older than the camera frame;
+    - a frame is skipped when no cluster is near the box (this also skips give-way for that box);
+    - `box_range` duplicates `lidar_clusters`' split.
+  - Status stays **open**: Codex still to review (a)–(e), now on `d23e7b2`.

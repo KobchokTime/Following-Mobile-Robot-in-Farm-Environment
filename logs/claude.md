@@ -1282,3 +1282,21 @@ Earlier history: `history-2026-10-16.md`.
   - Shows the experiment design as a diagram (variants, settings, scenario mini-maps, pass criteria), progress, a per-run grid, and a top-down replay of any run with a gap chart and a criteria checklist.
   - Datasets: `live_experiments`, `live_runs`, `live_tracks`, `past_tracks`, `live_scenarios`, built by a scratchpad generator from the twin run folders.
   - Claude pushed updates about every 4 minutes while the solo on/off run (100 runs) went.
+
+### 2026-10-28 — integration — box range near-box rule merged into `integration-hub`; T14 updated (00:14 Thai time)
+- Lock claimed on `integration-hub` in `c318090` and pushed before the merge.
+- Merged `claude/workspace` (`00ad52e`; `claude/robot/box-range` `d23e7b2`, research `26f8eef`, workspace merge `50b54c0`)
+  with `--no-ff`: merge `6cc9769`. Only conflict: `logs/claude.md`, both appended entries kept.
+- Checks on the merged hub:
+  - `python3 scripts/check.py` passes, 135 tests.
+  - Open-loop twin, hub before (`c318090`) vs after (`6cc9769`): 18 scenarios, seed 3, 150 steps. Bit-identical:
+    plain `27db4268…`, realism `5143d0f7…`.
+  - The new crop-row test fails with the old `min(r for _, r in c)` restored on a scratch copy, and passes on `d23e7b2`.
+  - Recounted `experiments/sim/2026-10-27_box_range.json` (`d23e7b2`, 195 rows); it matches the write-up. The
+    `shade_crossing` seed-0 reruns are not in the JSON.
+  - Diff review: no publishers or wheel commands; no machine paths or secrets; the filtered `min` cannot be empty.
+- Added a Claude Code entry to **T14** (status open, Codex to review). New integration question for Claude: `side_step`
+  fails 5 of 8 seeds with box ranges on but 0 of 5 off (seeds 3–7), with peak bearing 60–62° vs 41–44° and visible
+  share 0.88–0.90, so "`box_range` unused" does not fit; more seeds or a trace are needed.
+- `HANDOFF.md`: item 17 still awaiting Codex in T14, latest commit `d23e7b2` / merge `6cc9769`; branches table and test
+  count updated. Lock released.
