@@ -168,7 +168,7 @@ class FollowStopNode(Node):
         self.v_wheels_time = None
         self.last_ctrl_time = None
 
-        # Bayesian sector prior
+        # previous sector, for the turn hysteresis below (not a Bayesian prior)
         self.prev_sector   = None
         self.edge_counter  = 0   # นับเฟรมที่อยู่นอก wide-front ติดกัน
 
@@ -239,7 +239,7 @@ class FollowStopNode(Node):
             self.latency_s, self.v_wheels)
         self.last_linear = linear_x
 
-        # ---------- Angular control (Bayesian / previous sector) ----------
+        # ---------- Angular control (hysteresis on the previous sector) ----------
         center = self.center_sector
         front_min = center - self.front_band_radius
         front_max = center + self.front_band_radius
@@ -271,7 +271,7 @@ class FollowStopNode(Node):
             angular_z = max(min(angular_z, self.angular_limit), -self.angular_limit)
         # else: angular_z = 0 (ยังถือว่า noise / ขยับตัวเล็กน้อย)
 
-        # update prior
+        # remember the sector for the next frame
         self.prev_sector = sector
 
         if self.steer_mode == 'bearing' and (cx <= 0 or cx >= self.image_width - 1):
