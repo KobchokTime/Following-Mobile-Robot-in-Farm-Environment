@@ -1,6 +1,6 @@
 variant              | lab: ranked first (B1 B2 D1 D2) | held-out: kept own (min, mean) | strangers ranked first
 chroma               |  13.7  26.2  98.8  87.9 |  99.7  99.9 |  60.1
 hist                 |  99.4  96.9  99.4  97.0 |  37.4  85.0 |  54.3
-grey bin             |  99.4  96.9  16.1  19.7 |  73.5  94.5 |  64.7
+grey bin             |  99.4  96.9  16.1  19.7 |  73.5  94.5 |  64.6
 hist + chroma        |  99.4  96.9  99.4  97.0 |  89.8  97.7 |  65.9
 grey bin + chroma    |  98.2  96.9  17.4  19.7 |  93.9  98.7 |  62.3

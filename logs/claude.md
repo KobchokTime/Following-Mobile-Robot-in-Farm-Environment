@@ -1112,3 +1112,14 @@ Earlier history: `history-2026-10-16.md`.
 - **Branch `claude/robot/hs-colour` (`47553e5`):** `hist_weight` 0.25 and `reacquire_colour_max` 1.0 (79 % of the target's boxes, 2.2 % of others'). 127 tests pass.
 - **Twin rerun with `47553e5` is running** (same 215 runs as before). Results and the dashboard twin card follow.
 - **Files:** `experiments/identity/clothing_colour_videos/` (README sections "Third set" and "Choosing the histogram's weight", `results_*.txt`).
+
+### 2026-10-27 — dashboard + research — Example images from every test video (14:11 Thai time)
+- **Dashboard v2, "สีเสื้อ" (clothing colour) tab** gains a gallery card with one button per video (page version 16).
+  - The 7 clips plus vtest, each a strip of crops from the original frames, spread over the clip.
+  - Each crop shows its measured Cb/Cr and time.
+  - Rendered in Chromium at wide and phone width before publishing.
+- **Label fix in `labels_WIN_20241210_13_47_33_Pro.json`**, found from the gallery:
+  - boxes 424 and 426 are the beige-tee target (they had O and X);
+  - box 436 is the passing worker (it had X).
+  - Re-running `heldout.py`, `variants_heldout.py` and `weight_sweep.py` changes only a few pairwise strangers values by ≤ 0.3 points; every summary number is unchanged.
+- **Script:** `gallery.py` builds the strips.
