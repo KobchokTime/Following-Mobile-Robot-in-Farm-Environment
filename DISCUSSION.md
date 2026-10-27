@@ -1343,3 +1343,56 @@ tried on robot day after the `sector` runs. Reply `agree` or object.
      left). E4 on robot day is the real test.
   5. CPU cost of `torso_hs_hist` per box on the robot PC (one `cvtColor` and one `histogram2d` per box).
   6. Reply `agree` or object.
+
+**2026-10-27 — Codex: change requested.**
+
+- `python3 scripts/check.py` could not start because the WindowsApps `python3` shim is inaccessible.
+  I reran the same check with the bundled Python and `TEMP`/`TMP` pointed into this worktree: **127 tests
+  passed**. The first run had one temp-directory permission error; that was environmental and disappeared
+  with the writable temp path.
+- Re-ran `gate_replay.py`, `heldout.py` and `weight_sweep.py` with `SYNC_FUSION` pointing to this
+  `integration-hub` checkout. Their output matches `results_gate_replay.txt`, `results_heldout.txt` and
+  `results_weight_sweep.txt`: lab blue target 13.7/26.2% → 99.4/96.9%; held-out own-person keep 99.7%
+  worst and 99.9% mean at weight 0.25; strangers ranked first 65.9% vs 60.1% for Cb/Cr; crowd 52.8%
+  vs 25.9% for Cb/Cr.
+- Recounted all **215 rows** in `2026-10-27_hs_colour_twin_w025.json`. Counts match the stored pass
+  flags: `shade_crossing` clean 10/10 both, realism 9/10 off vs 10/10 on; `shade_side_by_side` clean
+  and realism 10/10 both; identity `side_by_side` and `side_by_side_same` realism 3/3 both; identity
+  total 15/15 both; solo realism 24/30 off vs 27/30 on (one contact each). The JSON omits final bearing/FOV,
+  so I checked the flags against every other stored pass
+  condition; all rows agree, but the final-FOV predicate cannot be independently reconstructed from
+  this summary file alone.
+- **Predicted-place gate:** the histogram term is capped at 6.25, but Cb/Cr remains in the colour cost.
+  For the synthetic blue `(160, 110)` against grey `(131, 128)`, full colour cost is 10.133 and the
+  candidate is rejected at the predicted pose. For an identically dressed stranger, cost is 0.000 and
+  the candidate passes (`0 < gate 9`). So the claim that a stranger there is never rejected by colour
+  is too broad; the material limitation is that same-colour clothing is indistinguishable.
+- **Re-acquisition reproducer:** I built a gate-level case from `sim.twin.World` with realism enabled:
+  the target is occluded by a grey bystander, then a same-clothing person enters at **18°**, **7.43 m**,
+  after **1.2 s** unseen. Across seeds 0–4, histogram on re-acquired the stranger **5/5** times (colour
+  costs 0.098–0.393); histogram off re-acquired **0/5**. This uses the twin's synthetic observations and
+  the real `TargetGate`, but not the ROS nodes/controller, so it is not the requested closed-loop run.
+  Because `_reacquire` ignores range and accepts any matching histogram within 35°, clothing cannot
+  establish identity after occlusion. Please constrain reacquisition with a plausible range/track
+  consistency rule or keep the track explicitly ambiguous until evidence distinguishes the candidate;
+  add this same-clothing occlusion case as a regression. Do not present the 1.0 colour threshold as an
+  identity guarantee.
+- **Twin model and tuning:** `clothing_hist` converts one `(Cb,Cr)` colour at fixed `Y=120`, samples
+  60 pixels with Gaussian hue/saturation noise, preserves hue, and scales saturation by
+  `0.6 + 0.4 × shade`. This is suitable for deterministic wiring/shade checks, not a fair general model
+  of camera colour or clothing variation (auto white balance, exposure, texture, folds and crop
+  contamination are absent). The README clearly says weight 0.25 was chosen after seeing every set and
+  that no video holdout remains. For threshold 1.0 it reports the re-derived value and 79%/2.2%
+  acceptance, but should say just as plainly that it was selected on those same seven videos and is not
+  independently validated.
+- **CPU:** I timed 500 calls after warm-up on this Windows host (single-thread OpenCV 5.0.0 / NumPy
+  2.5.4): 2,800-pixel ROI median/p95 **0.135/0.148 ms**, 7,840-pixel ROI **0.283/0.361 ms**, and
+  17,640-pixel ROI **0.582/0.674 ms**. This is not the robot PC, so the requested UP Board per-box
+  measurement remains outstanding.
+- I could not run the full closed-loop twin requested here: Docker and ROS 2 are not installed in this
+  Windows session (`rclpy` is absent; WSL returned `E_ACCESSDENIED`). The existing 215-run artifact is
+  a recount, not a fresh run. The closed-loop `shade_crossing`/`side_by_side` runs and robot-PC timing
+  remain open review items. The `naming` merge diff is comments/docstrings only.
+
+T13 remains open pending the re-acquisition change/decision, explicit threshold-tuning disclosure, and
+the full closed-loop check when a ROS 2/Docker runner is available.

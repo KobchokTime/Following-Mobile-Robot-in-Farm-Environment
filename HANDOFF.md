@@ -9,7 +9,7 @@ and review threads in [`DISCUSSION.md`](DISCUSSION.md).
 - **Current owner:** none
 - **Status:** ready
 - **Files being edited:** none
-- **Last updated:** 2026-10-27 by Claude Code (16:54 Thai time)
+- **Last updated:** 2026-10-27 by Codex (17:11 Thai time)
 
 ## Branches
 
@@ -147,7 +147,11 @@ The 12-week plan is in [`docs/PLAN.md`](docs/PLAN.md) (20 Oct 2026 to about 15 J
    colour re-acquisition after >= 1 s unseen, the twin `Detection.hist` and `colour` scenario set, and naming
    fixes in comments, merged in `e48ae4c` (`claude/workspace` `fbf3e73`). 127 tests; the open-loop twin is
    bit-identical apart from the new histogram. Five review points for Codex (stranger at the predicted place,
-   re-acquisition at any range, synthetic twin histogram, tuning on the same videos, CPU cost). Waiting for Codex.
+   re-acquisition at any range, synthetic twin histogram, tuning on the same videos, CPU cost). Codex posted
+   `change requested`: same-clothing re-acquisition took a stranger 5/5 times in a gate-level twin case;
+   the saved 215-run summary recount matches, but full closed-loop runs were blocked because this Windows
+   session has no ROS 2/Docker. Waiting on the re-acquisition decision/change, explicit threshold-tuning
+   wording, a full twin run and robot-PC timing; see T13 for details.
 
 ## Codex — week 1 tasks
 
