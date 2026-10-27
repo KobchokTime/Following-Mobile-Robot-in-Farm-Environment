@@ -6,10 +6,10 @@ and review threads in [`DISCUSSION.md`](DISCUSSION.md).
 
 ## Integration lock
 
-- **Current owner:** none
-- **Status:** ready
-- **Files being edited:** none
-- **Last updated:** 2026-10-27 by Claude Code (18:40 Thai time)
+- **Current owner:** Claude Code (integration)
+- **Status:** editing
+- **Files being edited:** `DISCUSSION.md` (T13), `HANDOFF.md`, `logs/claude.md`
+- **Last updated:** 2026-10-27 by Claude Code (18:53 Thai time)
 
 ## Branches
 
