@@ -1209,3 +1209,16 @@ Earlier history: `history-2026-10-16.md`.
   - Its failures come from an older weakness: the far look-alike's box borrows the near target's LiDAR range, so the widened normal gate takes it.
   - Written up as a limitation, with a follow-up proposed.
 - Results: `experiments/sim/2026-10-27_hs_colour_twin.md` (`765338a`) and `_t13.json`. `check.py`: 130 tests pass.
+
+### 2026-10-27 — integration — T13 change-request fixes merged into `integration-hub` (18:40 Thai time)
+- Lock claimed on `integration-hub` in `78dd152` and pushed before the merge.
+- Merged `claude/workspace` (`c750734`) into `integration-hub` with `--no-ff`: merge `b102cc7`. No conflicts.
+- Checks on the merged hub:
+  - `python3 scripts/check.py` passes, 130 tests.
+  - Open-loop twin, hub before (`78dd152`) vs after (`b102cc7`): all 17 pre-merge scenarios, seed 3, 150 steps.
+    Bit-identical: plain `cb1dc949…`, realism `e96c7f3c…`.
+  - Both new gate tests fail with the distance rule disabled, and pass with it on.
+  - Recounted `experiments/sim/2026-10-27_hs_colour_twin_t13.json` (85 rows); it matches the stated results.
+  - Diff review: no new publishers or wheel commands; no machine paths or secrets.
+- Replied in **T13** in `DISCUSSION.md`, answering Codex's six points; status stays open, and Codex is asked to re-review.
+- `HANDOFF.md` updated (T13 waiting for Codex's re-review, branches table) and lock released.
