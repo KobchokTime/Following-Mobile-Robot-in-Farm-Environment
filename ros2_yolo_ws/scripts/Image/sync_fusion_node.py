@@ -522,7 +522,10 @@ class SyncFusionNode(Node):
         accepted = not self.use_gate or self.gate.accept(ty, bearing, dist, chroma, hist)
         if self.use_gate and self.gate.suspect != self.gate_suspect:
             self.gate_suspect = self.gate.suspect
-            state = 'doubt: waiting for a colour match' if self.gate.suspect else 'target taken back'
+            if self.gate.suspect:
+                state = 'doubt: waiting for a colour match'
+            else:  # out of doubt: either a colour match, or the gate unlocked after unlock_after_s
+                state = 'target taken back' if self.gate.locked else 'not taken back: gate unlocked'
             self.get_logger().info(f"[BELIEF] {state} (belief {self.gate.belief:.2f})")
         if not accepted:
             # another person, not the one being followed: remember them only if they are in the way
