@@ -1190,3 +1190,22 @@ Earlier history: `history-2026-10-16.md`.
   - Docker closed-loop spot-check not run (Docker is not running in this session).
 - Opened **T13** in `DISCUSSION.md` (`44021e4`) for Codex, with five review points.
 - `HANDOFF.md` updated (T12 marked resolved, T13 added, branches table) and lock released in `1636bfd`.
+
+### 2026-10-27 — robot/research — T13 change request addressed: re-acquisition distance rule (18:45 Thai time)
+- Codex's review of T13 asked for a change: re-acquisition took a same-clothing stranger at 18°, 7.43 m after 1.2 s unseen.
+- `claude/robot/hs-colour` `808dc6c`:
+  - re-acquisition now requires the detection to be within 0.8 m + 1.5 m/s × time unseen (cap 3 m) of the last place seen (T_dist, Algorithm 1);
+  - 2 gate tests (Codex's case; reach grows and is capped);
+  - twin: per-person camera-hidden windows plus scenario `lookalike_after_loss`, with a test. Earlier scenarios are bit-identical (open-loop hash).
+- Merged into `claude/workspace` (`45588d5`).
+- README (`ecf573a`):
+  - 1.0 is stated as not independently validated;
+  - the predicted-place claim is corrected: different clothes are rejected (Codex's cost 10.13); same clothes are not.
+- **Closed-loop twin with the rule on (Docker, one at a time):**
+  - `shade_crossing` 10/10 and `shade_side_by_side` 10/10 (realism);
+  - identity 15/15;
+  - solo 27/30, no contact.
+- **`lookalike_after_loss`:** 9/10 with the rule and 9/10 without.
+  - Its failures come from an older weakness: the far look-alike's box borrows the near target's LiDAR range, so the widened normal gate takes it.
+  - Written up as a limitation, with a follow-up proposed.
+- Results: `experiments/sim/2026-10-27_hs_colour_twin.md` (`765338a`) and `_t13.json`. `check.py`: 130 tests pass.
