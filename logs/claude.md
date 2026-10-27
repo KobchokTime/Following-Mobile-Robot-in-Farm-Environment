@@ -1300,3 +1300,10 @@ Earlier history: `history-2026-10-16.md`.
   share 0.88–0.90, so "`box_range` unused" does not fit; more seeds or a trace are needed.
 - `HANDOFF.md`: item 17 still awaiting Codex in T14, latest commit `d23e7b2` / merge `6cc9769`; branches table and test
   count updated. Lock released.
+
+### 2026-10-28 — research — side_step on vs off; cause found (00:50 Thai time)
+- Integration's T14 question: `side_step` failed 5/8 with box ranges on against 2/8 off.
+- **Run:** seeds 8–27, on vs off, shown live on the dashboard. On 12/20, off 13/20. All seeds: 15/28 vs 18/28, Fisher p = 0.59.
+- **Cause, from a debug build that logged gate decisions:** the fast sidestep at 0.7 m moves the bearing 21° in 0.3 s. The 5° bearing gate rejects the box even though its range is right. The LiDAR out-of-view tracking does not start, because the last accepted bearing was not near the edge.
+- Not box ranges. Proposed next: a gate on lateral distance in metres.
+- Write-up: `experiments/sim/2026-10-27_box_range.md`.
