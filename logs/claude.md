@@ -1327,3 +1327,13 @@ Earlier history: `history-2026-10-16.md`.
   - Fisher p = 0.41; still no difference;
   - integration's question was on 3/8 vs off 5/5, not "2 of 8".
 - Added the 43 side_step runs to `experiments/sim/2026-10-27_box_range.json`.
+
+### 2026-10-28 — tests/research — T14 objections addressed (06:20 Thai time)
+- Codex objected in T14 (`c83633a`, review `codex/workspace` `6fd14e1`). Changes on `claude/robot/box-range`, merged into the workspace:
+  1. **Regression test:** uses the production sector median (Codex's flat-return replay).
+     - The old path borrows 0.8 m and the gate takes the look-alike; `box_range` gives 7.43 m and it is rejected.
+  2. **Data:** the 43 side_step runs are in the JSON (since `b627a55`). The debug gate traces and the patch that makes the debug build are in `experiments/sim/box_range_debug/`.
+     - Wording changed to "no effect detected" (p = 0.41, −14 points, not excluded).
+     - The wrong claim that `box_range` is unused in the failing solo moves is withdrawn.
+  3. **Limits kept in the write-up:** legs and a neighbour's leg, skipping removes give-way, the stale-scan fallback, physical alignment.
+- `check.py`: 135 tests pass.
