@@ -69,3 +69,25 @@
   and E4 on robot day is the real test.
 - **Same-colour tops:** colour cannot help; geometry alone decides, as before.
 - **Not run:** Gazebo.
+
+## Update: histogram at a quarter weight (`47553e5`)
+
+- **Change:** after the weight sweep over all video sets
+  (`experiments/identity/clothing_colour_videos/README.md`), the gate uses `hist_weight` 0.25 and
+  `reacquire_colour_max` 1.0.
+- **Rerun:** the same 215 runs. Data: `2026-10-27_hs_colour_twin_w025.json`.
+
+| Set | Histogram off (Cb/Cr only) | Histogram on, 0.25 |
+|---|---|---|
+| `shade_crossing`, clean, seeds 0–9 | 10/10 | 10/10 |
+| `shade_crossing`, realism, seeds 0–9 | 9/10 | **10/10** |
+| `shade_side_by_side`, clean and realism | 10/10, 10/10 | 10/10, 10/10 |
+| Identity, realism, seeds 0–2 | 15/15 | 15/15 |
+| Solo, realism, seeds 0–2 | 24/30, 1 contact (`come_back` s1) | **27/30**, 1 contact (`come_back` s2) |
+| Solo, realism, `bearing` | — | 28/30, no contact |
+| Identity, realism, `bearing` | — | 15/15 |
+
+- **Same picture as at 0.5:** colour does no harm in the twin, and helps when a crossing person is in
+  shade.
+- **Run-to-run variation is large:** with the histogram off, `shade_crossing` with realism went 5/10
+  in the previous run and 9/10 now, on the same code for that setting.
