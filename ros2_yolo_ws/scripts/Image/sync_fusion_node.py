@@ -231,7 +231,8 @@ class TargetGate:
         if hist is None or not self.hists or t - self.t < self.reacquire_after_s:
             return False
         pb, _ = self._predict(t)
-        if abs(bearing - pb) > self.reacquire_bearing or self.colour_cost(chroma, hist) > self.reacquire_colour_max:
+        if abs(bearing - pb) > self.reacquire_bearing \
+                or self.colour_cost(chroma, hist) > self.reacquire_colour_max:
             return False
         self.t, self.bearing, self.range = t, bearing, rng
         self.bearing_rate = self.range_rate = 0.0
@@ -521,8 +522,8 @@ class SyncFusionNode(Node):
         accepted = not self.use_gate or self.gate.accept(ty, bearing, dist, chroma, hist)
         if self.use_gate and self.gate.suspect != self.gate_suspect:
             self.gate_suspect = self.gate.suspect
-            self.get_logger().info(f"[BELIEF] {'doubt: waiting for a colour match' if self.gate.suspect else 'target taken back'} "
-                                   f"(belief {self.gate.belief:.2f})")
+            state = 'doubt: waiting for a colour match' if self.gate.suspect else 'target taken back'
+            self.get_logger().info(f"[BELIEF] {state} (belief {self.gate.belief:.2f})")
         if not accepted:
             # another person, not the one being followed: remember them only if they are in the way
             # Only someone in the corridor and clearly nearer than the target is in the way
