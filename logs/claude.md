@@ -1178,3 +1178,15 @@ Earlier history: `history-2026-10-16.md`.
   - 127 tests pass.
 - Not merged, kept as measured negative results: `claude/robot/identity-belief` and `claude/robot/static-filter`.
 - Next: the `integration` subagent merges `claude/workspace` into `integration-hub` and opens T13 for Codex.
+
+### 2026-10-27 — integration — Colour gate and naming merged into `integration-hub`, T13 opened (16:55 Thai time)
+- Lock claimed on `integration-hub` in `4a80e8d` and pushed before the merge.
+- Merged `claude/workspace` (`fbf3e73`) into `integration-hub` with `--no-ff`: merge `e48ae4c`. No conflicts.
+- Checks on the merged hub:
+  - `python3 scripts/check.py` passes, 127 tests.
+  - Open-loop twin, hub before (`4a80e8d`) vs after (`e48ae4c`): all 15 pre-merge scenarios, seed 3, 150 steps,
+    scan + detections without `hist` + state hashed at every step. Bit-identical: plain `e8cb4b58…`, realism `f749aa20…`.
+  - Diff review: no new publishers or wheel commands; no machine paths or secrets.
+  - Docker closed-loop spot-check not run (Docker is not running in this session).
+- Opened **T13** in `DISCUSSION.md` (`44021e4`) for Codex, with five review points.
+- `HANDOFF.md` updated (T12 marked resolved, T13 added, branches table) and lock released in `1636bfd`.
