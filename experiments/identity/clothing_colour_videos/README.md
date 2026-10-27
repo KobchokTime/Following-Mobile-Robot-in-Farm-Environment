@@ -1,4 +1,4 @@
-# Clothing colour on video: two lab clips and five held-out clips
+# Clothing colour on video: lab clips, held-out clips and a public crowd video
 
 - **Date of analysis:** 2026-10-26.
 - **Folder:** renamed from `lab_videos_2025-04-08` when the held-out clips were added. The robot-side
@@ -162,7 +162,7 @@ yet. Each clip has one person, filmed outdoors.
 
 **The histogram alone failed the held-out check:**
 
-| | Cb/Cr | Histogram alone | Histogram + Cb/Cr, half each (adopted) |
+| | Cb/Cr | Histogram alone | Histogram + Cb/Cr, half each (first adopted, then 0.25: see below) |
 |---|---|---|---|
 | A. Kept own, worst clip | 99.7 % | **37.4 %** (black tee) | 89.8 % (black tee) |
 | A. Kept own, mean of 5 | 99.9 % | 85.0 % | 97.7 % |
@@ -197,3 +197,70 @@ yet. Each clip has one person, filmed outdoors.
   - `shade_side_by_side`.
 - **Gate replay** (`gate_replay.py`, `results_gate_replay.txt`) gives the same numbers as the offline
   model.
+
+## Third set: a public crowd video (OpenCV `vtest.avi`, PETS 2009 S2.L1 view 1)
+
+- **Why this video.** No other videos are on any branch. MOT Challenge and Hugging Face are blocked
+  by this environment's network policy, but `raw.githubusercontent.com` is not.
+  - `vtest.avi` is OpenCV's sample of PETS 2009 S2.L1: 795 frames, 10 fps, 768 × 576.
+  - The camera is high and static, the day is overcast, people are small (boxes about 70–85 px tall),
+    and about six are in view at once, mostly in dark clothes.
+  - It is a much harder and different domain from a robot's camera at 1 m.
+  - The video is not copied into the repository. Detections, labels and H,S samples are
+    (`*_vtest.*`).
+- **Labels.** Boxes were linked into tracklets (static camera), but the links swap people. Every
+  tracklet was viewed every 6th box and split where the person changed.
+  - Five people with recognisable clothes were named: RN (red/navy puffer), LB (light blue jacket),
+    BL (blonde, black coat: the hard case, whose torso is as dark as most others), RD (red top) and
+    BJ (blue jacket).
+  - Everyone else is O. Thirty boxes where two tracklets overlapped on one named person are X (left
+    out).
+- **Replay** (`vtest_eval.py`, `results_vtest.txt`).
+  - Each visit of a named person (a gap > 2 s ends it) is replayed on its own, colour only.
+  - It locks on the visit's largest box that lies fully inside the image within its first 2 s.
+    Locking on the first box, often half outside the image, gave every method a wrong reference.
+  - Score: in frames with the person and someone else in view, how often the person scores best.
+    Chance is 17 %.
+
+| Person | Cb/Cr | Histogram alone | Histogram + Cb/Cr (0.25) | GMM H,S N = 10 |
+|---|---|---|---|---|
+| RN red/navy puffer | 1.4 % | 83.6 % | 62.9 % | 0.0 % |
+| LB light blue jacket | 97.8 % | 98.9 % | 98.9 % | 0.0 % |
+| BL blonde, black coat | 40.3 % | 53.2 % | 53.4 % | 19.2 % |
+| RD red top | 3.5 % | 58.1 % | 6.1 % | 6.8 % |
+| BJ blue jacket | 100 % | 100 % | 100 % | 100 % |
+| **All** | 25.9 % | **69.8 %** | 52.8 % | 13.1 % |
+
+- **Why Cb/Cr fails here, even on a red top.**
+  - The torso region is about 10 × 24 px, so the red top's Cr swings between 151 and 196 from frame to
+    frame.
+  - Locked on Cr 151, the distance to a grey person (128, 134) is smaller than to the same red top at
+    its full red. Grey sits between the weak and the strong reading.
+  - Hue does not have this problem, so the histogram alone does best.
+- **The GMM did worse than chance.** Small crops leave too few pixels, and the model drifts. This is
+  the GMM as built here (our acceptance threshold), not the paper's.
+
+## Choosing the histogram's weight (`weight_sweep.py`, `results_weight_sweep.txt`)
+
+The same gate is used with only `hist_weight` changed.
+
+| hist_weight | Lab, worst of 4 ranked | Held-out kept own, worst / mean | Strangers ranked | vtest ranked, all |
+|---|---|---|---|---|
+| 0 (Cb/Cr only) | 13.7 % | 99.7 / 99.9 % | 60.1 % | 25.9 % |
+| **0.25 (adopted)** | **96.9 %** | **99.7 / 99.9 %** | **65.9 %** | 52.8 % |
+| 0.5 (first choice) | 96.9 % | 89.8 / 97.7 % | 65.9 % | 53.9 % |
+| 0.65 | 96.9 % | 67.3 / 91.5 % | 65.9 % | 54.1 % |
+| 0.75 | 96.9 % | 55.8 / 88.8 % | 71.6 % | 75.2 % |
+| 1.0 (histogram only) | 96.9 % | 37.4 / 85.0 % | 54.3 % | 69.8 % |
+
+- **0.25 keeps every held-out person as well as Cb/Cr alone does** and keeps the full lab-clip gain.
+  It gives up 1.1 points on the crowd against 0.5.
+- **More histogram helps the crowd but loses the black tee.** For a follower, losing its own target is
+  worse than ranking a stranger second.
+- **Caveat:** 0.25 was chosen after seeing every set, so no unseen video is left. Robot-day E4 is the
+  real test.
+- **The re-acquisition threshold was re-derived for the smaller colour costs:** 1.0 lets 79 % of the
+  target's boxes and 2.2 % of others' through. At 0.5 the matching threshold was 2.0.
+- **By design, at 0.25 colour alone cannot reject someone standing exactly where the target is
+  predicted:** the histogram adds at most 6.25 of the 9 budget. A small miss in bearing or range
+  together with a different colour does reject.
