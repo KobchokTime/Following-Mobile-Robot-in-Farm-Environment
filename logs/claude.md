@@ -1095,3 +1095,20 @@ Earlier history: `history-2026-10-16.md`.
 - **Write-up:** `experiments/sim/2026-10-27_hs_colour_twin.md` and `.json`.
 - **Dashboard v2:** "สีเสื้อ" (clothing colour) tab gains a twin card (dataset `colour_twin`, page version 13).
 - **Status:** the branch is still not merged. It needs Codex review and E4 on robot day. I have authorisation from the user to keep running and fixing.
+
+### 2026-10-27 — research + robot + dashboard — Crowd video, histogram weight 0.25, dashboard fixes (13:53 Thai time)
+- **Dashboard v2, "สีเสื้อ" (clothing colour) tab:**
+  - the Cb/Cr scatter no longer spills over the card: axes now come from the data, and the dots are clipped;
+  - bar-chart legends wrap as HTML instead of overlapping;
+  - all colour cards were rendered in Chromium (wide and phone width) with the real data before publishing;
+  - new cards: the vtest crowd and the weight sweep (page version 15).
+- **No other videos exist on any branch**, and MOT Challenge and Hugging Face are blocked by the network policy.
+  - Used OpenCV's `vtest.avi` from raw.githubusercontent.com, which is PETS 2009 S2.L1 view 1.
+  - Labelled 5 recognisable people by eye after splitting the swapping tracklets; the rest are "other".
+  - Colour only, own person ranked first (chance 17 %): Cb/Cr 25.9 %, histogram alone 69.8 %, histogram + Cb/Cr 52.8 %, GMM 13.1 %.
+- **Weight sweep over all three video sets** (`weight_sweep.py`).
+  - `hist_weight` 0.25 keeps every held-out person as well as Cb/Cr (worst 99.7 % vs 89.8 % at 0.5) and keeps the lab gain (96.9 %).
+  - Chosen after seeing every set; robot-day E4 is the real test.
+- **Branch `claude/robot/hs-colour` (`47553e5`):** `hist_weight` 0.25 and `reacquire_colour_max` 1.0 (79 % of the target's boxes, 2.2 % of others'). 127 tests pass.
+- **Twin rerun with `47553e5` is running** (same 215 runs as before). Results and the dashboard twin card follow.
+- **Files:** `experiments/identity/clothing_colour_videos/` (README sections "Third set" and "Choosing the histogram's weight", `results_*.txt`).
