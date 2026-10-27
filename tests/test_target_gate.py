@@ -44,6 +44,7 @@ class TargetGateTest(unittest.TestCase):
     def setUpClass(cls):
         module = _load()
         cls.Gate = module.TargetGate
+        cls.gate_params = module.GATE_PARAMS
         cls.in_path = staticmethod(module.in_path)
         cls.lidar_track = staticmethod(module.lidar_track)
         cls.bearing_to_cx = staticmethod(module.bearing_to_cx)
@@ -150,10 +151,41 @@ class TargetGateTest(unittest.TestCase):
         shade = [0.5 * a + 0.2 * b + 0.3 * c for a, b, c in zip(blue, self._hist(8, 1), grey)]
         self.assertAlmostEqual(sum(shade), 1.0)
         # colour alone may not veto (a quarter weight), but it ranks the target in shade first ...
-        self.assertLess(g.cost(0.2, D(8), 1.0, (131, 128), shade), g.cost(0.2, D(8), 1.0, (131, 128), grey))
-        # ... and together with a small miss in place it rejects the other colour, not the target
-        self.assertFalse(g.accept(0.2, D(8), 1.0, (131, 128), grey))
-        self.assertTrue(g.accept(0.2, D(8), 1.0, (131, 128), shade))
+        self.assertLess(g.cost(0.2, D(10), 1.0, (131, 128), shade), g.cost(0.2, D(10), 1.0, (131, 128), grey))
+        # ... and together with a small miss in place (10 deg, 0.17 m sideways at 1 m; 8 deg was 9.0 once
+        # the lateral sigma applies) it rejects the other colour, not the target
+        self.assertFalse(g.accept(0.2, D(10), 1.0, (131, 128), grey))
+        self.assertTrue(g.accept(0.2, D(10), 1.0, (131, 128), shade))
+
+    def test_gate_ros_parameters_match_the_gate_defaults(self):
+        """An undeclared -p is silently ignored by ROS 2: the T13 'rule off' twin runs never turned the rule
+        off. Every exposed name must be a TargetGate argument with the same default."""
+        import inspect
+        defaults = {k: v.default for k, v in inspect.signature(self.Gate).parameters.items()}
+        for name, value in self.gate_params.items():
+            self.assertIn(name, defaults)
+            self.assertEqual(defaults[name], value, name)
+        for name in ('lateral_sigma_m', 'reacquire_dist_m', 'reacquire_dist_max_m', 'hist_weight'):
+            self.assertIn(name, self.gate_params)
+
+    def test_a_fast_close_sidestep_stays_in_the_gate(self):
+        """side_step trace (box_range_debug/true_s10_gate.log): 6.5 -> 27.5 deg in 0.3 s at about 0.7 m."""
+        old, new = self.Gate(lateral_sigma_m=0.0), self.Gate()
+        for g in (old, new):
+            for k in range(5):
+                g.accept(0.1 * k, D(0.5 + 1.5 * k), 0.66)
+        self.assertGreater(old.cost(0.7, D(27.5), 0.72), 9.0)  # the old gate rejects the target
+        self.assertTrue(new.accept(0.7, D(27.5), 0.72))
+
+    def test_lateral_sigma_leaves_far_targets_and_side_people_alone(self):
+        far_old, far_new = self.Gate(lateral_sigma_m=0.0), self.Gate()
+        near = self.Gate()
+        for k in range(5):
+            for g in (far_old, far_new):
+                g.accept(0.1 * k, 0.0, 0.8 + 0.3 * k)  # walks out to 2 m
+            near.accept(0.1 * k, 0.0, 0.7)
+        self.assertAlmostEqual(far_old.cost(0.5, D(6), 2.0), far_new.cost(0.5, D(6), 2.0))  # 2 m: unchanged
+        self.assertFalse(near.accept(0.5, math.atan2(0.6, 0.7), math.hypot(0.6, 0.7)))  # 0.6 m to the side
 
     def test_histogram_learns_the_target_but_not_a_wrong_pick(self):
         g = self.Gate()
