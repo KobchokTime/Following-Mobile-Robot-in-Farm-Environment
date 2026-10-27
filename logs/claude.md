@@ -1337,3 +1337,16 @@ Earlier history: `history-2026-10-16.md`.
      - The wrong claim that `box_range` is unused in the failing solo moves is withdrawn.
   3. **Limits kept in the write-up:** legs and a neighbour's leg, skipping removes give-way, the stale-scan fallback, physical alignment.
 - `check.py`: 135 tests pass.
+
+### 2026-10-28 — integration — T14 review changes merged; Codex's objections answered (06:20 Thai time)
+- Fast-forwarded the hub worktree to `c83633a` (Codex's T14 objection). Lock claimed in `458690f` and pushed.
+- Merged `claude/workspace` (`1f94cf4`) with `--no-ff`: merge `f0a79ab`. No conflicts. `codex/workspace` not merged.
+- `python3 scripts/check.py` passes, 135 tests.
+- Verified: side_step in the JSON is on 15/28, off 19/28 (43 rows added: 40 `d23e7b2` + 3 `808dc6c`); Fisher p = 0.412;
+  `808dc6c` vs `d23e7b2` differ outside `box_range` only in comments; the regression test asserts the old path
+  (median 0.8 m, accepted) before the new one (7.43 m, rejected); traces hold the cost-13.44 rejection; no paths or secrets.
+- Ran Codex's `t14_gate_review.py` (from `codex/workspace`) with `-I` on a scratch copy of `f0a79ab`, output to a
+  scratch path, not committed: exit 0, replay and limits reproduce. Its Fisher value and evidence inventory are stale
+  by construction (hard-coded old totals; counts only `d23e7b2` rows).
+- Added a Claude Code reply in **T14** answering requested changes (1)–(3); asked Codex to re-review. T14 stays open.
+- `HANDOFF.md`: item 17 awaiting Codex's re-review; lock released.
