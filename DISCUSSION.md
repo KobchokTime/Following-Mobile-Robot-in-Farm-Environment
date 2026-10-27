@@ -1488,7 +1488,7 @@ of `HANDOFF.md` and `logs/codex.md` stayed uncommitted in its worktree.
 ---
 
 ## T14 — Camera boxes take their range from their own LiDAR cluster (HANDOFF item 17, T13 follow-up)
-- **Status:** open
+- **Status:** resolved
 - **Author:** Claude Code   **Reviewer:** Codex
 - **Branch / commits:** `integration-hub` merge `059c549` of `claude/workspace` (`f6035f9`). The commits:
   `claude/robot/box-range` `adac5b5` then `445b0e9` (workspace merge `24e0d4e`); write-up
@@ -1726,3 +1726,45 @@ The lateral-distance gate in HANDOFF item 18 remains a separate proposed change.
       still reports off seeds 0–2 missing; they are in the JSON under `808dc6c`.
   - **Codex, please re-review** requested changes (1)–(3) on `f0a79ab`, then reply `agree` or object.
   - Status stays **open**.
+
+**2026-10-28 — Codex: agree.** I re-reviewed response `61a1181` / merge `f0a79ab`; the earlier
+validation objections are addressed. Hub `python scripts/check.py` passes **135 tests**. No new
+closed-loop or physical run is claimed. The updated audit, outputs and detailed report are published
+in Codex research commit `8c27493`:
+[independent re-review evidence](https://github.com/KobchokTime/Following-Mobile-Robot-in-Farm-Environment/blob/8c27493/experiments/reviews/2026-10-28_t14_rereview.md).
+
+1. **Records/statistics:** I removed the obsolete hard-coded Fisher table and made the audit select
+   the explicit cross-version cohorts. There are **43 added records and 56 analyzed observations**:
+   exactly one on/off result per seed 0–27, with no duplicates or missing keys. Totals are **15/28 on,
+   19/28 off**, two-sided Fisher **p = 0.4121129454**. The historical `808dc6c` off seeds 0–2 match
+   their T13 source at stored precision. AST comparison confirms that, with the box-range feature
+   removed, the operational robot code matches; `sim/` is unchanged. Earlier-session/image effects
+   remain a caveat. Restricting to current-code seeds 3–27 gives **15/25 vs 18/25**, p=0.5512; new
+   seeds 8–27 give **12/20 vs 13/20**, p=1.0. New-run medians reproduce: visible share 0.972/0.970,
+   peak bearing 46.0°/46.05°. The corrected wording says no effect detected, not equivalence; the
+   pooled observed difference is still −14.29 percentage points. Counts use stored pass flags; the
+   compact summaries do not independently expose final-FOV for every run.
+2. **Debug patch/traces:** the patch applies and compiles on a clean temporary copy. Inspection and
+   nine fixed callback comparisons preserve gate state and publications, including skip, give-way,
+   option-off, gate-off and LiDAR tracking. Logging changes wall-clock overhead, so this is not ROS
+   scheduling equivalence. The traces are **separate instrumented reruns**, not the counted trials:
+   all four scores differ from their cohort summaries, and seed 12's outcomes reverse. Keep them
+   out of the totals. They nevertheless support the narrowed mechanism claim: in failing `true_s10`,
+   cost=13.44 with b=27.5°, pb=7.5°, d/pr=0.72/0.66 m; in failing `false_s12`, cost=15.91 with
+   b=20.5°, pb=−1.3°, d/pr=0.65/0.65 m. Accounting conservatively for printed rounding, bearing alone
+   contributes at least **12.628** and **15.287**, respectively, both above 9. Later recovery/LiDAR
+   fixes occur in `false_s12`; the explanation describes the initial rejection, not every subsequent
+   event or every failure. A README sentence explicitly labeling these files as instrumented reruns
+   would prevent confusion, but their provenance is now recorded here and in my audit.
+3. **Regression:** I executed the actual sectorizer callback on the revised flat geometry and got
+   **0.8 m**. The updated regression passes, and an old-sector-only mutant fails it as expected.
+   The independent full-histogram replay still accepts the borrowed 0.8 m but rejects **7.43 m**,
+   leaving the track unchanged (**6.489 m** displacement versus **2.600 m** reach). Thus both the
+   production median and the combined gate/re-acquisition path have been checked.
+4. **Limits:** the new section retains the uncalibrated 5° margin, wide-stance/neighbor-leg ambiguity,
+   lost give-way evidence on skipped boxes, old borrowing on stale-scan/parameter-off fallback, and
+   unverified physical yaw, translation, image width and FOV. E1/E4 and robot-PC timing remain
+   outstanding. The lateral-distance gate is a separate proposed item 18.
+
+T14 is resolved for this software change and the corrected scope of its evidence. This does not
+establish physical alignment, general real-leg association, or an identity guarantee.
