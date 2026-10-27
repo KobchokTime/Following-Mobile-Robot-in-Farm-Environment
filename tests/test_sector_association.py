@@ -98,16 +98,31 @@ class SectorAssociationTest(unittest.TestCase):
                 pts.append((b, t - math.sqrt(radius * radius - d2)))
         return pts
 
-    def test_a_box_far_behind_a_near_person_gets_its_own_range(self):
-        near = self._person(0.8, 0.0)
-        far_b = math.radians(18.0)
-        far = self._person(7.0 * math.cos(far_b), 7.0 * math.sin(far_b))
-        scan = [p for p in near + far if not any(abs(p[0] - q[0]) < 1e-9 and q[1] < p[1] for q in near + far)]
+    @staticmethod
+    def _sector_median(scan, bearing):
+        """The range lidar_sectorizer_node.py publishes for the sector a box at this bearing matches:
+        the median of the returns in [a1, a2), sectors evenly over -35..35 deg."""
         mids = sectorizer_mids()
-        sector_min = min(r for b, r in scan if abs(b - mids[self.m.nearest_sector(far_b, mids)]) <= math.radians(3.9))
-        self.assertLess(sector_min, 1.0)  # the old sector minimum is the near person's range
-        self.assertAlmostEqual(self.m.box_range(scan, far_b), 6.8, delta=0.1)
-        self.assertAlmostEqual(self.m.box_range(scan, 0.0), 0.6, delta=0.05)
+        a = math.radians(-35.0) + math.radians(70.0) / 9 * min(range(9), key=lambda k: abs(mids[k] - bearing))
+        rs = sorted(r for b, r in scan if a <= b < a + math.radians(70.0) / 9)
+        n = len(rs)
+        return (rs[n // 2] + rs[(n - 1) // 2]) / 2.0
+
+    def test_a_box_far_behind_a_near_person_gets_its_own_range(self):
+        """T13: the target fills +-17 deg at 0.8 m; a look-alike stands at 18 deg, 7.43 m (Codex's replay)."""
+        near = [(math.radians(0.5 * k), 0.8) for k in range(-34, 35)]
+        far = [(math.radians(17.5 + 0.5 * k), 7.43) for k in range(4)]
+        scan = near + far
+        far_b = math.radians(18.0)
+        self.assertAlmostEqual(self._sector_median(scan, far_b), 0.8)  # the old path borrows the target's range
+        self.assertAlmostEqual(self.m.box_range(scan, far_b), 7.43)
+        self.assertAlmostEqual(self.m.box_range(scan, 0.0), 0.8)
+        # through the gate: target last seen at 2 deg, 0.8 m, unseen 1.2 s; same clothes
+        for rng, taken in ((self._sector_median(scan, far_b), True), (self.m.box_range(scan, far_b), False)):
+            g = self.m.TargetGate()
+            for k in range(5):
+                g.accept(0.1 * k, math.radians(2.0), 0.8)
+            self.assertEqual(g.accept(1.6, far_b, rng), taken)
 
     def test_a_box_between_two_legs_finds_them(self):
         legs = self._person(1.0, 0.1, radius=0.06) + self._person(1.0, -0.1, radius=0.06)
