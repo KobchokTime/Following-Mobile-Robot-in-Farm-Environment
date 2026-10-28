@@ -9,6 +9,8 @@ Publishes what the robot's drivers would publish and consumes `/cmd_vel`:
   instead of `ros2_yolo_live.py` (camera + YOLO)
 - `/sim/state` (std_msgs/String, JSON ground truth, 10 Hz)
 - `/cmd_vel` is applied through the ZLAC bridge model in `world.py`
+- `/synced_target` is read back only to log whose box the fusion node published as the target
+  (`synced` in each state line: person names since the last line; `?` when no recent box matches)
 
 Parameters: `scenario`, `seed`, `bridge_mode`, `log_path`, `rate_hz`.
 The node exits by itself when the scenario duration is over.
@@ -24,7 +26,7 @@ import rclpy
 from geometry_msgs.msg import Twist
 from rclpy.node import Node
 from sensor_msgs.msg import LaserScan
-from std_msgs.msg import Int32MultiArray, String
+from std_msgs.msg import Float32MultiArray, Int32MultiArray, String
 
 from .scenarios import SCENARIO_LOOKUP, build
 from .world import Realism
@@ -55,6 +57,9 @@ class TwinWorldNode(Node):
         self.pub_frame = self.create_publisher(Int32MultiArray, "/yolo_frame", 10)
         self.pub_state = self.create_publisher(String, "/sim/state", 10)
         self.create_subscription(Twist, "/cmd_vel", self.on_cmd, 10)
+        self.create_subscription(Float32MultiArray, "/synced_target", self.on_synced, 10)
+        self._recent = []   # (sim time, person, cx) of boxes published in the last few frames
+        self._synced = []   # whose box each /synced_target was, since the last state line
 
         self._ticks_per_sensor = int(round(PHYSICS_HZ / SENSOR_HZ))
         self._tick = 0
@@ -66,6 +71,15 @@ class TwinWorldNode(Node):
 
     def on_cmd(self, msg: Twist) -> None:
         self.world.command(msg.linear.x, msg.angular.z)
+
+    def on_synced(self, msg: Float32MultiArray) -> None:
+        """Attribute a published target to the person whose recent box has the nearest column."""
+        if not msg.data:
+            return
+        cx = msg.data[0]
+        near = [(abs(c - cx), p) for t, p, c in self._recent if self.world.t - t <= 0.5]
+        best = min(near, default=None)
+        self._synced.append(best[1] if best is not None and best[0] <= 15 else "?")
 
     def on_tick(self) -> None:
         if self.done:
@@ -97,11 +111,14 @@ class TwinWorldNode(Node):
         for det in w.detections():
             self.pub_centroid.publish(Int32MultiArray(data=[det.cx, det.cy]))
             self.pub_sector.publish(Int32MultiArray(data=[det.cx, det.cy, det.sector_id, det.cb, det.cr, *det.hist]))
+            self._recent.append((w.t, det.person, det.cx))
             frame[4] += 1
             frame.extend([*det.box, 900, det.cb, det.cr])
         self.pub_frame.publish(Int32MultiArray(data=frame))  # as ros2_yolo_live.py's /yolo_frame
 
+        self._recent = [r for r in self._recent if w.t - r[0] <= 0.5]
         state = w.state()
+        state["synced"], self._synced = self._synced, []
         line = json.dumps(state)
         self.pub_state.publish(String(data=line))
         if self.log:

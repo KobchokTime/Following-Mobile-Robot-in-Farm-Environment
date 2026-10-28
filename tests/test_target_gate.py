@@ -11,10 +11,10 @@ ROOT = Path(__file__).resolve().parents[1]
 NODE = ROOT / "ros2_yolo_ws" / "scripts" / "Image" / "sync_fusion_node.py"
 
 
-def _load():
+def _load(node_class=object):
     names = ["rclpy", "rclpy.node", "rclpy.qos", "std_msgs", "std_msgs.msg", "sensor_msgs", "sensor_msgs.msg"]
     stubs = {n: types.ModuleType(n) for n in names}
-    stubs["rclpy.node"].Node = object
+    stubs["rclpy.node"].Node = node_class
     for k in ("QoSProfile", "QoSReliabilityPolicy", "QoSHistoryPolicy", "QoSDurabilityPolicy"):
         setattr(stubs["rclpy.qos"], k, object)
     stubs["std_msgs.msg"].Int32MultiArray = object
@@ -168,14 +168,79 @@ class TargetGateTest(unittest.TestCase):
         for name in ('lateral_sigma_m', 'reacquire_dist_m', 'reacquire_dist_max_m', 'hist_weight'):
             self.assertIn(name, self.gate_params)
 
+    def test_gate_ros_overrides_are_declared_and_reach_the_constructed_gate(self):
+        """Exercise actual node initialization: a dictionary-only guard misses the T13 wiring failure."""
+        overrides = {name: default + 0.0123 for name, default in self.gate_params.items()}
+
+        class ParameterNode:
+            def __init__(self, name):
+                self.parameters = {}
+
+            def declare_parameter(self, name, default):
+                self.parameters[name] = overrides.get(name, default)
+
+            def get_parameter(self, name):
+                # Missing declarations must fail rather than silently returning an override.
+                return types.SimpleNamespace(value=self.parameters[name])
+
+            def create_subscription(self, *args):
+                pass
+
+            create_publisher = create_subscription
+            create_timer = create_subscription
+
+            def get_logger(self):
+                return types.SimpleNamespace(info=lambda *args: None)
+
+        module = _load(node_class=ParameterNode)
+        module.QoSProfile = lambda **kwargs: None
+        module.QoSReliabilityPolicy = types.SimpleNamespace(BEST_EFFORT=1)
+        module.QoSHistoryPolicy = types.SimpleNamespace(KEEP_LAST=1)
+        module.QoSDurabilityPolicy = types.SimpleNamespace(VOLATILE=1)
+        node = module.SyncFusionNode()
+        for name, value in overrides.items():
+            self.assertEqual(node.parameters[name], value, name)
+        expected_gate = self.Gate(**overrides)
+        self.assertEqual(node.gate.__dict__, expected_gate.__dict__)
+
+    def test_a_same_clothes_person_beside_the_target_is_not_taken(self):
+        """T15 (Codex): target at (1.0, 0), stranger at (1.0, 0.44), same clothes, both boxes in one frame."""
+        sb, sr = math.atan2(0.44, 1.0), math.hypot(1.0, 0.44) - 0.2
+        g = self.Gate()
+        for k in range(5):
+            self.assertTrue(g.accept(0.1 * k, 0.0, 0.8))
+        self.assertTrue(g.accept(0.5, 0.0, 0.8))
+        self.assertFalse(g.accept(0.501, sb, sr))  # the same frame: someone is beside the target
+        # the target's own box is missed in the next frames; the stranger alone is still not taken
+        self.assertFalse(g.accept(0.6, sb, sr))
+        self.assertFalse(g.accept(0.7, sb, sr))
+
+    def test_a_person_beside_the_target_at_lock_on_is_not_taken(self):
+        """Twin close_pair_same: the stranger's box arrives just after the lock-on box, in the same frame."""
+        g = self.Gate()
+        self.assertTrue(g.accept(0.0, 0.0, 0.8))
+        self.assertFalse(g.accept(0.001, math.atan2(0.44, 1.0), math.hypot(1.0, 0.44) - 0.2))
+        self.assertFalse(g.accept(0.1, math.atan2(0.44, 1.0), math.hypot(1.0, 0.44) - 0.2))
+
+    def test_the_wider_gate_returns_once_the_other_person_has_gone(self):
+        g = self.Gate()
+        for k in range(5):
+            g.accept(0.1 * k, 0.0, 0.7)
+            g.accept(0.1 * k + 0.001, D(30), 0.75)  # someone 0.38 m to the side, every frame
+        for k in range(5, 18):
+            g.accept(0.1 * k, 0.0, 0.7)  # alone for 1.3 s
+        self.assertTrue(g.accept(1.8, D(16), 0.7))  # a fast sidestep is in the gate again
+
     def test_a_fast_close_sidestep_stays_in_the_gate(self):
         """side_step trace (box_range_debug/true_s10_gate.log): 6.5 -> 27.5 deg in 0.3 s at about 0.7 m."""
         old, new = self.Gate(lateral_sigma_m=0.0), self.Gate()
         for g in (old, new):
+            for k in range(7):  # standing for the first 0.6 s (the plain gate holds for 1 s after lock-on)
+                g.accept(0.1 * k, D(0.5), 0.66)
             for k in range(5):
-                g.accept(0.1 * k, D(0.5 + 1.5 * k), 0.66)
-        self.assertGreater(old.cost(0.7, D(27.5), 0.72), 9.0)  # the old gate rejects the target
-        self.assertTrue(new.accept(0.7, D(27.5), 0.72))
+                g.accept(0.7 + 0.1 * k, D(0.5 + 1.5 * k), 0.66)
+        self.assertGreater(old.cost(1.4, D(27.5), 0.72), 9.0)  # the old gate rejects the target
+        self.assertTrue(new.accept(1.4, D(27.5), 0.72))
 
     def test_lateral_sigma_leaves_far_targets_and_side_people_alone(self):
         far_old, far_new = self.Gate(lateral_sigma_m=0.0), self.Gate()

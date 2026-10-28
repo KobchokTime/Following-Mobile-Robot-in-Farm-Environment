@@ -1,6 +1,6 @@
 # Target gate on lateral distance (HANDOFF item 18)
 
-**Status: done; awaiting Codex's review in T15.** This file is the handoff note. Anyone, Claude or Codex, can
+**Status: round 2 done (ambiguity-aware lateral gate, `5aa4f65`); awaiting Codex's re-review in T15.** This file is the handoff note. Anyone, Claude or Codex, can
 continue from the "Next steps" list below. Every step is committed and pushed on
 `claude/robot/lateral-gate`.
 
@@ -138,3 +138,114 @@ finish.
   - The robot follows the look-alike.
   - With the rule on: 20/20, as in the table above.
 - **This is the closed-loop evidence T13 lacked.**
+
+## Round 2: Codex's T15 objection (in progress, Claude Code)
+
+- **Objection** (T15 `0579f0b`; review `experiments/reviews/2026-10-28_t15_review.md` on `codex/workspace`):
+  - With 0.15, a stranger in the same clothes 0.44 m beside the target is published as the target in the
+    same frame as the target. The two silhouettes are apart and both ranges are right (cost 5.85, against
+    22.94 with the old gate).
+  - "A person that close overlaps the target in the image" was wrong for this case.
+  - Codex asks for:
+    1. a close two-person regression that counts wrong-person publications;
+    2. a comparison of the default (Codex's candidate is 0.10);
+    3. a constructor-level parameter test.
+- **Done so far** (branch `claude/robot/lateral-gate-2`):
+  - Codex's constructor test (`bc41e3f`) is taken as is.
+  - `sync_fusion` logs its effective gate settings at start (`[GATE] ...`).
+  - The twin's `world_node` reads `/synced_target` back and attributes each publication to the person
+    whose recent box has the nearest column (`synced` in the state lines).
+    - `score.py` reports `published`, `published_other`, `published_other_share` and
+      `published_unmatched`.
+    - Earlier scenarios are bit-identical (open-loop hash, plain and realism).
+  - New colour-set scenario `close_pair_same`:
+    - the pair walks side by side, 0.44 m apart, in the same clothes;
+    - then the other person turns away.
+  - `collect_runs.py` keeps the effective `[GATE]` line and the publication counts.
+- **Sweep:** `experiments/sim/scripts/run_lateral_sweep.sh`, `lateral_sigma_m` 0 / 0.10 / 0.15 interleaved
+  per seed.
+  - `side_step` s8–27 (realism);
+  - `close_pair_same` s0–9 (realism) and s0–4 (clean);
+  - with 0.10: identity s0–2 and `zigzag` s0–9.
+  - The script needs a new output folder and records the image id. It stops if a run has no score, or if
+    the `[GATE]` line does not show the requested value.
+- **Early sweep result:** with `close_pair_same` realism s0–3, any floor publishes the other person when the
+  target's own box is missed:
+
+  | Gate | Passed | Wrong publications |
+  |---|---|---|
+  | 0 (old) | 4/4 | 1 |
+  | 0.10 | 2/4 | 71 |
+  | 0.15 | 1/4 | 357 |
+
+  A smaller floor alone is therefore not the fix.
+- **Sweep 1, complete for `side_step` and `close_pair_same`** (`2026-10-28_lateral_sweep.json`, realism unless
+  noted, interleaved per seed). "Wrong" means publications of another person's box (in solo scenarios,
+  realism's random false-positive boxes):
+
+  | Floor | `side_step` s8–27 | `close_pair_same` realism s0–9 | wrong (realism pair) | `close_pair_same` clean s0–4 | wrong (clean pair) |
+  |---|---|---|---|---|---|
+  | 0 (old) | 10/20 | 10/10 | 7 | 5/5 | 0 |
+  | 0.10 | 19/20 | **3/10** | **201** | 5/5 | 0 |
+  | 0.15 | 20/20 | **2/10** | **648** | 5/5 | **495** |
+
+  - No contacts anywhere. With 0.10, identity s0–2 is 15/15 and `zigzag` s0–9 is 10/10.
+  - **Codex's objection is confirmed in closed loop:** a plain floor, even 0.10, gives up the
+    close same-clothes pair to win `side_step`.
+- **Round 2b (`claude/robot/lateral-gate-2`, commit "wider lateral gate only when the target is alone"):**
+  - the floor applies only when no second person has been near the predicted target in the last 1 s;
+  - two boxes in one frame (≤ 30 ms apart), both within 1 m of the prediction and at least 0.25 m
+    apart, mark the next 1 s as ambiguous, and the plain 5° is used then;
+  - tests cover Codex's same-frame case, the lone stranger after it, and the floor coming back once the
+    target is alone;
+  - `ambiguity_radius_m` 0 turns the check off. 141 tests pass.
+- **Sweep 2b:** `experiments/sim/scripts/run_ambiguity_sweep.sh`, variants interleaved per seed:
+  - `old` (0), `amb` (0.15 with the check), `floor` (0.15 without it);
+  - on `side_step` s8–27 and `close_pair_same` (realism s0–9, clean s0–4);
+  - with `amb` only: identity s0–2 and `zigzag` s0–9.
+  - It is queued after sweep 1 in a new output folder.
+- **Sweep 2b result** (`2026-10-28_ambiguity_sweep.json`, 130 runs, interleaved):
+
+  | Variant | `side_step` s8–27 | pair, realism s0–9 | wrong | pair, clean s0–4 | wrong | identity / `zigzag` |
+  |---|---|---|---|---|---|---|
+  | `old` | 7/20 | 10/10 | 7 | 5/5 | 0 | — |
+  | `amb` | **20/20** | 10/10 | 50 | 5/5 | 5 | 15/15 / 10/10 |
+  | `floor` | 20/20 | 4/10 | 561 | 4/5 | 492 | — |
+
+  - "Wrong" counts every publication of a box that is not the target's.
+  - `old`'s 7 are realism's random false-positive boxes; none is the distractor.
+  - **All of `amb`'s distractor publications fall in the first 5 s.** The cause was a bug: the lock-on box
+    was not noted, so the stranger's box in the same frame did not count as a second person.
+- **Round 2c fix** (`5aa4f65`):
+  - the lock-on box is noted, and the first second after lock-on uses the plain gate;
+  - a test covers the lock-on frame.
+  - The sidestep test's synthetic move now starts after that second.
+  - 142 tests pass.
+- **Confirmation:** `CONFIRM=1 bash experiments/sim/scripts/run_ambiguity_sweep.sh <new_dir> twin:amb2`.
+  It compares `old` and `amb` on `close_pair_same` (realism s0–9, clean s0–4) and `side_step` s8–17.
+- **Next:**
+  1. Collect both sweeps (`2026-10-28_lateral_sweep.json`, `2026-10-28_ambiguity_sweep.json`) and the
+     confirmation (`2026-10-28_ambiguity_confirm.json`).
+  2. Keep `amb` as the default if it keeps the `side_step` gain and matches `old` on wrong publications.
+     Otherwise fall back to `lateral_sigma_m` 0.
+  3. Write the result here and reply in T15.
+
+### Round 2c confirmation (`5aa4f65`, `2026-10-28_ambiguity_confirm.json`, 50 runs, interleaved)
+
+| Variant | `side_step` s8–17 | pair, realism s0–9 | pair, clean s0–4 | Distractor published | Contacts |
+|---|---|---|---|---|---|
+| `old` (0) | 5/10 | 10/10 | 5/5 | 0 | 0 |
+| `amb` (0.15 + ambiguity check) | **10/10** | 10/10 | 5/5 | **0** | 0 |
+
+- **Wrong publications:** the remaining counts (5 for `old`, 7 for `amb`, realism only) are random
+  false-positive boxes; none is the distractor.
+- **Decision:** keep `amb` as the default.
+  - `lateral_sigma_m` 0.15, `ambiguity_window_s` 1, `ambiguity_radius_m` 1.
+  - It keeps the `side_step` gain (sweep 2b 20/20 vs 7/20; here 10/10 vs 5/10).
+  - It matches the old gate on the close same-clothes pair, with no distractor publications after the
+    lock-on fix.
+- **Not shown:**
+  - two people closer than 0.25 m count as one (one box or overlapping boxes);
+  - a second person who stays more than 1 m from the predicted target is not checked, and the floor
+    applies to them. They are then well outside its 0.445 m reach at 0.7 m.
+  - The camera may split or merge boxes differently on the robot (E4).
