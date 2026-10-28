@@ -184,3 +184,8 @@ Earlier history: `history-2026-10-16.md`.
 - Pushed `codex/thesis-desk-office-queue` at `432ad52` to GitHub and opened draft PR #8 against `integration-hub`.
 - PR: https://github.com/KobchokTime/Following-Mobile-Robot-in-Farm-Environment/pull/8
 - Review gate: browser smoke of desks, camera controls, movement, seating and meeting before integration; the in-app browser could not reach the local test server in this run.
+
+### 2026-10-28 — thesis-desk — Fix Office PR CI prerequisite
+- PR #8 check failed on head `150b544` because CI Python 3.10 could not import NumPy in `tests/test_torso_chroma.py`; local check had NumPy installed.
+- Merged the existing PR #3 branch `origin/codex/ci/install-numpy` (`272ff22`) into the Office branch with merge commit `3261572`. This is a CI prerequisite only; no robot code or test was changed.
+- Re-run `scripts/check.py` and CI on the new head before review.
