@@ -236,3 +236,9 @@ Earlier history: `history-2026-10-16.md`.
 - Replaced the nested model runner with `automation-queue.mjs`: it only claims bounded jobs into separate local clones and verifies changed-file scope, unchanged base commit and `scripts/check.py` after a native Codex subagent works there. It cannot call an API or silently mark a no-diff write job successful.
 - Added a new pilot ID `dashboard-dirty-provenance-v2`; the failed first ID remains visible. Node queue tests pass 2/2, dry-run selects only v2, the status endpoint reports failed/ready correctly, and `scripts/check.py` passes 166 tests.
 - Follow-up: prepare v2, run one native subagent, finish/verify it, and update the existing heartbeat to use this queue only when plan usage permits.
+
+### 2026-10-28 — qa — Office Boss dirty-checkout regression pilot
+
+- Native Codex subagent in `codex/qa/office/dashboard-dirty-provenance-v2-20261028084253` added one offline test in `tests/test_dashboard_unit_tests.py` that confirms every exported test row reports `working_tree_dirty: true` when Git status is nonempty. No generator or robot source changed.
+- Focused unit tests passed 3/3; full `scripts/check.py` passed 167/167 in the isolated clone. The Office queue verified the allowed diff, unchanged base HEAD, and successful offline gate, then recorded `review-ready` for independent review.
+- No API key, paid credits, robot hardware, motor command, or dashboard publication was used.

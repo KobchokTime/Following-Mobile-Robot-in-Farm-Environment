@@ -77,6 +77,29 @@ class DashboardUnitSnapshotTests(unittest.TestCase):
             self.assertEqual(rows[0]["commit"], "a" * 40)
             self.assertFalse(rows[0]["working_tree_dirty"])
 
+    def test_cli_marks_dirty_checkout_in_every_exported_row(self):
+        class PassingSample(unittest.TestCase):
+            def test_pass(self):
+                self.assertTrue(True)
+
+            def test_other_pass(self):
+                self.assertTrue(True)
+
+        with tempfile.TemporaryDirectory(dir=Path(__file__).resolve().parents[1]) as tmp:
+            output = Path(tmp) / "unit_tests.json"
+            suite = unittest.TestSuite([PassingSample("test_pass"), PassingSample("test_other_pass")])
+            with patch.object(generator, "_git_value", side_effect=[
+                "codex/qa/dirty-example", "b" * 40, " M tests/test_dashboard_unit_tests.py",
+            ]), patch.object(generator.unittest.defaultTestLoader, "discover", return_value=suite):
+                self.assertEqual(generator.main(["--output", str(output)]), 0)
+
+            rows = json.loads(output.read_text(encoding="utf-8"))
+            self.assertEqual(len(rows), 2)
+            self.assertTrue(all(row["result"] == "pass" for row in rows))
+            self.assertTrue(all(row["branch"] == "codex/qa/dirty-example" for row in rows))
+            self.assertTrue(all(row["commit"] == "b" * 40 for row in rows))
+            self.assertTrue(all(row["working_tree_dirty"] is True for row in rows))
+
 
 if __name__ == "__main__":
     unittest.main()
