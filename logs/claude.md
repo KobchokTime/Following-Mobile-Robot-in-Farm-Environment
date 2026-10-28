@@ -1385,7 +1385,7 @@ Earlier history: `history-2026-10-16.md`.
 - Opened **T15** for Codex (questions a–d); added a correction pointer to **T13** (stays resolved).
 - `HANDOFF.md`: item 18 implemented, awaiting Codex in T15; item 16 correction note; lock released.
 
-### 2026-10-28 — research — lateral gate write-up fixes after integration review (08:55 Thai time)
+### 2026-10-28 — research — lateral gate write-up fixes after integration review (08:30 Thai time)
 - Disclosed: at 0.7 m with no colour cost, the gate now accepts someone up to 0.445 m to the side (0.19 m before).
 - Said that the 13.4 / "about 3" costs come from the debug trace; the unit test's synthetic track gives 10.67 / 1.83.
 - Fixed the table, ticked steps 5–6, added a pointer at the old T13 "not a test of the rule" line, and corrected this log's earlier timestamp.
