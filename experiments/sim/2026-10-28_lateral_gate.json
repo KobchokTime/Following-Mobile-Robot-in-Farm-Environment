@@ -2126,6 +2126,90 @@
 "realism": true
 },
 {
+"run": "zz_off_s4",
+"scenario": "zigzag",
+"seed": 4,
+"pass_": true,
+"contact": false,
+"final_gap_m": 0.553,
+"target_visible_share": 1.0,
+"max_abs_target_bearing_deg": 26.7,
+"ros_params": [
+"lateral_sigma_m:=0.0"
+],
+"realism": true
+},
+{
+"run": "zz_off_s5",
+"scenario": "zigzag",
+"seed": 5,
+"pass_": false,
+"contact": false,
+"final_gap_m": 3.759,
+"target_visible_share": 0.251,
+"max_abs_target_bearing_deg": 109.9,
+"ros_params": [
+"lateral_sigma_m:=0.0"
+],
+"realism": true
+},
+{
+"run": "zz_off_s6",
+"scenario": "zigzag",
+"seed": 6,
+"pass_": true,
+"contact": false,
+"final_gap_m": 0.535,
+"target_visible_share": 1.0,
+"max_abs_target_bearing_deg": 29.3,
+"ros_params": [
+"lateral_sigma_m:=0.0"
+],
+"realism": true
+},
+{
+"run": "zz_off_s7",
+"scenario": "zigzag",
+"seed": 7,
+"pass_": true,
+"contact": false,
+"final_gap_m": 0.53,
+"target_visible_share": 1.0,
+"max_abs_target_bearing_deg": 33.4,
+"ros_params": [
+"lateral_sigma_m:=0.0"
+],
+"realism": true
+},
+{
+"run": "zz_off_s8",
+"scenario": "zigzag",
+"seed": 8,
+"pass_": true,
+"contact": false,
+"final_gap_m": 0.541,
+"target_visible_share": 1.0,
+"max_abs_target_bearing_deg": 33.0,
+"ros_params": [
+"lateral_sigma_m:=0.0"
+],
+"realism": true
+},
+{
+"run": "zz_off_s9",
+"scenario": "zigzag",
+"seed": 9,
+"pass_": false,
+"contact": false,
+"final_gap_m": 3.792,
+"target_visible_share": 0.244,
+"max_abs_target_bearing_deg": 115.6,
+"ros_params": [
+"lateral_sigma_m:=0.0"
+],
+"realism": true
+},
+{
 "run": "zz_on_s0",
 "scenario": "zigzag",
 "seed": 0,
@@ -2190,6 +2274,76 @@
 "final_gap_m": 0.532,
 "target_visible_share": 1.0,
 "max_abs_target_bearing_deg": 34.2,
+"ros_params": [
+"lateral_sigma_m:=0.15"
+],
+"realism": true
+},
+{
+"run": "zz_on_s5",
+"scenario": "zigzag",
+"seed": 5,
+"pass_": true,
+"contact": false,
+"final_gap_m": 0.521,
+"target_visible_share": 1.0,
+"max_abs_target_bearing_deg": 29.4,
+"ros_params": [
+"lateral_sigma_m:=0.15"
+],
+"realism": true
+},
+{
+"run": "zz_on_s6",
+"scenario": "zigzag",
+"seed": 6,
+"pass_": true,
+"contact": false,
+"final_gap_m": 0.52,
+"target_visible_share": 1.0,
+"max_abs_target_bearing_deg": 32.5,
+"ros_params": [
+"lateral_sigma_m:=0.15"
+],
+"realism": true
+},
+{
+"run": "zz_on_s7",
+"scenario": "zigzag",
+"seed": 7,
+"pass_": true,
+"contact": false,
+"final_gap_m": 0.522,
+"target_visible_share": 1.0,
+"max_abs_target_bearing_deg": 26.0,
+"ros_params": [
+"lateral_sigma_m:=0.15"
+],
+"realism": true
+},
+{
+"run": "zz_on_s8",
+"scenario": "zigzag",
+"seed": 8,
+"pass_": false,
+"contact": false,
+"final_gap_m": 3.803,
+"target_visible_share": 0.251,
+"max_abs_target_bearing_deg": 102.4,
+"ros_params": [
+"lateral_sigma_m:=0.15"
+],
+"realism": true
+},
+{
+"run": "zz_on_s9",
+"scenario": "zigzag",
+"seed": 9,
+"pass_": true,
+"contact": false,
+"final_gap_m": 0.502,
+"target_visible_share": 1.0,
+"max_abs_target_bearing_deg": 34.5,
 "ros_params": [
 "lateral_sigma_m:=0.15"
 ],

@@ -1,6 +1,6 @@
 # Target gate on lateral distance (HANDOFF item 18)
 
-**Status: in progress, Claude Code.** This file is the handoff note. Anyone, Claude or Codex, can
+**Status: twin runs done; awaiting integration and Codex review.** This file is the handoff note. Anyone, Claude or Codex, can
 continue from the "Next steps" list below. Every step is committed and pushed on
 `claude/robot/lateral-gate`.
 
@@ -37,7 +37,7 @@ continue from the "Next steps" list below. Every step is committed and pushed on
       - a person 0.6 m to the side at the same range is still rejected;
       - with 0, the old cost is reproduced.
 - [x] 3. `python3 scripts/check.py` passes (138). Committed and pushed.
-- [ ] 4. (side_step done; regressions running) Twin (Docker, `--bridge-mode mps`, one run at a time):
+- [x] 4. Twin (Docker, `--bridge-mode mps`, one run at a time):
       - `side_step` seeds 8–27, realism, `lateral_sigma_m` 0.15 vs 0;
       - then regressions with 0.15: identity s0–2, solo s0–2, `shade_crossing` s0–9,
         `shade_side_by_side` s0–9, and `lookalike_after_loss` s0–9 clean and realism.
@@ -45,7 +45,7 @@ continue from the "Next steps" list below. Every step is committed and pushed on
         off (`reacquire_dist_m` / `reacquire_dist_max_m` 100).
       - Script: `experiments/sim/scripts/run_lateral_gate.sh`. Results go in
         `2026-10-28_lateral_gate.json`, via `experiments/sim/scripts/collect_runs.py`.
-- [ ] 4b. `zigzag` on/off check (`zz_*`). If 0.15 hurts `zigzag`, find out why before going further.
+- [x] 4b. `zigzag` on/off check (`zz_*`): no harm detected (see Results).
 - [ ] 5. Write the results here. Merge into `claude/workspace` and log in `logs/claude.md`.
 - [ ] 6. Integration: merge into `integration-hub` and open a thread for Codex. Update HANDOFF item 18.
 
@@ -63,6 +63,19 @@ continue from the "Next steps" list below. Every step is committed and pushed on
   - the tunables are declared (`GATE_PARAMS`);
   - `test_gate_ros_parameters_match_the_gate_defaults` keeps them in step with `TargetGate`;
   - step 4 reruns the rule-off case for real.
+
+## Summary
+
+- **The lateral gate fixes the traced `side_step` failure:** 19/20 vs 5/20 interleaved (p = 1e-5).
+- **No harm was detected** on identity (15/15), the colour set (19/20 in shade, 20/20 look-alike) or
+  `zigzag` (8/10 vs 6/10).
+- **Not shown:** that it never accepts a second person close in.
+  - At 1 m, a differently dressed person 0.14 m to the side now costs 8.97 instead of 10.83, so the gate
+    accepts them (the unit test moved to 10°, about 0.17 m).
+  - A person that close to the target overlaps them in the image anyway.
+- **T13 correction:** the re-acquisition rule really off gives 0/20, with 18 contacts; on, 20/20.
+- **The twin varies between sessions** (`side_step` with the old gate: 5/20 here, 12–13/20 the day before).
+  Compare variants only when they run interleaved in one session.
 
 ## How to resume
 
@@ -103,8 +116,9 @@ finish.
 | Solo, seeds 0–2 | 27/30, no contact. **`zigzag` fails all 3 seeds** |
 
 - `zigzag` passed 4/5 with the old gate on seeds 3–7 (`2026-10-27_box_range.md`).
-- A within-session check is queued: `zigzag` seeds 0–9 with 0.15 vs 0, interleaved (`zz_*` in the run
-  script).
+- **Within-session check:** `zigzag` seeds 0–9, 0.15 vs 0, interleaved. Result **8/10 vs 6/10**, no contact,
+  Fisher p = 0.63. No harm detected.
+  - The solo 0/3 is run-to-run variation, like the old gate's 5/20 vs 12–13/20 on `side_step`.
 
 | `shade_crossing`, seeds 0–9 | 9/10 (seed 7), no contact |
 | `shade_side_by_side`, seeds 0–9 | 10/10 |
