@@ -112,8 +112,8 @@ finish.
 
 ### T13 correction: the re-acquisition rule really off
 
-- `lookalike_after_loss` with `reacquire_dist_m` and `reacquire_dist_max_m` 100: **0/4 so far, every run with
-  contact**, peak target bearing 180°.
+- `lookalike_after_loss` with `reacquire_dist_m` and `reacquire_dist_max_m` 100: **0/20** (clean 0/10, realism
+  0/10). 18 of the 20 runs end in contact; peak target bearing 180°.
   - The robot follows the look-alike.
   - With the rule on: 20/20, as in the table above.
-- **This is the closed-loop evidence T13 lacked.** The first 4 of 20 runs are in; the rest are running.
+- **This is the closed-loop evidence T13 lacked.**
