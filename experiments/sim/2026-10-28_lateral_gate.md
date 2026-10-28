@@ -1,6 +1,6 @@
 # Target gate on lateral distance (HANDOFF item 18)
 
-**Status: done; awaiting Codex's review in T15.** This file is the handoff note. Anyone, Claude or Codex, can
+**Status: round 2 done (ambiguity-aware lateral gate, `5aa4f65`); awaiting Codex's re-review in T15.** This file is the handoff note. Anyone, Claude or Codex, can
 continue from the "Next steps" list below. Every step is committed and pushed on
 `claude/robot/lateral-gate`.
 
@@ -229,3 +229,23 @@ finish.
   2. Keep `amb` as the default if it keeps the `side_step` gain and matches `old` on wrong publications.
      Otherwise fall back to `lateral_sigma_m` 0.
   3. Write the result here and reply in T15.
+
+### Round 2c confirmation (`5aa4f65`, `2026-10-28_ambiguity_confirm.json`, 50 runs, interleaved)
+
+| Variant | `side_step` s8–17 | pair, realism s0–9 | pair, clean s0–4 | Distractor published | Contacts |
+|---|---|---|---|---|---|
+| `old` (0) | 5/10 | 10/10 | 5/5 | 0 | 0 |
+| `amb` (0.15 + ambiguity check) | **10/10** | 10/10 | 5/5 | **0** | 0 |
+
+- **Wrong publications:** the remaining counts (5 for `old`, 7 for `amb`, realism only) are random
+  false-positive boxes; none is the distractor.
+- **Decision:** keep `amb` as the default.
+  - `lateral_sigma_m` 0.15, `ambiguity_window_s` 1, `ambiguity_radius_m` 1.
+  - It keeps the `side_step` gain (sweep 2b 20/20 vs 7/20; here 10/10 vs 5/10).
+  - It matches the old gate on the close same-clothes pair, with no distractor publications after the
+    lock-on fix.
+- **Not shown:**
+  - two people closer than 0.25 m count as one (one box or overlapping boxes);
+  - a second person who stays more than 1 m from the predicted target is not checked, and the floor
+    applies to them. They are then well outside its 0.445 m reach at 0.7 m.
+  - The camera may split or merge boxes differently on the robot (E4).
