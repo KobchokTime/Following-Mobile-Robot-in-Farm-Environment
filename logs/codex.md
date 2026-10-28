@@ -175,3 +175,7 @@ Earlier history: `history-2026-10-16.md`.
 - Added a dated, read-only three-lane work queue, project-specific chat roles and a Codex-only backend. No API key or external job dispatcher is used.
 - Checks: Node syntax for all scripts, queue JSON structure, direct GET handler smoke (200; three lanes), and `scripts/check.py` (142 tests) passed. Browser visual smoke could not run: local test URL timed out in the in-app browser; file URL was blocked by browser policy.
 - Follow-up: review this branch and verify the 3D scene/controls in a browser that can reach the local server before integration. The queue is a snapshot, not live execution.
+
+### 2026-10-28 — thesis-desk — Rename Office feature branch for GitHub
+- Initial push of `codex/thesis-desk/office-queue` was rejected by GitHub with `directory file conflict` because the existing `codex/thesis-desk` branch occupies that ref prefix.
+- Renamed the local feature branch to `codex/thesis-desk-office-queue`. No files or commits were discarded.
