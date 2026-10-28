@@ -46,4 +46,6 @@ Pilot status on 28 October 2026:
 
 - Codex opened draft [PR #3](https://github.com/KobchokTime/Following-Mobile-Robot-in-Farm-Environment/pull/3) to install NumPy for the offline CI check. The pre-fix check failed on an import error; the PR's check job passed.
 - Codex opened draft [PR #4](https://github.com/KobchokTime/Following-Mobile-Robot-in-Farm-Environment/pull/4), stacked on #3, to retain per-run score hashes and declared provenance. The runner does not yet write these manifests, so old rows remain `missing`; a complete declaration is not independent image/runtime verification. Retarget #4 to `integration-hub` after #3 lands.
-- Claude was asked to export the artifact source and generator to the repository. This is still in progress; do not treat the live artifact as repo-backed yet.
+- Claude exported a repository snapshot of the artifact page, dataset records, live generator, and registry in `claude/dashboard/source` at `be8729c`. It is not yet integrated or published from a reviewed repository commit.
+- Codex opened draft [PR #5](https://github.com/KobchokTime/Following-Mobile-Robot-in-Farm-Environment/pull/5) against Claude's source branch: a validator for the five live datasets plus an explicit UTF-8 generator fix. Local offline checks passed 147 tests; validation against Claude's completed run folders and artifact publication remain pending.
+- The tests/CI tab still uses a 21 October CI snapshot, while the unit-test dataset is from 25 October. Treat these as dated snapshots until a verified update pipeline exists.
