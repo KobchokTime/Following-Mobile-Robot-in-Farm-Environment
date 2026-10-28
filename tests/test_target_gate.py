@@ -203,6 +203,27 @@ class TargetGateTest(unittest.TestCase):
         expected_gate = self.Gate(**overrides)
         self.assertEqual(node.gate.__dict__, expected_gate.__dict__)
 
+    def test_a_same_clothes_person_beside_the_target_is_not_taken(self):
+        """T15 (Codex): target at (1.0, 0), stranger at (1.0, 0.44), same clothes, both boxes in one frame."""
+        sb, sr = math.atan2(0.44, 1.0), math.hypot(1.0, 0.44) - 0.2
+        g = self.Gate()
+        for k in range(5):
+            self.assertTrue(g.accept(0.1 * k, 0.0, 0.8))
+        self.assertTrue(g.accept(0.5, 0.0, 0.8))
+        self.assertFalse(g.accept(0.501, sb, sr))  # the same frame: someone is beside the target
+        # the target's own box is missed in the next frames; the stranger alone is still not taken
+        self.assertFalse(g.accept(0.6, sb, sr))
+        self.assertFalse(g.accept(0.7, sb, sr))
+
+    def test_the_wider_gate_returns_once_the_other_person_has_gone(self):
+        g = self.Gate()
+        for k in range(5):
+            g.accept(0.1 * k, 0.0, 0.7)
+            g.accept(0.1 * k + 0.001, D(30), 0.75)  # someone 0.38 m to the side, every frame
+        for k in range(5, 18):
+            g.accept(0.1 * k, 0.0, 0.7)  # alone for 1.3 s
+        self.assertTrue(g.accept(1.8, D(16), 0.7))  # a fast sidestep is in the gate again
+
     def test_a_fast_close_sidestep_stays_in_the_gate(self):
         """side_step trace (box_range_debug/true_s10_gate.log): 6.5 -> 27.5 deg in 0.3 s at about 0.7 m."""
         old, new = self.Gate(lateral_sigma_m=0.0), self.Gate()

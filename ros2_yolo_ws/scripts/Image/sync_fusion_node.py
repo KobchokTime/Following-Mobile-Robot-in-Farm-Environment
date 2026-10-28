@@ -161,7 +161,11 @@ class TargetGate:
 
     Close in, a small sideways step is a large angle (0.25 m is 20 deg at 0.7 m), so the bearing sigma is
     never tighter than lateral_sigma_m sideways: max(bearing_sigma_deg, lateral_sigma_m / range). From
-    about 1.7 m out (0.15 m / tan 5 deg) this is the plain 5 deg; lateral_sigma_m 0 restores it everywhere.
+    about 1.7 m out (0.15 m / 5 deg) this is the plain 5 deg; lateral_sigma_m 0 restores it everywhere.
+    The wider gate applies only when the target is alone: if within ambiguity_window_s two boxes in one
+    frame (ambiguity_frame_s) lay within ambiguity_radius_m of the predicted target and at least
+    ambiguity_min_sep_m apart, someone else is close by and the plain 5 deg is kept, so a person beside
+    the target is not taken when the target's own box is missed (T15).
 
     Lock-on uses the controller's start window: range 0.5-1.0 m, near the image centre.
     """
@@ -172,12 +176,17 @@ class TargetGate:
                  hist_sigma=0.2, hist_window=10, hist_learn_slack=0.1, hist_weight=0.25,
                  reacquire_after_s=1.0, reacquire_colour_max=1.0, reacquire_bearing_deg=35.0,
                  reacquire_dist_m=0.8, reacquire_speed_mps=1.5, reacquire_dist_max_m=3.0,
-                 lateral_sigma_m=0.15):
+                 lateral_sigma_m=0.15, ambiguity_window_s=1.0, ambiguity_radius_m=1.0,
+                 ambiguity_min_sep_m=0.25, ambiguity_frame_s=0.03):
         self.lock_range = lock_range
         self.lock_bearing = math.radians(lock_bearing_deg)
         self.sb = math.radians(bearing_sigma_deg)
         self.sr = range_sigma_m
         self.lateral_sigma = lateral_sigma_m
+        self.ambiguity_window = ambiguity_window_s
+        self.ambiguity_radius = ambiguity_radius_m
+        self.ambiguity_min_sep = ambiguity_min_sep_m
+        self.ambiguity_frame = ambiguity_frame_s
         self.sc = chroma_sigma
         self.gate = gate
         self.widen_per_s = widen_per_s
@@ -210,6 +219,8 @@ class TargetGate:
         self.range = self.range_rate = 0.0
         self.chroma = None
         self.hists = []  # the target's last learned torso histograms (normalised)
+        self.boxes = []  # (t, x, y) of recent boxes near the target, robot frame
+        self.ambiguous_until = -math.inf  # someone else was beside the target until then
 
     def hist_model(self):
         return [sum(col) / len(self.hists) for col in zip(*self.hists)]
@@ -233,7 +244,9 @@ class TargetGate:
             return math.inf
         pb, pr = self._predict(t)
         widen = 1.0 + self.widen_per_s * max(0.0, t - self.t - 0.2)
-        sb = max(self.sb, self.lateral_sigma / max(0.3, (rng + pr) / 2.0))  # never under lateral_sigma sideways
+        sb = self.sb
+        if t >= self.ambiguous_until:  # alone: never under lateral_sigma sideways
+            sb = max(sb, self.lateral_sigma / max(0.3, (rng + pr) / 2.0))
         c = ((bearing - pb) / (sb * widen)) ** 2 + ((rng - pr) / (self.sr * widen)) ** 2
         return c + self.colour_cost(chroma, hist)
 
@@ -290,10 +303,24 @@ class TargetGate:
             self.range_rate += self.beta * er / dt
         self.t = t
 
+    def _note_box(self, t, bearing, rng):
+        """Remember boxes near the predicted target; two people there in one frame make it ambiguous."""
+        pb, pr = self._predict(t)
+        x, y = rng * math.cos(bearing), rng * math.sin(bearing)
+        if math.hypot(x - pr * math.cos(pb), y - pr * math.sin(pb)) > self.ambiguity_radius:
+            return
+        self.boxes = [b for b in self.boxes if t - b[0] <= self.ambiguity_frame] + [(t, x, y)]
+        for _, bx, by in self.boxes[:-1]:
+            if math.hypot(x - bx, y - by) >= self.ambiguity_min_sep:
+                self.ambiguous_until = t + self.ambiguity_window
+                break
+
     def accept(self, t, bearing, rng, chroma=None, hist=None):
         """True if this detection is the target; updates the track when it is."""
         if self.locked and t - self.t > self.unlock_after_s:
             self.reset()
+        if self.locked:
+            self._note_box(t, bearing, rng)
         if not self.locked:
             if self.lock_range[0] <= rng <= self.lock_range[1] and abs(bearing) <= self.lock_bearing:
                 self.locked, self.t = True, t
@@ -322,6 +349,8 @@ class TargetGate:
 GATE_PARAMS = {
     'bearing_sigma_deg': 5.0,
     'lateral_sigma_m': 0.15,
+    'ambiguity_window_s': 1.0,
+    'ambiguity_radius_m': 1.0,
     'range_sigma_m': 0.15,
     'hist_weight': 0.25,
     'reacquire_after_s': 1.0,
