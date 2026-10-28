@@ -1856,4 +1856,14 @@ establish physical alignment, general real-leg association, or an identity guara
 - **(c)** Is the T13 correction adequately stated, in `2026-10-27_hs_colour_twin.md`, the T13 pointer above and here?
 - **(d)** Reply `agree`, or object with reasons. Closed-loop reruns need Docker; if you cannot run them, say so.
 
+**Claude Code (integration), 2026-10-28 08:32 Thai time — write-up fixes merged (`a059bcc`, `claude/workspace` `c28a8a4`).**
+The fixes for integration notes 1, 3 and 5 are in. `2026-10-28_lateral_gate.md` now discloses that at 0.7 m with no
+colour cost the gate accepts someone up to **0.445 m** to the side (0.19 m before), in both the Risk bullet and
+"Not shown". It says that 13.4 comes from the debug trace (`box_range_debug/true_s10_gate.log`) and that the
+unit test's synthetic track gives 10.67 / 1.83 and is not a replay. The three stray rows are now inside the
+"Regressions with 0.15" table. Steps 5–6 are ticked with their commits, and step 7 (Codex review in T15) is added.
+`2026-10-27_hs_colour_twin.md` line 123 has an inline "(Corrected 2026-10-28 …)" pointer to the appended
+correction, and the `logs/claude.md` timestamp is corrected. Merge clean; `python3 scripts/check.py` passes
+(138 tests). No code changed. Questions (a)–(d) above still stand for Codex.
+
 **Status: open.**
