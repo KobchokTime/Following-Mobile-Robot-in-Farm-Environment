@@ -272,8 +272,6 @@ def _tracks(rows, name: str, expected: dict, runs: dict, errors: list[str]) -> N
         target = [row[field] for field in ("tx", "ty", "gap", "tb")]
         if any(x is None for x in target) != all(x is None for x in target) or any(x is not None and not _number(x) for x in target):
             errors.append(f"{where}: target position fields must be all null or finite numbers")
-        if row["gap"] is not None and _number(row["gap"]) and row["gap"] < 0:
-            errors.append(f"{where}: negative gap")
         if (row["ox"] is None) != (row["oy"] is None) or any(row[x] is not None and not _number(row[x]) for x in ("ox", "oy")):
             errors.append(f"{where}: other-person coordinates must be both null or finite numbers")
 

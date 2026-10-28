@@ -49,6 +49,9 @@ class DashboardLiveValidatorTest(unittest.TestCase):
                 "people": {"person_0": {"bearing_deg": 0.0, "range_m": 0.8, "is_target": True}},
             }
             (d / "state.jsonl").write_text(json.dumps(state) + "\n", encoding="utf-8")
+        self.generate()
+
+    def generate(self):
         proc = subprocess.run([sys.executable, "tools/dashboard/live/gen_live.py", "--registry", str(self.registry),
                                "--runs-root", str(self.runs), "--out", str(self.out)], cwd=ROOT,
                               capture_output=True, text=True, check=False, env={**os.environ, "PYTHONUTF8": "0"})
@@ -97,6 +100,17 @@ class DashboardLiveValidatorTest(unittest.TestCase):
         errors = validate(self.registry, self.out)
         self.assertTrue(any("t must increase" in error for error in errors))
         self.assertTrue(any("wrong live/past file" in error for error in errors))
+
+    def test_generated_track_can_have_negative_gap_at_close_range(self):
+        state_path = self.runs / "live_case" / "live_s0" / "straight_mps" / "state.jsonl"
+        state = json.loads(state_path.read_text(encoding="utf-8"))
+        state["people"]["person_0"]["range_m"] = 0.1
+        state_path.write_text(json.dumps(state) + "\n", encoding="utf-8")
+        self.out = self.root / "output_close_range"  # fresh cache, so the generator reads the changed state
+        self.generate()
+        track = json.loads((self.out / "live_tracks.json").read_text(encoding="utf-8"))[0]
+        self.assertEqual(track["gap"], -0.1)
+        self.assertEqual(validate(self.registry, self.out), [])
 
     def test_scenario_reference_and_file_limit(self):
         self.mutate("live_scenarios.json", lambda rows: rows.clear())
