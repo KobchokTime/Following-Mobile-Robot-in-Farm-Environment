@@ -170,6 +170,8 @@ export async function handleRequest(req, res) {
             state: event?.state || (job.ready ? "ready" : "paused"),
             at: event?.at || null, branch: event?.branch || null,
             summary: event?.summary || null,
+            checkExit: Number.isInteger(event?.checkExit) ? event.checkExit : null,
+            checkTimedOut: event?.checkTimedOut === true,
           };
         }),
       });
@@ -193,7 +195,7 @@ export async function handleRequest(req, res) {
     const agent = agents.find((item) => item.id === match[1]);
     return agent ? askAgent(req, res, agent) : reply(res, 404, { error: "ไม่พบ agent" });
   }
-  const files = { "/": ["index.html", "text/html"], "/index.html": ["index.html", "text/html"], "/agent-chat.js": ["agent-chat.js", "text/javascript"], "/work-queue.js": ["work-queue.js", "text/javascript"] };
+  const files = { "/": ["index.html", "text/html"], "/index.html": ["index.html", "text/html"], "/agent-chat.js": ["agent-chat.js", "text/javascript"], "/work-queue.js": ["work-queue.js", "text/javascript"], "/automation-status.mjs": ["automation-status.mjs", "text/javascript"] };
   if (req.method !== "GET" || !files[url.pathname]) return reply(res, 404, { error: "ไม่พบหน้า" });
   try {
     const [name, type] = files[url.pathname];
