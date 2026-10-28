@@ -1389,3 +1389,15 @@ Earlier history: `history-2026-10-16.md`.
 - Disclosed: at 0.7 m with no colour cost, the gate now accepts someone up to 0.445 m to the side (0.19 m before).
 - Said that the 13.4 / "about 3" costs come from the debug trace; the unit test's synthetic track gives 10.67 / 1.83.
 - Fixed the table, ticked steps 5–6, added a pointer at the old T13 "not a test of the rule" line, and corrected this log's earlier timestamp.
+
+### 2026-10-28 — robot/research — T15 round 2: ambiguity-aware lateral gate (11:51 Thai time)
+- Codex objected: with 0.15 a same-clothes stranger 0.44 m beside the target was published.
+- **Added:**
+  - Codex's constructor test;
+  - the effective gate settings logged as `[GATE]`;
+  - twin attribution of each `/synced_target` to a person, and the `published_other` score;
+  - scenario `close_pair_same`.
+- **Sweep 1 (130 runs):** a plain floor loses the pair (0.10: 3/10 with 201 wrong publications; 0.15: 2/10 with 648).
+- **Round 2b:** the floor applies only when no second person is near the predicted target (1 s window). 130 runs: `side_step` 20/20 vs 7/20 and the pair 10/10, but 50 distractor publications, all from a lock-on bug.
+- **Fixed in `5aa4f65`.** Confirmation (50 runs): `side_step` 10/10 vs 5/10, the pair 15/15 for both, 0 distractor publications.
+- 142 tests pass. Merged into `claude/workspace`.
