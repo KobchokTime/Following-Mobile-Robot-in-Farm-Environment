@@ -153,6 +153,13 @@ class WalkUpTest(unittest.TestCase):
         node.try_sync_from_yolo(t, int(round(self.W / 2.0 - f * math.tan(math.atan2(-0.9, 1.5)))), 240, 4)
         self.assertEqual(self.frame(node, t + 0.1, [(0.9, -0.25)]), [True])
 
+    def test_a_late_box_on_the_target_stepping_aside_is_not_a_crowd(self):
+        """Twin realism: the box is 0.15 s behind the scan, so it lags the target's own returns by 0.3 m."""
+        m, _ = make_node()
+        target_now = person(1.0, -0.30)
+        self.assertFalse(m.scan_crowded(scan(target_now), 0.0, 0.8, 0.0, 0.8, 0.5))
+        self.assertTrue(m.scan_crowded(scan(target_now, person(1.05, 0.12)), 0.0, 0.8, 0.0, 0.8, 0.5))
+
     def test_a_crop_row_beside_the_target_does_not_count_as_a_person(self):
         m, _ = make_node()
         row = [p for k in range(40) for p in person(0.1 * k, -0.6, radius=0.05)]  # plants 0.1 m apart, 0.6 m right

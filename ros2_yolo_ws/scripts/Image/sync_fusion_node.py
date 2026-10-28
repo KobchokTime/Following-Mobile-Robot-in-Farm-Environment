@@ -101,20 +101,23 @@ def box_range(points, bearing, margin_rad=math.radians(5.0)):
     return best
 
 
-def scan_crowded(points, box_bearing, box_rng, pred_bearing, pred_range, radius_m, sep_m=0.35, max_width_m=1.5):
-    """True if the scan has someone besides the box near the predicted target (T15 follow-up).
+def scan_crowded(points, box_bearing, box_rng, pred_bearing, pred_range, radius_m, spread_m=0.55, max_width_m=1.5):
+    """True if the scan shows more than one person near the predicted target (T15 follow-up).
 
     Only for a box within radius_m of the predicted target, where the wider gate could take a stranger.
     The camera can miss the target's box, or send a stranger's box first in a frame; the scan has both
-    people. Two people side by side chain into one cluster, so returns count one by one: any return
-    within radius_m of the predicted target and at least sep_m from where the box is. A person's own
-    returns lie within about 0.3 m of their box. Returns in a cluster wider than max_width_m (a crop row,
-    a wall) do not count.
+    people. The returns within radius_m of the prediction are one person if they span less than spread_m
+    (a person seen from one side spans at most about 0.45 m); two people side by side span more. The box
+    position itself is not compared with the returns: the camera is about 0.15 s behind the scan, so a
+    target stepping sideways would look like a second person. Two people side by side chain into one
+    cluster, so returns count one by one; returns in a cluster wider than max_width_m (a crop row, a
+    wall) do not count.
     """
     bx, by = box_rng * math.cos(box_bearing), box_rng * math.sin(box_bearing)
     px, py = pred_range * math.cos(pred_bearing), pred_range * math.sin(pred_bearing)
     if math.hypot(bx - px, by - py) > radius_m:
-        return False  # a box away from the target (a false box, a post): the target's own returns are not a crowd
+        return False  # a box away from the target (a false box, a post)
+    near = []
     pts = sorted(points)
     start = 0
     for i in range(1, len(pts) + 1):
@@ -127,9 +130,9 @@ def scan_crowded(points, box_bearing, box_rng, pred_bearing, pred_range, radius_
             continue
         for b, r in c:
             x, y = r * math.cos(b), r * math.sin(b)
-            if math.hypot(x - px, y - py) <= radius_m and math.hypot(x - bx, y - by) >= sep_m:
-                return True
-    return False
+            if math.hypot(x - px, y - py) <= radius_m:
+                near.append((x, y))
+    return any(math.hypot(x0 - x1, y0 - y1) >= spread_m for i, (x0, y0) in enumerate(near) for x1, y1 in near[i + 1:])
 
 
 def scan_is_fresh(now, scan_time, max_age):
