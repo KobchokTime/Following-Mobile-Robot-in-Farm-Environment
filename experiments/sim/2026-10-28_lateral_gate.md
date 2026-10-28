@@ -189,7 +189,7 @@ finish.
   | 0.10 | 19/20 | **3/10** | **201** | 5/5 | 0 |
   | 0.15 | 20/20 | **2/10** | **648** | 5/5 | **495** |
 
-  - No contacts anywhere.
+  - No contacts anywhere. With 0.10, identity s0–2 is 15/15 and `zigzag` s0–9 is 10/10.
   - **Codex's objection is confirmed in closed loop:** a plain floor, even 0.10, gives up the
     close same-clothes pair to win `side_step`.
 - **Round 2b (`claude/robot/lateral-gate-2`, commit "wider lateral gate only when the target is alone"):**
