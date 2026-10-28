@@ -26,7 +26,7 @@ run() {  # tag scenario seed realism(0/1) variant
     [ -f "$d/score.json" ] || { echo "no score: $d"; exit 2; }
     for p in $(params "$5"); do
       local k=${p%%:=*} v=$(python3 -c "print(f'{float(\"${p##*:=}\"):g}')")
-      grep -q "\[GATE\].*\b$k=$v\b" "$d/sync_fusion.log" || { echo "gate setting not applied ($k=$v): $d"; exit 3; }
+      grep -qE "\[GATE\].* $k=${v//./\\.}( |\$)" "$d/sync_fusion.log" || { echo "gate setting not applied ($k=$v): $d"; exit 3; }
     done
     ok=1
   done

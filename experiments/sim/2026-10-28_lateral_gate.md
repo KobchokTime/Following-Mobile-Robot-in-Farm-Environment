@@ -29,8 +29,9 @@ continue from the "Next steps" list below. Every step is committed and pushed on
       replay of the trace.
 - `lateral_sigma_m` = 0 restores the old gate exactly.
 - **Risk:** a second person close to the target could pass the gate more easily at short range.
-  - Integration measured this at 0.7 m with no colour cost. The gate then accepts someone up to
-    **0.445 m** to the side, against 0.19 m with the old gate.
+  - Integration measured this at 0.7 m with no colour cost. The gate then accepts someone at the same range
+    up to **0.44 m** from the target (0.442 m apart; earlier written as 0.445 m), against 0.18 m with the old
+    gate (earlier 0.19 m).
   - Only colour and the range term keep two people that close apart. The
   identity and colour sets check this, and colour still adds its cost.
 
@@ -54,7 +55,7 @@ continue from the "Next steps" list below. Every step is committed and pushed on
 - [x] 4b. `zigzag` on/off check (`zz_*`): no harm detected (see Results).
 - [x] 5. Results written here; merged into `claude/workspace` (`24e121e`) and logged.
 - [x] 6. Integration: merged into `integration-hub` (`8b946b7`); T15 opened for Codex (`2857f01`).
-- [ ] 7. Codex review in T15.
+- [x] 7. Codex review in T15: objection `0579f0b`, answered by Round 2 below; re-review pending.
 
 ## Found on the way: T13's "rule off" runs had the rule on
 
@@ -77,7 +78,7 @@ continue from the "Next steps" list below. Every step is committed and pushed on
 - **No harm was detected** on identity (15/15), the colour set (19/20 in shade, 20/20 look-alike) or
   `zigzag` (8/10 vs 6/10).
 - **Not shown:** that it never accepts a second person close in. With no colour cost, the gate at 0.7 m
-  accepts someone up to 0.445 m to the side (0.19 m before).
+  accepts someone at the same range up to 0.44 m from the target (0.18 m before).
   - At 1 m, a differently dressed person 0.14 m to the side now costs 8.97 instead of 10.83, so the gate
     accepts them (the unit test moved to 10°, about 0.17 m).
   - A person that close to the target overlaps them in the image anyway.
@@ -139,7 +140,7 @@ finish.
   - With the rule on: 20/20, as in the table above.
 - **This is the closed-loop evidence T13 lacked.**
 
-## Round 2: Codex's T15 objection (in progress, Claude Code)
+## Round 2: Codex's T15 objection (done; Codex re-review pending)
 
 - **Objection** (T15 `0579f0b`; review `experiments/reviews/2026-10-28_t15_review.md` on `codex/workspace`):
   - With 0.15, a stranger in the same clothes 0.44 m beside the target is published as the target in the
@@ -223,12 +224,12 @@ finish.
   - 142 tests pass.
 - **Confirmation:** `CONFIRM=1 bash experiments/sim/scripts/run_ambiguity_sweep.sh <new_dir> twin:amb2`.
   It compares `old` and `amb` on `close_pair_same` (realism s0–9, clean s0–4) and `side_step` s8–17.
-- **Next:**
-  1. Collect both sweeps (`2026-10-28_lateral_sweep.json`, `2026-10-28_ambiguity_sweep.json`) and the
+- **Next (all done):**
+  1. [x] Collect both sweeps (`2026-10-28_lateral_sweep.json`, `2026-10-28_ambiguity_sweep.json`) and the
      confirmation (`2026-10-28_ambiguity_confirm.json`).
-  2. Keep `amb` as the default if it keeps the `side_step` gain and matches `old` on wrong publications.
+  2. [x] Keep `amb` as the default if it keeps the `side_step` gain and matches `old` on wrong publications.
      Otherwise fall back to `lateral_sigma_m` 0.
-  3. Write the result here and reply in T15.
+  3. [x] Write the result here and reply in T15. `amb` is kept (Round 2c below).
 
 ### Round 2c confirmation (`5aa4f65`, `2026-10-28_ambiguity_confirm.json`, 50 runs, interleaved)
 
@@ -247,5 +248,5 @@ finish.
 - **Not shown:**
   - two people closer than 0.25 m count as one (one box or overlapping boxes);
   - a second person who stays more than 1 m from the predicted target is not checked, and the floor
-    applies to them. They are then well outside its 0.445 m reach at 0.7 m.
+    applies to them. They are then well outside its 0.44 m reach at 0.7 m.
   - The camera may split or merge boxes differently on the robot (E4).
