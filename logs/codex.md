@@ -242,3 +242,8 @@ Earlier history: `history-2026-10-16.md`.
 - Native Codex subagent in `codex/qa/office/dashboard-dirty-provenance-v2-20261028084253` added one offline test in `tests/test_dashboard_unit_tests.py` that confirms every exported test row reports `working_tree_dirty: true` when Git status is nonempty. No generator or robot source changed.
 - Focused unit tests passed 3/3; full `scripts/check.py` passed 167/167 in the isolated clone. The Office queue verified the allowed diff, unchanged base HEAD, and successful offline gate, then recorded `review-ready` for independent review.
 - No API key, paid credits, robot hardware, motor command, or dashboard publication was used.
+
+### 2026-10-28 — qa — Open Boss pilot draft PR
+
+- Pushed `codex/qa/office/dashboard-dirty-provenance-v2-20261028084253` at `76aa7c4` and opened draft PR #9 against `codex/thesis-desk-office-queue` for independent review. It is stacked on Office PR #8 and does not merge or publish any dashboard data.
+- PR: https://github.com/KobchokTime/Following-Mobile-Robot-in-Farm-Environment/pull/9
