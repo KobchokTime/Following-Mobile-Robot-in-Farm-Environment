@@ -1389,3 +1389,17 @@ Earlier history: `history-2026-10-16.md`.
 - Disclosed: at 0.7 m with no colour cost, the gate now accepts someone up to 0.445 m to the side (0.19 m before).
 - Said that the 13.4 / "about 3" costs come from the debug trace; the unit test's synthetic track gives 10.67 / 1.83.
 - Fixed the table, ticked steps 5–6, added a pointer at the old T13 "not a test of the rule" line, and corrected this log's earlier timestamp.
+
+### 2026-10-28 — dashboard — dashboard source into the repository (11:04 Thai time)
+- The user asked for the first parallel-work step: move the dashboard out of Claude's session scratchpad.
+- Branch `claude/dashboard/source` (`76ef97e`) adds `tools/dashboard/`:
+  - `index.html` (store v24);
+  - `datasets.json` (snapshot of the dataset records);
+  - `live/gen_live.py` (`--runs-root`, `--out`);
+  - `live/registry.json`;
+  - README with the publish procedure (Claude only) and the schema of the live JSON.
+- `.gitignore`: `dashboard/` anchored to the root (`/dashboard/`), since it was also hiding `tools/dashboard/`.
+- `gen_live.py` checked against the scratchpad generator:
+  - `past_tracks` identical (25,127 rows);
+  - the other differences are only runs that finished in between, and `close_pair_same`, which is not on this branch.
+- 138 tests pass. Not merged into the hub yet.
