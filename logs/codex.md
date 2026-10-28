@@ -274,3 +274,9 @@ Earlier history: `history-2026-10-16.md`.
 - Committed the focused-check gate as `b8ed401` on `codex/thesis-desk-office-queue` and pushed the existing draft PR #8 branch. GitHub then reported a conflict with `integration-hub`.
 - Merged `origin/integration-hub` at `1042843` with `--no-ff`; resolved the sole `logs/codex.md` overlap by retaining both append-only Office and integration entries. `DISCUSSION.md` and `HANDOFF.md` arrived unchanged from the hub merge.
 - Node queue tests passed 3/3, `scripts/check.py` passed 166/166 and staged diff check passed. Pushed merge commit `3c4a090`; GitHub reported PR #8 `MERGEABLE` and still draft. Mew and Min clones remain review-ready and uncommitted.
+
+### 2026-10-28 — thesis-desk — Open review PRs for two Office lanes
+
+- Codex usage allowed ordinary work (53% five-hour, 24% weekly, no paid credits). PR #8 `45a748d` was mergeable; its `check` passed while twin and Gazebo were still running at inspection time.
+- Reviewed Mew's four-file status-panel diff and Min's documentation links and source fields. Mew's focused Node tests passed 4/4, Python gate 166/166, and browser smoke showed desks and walk/seat/meeting activity. Min's Python gate passed 166/166; source paths and CLI arguments matched the repository.
+- Committed Mew as `d851995` and opened draft PR #11 against `codex/thesis-desk-office-queue`. Committed Min as `770020c` and opened draft PR #10 against the same base. Both changes stay separate for review; neither was merged into the Office branch or dashboard artifact.
