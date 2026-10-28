@@ -33,6 +33,10 @@ export function changedPathsAllowed(paths, allowedPaths) {
   });
 }
 
+export function checksPassed(checks) {
+  return checks.every((check) => check.code === 0 && !check.timedOut);
+}
+
 function validateJob(job) {
   if (!/^[a-z0-9][a-z0-9-]{2,50}$/.test(job.id) ||
       !/^[a-z0-9][a-z0-9-]{2,50}$/.test(job.lane) ||
@@ -40,6 +44,11 @@ function validateJob(job) {
       !["read-only", "workspace-write"].includes(job.mode) ||
       !Array.isArray(job.allowedPaths) || !job.allowedPaths.length ||
       job.allowedPaths.some((path) => !/^[a-z0-9_/-]+\/$/.test(path) || path.includes("..")) ||
+      (job.focusedNodeTests !== undefined &&
+        (!Array.isArray(job.focusedNodeTests) || job.focusedNodeTests.length > 8 ||
+          job.focusedNodeTests.some((path) => typeof path !== "string" ||
+            !/^[a-z0-9_/-]+\.test\.mjs$/.test(path) ||
+            !changedPathsAllowed([path], job.allowedPaths)))) ||
       typeof job.task !== "string" || job.task.length < 30 ||
       typeof job.acceptance !== "string" || job.acceptance.length < 15 ||
       !/^codex\/[a-z0-9/-]+$/.test(job.branchPrefix)) {
@@ -155,14 +164,17 @@ async function finish(jobId) {
     const queue = await loadQueue();
     const job = queue.jobs.find((item) => item.id === jobId);
     if (!job) throw new Error("Unknown job");
-    const latest = new Map((await events()).map((event) => [event.jobId, event])).get(jobId);
-    if (latest?.state !== "assigned") throw new Error("Job is not assigned");
-    const checkout = resolve(latest.checkout);
+    const history = (await events()).filter((event) => event.jobId === jobId);
+    const latest = history.at(-1);
+    const assignment = history.findLast((event) => event.state === "assigned");
+    if (!["assigned", "failed"].includes(latest?.state) || !assignment?.checkout ||
+        !assignment.branch || !assignment.baseCommit) throw new Error("Job has no checkout to verify");
+    const checkout = resolve(assignment.checkout);
     if (!checkout.startsWith(checkoutRoot + sep)) throw new Error("Unsafe checkout path");
     const changed = await changedFiles(checkout);
     const headCommit = await git(["rev-parse", "HEAD"], checkout);
     const scopeValid = changedPathsAllowed(changed, job.allowedPaths);
-    const headUnchanged = headCommit === latest.baseCommit;
+    const headUnchanged = headCommit === assignment.baseCommit;
     const hasWork = job.mode === "read-only" || changed.length > 0;
     const tempDir = join(checkout, ".office-tmp");
     const env = { ...process.env, TEMP: tempDir, TMP: tempDir, TMPDIR: tempDir };
@@ -171,13 +183,27 @@ async function finish(jobId) {
     });
     const checkLog = join(stateDir, `${jobId}-${Date.now()}-check.txt`);
     await writeFile(checkLog, `checkout: ${checkout}\ncommand: scripts/check.py\nexit: ${check.code}\ntimed out: ${check.timedOut}\n\nstdout:\n${check.stdout}\n\nstderr:\n${check.stderr}\n`, { flag: "wx" });
-    const ok = scopeValid && headUnchanged && hasWork && check.code === 0 && !check.timedOut;
+    const focusedChecks = [];
+    for (const path of job.focusedNodeTests || []) {
+      const result = await run("node", ["--test", path], { cwd: checkout, timeoutMs: 120_000, env });
+      const log = join(stateDir, `${jobId}-${Date.now()}-${focusedChecks.length}-node.txt`);
+      await writeFile(log, `checkout: ${checkout}\ncommand: node --test ${path}\nexit: ${result.code}\ntimed out: ${result.timedOut}\n\nstdout:\n${result.stdout}\n\nstderr:\n${result.stderr}\n`, { flag: "wx" });
+      focusedChecks.push({ path, code: result.code, timedOut: result.timedOut, log });
+    }
+    const ok = scopeValid && headUnchanged && hasWork && check.code === 0 && !check.timedOut &&
+      checksPassed(focusedChecks);
+    const focusedFailure = focusedChecks.find((item) => item.code !== 0 || item.timedOut);
     const result = {
       jobId, lane: job.lane, agent: job.agent, state: ok ? "review-ready" : "failed",
-      branch: latest.branch, baseCommit: latest.baseCommit, headCommit, checkout, changed,
+      branch: assignment.branch, baseCommit: assignment.baseCommit, headCommit, checkout, changed,
       scopeValid, headUnchanged, checkExit: check.code, checkTimedOut: check.timedOut, checkLog,
+      focusedChecks,
       summary: ok ? "มีงานและเช็กออฟไลน์ผ่าน รอคนรีวิว" :
-        "ไม่มีงานที่รับได้ หรือขอบเขต/เช็กไม่ผ่าน ดู clone และผลตรวจ",
+        !scopeValid ? "ไฟล์ที่แก้อยู่นอกขอบเขตงาน" :
+        !headUnchanged ? "HEAD ของ clone เปลี่ยนจากฐานที่มอบหมาย" :
+        !hasWork ? "งานเขียนไม่มีไฟล์เปลี่ยน" :
+        check.code !== 0 || check.timedOut ? `Python check ไม่ผ่าน (exit ${check.code})` :
+        `Node test ไม่ผ่าน: ${focusedFailure.path} (exit ${focusedFailure.code})`,
     };
     await record(result);
     return result;

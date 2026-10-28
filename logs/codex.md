@@ -255,3 +255,10 @@ Earlier history: `history-2026-10-16.md`.
 - Updated the existing active hourly `follower-test-bench` heartbeat to read the Office queue, check current plan usage, pause at 80% five-hour or 90% weekly usage, and dispatch native subagents only in isolated assignments. It retains the no-key/no-paid-credit and review-before-merge boundaries.
 - Pushed Office feature head `11d75c4` and updated draft PR #8 with the automation flow, visual smoke, pilot QA evidence and current checks. Its GitHub `check` completed successfully; twin and gazebo were still running at inspection time.
 - The Boss pilot was opened separately as draft QA PR #9, stacked on the Office branch. Office UI displayed its `review-ready` branch and time after reload; next Mew and Min jobs remain queued because usage was 86% in the five-hour window.
+
+### 2026-10-28 — thesis-desk — Verify two Office lanes and require focused checks
+
+- Checked Codex included-plan usage before preparing Mew and Min; the queue assigned separate clones from Office head `dc630f9` without API keys, paid credits or robot hardware.
+- Mew's first Python-only `--finish` incorrectly reported review-ready while its interrupted Node test file contained NUL bytes. Appended a correcting failed event. Mew repaired the file; browser smoke at port 8767 showed desks and the failed/review-ready details, and walk, seat and meeting controls updated the scene activity.
+- The queue now runs each configured focused Node test in addition to `scripts/check.py`, writes both raw logs, and requires all exits to pass. It can recheck a repaired failed assignment using the original clone. Recheck recorded Mew as review-ready with unchanged HEAD, allowed paths, Python 166/166 and focused Node 4/4; Min's documentation clone also passed Python 166/166 and remains review-ready.
+- Node queue tests passed 3/3, `scripts/check.py` passed 166/166, and `git diff --check` passed. Both job clones remain unmerged for review.
