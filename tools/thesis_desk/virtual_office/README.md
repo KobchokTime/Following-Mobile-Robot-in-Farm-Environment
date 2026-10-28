@@ -30,7 +30,9 @@ per job, with at most three active jobs and one job per lane. The heartbeat
 starts native Codex subagents in those clones using the signed-in ChatGPT plan.
 After a subagent finishes, `automation-queue.mjs --finish --job ID` verifies
 the allowed file scope, unchanged base commit and offline `scripts/check.py`
-gate. The result remains for independent review; no branch is committed,
+gate. Jobs with `focusedNodeTests` must pass those Node tests as well. A failed
+check or missing check executable is recorded as failed, and `--finish` can
+recheck the same clone after repair. The result remains for independent review; no branch is committed,
 pushed or merged by the queue.
 
 The queue stores append-only events under the sibling

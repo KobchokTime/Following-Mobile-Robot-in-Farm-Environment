@@ -78,12 +78,17 @@ async function runCodex(instructions, input, previous) {
 
 const runModel = runCodex;
 
-async function readMessage(req, res) {
+export async function readMessage(req, res) {
   let payload;
   try { payload = await readJson(req); }
   catch { reply(res, 400, { error: "รูปแบบข้อความไม่ถูกต้องหรือยาวเกินกำหนด" }); return null; }
-  const message = String(payload.message || "").trim();
-  const session = String(payload.session || "").trim();
+  if (payload === null || typeof payload !== "object" || Array.isArray(payload) ||
+      typeof payload.message !== "string" || typeof payload.session !== "string") {
+    reply(res, 400, { error: "ข้อความหรือ session ไม่ถูกต้อง" });
+    return null;
+  }
+  const message = payload.message.trim();
+  const session = payload.session.trim();
   if (!message || message.length > 4000 || !/^[a-zA-Z0-9-]{8,80}$/.test(session)) {
     reply(res, 400, { error: "ข้อความหรือ session ไม่ถูกต้อง" });
     return null;
@@ -206,4 +211,9 @@ export async function handleRequest(req, res) {
 }
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === resolve(process.argv[1]))
-  createServer(handleRequest).listen(port, "127.0.0.1", () => console.log(`Virtual Office: http://127.0.0.1:${port}`));
+  createServer((req, res) => {
+    Promise.resolve(handleRequest(req, res)).catch(() => {
+      if (!res.headersSent) reply(res, 500, { error: "เซิร์ฟเวอร์ประมวลผลคำขอไม่ได้" });
+      else res.destroy();
+    });
+  }).listen(port, "127.0.0.1", () => console.log(`Virtual Office: http://127.0.0.1:${port}`));

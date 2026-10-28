@@ -280,3 +280,9 @@ Earlier history: `history-2026-10-16.md`.
 - Codex usage allowed ordinary work (53% five-hour, 24% weekly, no paid credits). PR #8 `45a748d` was mergeable; its `check` passed while twin and Gazebo were still running at inspection time.
 - Reviewed Mew's four-file status-panel diff and Min's documentation links and source fields. Mew's focused Node tests passed 4/4, Python gate 166/166, and browser smoke showed desks and walk/seat/meeting activity. Min's Python gate passed 166/166; source paths and CLI arguments matched the repository.
 - Committed Mew as `d851995` and opened draft PR #11 against `codex/thesis-desk-office-queue`. Committed Min as `770020c` and opened draft PR #10 against the same base. Both changes stay separate for review; neither was merged into the Office branch or dashboard artifact.
+
+### 2026-10-28 — thesis-desk — Address independent Office PR review
+
+- An independent GPT-6 Astra review of draft PR #8 found two P2 cases: JSON `null` could throw in the Office chat request path, and a check executable that could not start left an Office assignment stuck. The review made no file changes.
+- Validated message types before reading fields and added an HTTP listener catch for unexpected request failures. The queue now records a check spawn error as a failed result with a diagnostic and keeps the clone available for recheck.
+- Added focused regression tests for invalid JSON values, a valid message, and a missing check executable. Node tests passed 6/6, `scripts/check.py` passed 166/166, syntax checks and `git diff --check` passed. No external model call, robot or artifact publish was used for these tests.

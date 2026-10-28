@@ -77,15 +77,25 @@ async function record(event) {
   await appendFile(eventsFile, JSON.stringify({ at: new Date().toISOString(), ...event }) + "\n", "utf8");
 }
 
-async function run(command, args, { cwd = repo, timeoutMs = 60_000, env = process.env } = {}) {
-  return new Promise((done, fail) => {
-    const child = spawn(command, args, { cwd, env, windowsHide: true, stdio: ["ignore", "pipe", "pipe"] });
+export async function run(command, args, { cwd = repo, timeoutMs = 60_000, env = process.env } = {}) {
+  return new Promise((done) => {
+    let child;
+    try { child = spawn(command, args, { cwd, env, windowsHide: true, stdio: ["ignore", "pipe", "pipe"] }); }
+    catch (error) {
+      done({ code: null, stdout: "", stderr: error.message, timedOut: false,
+        spawnError: error.code || error.name });
+      return;
+    }
     let stdout = "", stderr = "", timedOut = false;
     const timer = setTimeout(() => { timedOut = true; child.kill(); }, timeoutMs);
     child.stdout.on("data", (chunk) => { stdout = (stdout + chunk).slice(-32_000); });
     child.stderr.on("data", (chunk) => { stderr = (stderr + chunk).slice(-32_000); });
-    child.on("error", (error) => { clearTimeout(timer); fail(error); });
-    child.on("close", (code) => { clearTimeout(timer); done({ code, stdout, stderr, timedOut }); });
+    child.on("error", (error) => {
+      clearTimeout(timer);
+      done({ code: null, stdout, stderr: `${stderr}\n${error.message}`, timedOut,
+        spawnError: error.code || error.name });
+    });
+    child.on("close", (code) => { clearTimeout(timer); done({ code, stdout, stderr, timedOut, spawnError: null }); });
   });
 }
 
@@ -182,13 +192,14 @@ async function finish(jobId) {
       cwd: checkout, timeoutMs: 300_000, env,
     });
     const checkLog = join(stateDir, `${jobId}-${Date.now()}-check.txt`);
-    await writeFile(checkLog, `checkout: ${checkout}\ncommand: scripts/check.py\nexit: ${check.code}\ntimed out: ${check.timedOut}\n\nstdout:\n${check.stdout}\n\nstderr:\n${check.stderr}\n`, { flag: "wx" });
+    await writeFile(checkLog, `checkout: ${checkout}\ncommand: scripts/check.py\nexit: ${check.code}\ntimed out: ${check.timedOut}\nspawn error: ${check.spawnError || "none"}\n\nstdout:\n${check.stdout}\n\nstderr:\n${check.stderr}\n`, { flag: "wx" });
     const focusedChecks = [];
     for (const path of job.focusedNodeTests || []) {
       const result = await run("node", ["--test", path], { cwd: checkout, timeoutMs: 120_000, env });
       const log = join(stateDir, `${jobId}-${Date.now()}-${focusedChecks.length}-node.txt`);
-      await writeFile(log, `checkout: ${checkout}\ncommand: node --test ${path}\nexit: ${result.code}\ntimed out: ${result.timedOut}\n\nstdout:\n${result.stdout}\n\nstderr:\n${result.stderr}\n`, { flag: "wx" });
-      focusedChecks.push({ path, code: result.code, timedOut: result.timedOut, log });
+      await writeFile(log, `checkout: ${checkout}\ncommand: node --test ${path}\nexit: ${result.code}\ntimed out: ${result.timedOut}\nspawn error: ${result.spawnError || "none"}\n\nstdout:\n${result.stdout}\n\nstderr:\n${result.stderr}\n`, { flag: "wx" });
+      focusedChecks.push({ path, code: result.code, timedOut: result.timedOut,
+        spawnError: result.spawnError, log });
     }
     const ok = scopeValid && headUnchanged && hasWork && check.code === 0 && !check.timedOut &&
       checksPassed(focusedChecks);
@@ -196,13 +207,16 @@ async function finish(jobId) {
     const result = {
       jobId, lane: job.lane, agent: job.agent, state: ok ? "review-ready" : "failed",
       branch: assignment.branch, baseCommit: assignment.baseCommit, headCommit, checkout, changed,
-      scopeValid, headUnchanged, checkExit: check.code, checkTimedOut: check.timedOut, checkLog,
+      scopeValid, headUnchanged, checkExit: check.code, checkTimedOut: check.timedOut,
+      checkSpawnError: check.spawnError, checkLog,
       focusedChecks,
       summary: ok ? "มีงานและเช็กออฟไลน์ผ่าน รอคนรีวิว" :
         !scopeValid ? "ไฟล์ที่แก้อยู่นอกขอบเขตงาน" :
         !headUnchanged ? "HEAD ของ clone เปลี่ยนจากฐานที่มอบหมาย" :
         !hasWork ? "งานเขียนไม่มีไฟล์เปลี่ยน" :
+        check.spawnError ? `Python check เริ่มไม่ได้ (${check.spawnError})` :
         check.code !== 0 || check.timedOut ? `Python check ไม่ผ่าน (exit ${check.code})` :
+        focusedFailure.spawnError ? `Node test เริ่มไม่ได้: ${focusedFailure.path} (${focusedFailure.spawnError})` :
         `Node test ไม่ผ่าน: ${focusedFailure.path} (exit ${focusedFailure.code})`,
     };
     await record(result);

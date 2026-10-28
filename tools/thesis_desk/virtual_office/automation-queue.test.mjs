@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { changedPathsAllowed, checksPassed, selectJobs } from "./automation-queue.mjs";
+import { changedPathsAllowed, checksPassed, run, selectJobs } from "./automation-queue.mjs";
 
 test("limits assignments to three independent lanes and active capacity", () => {
   const jobs = [
@@ -28,4 +28,11 @@ test("a required focused check failure blocks review-ready", () => {
   assert.equal(checksPassed([{ code: 0, timedOut: false }]), true);
   assert.equal(checksPassed([{ code: 1, timedOut: false }]), false);
   assert.equal(checksPassed([{ code: 0, timedOut: true }]), false);
+});
+
+test("a missing check executable resolves as a failed check", async () => {
+  const result = await run("office-check-command-does-not-exist", [], { timeoutMs: 1000 });
+  assert.equal(result.code, null);
+  assert.equal(result.spawnError, "ENOENT");
+  assert.equal(checksPassed([result]), false);
 });
