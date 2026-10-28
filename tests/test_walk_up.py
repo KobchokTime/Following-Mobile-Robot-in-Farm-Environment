@@ -141,6 +141,18 @@ class WalkUpTest(unittest.TestCase):
         node.try_sync_from_yolo(t, int(round(self.W / 2.0 - f * math.tan(math.atan2(-0.25, 0.9)))), 240, 4)
         self.assertEqual(len(node.published), n + 1)
 
+    def test_a_false_box_away_from_the_target_leaves_the_wider_gate(self):
+        """Twin side_step with realism: a spurious box on a post must not make the target's own returns a crowd."""
+        m, node = make_node()
+        t = self.lock(node, target=(0.9, 0.0))
+        node.scan_points = scan(person(0.9, 0.0), person(1.5, -0.9, radius=0.06))
+        node.scan_time = t
+        node.buf_lidar.clear()
+        node.buf_lidar.append((t, [1.0]))
+        f = (self.W / 2.0) / math.tan(math.radians(self.HFOV) / 2.0)
+        node.try_sync_from_yolo(t, int(round(self.W / 2.0 - f * math.tan(math.atan2(-0.9, 1.5)))), 240, 4)
+        self.assertEqual(self.frame(node, t + 0.1, [(0.9, -0.25)]), [True])
+
     def test_a_crop_row_beside_the_target_does_not_count_as_a_person(self):
         m, _ = make_node()
         row = [p for k in range(40) for p in person(0.1 * k, -0.6, radius=0.05)]  # plants 0.1 m apart, 0.6 m right

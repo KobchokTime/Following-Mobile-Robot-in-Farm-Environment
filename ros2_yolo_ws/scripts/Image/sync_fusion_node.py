@@ -104,6 +104,7 @@ def box_range(points, bearing, margin_rad=math.radians(5.0)):
 def scan_crowded(points, box_bearing, box_rng, pred_bearing, pred_range, radius_m, sep_m=0.35, max_width_m=1.5):
     """True if the scan has someone besides the box near the predicted target (T15 follow-up).
 
+    Only for a box within radius_m of the predicted target, where the wider gate could take a stranger.
     The camera can miss the target's box, or send a stranger's box first in a frame; the scan has both
     people. Two people side by side chain into one cluster, so returns count one by one: any return
     within radius_m of the predicted target and at least sep_m from where the box is. A person's own
@@ -112,6 +113,8 @@ def scan_crowded(points, box_bearing, box_rng, pred_bearing, pred_range, radius_
     """
     bx, by = box_rng * math.cos(box_bearing), box_rng * math.sin(box_bearing)
     px, py = pred_range * math.cos(pred_bearing), pred_range * math.sin(pred_bearing)
+    if math.hypot(bx - px, by - py) > radius_m:
+        return False  # a box away from the target (a false box, a post): the target's own returns are not a crowd
     pts = sorted(points)
     start = 0
     for i in range(1, len(pts) + 1):
