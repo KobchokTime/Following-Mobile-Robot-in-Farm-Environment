@@ -6,6 +6,7 @@
 #   floor lateral_sigma_m 0.15, ambiguity_radius_m 0 (round 1: no ambiguity check)
 # Needs: docker build -q --build-arg INSTALL_MCAP=0 -f sim/docker/Dockerfile -t twin:amb .
 # Usage: bash experiments/sim/scripts/run_ambiguity_sweep.sh <new_out_dir> [image]
+# CONFIRM=1 runs only the round-2c confirmation (old vs amb: close_pair_same and side_step s8-17).
 set -u
 OUT=$(realpath -m "${1:?out dir}"); IMG=${2:-twin:amb}
 [ -e "$OUT" ] && { echo "out dir exists: $OUT"; exit 1; }
@@ -31,6 +32,12 @@ run() {  # tag scenario seed realism(0/1) variant
   done
   [ $ok = 1 ] || { echo "no run folder: $1"; exit 2; }
 }
+if [ "${CONFIRM:-0}" = 1 ]; then  # round 2c: after the lock-on fix, old vs amb only
+  for sd in $(seq 0 9); do for v in old amb; do run "cp_real_${v}_s$sd" close_pair_same "$sd" 1 $v; done; done
+  for sd in $(seq 0 4); do for v in old amb; do run "cp_clean_${v}_s$sd" close_pair_same "$sd" 0 $v; done; done
+  for sd in $(seq 8 17); do for v in old amb; do run "ss_${v}_s$sd" side_step "$sd" 1 $v; done; done
+  echo ALLDONE; exit 0
+fi
 for sd in $(seq 8 27); do for v in old amb floor; do run "ss_${v}_s$sd" side_step "$sd" 1 $v; done; done
 echo "side_step done $(date -u +%H:%MZ)"
 for sd in $(seq 0 9); do for v in old amb floor; do run "cp_real_${v}_s$sd" close_pair_same "$sd" 1 $v; done; done

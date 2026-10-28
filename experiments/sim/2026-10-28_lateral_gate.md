@@ -204,8 +204,28 @@ finish.
   - on `side_step` s8–27 and `close_pair_same` (realism s0–9, clean s0–4);
   - with `amb` only: identity s0–2 and `zigzag` s0–9.
   - It is queued after sweep 1 in a new output folder.
+- **Sweep 2b result** (`2026-10-28_ambiguity_sweep.json`, 130 runs, interleaved):
+
+  | Variant | `side_step` s8–27 | pair, realism s0–9 | wrong | pair, clean s0–4 | wrong | identity / `zigzag` |
+  |---|---|---|---|---|---|---|
+  | `old` | 7/20 | 10/10 | 7 | 5/5 | 0 | — |
+  | `amb` | **20/20** | 10/10 | 50 | 5/5 | 5 | 15/15 / 10/10 |
+  | `floor` | 20/20 | 4/10 | 561 | 4/5 | 492 | — |
+
+  - "Wrong" counts every publication of a box that is not the target's.
+  - `old`'s 7 are realism's random false-positive boxes; none is the distractor.
+  - **All of `amb`'s distractor publications fall in the first 5 s.** The cause was a bug: the lock-on box
+    was not noted, so the stranger's box in the same frame did not count as a second person.
+- **Round 2c fix** (`5aa4f65`):
+  - the lock-on box is noted, and the first second after lock-on uses the plain gate;
+  - a test covers the lock-on frame.
+  - The sidestep test's synthetic move now starts after that second.
+  - 142 tests pass.
+- **Confirmation:** `CONFIRM=1 bash experiments/sim/scripts/run_ambiguity_sweep.sh <new_dir> twin:amb2`.
+  It compares `old` and `amb` on `close_pair_same` (realism s0–9, clean s0–4) and `side_step` s8–17.
 - **Next:**
-  1. Collect both sweeps (`2026-10-28_lateral_sweep.json`, `2026-10-28_ambiguity_sweep.json`).
+  1. Collect both sweeps (`2026-10-28_lateral_sweep.json`, `2026-10-28_ambiguity_sweep.json`) and the
+     confirmation (`2026-10-28_ambiguity_confirm.json`).
   2. Keep `amb` as the default if it keeps the `side_step` gain and matches `old` on wrong publications.
      Otherwise fall back to `lateral_sigma_m` 0.
   3. Write the result here and reply in T15.
