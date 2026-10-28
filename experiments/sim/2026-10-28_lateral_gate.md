@@ -45,6 +45,7 @@ continue from the "Next steps" list below. Every step is committed and pushed on
         off (`reacquire_dist_m` / `reacquire_dist_max_m` 100).
       - Script: `experiments/sim/scripts/run_lateral_gate.sh`. Results go in
         `2026-10-28_lateral_gate.json`, via `experiments/sim/scripts/collect_runs.py`.
+- [ ] 4b. `zigzag` on/off check (`zz_*`). If 0.15 hurts `zigzag`, find out why before going further.
 - [ ] 5. Write the results here. Merge into `claude/workspace` and log in `logs/claude.md`.
 - [ ] 6. Integration: merge into `integration-hub` and open a thread for Codex. Update HANDOFF item 18.
 
@@ -94,6 +95,15 @@ finish.
   - So `side_step` also varies a lot from session to session, plausibly with host load. Only the
     interleaved on/off comparison within this session is a fair test.
 
-### Regressions with 0.15, and T13's rule really off
+### Regressions with 0.15 (realism)
 
-(running; see the live dashboard)
+| Set | Result |
+|---|---|
+| Identity, seeds 0–2 | 15/15, no contact |
+| Solo, seeds 0–2 | 27/30, no contact. **`zigzag` fails all 3 seeds** |
+
+- `zigzag` passed 4/5 with the old gate on seeds 3–7 (`2026-10-27_box_range.md`).
+- A within-session check is queued: `zigzag` seeds 0–9 with 0.15 vs 0, interleaved (`zz_*` in the run
+  script).
+
+(colour set and T13 rule-off still running; see the live dashboard)

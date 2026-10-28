@@ -1,5 +1,187 @@
 [
 {
+"run": "col_shade_crossing_s0",
+"scenario": "shade_crossing",
+"seed": 0,
+"pass_": true,
+"contact": false,
+"final_gap_m": 0.516,
+"target_visible_share": 1.0,
+"max_abs_target_bearing_deg": 17.1,
+"ros_params": [
+"lateral_sigma_m:=0.15"
+],
+"realism": true
+},
+{
+"run": "col_shade_crossing_s1",
+"scenario": "shade_crossing",
+"seed": 1,
+"pass_": true,
+"contact": false,
+"final_gap_m": 0.53,
+"target_visible_share": 1.0,
+"max_abs_target_bearing_deg": 2.5,
+"ros_params": [
+"lateral_sigma_m:=0.15"
+],
+"realism": true
+},
+{
+"run": "col_shade_crossing_s2",
+"scenario": "shade_crossing",
+"seed": 2,
+"pass_": true,
+"contact": false,
+"final_gap_m": 0.525,
+"target_visible_share": 1.0,
+"max_abs_target_bearing_deg": 2.3,
+"ros_params": [
+"lateral_sigma_m:=0.15"
+],
+"realism": true
+},
+{
+"run": "col_shade_crossing_s3",
+"scenario": "shade_crossing",
+"seed": 3,
+"pass_": true,
+"contact": false,
+"final_gap_m": 0.522,
+"target_visible_share": 1.0,
+"max_abs_target_bearing_deg": 8.7,
+"ros_params": [
+"lateral_sigma_m:=0.15"
+],
+"realism": true
+},
+{
+"run": "col_shade_side_by_side_s0",
+"scenario": "shade_side_by_side",
+"seed": 0,
+"pass_": true,
+"contact": false,
+"final_gap_m": 0.52,
+"target_visible_share": 1.0,
+"max_abs_target_bearing_deg": 19.9,
+"ros_params": [
+"lateral_sigma_m:=0.15"
+],
+"realism": true
+},
+{
+"run": "col_shade_side_by_side_s1",
+"scenario": "shade_side_by_side",
+"seed": 1,
+"pass_": true,
+"contact": false,
+"final_gap_m": 0.505,
+"target_visible_share": 1.0,
+"max_abs_target_bearing_deg": 20.0,
+"ros_params": [
+"lateral_sigma_m:=0.15"
+],
+"realism": true
+},
+{
+"run": "col_shade_side_by_side_s2",
+"scenario": "shade_side_by_side",
+"seed": 2,
+"pass_": true,
+"contact": false,
+"final_gap_m": 0.511,
+"target_visible_share": 1.0,
+"max_abs_target_bearing_deg": 19.3,
+"ros_params": [
+"lateral_sigma_m:=0.15"
+],
+"realism": true
+},
+{
+"run": "look_clean_s0",
+"scenario": "lookalike_after_loss",
+"seed": 0,
+"pass_": true,
+"contact": false,
+"final_gap_m": 0.504,
+"target_visible_share": 1.0,
+"max_abs_target_bearing_deg": 0.0,
+"ros_params": [
+"lateral_sigma_m:=0.15"
+],
+"realism": false
+},
+{
+"run": "look_clean_s1",
+"scenario": "lookalike_after_loss",
+"seed": 1,
+"pass_": true,
+"contact": false,
+"final_gap_m": 0.497,
+"target_visible_share": 1.0,
+"max_abs_target_bearing_deg": 0.0,
+"ros_params": [
+"lateral_sigma_m:=0.15"
+],
+"realism": false
+},
+{
+"run": "look_clean_s2",
+"scenario": "lookalike_after_loss",
+"seed": 2,
+"pass_": true,
+"contact": false,
+"final_gap_m": 0.504,
+"target_visible_share": 1.0,
+"max_abs_target_bearing_deg": 0.0,
+"ros_params": [
+"lateral_sigma_m:=0.15"
+],
+"realism": false
+},
+{
+"run": "look_real_s0",
+"scenario": "lookalike_after_loss",
+"seed": 0,
+"pass_": true,
+"contact": false,
+"final_gap_m": 0.535,
+"target_visible_share": 1.0,
+"max_abs_target_bearing_deg": 8.0,
+"ros_params": [
+"lateral_sigma_m:=0.15"
+],
+"realism": true
+},
+{
+"run": "look_real_s1",
+"scenario": "lookalike_after_loss",
+"seed": 1,
+"pass_": true,
+"contact": false,
+"final_gap_m": 0.519,
+"target_visible_share": 1.0,
+"max_abs_target_bearing_deg": 1.7,
+"ros_params": [
+"lateral_sigma_m:=0.15"
+],
+"realism": true
+},
+{
+"run": "look_real_s2",
+"scenario": "lookalike_after_loss",
+"seed": 2,
+"pass_": true,
+"contact": false,
+"final_gap_m": 0.514,
+"target_visible_share": 1.0,
+"max_abs_target_bearing_deg": 9.7,
+"ros_params": [
+"lateral_sigma_m:=0.15"
+],
+"realism": true
+},
+{
 "run": "reg_identity_s0",
 "scenario": "crossing",
 "seed": 0,
@@ -64,6 +246,566 @@
 "final_gap_m": 0.531,
 "target_visible_share": 1.0,
 "max_abs_target_bearing_deg": 1.9,
+"ros_params": [
+"lateral_sigma_m:=0.15"
+],
+"realism": true
+},
+{
+"run": "reg_identity_s1",
+"scenario": "crossing",
+"seed": 1,
+"pass_": true,
+"contact": false,
+"final_gap_m": 0.529,
+"target_visible_share": 1.0,
+"max_abs_target_bearing_deg": 2.5,
+"ros_params": [
+"lateral_sigma_m:=0.15"
+],
+"realism": true
+},
+{
+"run": "reg_identity_s1",
+"scenario": "head_on",
+"seed": 1,
+"pass_": true,
+"contact": false,
+"final_gap_m": 0.529,
+"target_visible_share": 1.0,
+"max_abs_target_bearing_deg": 13.8,
+"ros_params": [
+"lateral_sigma_m:=0.15"
+],
+"realism": true
+},
+{
+"run": "reg_identity_s1",
+"scenario": "side_by_side",
+"seed": 1,
+"pass_": true,
+"contact": false,
+"final_gap_m": 0.532,
+"target_visible_share": 1.0,
+"max_abs_target_bearing_deg": 20.6,
+"ros_params": [
+"lateral_sigma_m:=0.15"
+],
+"realism": true
+},
+{
+"run": "reg_identity_s1",
+"scenario": "side_by_side_same",
+"seed": 1,
+"pass_": true,
+"contact": false,
+"final_gap_m": 0.522,
+"target_visible_share": 1.0,
+"max_abs_target_bearing_deg": 19.3,
+"ros_params": [
+"lateral_sigma_m:=0.15"
+],
+"realism": true
+},
+{
+"run": "reg_identity_s1",
+"scenario": "stand_aside",
+"seed": 1,
+"pass_": true,
+"contact": false,
+"final_gap_m": 0.513,
+"target_visible_share": 1.0,
+"max_abs_target_bearing_deg": 14.8,
+"ros_params": [
+"lateral_sigma_m:=0.15"
+],
+"realism": true
+},
+{
+"run": "reg_identity_s2",
+"scenario": "crossing",
+"seed": 2,
+"pass_": true,
+"contact": false,
+"final_gap_m": 0.547,
+"target_visible_share": 1.0,
+"max_abs_target_bearing_deg": 4.8,
+"ros_params": [
+"lateral_sigma_m:=0.15"
+],
+"realism": true
+},
+{
+"run": "reg_identity_s2",
+"scenario": "head_on",
+"seed": 2,
+"pass_": true,
+"contact": false,
+"final_gap_m": 0.531,
+"target_visible_share": 1.0,
+"max_abs_target_bearing_deg": 5.3,
+"ros_params": [
+"lateral_sigma_m:=0.15"
+],
+"realism": true
+},
+{
+"run": "reg_identity_s2",
+"scenario": "side_by_side",
+"seed": 2,
+"pass_": true,
+"contact": false,
+"final_gap_m": 0.535,
+"target_visible_share": 1.0,
+"max_abs_target_bearing_deg": 21.1,
+"ros_params": [
+"lateral_sigma_m:=0.15"
+],
+"realism": true
+},
+{
+"run": "reg_identity_s2",
+"scenario": "side_by_side_same",
+"seed": 2,
+"pass_": true,
+"contact": false,
+"final_gap_m": 0.53,
+"target_visible_share": 1.0,
+"max_abs_target_bearing_deg": 20.8,
+"ros_params": [
+"lateral_sigma_m:=0.15"
+],
+"realism": true
+},
+{
+"run": "reg_identity_s2",
+"scenario": "stand_aside",
+"seed": 2,
+"pass_": true,
+"contact": false,
+"final_gap_m": 0.537,
+"target_visible_share": 1.0,
+"max_abs_target_bearing_deg": 4.8,
+"ros_params": [
+"lateral_sigma_m:=0.15"
+],
+"realism": true
+},
+{
+"run": "reg_solo_s0",
+"scenario": "come_back",
+"seed": 0,
+"pass_": true,
+"contact": false,
+"final_gap_m": 0.514,
+"target_visible_share": 1.0,
+"max_abs_target_bearing_deg": 1.4,
+"ros_params": [
+"lateral_sigma_m:=0.15"
+],
+"realism": true
+},
+{
+"run": "reg_solo_s0",
+"scenario": "curve_left",
+"seed": 0,
+"pass_": true,
+"contact": false,
+"final_gap_m": 0.541,
+"target_visible_share": 1.0,
+"max_abs_target_bearing_deg": 18.0,
+"ros_params": [
+"lateral_sigma_m:=0.15"
+],
+"realism": true
+},
+{
+"run": "reg_solo_s0",
+"scenario": "side_step",
+"seed": 0,
+"pass_": true,
+"contact": false,
+"final_gap_m": 0.536,
+"target_visible_share": 0.974,
+"max_abs_target_bearing_deg": 45.3,
+"ros_params": [
+"lateral_sigma_m:=0.15"
+],
+"realism": true
+},
+{
+"run": "reg_solo_s0",
+"scenario": "stop_and_go",
+"seed": 0,
+"pass_": true,
+"contact": false,
+"final_gap_m": 0.518,
+"target_visible_share": 1.0,
+"max_abs_target_bearing_deg": 3.2,
+"ros_params": [
+"lateral_sigma_m:=0.15"
+],
+"realism": true
+},
+{
+"run": "reg_solo_s0",
+"scenario": "straight",
+"seed": 0,
+"pass_": true,
+"contact": false,
+"final_gap_m": 0.532,
+"target_visible_share": 1.0,
+"max_abs_target_bearing_deg": 13.1,
+"ros_params": [
+"lateral_sigma_m:=0.15"
+],
+"realism": true
+},
+{
+"run": "reg_solo_s0",
+"scenario": "target_loss",
+"seed": 0,
+"pass_": true,
+"contact": false,
+"final_gap_m": 0.536,
+"target_visible_share": 1.0,
+"max_abs_target_bearing_deg": 3.3,
+"ros_params": [
+"lateral_sigma_m:=0.15"
+],
+"realism": true
+},
+{
+"run": "reg_solo_s0",
+"scenario": "turn_90",
+"seed": 0,
+"pass_": true,
+"contact": false,
+"final_gap_m": 0.507,
+"target_visible_share": 1.0,
+"max_abs_target_bearing_deg": 30.7,
+"ros_params": [
+"lateral_sigma_m:=0.15"
+],
+"realism": true
+},
+{
+"run": "reg_solo_s0",
+"scenario": "walk_0p6",
+"seed": 0,
+"pass_": true,
+"contact": false,
+"final_gap_m": 0.54,
+"target_visible_share": 1.0,
+"max_abs_target_bearing_deg": 13.4,
+"ros_params": [
+"lateral_sigma_m:=0.15"
+],
+"realism": true
+},
+{
+"run": "reg_solo_s0",
+"scenario": "walk_1p0",
+"seed": 0,
+"pass_": true,
+"contact": false,
+"final_gap_m": 0.509,
+"target_visible_share": 1.0,
+"max_abs_target_bearing_deg": 2.4,
+"ros_params": [
+"lateral_sigma_m:=0.15"
+],
+"realism": true
+},
+{
+"run": "reg_solo_s0",
+"scenario": "zigzag",
+"seed": 0,
+"pass_": false,
+"contact": false,
+"final_gap_m": 0.54,
+"target_visible_share": 0.786,
+"max_abs_target_bearing_deg": 68.2,
+"ros_params": [
+"lateral_sigma_m:=0.15"
+],
+"realism": true
+},
+{
+"run": "reg_solo_s1",
+"scenario": "come_back",
+"seed": 1,
+"pass_": true,
+"contact": false,
+"final_gap_m": 0.536,
+"target_visible_share": 1.0,
+"max_abs_target_bearing_deg": 3.0,
+"ros_params": [
+"lateral_sigma_m:=0.15"
+],
+"realism": true
+},
+{
+"run": "reg_solo_s1",
+"scenario": "curve_left",
+"seed": 1,
+"pass_": true,
+"contact": false,
+"final_gap_m": 0.504,
+"target_visible_share": 1.0,
+"max_abs_target_bearing_deg": 17.4,
+"ros_params": [
+"lateral_sigma_m:=0.15"
+],
+"realism": true
+},
+{
+"run": "reg_solo_s1",
+"scenario": "side_step",
+"seed": 1,
+"pass_": true,
+"contact": false,
+"final_gap_m": 0.51,
+"target_visible_share": 0.978,
+"max_abs_target_bearing_deg": 42.0,
+"ros_params": [
+"lateral_sigma_m:=0.15"
+],
+"realism": true
+},
+{
+"run": "reg_solo_s1",
+"scenario": "stop_and_go",
+"seed": 1,
+"pass_": true,
+"contact": false,
+"final_gap_m": 0.535,
+"target_visible_share": 1.0,
+"max_abs_target_bearing_deg": 4.6,
+"ros_params": [
+"lateral_sigma_m:=0.15"
+],
+"realism": true
+},
+{
+"run": "reg_solo_s1",
+"scenario": "straight",
+"seed": 1,
+"pass_": true,
+"contact": false,
+"final_gap_m": 0.529,
+"target_visible_share": 1.0,
+"max_abs_target_bearing_deg": 2.9,
+"ros_params": [
+"lateral_sigma_m:=0.15"
+],
+"realism": true
+},
+{
+"run": "reg_solo_s1",
+"scenario": "target_loss",
+"seed": 1,
+"pass_": true,
+"contact": false,
+"final_gap_m": 0.538,
+"target_visible_share": 1.0,
+"max_abs_target_bearing_deg": 11.7,
+"ros_params": [
+"lateral_sigma_m:=0.15"
+],
+"realism": true
+},
+{
+"run": "reg_solo_s1",
+"scenario": "turn_90",
+"seed": 1,
+"pass_": true,
+"contact": false,
+"final_gap_m": 0.518,
+"target_visible_share": 1.0,
+"max_abs_target_bearing_deg": 23.7,
+"ros_params": [
+"lateral_sigma_m:=0.15"
+],
+"realism": true
+},
+{
+"run": "reg_solo_s1",
+"scenario": "walk_0p6",
+"seed": 1,
+"pass_": true,
+"contact": false,
+"final_gap_m": 0.532,
+"target_visible_share": 1.0,
+"max_abs_target_bearing_deg": 15.2,
+"ros_params": [
+"lateral_sigma_m:=0.15"
+],
+"realism": true
+},
+{
+"run": "reg_solo_s1",
+"scenario": "walk_1p0",
+"seed": 1,
+"pass_": true,
+"contact": false,
+"final_gap_m": 0.535,
+"target_visible_share": 1.0,
+"max_abs_target_bearing_deg": 16.7,
+"ros_params": [
+"lateral_sigma_m:=0.15"
+],
+"realism": true
+},
+{
+"run": "reg_solo_s1",
+"scenario": "zigzag",
+"seed": 1,
+"pass_": false,
+"contact": false,
+"final_gap_m": 2.122,
+"target_visible_share": 0.317,
+"max_abs_target_bearing_deg": 86.2,
+"ros_params": [
+"lateral_sigma_m:=0.15"
+],
+"realism": true
+},
+{
+"run": "reg_solo_s2",
+"scenario": "come_back",
+"seed": 2,
+"pass_": true,
+"contact": false,
+"final_gap_m": 0.519,
+"target_visible_share": 1.0,
+"max_abs_target_bearing_deg": 16.9,
+"ros_params": [
+"lateral_sigma_m:=0.15"
+],
+"realism": true
+},
+{
+"run": "reg_solo_s2",
+"scenario": "curve_left",
+"seed": 2,
+"pass_": true,
+"contact": false,
+"final_gap_m": 0.534,
+"target_visible_share": 1.0,
+"max_abs_target_bearing_deg": 23.0,
+"ros_params": [
+"lateral_sigma_m:=0.15"
+],
+"realism": true
+},
+{
+"run": "reg_solo_s2",
+"scenario": "side_step",
+"seed": 2,
+"pass_": true,
+"contact": false,
+"final_gap_m": 0.53,
+"target_visible_share": 0.97,
+"max_abs_target_bearing_deg": 51.0,
+"ros_params": [
+"lateral_sigma_m:=0.15"
+],
+"realism": true
+},
+{
+"run": "reg_solo_s2",
+"scenario": "stop_and_go",
+"seed": 2,
+"pass_": true,
+"contact": false,
+"final_gap_m": 0.517,
+"target_visible_share": 1.0,
+"max_abs_target_bearing_deg": 12.6,
+"ros_params": [
+"lateral_sigma_m:=0.15"
+],
+"realism": true
+},
+{
+"run": "reg_solo_s2",
+"scenario": "straight",
+"seed": 2,
+"pass_": true,
+"contact": false,
+"final_gap_m": 0.516,
+"target_visible_share": 1.0,
+"max_abs_target_bearing_deg": 9.6,
+"ros_params": [
+"lateral_sigma_m:=0.15"
+],
+"realism": true
+},
+{
+"run": "reg_solo_s2",
+"scenario": "target_loss",
+"seed": 2,
+"pass_": true,
+"contact": false,
+"final_gap_m": 0.528,
+"target_visible_share": 1.0,
+"max_abs_target_bearing_deg": 9.9,
+"ros_params": [
+"lateral_sigma_m:=0.15"
+],
+"realism": true
+},
+{
+"run": "reg_solo_s2",
+"scenario": "turn_90",
+"seed": 2,
+"pass_": true,
+"contact": false,
+"final_gap_m": 0.527,
+"target_visible_share": 1.0,
+"max_abs_target_bearing_deg": 29.0,
+"ros_params": [
+"lateral_sigma_m:=0.15"
+],
+"realism": true
+},
+{
+"run": "reg_solo_s2",
+"scenario": "walk_0p6",
+"seed": 2,
+"pass_": true,
+"contact": false,
+"final_gap_m": 0.524,
+"target_visible_share": 1.0,
+"max_abs_target_bearing_deg": 6.1,
+"ros_params": [
+"lateral_sigma_m:=0.15"
+],
+"realism": true
+},
+{
+"run": "reg_solo_s2",
+"scenario": "walk_1p0",
+"seed": 2,
+"pass_": true,
+"contact": false,
+"final_gap_m": 0.519,
+"target_visible_share": 1.0,
+"max_abs_target_bearing_deg": 6.5,
+"ros_params": [
+"lateral_sigma_m:=0.15"
+],
+"realism": true
+},
+{
+"run": "reg_solo_s2",
+"scenario": "zigzag",
+"seed": 2,
+"pass_": false,
+"contact": false,
+"final_gap_m": 3.8,
+"target_visible_share": 0.247,
+"max_abs_target_bearing_deg": 116.1,
 "ros_params": [
 "lateral_sigma_m:=0.15"
 ],

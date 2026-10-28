@@ -28,4 +28,8 @@ for sd in $(seq 0 9); do
   run "look_ruleoff_clean_s$sd" lookalike_after_loss "$sd" 0 0.15 "${OFF[@]}"
   run "look_ruleoff_real_s$sd" lookalike_after_loss "$sd" 1 0.15 "${OFF[@]}"
 done; echo "rule-off done $(date -u +%H:%MZ)"
+# zigzag check: solo s0-2 with 0.15 failed zigzag 3/3, so compare on vs off interleaved
+for sd in $(seq 0 9); do
+  run "zz_on_s$sd" zigzag "$sd" 1 0.15; run "zz_off_s$sd" zigzag "$sd" 1 0.0
+done; echo "zigzag done $(date -u +%H:%MZ)"
 echo ALLDONE
