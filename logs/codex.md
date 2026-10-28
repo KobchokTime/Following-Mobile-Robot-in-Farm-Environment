@@ -166,3 +166,7 @@ Earlier history: `history-2026-10-16.md`.
 - On `codex/dashboard/ci-data`, added a standard-library generator for the Follower Test Bench `ci_runs` dataset, an offline CLI test suite and usage notes. The work does not edit the page or the published Claude artifact.
 - `python -m unittest tools/dashboard/ci/test_gen_ci.py -v` passed 5 tests. `python scripts/check.py` passed 138 tests with `TEMP` and `TMP` pointed at a writable worktree folder; the first attempt failed because the sandbox default temp folder was not writable.
 - The unauthenticated public API smoke request could not resolve `api.github.com` in this sandbox. The `--input` path passed; no live dataset was generated or published.
+
+### 2026-10-28 — dashboard/ci — Include CI generator tests in the standard gate
+- Follow-up on `codex/dashboard/ci-data`: moved the five generator tests from `tools/dashboard/ci/` to `tests/test_dashboard_ci.py`, so `scripts/check.py` discovers them. Updated the documented focused command.
+- The focused test run passed 5/5, and `python scripts/check.py` passed 143/143 with writable `TEMP`/`TMP`. This supersedes the earlier 138-test count, which did not include the new cases.

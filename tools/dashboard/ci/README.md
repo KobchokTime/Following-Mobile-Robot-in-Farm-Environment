@@ -43,7 +43,7 @@ works offline.
 Run offline tests:
 
 ```sh
-python -m unittest tools/dashboard/ci/test_gen_ci.py
+python -m unittest discover -s tests -p test_dashboard_ci.py -v
 ```
 
 GitHub's [workflow runs endpoint](https://docs.github.com/en/rest/actions/workflow-runs)

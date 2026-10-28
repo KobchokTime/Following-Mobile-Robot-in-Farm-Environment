@@ -6,7 +6,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools" / "dashboard" / "ci"))
 from gen_ci import api_url, main, make_rows  # noqa: E402
 
 
