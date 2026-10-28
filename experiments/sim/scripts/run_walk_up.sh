@@ -5,7 +5,8 @@
 #   noscan lateral_sigma_m 0.15, crowd_from_scan false (T15 round 2 as merged)
 #   scan   lateral_sigma_m 0.15, crowd_from_scan true (the new default)
 # Needs: docker build -q --build-arg INSTALL_MCAP=0 -f sim/docker/Dockerfile -t twin:walkup .
-# Usage: bash experiments/sim/scripts/run_walk_up.sh <new_out_dir> [image]
+# Usage: [ROUND=2] bash experiments/sim/scripts/run_walk_up.sh <new_out_dir> [image]
+# Round 1 ran at cd6eead, where the radius was fixed at 1.0 (CROWD_RADIUS=1.0 on a later build repeats it).
 set -u
 OUT=$(realpath -m "${1:?out dir}"); IMG=${2:-twin:walkup}
 [ -e "$OUT" ] && { echo "out dir exists: $OUT"; exit 1; }
@@ -13,7 +14,7 @@ mkdir -p "$OUT"; docker image inspect "$IMG" --format '{{.Id}}' > "$OUT/IMAGE_ID
 params() { case $1 in
   old) echo "lateral_sigma_m:=0.0 crowd_from_scan:=true" ;;
   noscan) echo "lateral_sigma_m:=0.15 crowd_from_scan:=false" ;;
-  scan) echo "lateral_sigma_m:=0.15 crowd_from_scan:=true" ;;
+  scan) echo "lateral_sigma_m:=0.15 crowd_from_scan:=true crowd_radius_m:=${CROWD_RADIUS:-0.5}" ;;
 esac; }
 run() {  # tag scenario seed realism(0/1) variant
   local R=""; [ "$4" = 1 ] && R=--realism
@@ -32,6 +33,12 @@ run() {  # tag scenario seed realism(0/1) variant
   done
   [ $ok = 1 ] || { echo "no run folder: $1"; exit 2; }
 }
+if [ "${ROUND:-1}" = 2 ]; then  # crowd_radius_m 0.5 (round 1 used 1.0 and lost side_step runs to a post)
+  for sd in $(seq 8 27); do for v in noscan scan; do run "ss_${v}_s$sd" side_step "$sd" 1 $v; done; done
+  for sd in $(seq 0 9); do run "wu_real_scan_s$sd" walk_up_same "$sd" 1 scan; done
+  for sd in $(seq 0 4); do run "cp_real_scan_s$sd" close_pair_same "$sd" 1 scan; done
+  echo ALLDONE; exit 0
+fi
 for sd in $(seq 0 9); do for v in old noscan scan; do run "wu_real_${v}_s$sd" walk_up_same "$sd" 1 $v; done; done
 echo "walk_up done $(date -u +%H:%MZ)"
 for sd in $(seq 8 17); do for v in noscan scan; do run "ss_${v}_s$sd" side_step "$sd" 1 $v; done; done

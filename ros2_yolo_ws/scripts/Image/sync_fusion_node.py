@@ -434,6 +434,7 @@ class SyncFusionNode(Node):
         self.declare_parameter('box_range_from_scan', True)
         # the scan tells the gate when someone else is near the target, whatever order the boxes come in
         self.declare_parameter('crowd_from_scan', True)
+        self.declare_parameter('crowd_radius_m', 0.5)  # only returns this close to the predicted target count
         # TargetGate tunables, so an experiment's -p really reaches the gate (undeclared -p are ignored)
         for name, value in GATE_PARAMS.items():
             self.declare_parameter(name, value)
@@ -465,9 +466,10 @@ class SyncFusionNode(Node):
         self.scan_max_age = float(self.get_parameter('lidar_scan_max_age_s').value)
         self.box_range_from_scan = bool(self.get_parameter('box_range_from_scan').value)
         self.crowd_from_scan = bool(self.get_parameter('crowd_from_scan').value)
+        self.crowd_radius = float(self.get_parameter('crowd_radius_m').value)
         # the effective settings, so a run's log shows what it actually ran with
         self.get_logger().info('[GATE] ' + ' '.join(f'{k}={v:g}' for k, v in sorted(
-            {**gate_args, 'crowd_from_scan': float(self.crowd_from_scan)}.items())))
+            {**gate_args, 'crowd_from_scan': float(self.crowd_from_scan), 'crowd_radius_m': self.crowd_radius}.items())))
         self.last_camera_fix = None  # time of the last camera detection accepted as the target
         self.last_camera_bearing = 0.0
         self.edge_rad = math.radians(self.camera_hfov_deg / 2.0 - float(self.get_parameter('lidar_edge_deg').value))
@@ -618,7 +620,7 @@ class SyncFusionNode(Node):
         if self.use_gate and self.crowd_from_scan and self.gate.locked \
                 and scan_is_fresh(ty, self.scan_time, self.scan_max_age):
             pb, pr = self.gate._predict(ty)
-            if scan_crowded(self.scan_points, bearing, dist, pb, pr, self.gate.ambiguity_radius):
+            if scan_crowded(self.scan_points, bearing, dist, pb, pr, self.crowd_radius):
                 self.gate.note_crowded(ty)
 
         if self.use_gate and not self.gate.accept(ty, bearing, dist, chroma, hist):

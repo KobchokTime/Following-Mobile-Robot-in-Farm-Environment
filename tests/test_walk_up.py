@@ -128,11 +128,24 @@ class WalkUpTest(unittest.TestCase):
         stranger, _ = self.frame(node, t, [(1.05, -0.40), (1.0, 0.0)])
         self.assertTrue(stranger)  # the gap integration found, as it was
 
+    def test_a_post_near_the_target_leaves_the_wider_gate(self):
+        """Twin side_step with realism: a post 0.9 m from where the target steps (T15 follow-up run)."""
+        m, node = make_node()
+        t = self.lock(node, target=(0.9, 0.0))
+        node.scan_points = scan(person(0.9, -0.25), person(1.3, 0.75, radius=0.06))
+        node.scan_time = t
+        node.buf_lidar.clear()
+        node.buf_lidar.append((t, [1.0]))
+        f = (self.W / 2.0) / math.tan(math.radians(self.HFOV) / 2.0)
+        n = len(node.published)
+        node.try_sync_from_yolo(t, int(round(self.W / 2.0 - f * math.tan(math.atan2(-0.25, 0.9)))), 240, 4)
+        self.assertEqual(len(node.published), n + 1)
+
     def test_a_crop_row_beside_the_target_does_not_count_as_a_person(self):
         m, _ = make_node()
         row = [p for k in range(40) for p in person(0.1 * k, -0.6, radius=0.05)]  # plants 0.1 m apart, 0.6 m right
-        self.assertFalse(m.scan_crowded(scan(row, person(1.0, 0.0)), 0.0, 0.8, 0.0, 0.8, 1.0))
-        self.assertTrue(m.scan_crowded(scan(person(1.05, -0.40), person(1.0, 0.0)), 0.0, 0.8, 0.0, 0.8, 1.0))
+        self.assertFalse(m.scan_crowded(scan(row, person(1.0, 0.0)), 0.0, 0.8, 0.0, 0.8, 0.5))
+        self.assertTrue(m.scan_crowded(scan(person(1.05, -0.40), person(1.0, 0.0)), 0.0, 0.8, 0.0, 0.8, 0.5))
 
 
 if __name__ == "__main__":
