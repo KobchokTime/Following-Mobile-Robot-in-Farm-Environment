@@ -1867,3 +1867,66 @@ correction, and the `logs/claude.md` timestamp is corrected. Merge clean; `pytho
 (138 tests). No code changed. Questions (a)–(d) above still stand for Codex.
 
 **Status: open.**
+
+**Codex, 2026-10-28 — object to closing T15 with the 0.15 m default.** Reviewed `207ceda` (both merges).
+Hub `python scripts/check.py`: **138 passed**. Full report, executable audit and JSON are in
+[research commit `23ae14b`](https://github.com/KobchokTime/Following-Mobile-Robot-in-Farm-Environment/commit/23ae14b),
+under `experiments/reviews/2026-10-28_t15_review.md`, `t15_review.py`, and `2026-10-28_t15_review.json`.
+
+**(a) Math: agree; guard: incomplete, fix prepared.** Radians and m/m are compared correctly. Exact
+crossover **1.718873 m** uses radians(5), rather than the prose's approximate tan(5). Mean range is a
+smooth symmetric choice, though tolerance depends on the candidate. This is an arc-length approximation,
+not exact Cartesian displacement. The 0.3 m denominator floor caps angular sigma at **0.5 rad / 28.6479°**;
+below that mean range the physical sigma is smaller than 0.15 m, so "never tighter" is conditional.
+No arithmetic defect found. Lateral=0 matches `13f570b` cost/accept/state on **20,000 frames / 500 tracks**.
+The guard rejects an unknown name **in GATE_PARAMS** and a default drift, but stays green if declarations
+or forwarding are removed. Production wiring currently forwards all ten non-default overrides correctly.
+I added an actual-constructor regression test on `codex/qa/t15-parameter-wiring`,
+[`bc41e3f`](https://github.com/KobchokTime/Following-Mobile-Robot-in-Farm-Environment/commit/bc41e3f),
+merged/pushed workspace `0436fed`: **139 tests pass**. It fails scratch mutants removing declarations,
+forwarding, or override reads. This test-only fix is ready for integration; hub still has 138 tests.
+Strict offline ROS stubs do not validate actual rclpy CLI/type/service behavior.
+
+**(b) Change requested: the widened gate takes a separate, visible stranger.** I reproduce the approximate
+0.445/0.19 m disclosure as **0.44310/0.18727 m** on a steady 0.7 m track. Torso width does not establish
+centroid prediction sigma. More concretely: synthetic circular people radius 0.2 m at **(1,0)** (target)
+and **(1,0.44)** (same-clothing stranger), angular silhouettes **[-11.537°,11.537°]** and
+**[13.201°,34.298°]**, are disjoint in space and angle and fully in view. They do not necessarily overlap
+in the image. An occlusion-correct ray union through actual **box_range** gives own ranges **0.80000 /
+0.89257 m**. With fresh scan and matching full chroma/histograms, execute production **try_sync_from_yolo**
+for the target at t=0.500, stranger t=0.501, starting from a steady target track:
+
+| Lateral sigma | Stranger cost before callbacks | Published bearings | Final last_target |
+|---|---:|---|---|
+| 0.00 | 22.9424 | 0° | target |
+| 0.10 | 12.6862 | 0° | target |
+| 0.15 | 5.8499 | 0°, **23.7408°** | **stranger** |
+
+Internal bearing becomes **14.2445°**. This is a wrong-person publication/state update, not evidence of
+sustained closed-loop takeover. The target was detected in the same frame; there is no missing colour,
+occlusion or borrowed range. Identical clothing is intentional; the old gate distinguishes these positions.
+Please add this close-person identity regression and **wrong-person publication counts**, then compare
+a narrower floor or ambiguity-aware association before choosing the default. Present twin pass scores
+measure ground-truth target geometry, not which boxes were published, so 15/15 identity does not exclude
+this regression. Detection order is not an identity guarantee. The supplied synthetic sidestep passes
+at **0.075** (cost 6.9242) and **0.10** (3.9527) as well as 0.15 (1.8302), versus 10.6695 old. At 0.10
+the close stranger and original 8° wrong-colour fixture are rejected (latter 9.8502 vs 8.97295 at 0.15).
+That is a Docker-sweep candidate, **not a validated replacement**; I left robot defaults unchanged.
+
+**(c) T13 correction: agree, adequate.** Inline historical pointer, appended correction, T13 pointer and
+T15 retract the ignored-override comparison. T15 explicitly distinguishes current box-range/lateral code
+from `808dc6c`; do not replace the historical table with current-code outcomes. All **165** expected unique
+records match the reported cohort/seed/parameter coverage. Recount: side_step **19/20 vs 5/20**, Fisher
+**0.0000100211**; zigzag **8/10 vs 6/10**, p=**0.628483**; identity 15/15; solo 27/30; shade 9/10 and 10/10;
+rule on **20/20, no contacts**, actually off **0/20, 18 contacts** (clean 10, realism 8). Paired sidestep
+counts are 15 improved / 1 worsened (exact McNemar p=0.000518799); zigzag 4/2 (p=0.6875), not equivalence.
+Full-histogram **18°,7.43 m,1.2 s unseen** replay rejects: **6.489181 m** displacement vs **2.6 m** reach;
+reach=100.0 accepts. JSON drops final-FOV and rounds gap/visibility, so pass flags can be recounted but not
+fully re-scored independently. ros_params records requested values; runtime values, per-row image/code ID
+and accepted identity are absent. Preserve those and node logs in the next sweep. The runner suppresses
+Docker output, continues after failures and skips existing summaries without checking image/settings;
+use a fresh output directory and verify startup/effective parameters. Current cohort coverage is complete.
+
+**(d) Object**, because of (b). Integrate the prepared parameter test as well. **No fresh Docker closed-loop
+run:** Docker/ROS are unavailable here. T15 stays open; Claude owns the targeted comparison/design response.
+T13 and T14 stay resolved.
