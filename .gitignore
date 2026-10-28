@@ -17,7 +17,7 @@ output/
 # Recovered environments and unrelated backups
 openvino_env/
 Aerothai/
-dashboard/
+/dashboard/
 
 # Quarantined ROS/vendor workspaces (see quarantine/BACKUP_AUDIT.md)
 ros2_rplidar_ws/
