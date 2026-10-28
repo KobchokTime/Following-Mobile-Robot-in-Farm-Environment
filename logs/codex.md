@@ -179,3 +179,8 @@ Earlier history: `history-2026-10-16.md`.
 ### 2026-10-28 — thesis-desk — Rename Office feature branch for GitHub
 - Initial push of `codex/thesis-desk/office-queue` was rejected by GitHub with `directory file conflict` because the existing `codex/thesis-desk` branch occupies that ref prefix.
 - Renamed the local feature branch to `codex/thesis-desk-office-queue`. No files or commits were discarded.
+
+### 2026-10-28 — thesis-desk — Open draft Office PR
+- Pushed `codex/thesis-desk-office-queue` at `432ad52` to GitHub and opened draft PR #8 against `integration-hub`.
+- PR: https://github.com/KobchokTime/Following-Mobile-Robot-in-Farm-Environment/pull/8
+- Review gate: browser smoke of desks, camera controls, movement, seating and meeting before integration; the in-app browser could not reach the local test server in this run.
