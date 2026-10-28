@@ -249,3 +249,9 @@ Earlier history: `history-2026-10-16.md`.
 - Added two bounded future jobs: Mew improves the Office review/failed status panel in `tools/thesis_desk/virtual_office/`; Min documents dashboard data provenance in `docs/`. They are separate lanes and remain queued while Codex's five-hour usage is near the agreed limit.
 - The first final `scripts/check.py` attempt failed because the Windows sandbox's default TEMP was unwritable. Re-ran with TEMP/TMP under the writable visualization root: 166/166 offline tests passed. Node queue tests passed 2/2 and syntax/diff checks passed.
 - Added append-only raw check-output paths to future queue finish events, so reviewers can inspect the offline gate result.
+
+### 2026-10-28 — thesis-desk — Activate Office heartbeat and refresh draft PR
+
+- Updated the existing active hourly `follower-test-bench` heartbeat to read the Office queue, check current plan usage, pause at 80% five-hour or 90% weekly usage, and dispatch native subagents only in isolated assignments. It retains the no-key/no-paid-credit and review-before-merge boundaries.
+- Pushed Office feature head `11d75c4` and updated draft PR #8 with the automation flow, visual smoke, pilot QA evidence and current checks. Its GitHub `check` completed successfully; twin and gazebo were still running at inspection time.
+- The Boss pilot was opened separately as draft QA PR #9, stacked on the Office branch. Office UI displayed its `review-ready` branch and time after reload; next Mew and Min jobs remain queued because usage was 86% in the five-hour window.
