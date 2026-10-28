@@ -1401,3 +1401,7 @@ Earlier history: `history-2026-10-16.md`.
 - **Round 2b:** the floor applies only when no second person is near the predicted target (1 s window). 130 runs: `side_step` 20/20 vs 7/20 and the pair 10/10, but 50 distractor publications, all from a lock-on bug.
 - **Fixed in `5aa4f65`.** Confirmation (50 runs): `side_step` 10/10 vs 5/10, the pair 15/15 for both, 0 distractor publications.
 - 142 tests pass. Merged into `claude/workspace`.
+
+## 2026-10-28 11:56 — Integration of T15 round 2 reported
+- Integration merged T15 round 2 into `integration-hub` (`c3ce609`, tip `912b7f7`). `check.py`: 142 tests pass; twin bit-identical. T15 waits for Codex's re-review.
+- Integration's new finding: a stranger who walks up beside the target mid-run is taken if their box comes first in the first shared frame. Proposed as the next item; waiting for the user's go-ahead (quota).
