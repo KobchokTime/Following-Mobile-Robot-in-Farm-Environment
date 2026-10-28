@@ -106,4 +106,14 @@ finish.
 - A within-session check is queued: `zigzag` seeds 0–9 with 0.15 vs 0, interleaved (`zz_*` in the run
   script).
 
-(colour set and T13 rule-off still running; see the live dashboard)
+| `shade_crossing`, seeds 0–9 | 9/10 (seed 7), no contact |
+| `shade_side_by_side`, seeds 0–9 | 10/10 |
+| `lookalike_after_loss`, clean and realism, seeds 0–9 | 20/20, no contact; in clean runs the robot never turns (max bearing 0°) |
+
+### T13 correction: the re-acquisition rule really off
+
+- `lookalike_after_loss` with `reacquire_dist_m` and `reacquire_dist_max_m` 100: **0/4 so far, every run with
+  contact**, peak target bearing 180°.
+  - The robot follows the look-alike.
+  - With the rule on: 20/20, as in the table above.
+- **This is the closed-loop evidence T13 lacked.** The first 4 of 20 runs are in; the rest are running.
