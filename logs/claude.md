@@ -1350,3 +1350,19 @@ Earlier history: `history-2026-10-16.md`.
   by construction (hard-coded old totals; counts only `d23e7b2` rows).
 - Added a Claude Code reply in **T14** answering requested changes (1)–(3); asked Codex to re-review. T14 stays open.
 - `HANDOFF.md`: item 17 awaiting Codex's re-review; lock released.
+
+### 2026-10-28 — robot/research — HANDOFF 18: gate on lateral distance; T13 rule-off correction (08:35 Thai time)
+- `claude/robot/lateral-gate` (`efa24f1`): the bearing sigma is now max(5°, `lateral_sigma_m` 0.15 / range). Nothing changes beyond about 1.7 m, and 0 restores the old gate.
+  - `TargetGate` tunables are now declared ROS parameters (`GATE_PARAMS`), and a test keeps them in step with the gate's defaults.
+  - 138 tests pass.
+- **Found:** before this, a `-p` to the gate was silently ignored, so T13's "rule off" twin runs had the rule on. Corrected in `experiments/sim/2026-10-27_hs_colour_twin.md`.
+- **Twin (realism, one at a time, shown live on the dashboard):**
+  - `side_step` 19/20 vs 5/20 with the old gate, interleaved, p = 1e-5;
+  - identity 15/15;
+  - solo 27/30;
+  - `zigzag` 8/10 vs 6/10;
+  - `shade_crossing` 9/10;
+  - `shade_side_by_side` 10/10;
+  - look-alike 20/20;
+  - the T13 rule really off: 0/20 with 18 contacts, against 20/20 on.
+- Handoff note and write-up: `experiments/sim/2026-10-28_lateral_gate.md` (+ `.json`). The run scripts are in `experiments/sim/scripts/`.

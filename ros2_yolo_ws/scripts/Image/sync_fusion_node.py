@@ -159,6 +159,10 @@ class TargetGate:
     with a histogram: Cb/Cr alone cannot tell a blue top in shade from a grey one. The colour
     threshold was chosen on the same seven videos as hist_weight; it is not an identity guarantee.
 
+    Close in, a small sideways step is a large angle (0.25 m is 20 deg at 0.7 m), so the bearing sigma is
+    never tighter than lateral_sigma_m sideways: max(bearing_sigma_deg, lateral_sigma_m / range). From
+    about 1.7 m out (0.15 m / tan 5 deg) this is the plain 5 deg; lateral_sigma_m 0 restores it everywhere.
+
     Lock-on uses the controller's start window: range 0.5-1.0 m, near the image centre.
     """
 
@@ -167,11 +171,13 @@ class TargetGate:
                  alpha=0.6, beta=0.2, chroma_rate=0.05, min_rate_dt=0.015, unlock_after_s=5.0,
                  hist_sigma=0.2, hist_window=10, hist_learn_slack=0.1, hist_weight=0.25,
                  reacquire_after_s=1.0, reacquire_colour_max=1.0, reacquire_bearing_deg=35.0,
-                 reacquire_dist_m=0.8, reacquire_speed_mps=1.5, reacquire_dist_max_m=3.0):
+                 reacquire_dist_m=0.8, reacquire_speed_mps=1.5, reacquire_dist_max_m=3.0,
+                 lateral_sigma_m=0.15):
         self.lock_range = lock_range
         self.lock_bearing = math.radians(lock_bearing_deg)
         self.sb = math.radians(bearing_sigma_deg)
         self.sr = range_sigma_m
+        self.lateral_sigma = lateral_sigma_m
         self.sc = chroma_sigma
         self.gate = gate
         self.widen_per_s = widen_per_s
@@ -227,7 +233,8 @@ class TargetGate:
             return math.inf
         pb, pr = self._predict(t)
         widen = 1.0 + self.widen_per_s * max(0.0, t - self.t - 0.2)
-        c = ((bearing - pb) / (self.sb * widen)) ** 2 + ((rng - pr) / (self.sr * widen)) ** 2
+        sb = max(self.sb, self.lateral_sigma / max(0.3, (rng + pr) / 2.0))  # never under lateral_sigma sideways
+        c = ((bearing - pb) / (sb * widen)) ** 2 + ((rng - pr) / (self.sr * widen)) ** 2
         return c + self.colour_cost(chroma, hist)
 
     def colour_cost(self, chroma=None, hist=None):
@@ -311,6 +318,21 @@ class TargetGate:
         return True
 
 
+# TargetGate settings exposed as ROS parameters, with TargetGate's own defaults
+GATE_PARAMS = {
+    'bearing_sigma_deg': 5.0,
+    'lateral_sigma_m': 0.15,
+    'range_sigma_m': 0.15,
+    'hist_weight': 0.25,
+    'reacquire_after_s': 1.0,
+    'reacquire_colour_max': 1.0,
+    'reacquire_bearing_deg': 35.0,
+    'reacquire_dist_m': 0.8,
+    'reacquire_speed_mps': 1.5,
+    'reacquire_dist_max_m': 3.0,
+}
+
+
 class SyncFusionNode(Node):
     def __init__(self):
         super().__init__('sync_fusion_node')
@@ -345,6 +367,9 @@ class SyncFusionNode(Node):
         self.declare_parameter('lidar_scan_max_age_s', 0.3)  # older scans are never used to track
         # a box's range from the LiDAR cluster centred on it, not the nearest return in its sector
         self.declare_parameter('box_range_from_scan', True)
+        # TargetGate tunables, so an experiment's -p really reaches the gate (undeclared -p are ignored)
+        for name, value in GATE_PARAMS.items():
+            self.declare_parameter(name, value)
 
         self.max_dt = float(self.get_parameter('max_dt').value)
         self.buffer_sec = float(self.get_parameter('buffer_sec').value)
@@ -356,7 +381,7 @@ class SyncFusionNode(Node):
         self.use_gate = bool(self.get_parameter('target_gate').value)
         self.use_chroma = bool(self.get_parameter('use_chroma').value)
         self.use_hs_hist = bool(self.get_parameter('use_hs_hist').value)
-        self.gate = TargetGate()
+        self.gate = TargetGate(**{name: float(self.get_parameter(name).value) for name in GATE_PARAMS})
         self.path_half_width = float(self.get_parameter('path_half_width_m').value)
         self.path_hold = float(self.get_parameter('path_hold_s').value)
         self.path_margin = float(self.get_parameter('path_margin_m').value)

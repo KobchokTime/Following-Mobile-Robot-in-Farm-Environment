@@ -135,3 +135,12 @@
   separate change to how boxes and LiDAR are matched, proposed as follow-up.
 - **The twin histogram** checks only wiring and shade behaviour. It does not measure how well colour
   separates people; that evidence is the video work, and E4 on robot day.
+
+## Correction (2026-10-28): the "rule off" column had the rule on
+
+- `TargetGate` settings were not declared ROS parameters, so `--ros-param reacquire_dist_m:=100.0
+  reacquire_dist_max_m:=100.0` was silently ignored.
+- **Both columns of the `lookalike_after_loss` table above ran with the rule on:** 18/20 in all.
+- The rule really off, after the parameters were declared (`efa24f1`), is **0/20, with 18 contacts**;
+  on, 20/20 (`2026-10-28_lateral_gate.md`).
+- The gate-level evidence and the borrowed-range diagnosis are unaffected.
