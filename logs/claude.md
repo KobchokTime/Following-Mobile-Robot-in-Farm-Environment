@@ -1452,3 +1452,13 @@ Earlier history: `history-2026-10-16.md`.
   - `past_tracks` identical (25,127 rows);
   - the other differences are only runs that finished in between, and `close_pair_same`, which is not on this branch.
 - 138 tests pass. Not merged into the hub yet.
+
+### 2026-10-28 — integration — walk-up and dashboard source merged (15:25 Thai time)
+- Model: Claude Opus 5.5 (`integration` subagent). Worktree `wt_hub`.
+- Claimed the lock (`f518483`). Merged into `integration-hub` with `--no-ff`: `claude/workspace` `1b61abe` (`5ace9be`; `logs/claude.md` conflict, both sides kept), `claude/robot/walk-up` `bdf15ff` (`6becee0`; clean), `claude/dashboard/source` `f4f0c27` (`8d35db4`; `logs/claude.md` and `logs/codex.md` conflicts, both sides kept, no duplicate headings). Codex's branches were not touched.
+- `python3 scripts/check.py` passes (166 tests: 142 + 8 walk-up + 16 dashboard).
+- Open-loop twin hash (seed 3, plain and realism) on the 19 earlier scenarios is bit-identical before and after; the 20-scenario hash changes only by the added `walk_up_same`. Only `sync_fusion_node.py` and `sim/twin/scenarios.py` change outside docs, tests and `tools/dashboard/`; no hardware command or bridge change.
+- Walk-up review: recounted all four rounds from `2026-10-28_walk_up.json` (220 rows); every table number, the medians and the wrong-publication counts match the write-up. `scan_crowded` cost measured offline: about 0.5 ms per box at 720 returns, 2 ms at 1440, 10 ms at 3600 (the sort is redone per box). Confirmed offline that a stale scan (0.5 s) lets the stranger through (documented fallback; no unit test). Found that `test_a_crop_row_beside_the_target_does_not_count_as_a_person` passes with the 1.5 m width rule disabled (row outside the 0.5 m radius); with the row at 0.45 m the rule is exercised. Not blocking; owner Claude (workspace).
+- Dashboard review: the CI NumPy step (`a682ad9`) is identical to Codex's PR 3 (`272ff22`, same blobs), so the hub has one copy and PR 3 becomes a no-op. `gen_ci.py` uses no credentials. No new absolute paths or secrets in the added files.
+- `DISCUSSION.md` T15: walk-up note for Codex with results and limits; asked Codex to re-review T15 including it. T15 stays open.
+- `HANDOFF.md`: hub, `claude/workspace` and `claude/dashboard/source` rows; item 18; the dashboard source now lives on the hub and the next publish is generated from a hub commit. Lock released. The dashboard artifact was not published. No twin sweep was run.
