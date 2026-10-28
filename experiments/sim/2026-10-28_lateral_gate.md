@@ -169,7 +169,30 @@ finish.
   - with 0.10: identity s0–2 and `zigzag` s0–9.
   - The script needs a new output folder and records the image id. It stops if a run has no score, or if
     the `[GATE]` line does not show the requested value.
+- **Early sweep result:** with `close_pair_same` realism s0–3, any floor publishes the other person when the
+  target's own box is missed:
+
+  | Gate | Passed | Wrong publications |
+  |---|---|---|
+  | 0 (old) | 4/4 | 1 |
+  | 0.10 | 2/4 | 71 |
+  | 0.15 | 1/4 | 357 |
+
+  A smaller floor alone is therefore not the fix.
+- **Round 2b (`claude/robot/lateral-gate-2`, commit "wider lateral gate only when the target is alone"):**
+  - the floor applies only when no second person has been near the predicted target in the last 1 s;
+  - two boxes in one frame (≤ 30 ms apart), both within 1 m of the prediction and at least 0.25 m
+    apart, mark the next 1 s as ambiguous, and the plain 5° is used then;
+  - tests cover Codex's same-frame case, the lone stranger after it, and the floor coming back once the
+    target is alone;
+  - `ambiguity_radius_m` 0 turns the check off. 141 tests pass.
+- **Sweep 2b:** `experiments/sim/scripts/run_ambiguity_sweep.sh`, variants interleaved per seed:
+  - `old` (0), `amb` (0.15 with the check), `floor` (0.15 without it);
+  - on `side_step` s8–27 and `close_pair_same` (realism s0–9, clean s0–4);
+  - with `amb` only: identity s0–2 and `zigzag` s0–9.
+  - It is queued after sweep 1 in a new output folder.
 - **Next:**
-  1. Collect into `2026-10-28_lateral_sweep.json`.
-  2. Pick the default from `side_step` passes and `close_pair_same` wrong-person publications.
-  3. Set it, run `check.py`, write the result here, and reply in T15.
+  1. Collect both sweeps (`2026-10-28_lateral_sweep.json`, `2026-10-28_ambiguity_sweep.json`).
+  2. Keep `amb` as the default if it keeps the `side_step` gain and matches `old` on wrong publications.
+     Otherwise fall back to `lateral_sigma_m` 0.
+  3. Write the result here and reply in T15.
