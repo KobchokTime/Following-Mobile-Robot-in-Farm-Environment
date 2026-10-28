@@ -230,3 +230,9 @@ Earlier history: `history-2026-10-16.md`.
 - Added append-only runtime events, `GET /api/automation` and an Office status panel. The web page reads status; it cannot start or mutate jobs.
 - Checks: Node syntax, 2 Node runner tests, direct automation endpoint smoke (200, one ready job), dry-run selection and `scripts/check.py` (166 tests) passed. Local clone creation succeeded in a disposable folder under the Office runtime root; the restricted shell could not run Git's local clone transport, so unattended invocation requires the approved local execution context.
 - Follow-up: run one Codex pilot after verifying plan usage, inspect its branch/evidence, then connect the existing hourly heartbeat to the runner. Browser visual smoke of the Office scene remains pending before merge.
+
+### 2026-10-28 — thesis-desk — Route Office edits through native subagents
+- The first nested `codex exec` pilot on `dashboard-dirty-provenance` could not read or edit: the host forced it to read-only and rejected shell commands. It produced no diff. The runner incorrectly marked it review-ready because the independent offline check passed; appended a correcting failed event without rewriting history.
+- Replaced the nested model runner with `automation-queue.mjs`: it only claims bounded jobs into separate local clones and verifies changed-file scope, unchanged base commit and `scripts/check.py` after a native Codex subagent works there. It cannot call an API or silently mark a no-diff write job successful.
+- Added a new pilot ID `dashboard-dirty-provenance-v2`; the failed first ID remains visible. Node queue tests pass 2/2, dry-run selects only v2, the status endpoint reports failed/ready correctly, and `scripts/check.py` passes 166 tests.
+- Follow-up: prepare v2, run one native subagent, finish/verify it, and update the existing heartbeat to use this queue only when plan usage permits.

@@ -23,17 +23,17 @@ The Team Lead delegates chat calls to specialists. Chat requests answer question
 
 ## Automatic feature jobs
 
-`automation-jobs.json` contains bounded, reviewed tasks assigned to Office
-characters. The existing Codex heartbeat checks plan usage and calls the runner
-once per cycle when usage is available. The runner creates one isolated local Git
-clone per job, caps concurrent Codex processes at three and never starts two jobs from
-the same lane. It invokes `codex exec` using the signed-in ChatGPT account,
-with a workspace sandbox and no API-key environment variables. Each job has a
-15-minute default deadline, an allowed file scope and the offline
-`scripts/check.py` gate. A failed or interrupted job is not retried under the
-same ID. Branches remain uncommitted and unmerged for review.
+`automation-jobs.json` contains bounded tasks assigned to Office characters.
+The existing Codex heartbeat checks plan usage, then calls
+`automation-queue.mjs --prepare`. This creates one isolated local Git clone
+per job, with at most three active jobs and one job per lane. The heartbeat
+starts native Codex subagents in those clones using the signed-in ChatGPT plan.
+After a subagent finishes, `automation-queue.mjs --finish --job ID` verifies
+the allowed file scope, unchanged base commit and offline `scripts/check.py`
+gate. The result remains for independent review; no branch is committed,
+pushed or merged by the queue.
 
-The runner stores append-only events and raw local output under the sibling
+The queue stores append-only events under the sibling
 `office-agent-worktrees/.office-state/` directory by default. Set
 `OFFICE_WORKTREE_ROOT` to the same absolute path for the runner and web server
 if you want another location. `GET /api/automation` and the Office page show
@@ -41,11 +41,10 @@ the latest event for each job. Status is local to this PC; it is not a live
 Claude artifact feed.
 
 To inspect the next cycle manually, run
-`node tools/thesis_desk/virtual_office/automation-runner.mjs --dry-run`.
-The heartbeat sets `OFFICE_USAGE_CHECKED_AT` only after checking Codex's plan
-usage, then runs the same command with `--run`. A PC that is off or disconnected
-cannot run model jobs. The runner does not contact Claude, push branches,
-publish artifacts or use a quota reset.
+`node tools/thesis_desk/virtual_office/automation-queue.mjs --dry-run`.
+The heartbeat sets `OFFICE_USAGE_CHECKED_AT` only after checking Codex's
+plan usage. A PC that is off or disconnected cannot run model jobs. The queue
+does not call an API, contact Claude, publish artifacts or use a quota reset.
 
 ## Robot project dashboard
 

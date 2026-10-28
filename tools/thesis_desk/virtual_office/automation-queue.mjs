@@ -1,0 +1,205 @@
+import { spawn } from "node:child_process";
+import { appendFile, mkdir, open, readFile, unlink } from "node:fs/promises";
+import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const here = dirname(fileURLToPath(import.meta.url));
+const repo = resolve(here, "../../..");
+const queueFile = join(here, "automation-jobs.json");
+const checkoutRoot = resolve(process.env.OFFICE_WORKTREE_ROOT || join(dirname(repo), "office-agent-worktrees"));
+const stateDir = join(checkoutRoot, ".office-state");
+const eventsFile = join(stateDir, "events.jsonl");
+const lockFile = join(stateDir, "queue.lock");
+
+export function selectJobs(jobs, events, limit = 3) {
+  const latest = new Map(events.map((event) => [event.jobId, event]));
+  const active = [...latest.values()].filter((event) => event.state === "assigned");
+  const lanes = new Set(active.map((event) => event.lane));
+  const cap = Math.max(0, Math.min(Number(limit) || 0, 3) - active.length);
+  const selected = [];
+  for (const job of jobs) {
+    if (!job.ready || latest.has(job.id) || lanes.has(job.lane) || selected.length >= cap) continue;
+    lanes.add(job.lane);
+    selected.push(job);
+  }
+  return selected;
+}
+
+export function changedPathsAllowed(paths, allowedPaths) {
+  return paths.every((path) => {
+    const normalized = path.replaceAll("\\", "/");
+    return !isAbsolute(path) && !normalized.split("/").includes("..") &&
+      allowedPaths.some((prefix) => normalized.startsWith(prefix));
+  });
+}
+
+function validateJob(job) {
+  if (!/^[a-z0-9][a-z0-9-]{2,50}$/.test(job.id) ||
+      !/^[a-z0-9][a-z0-9-]{2,50}$/.test(job.lane) ||
+      !/^[a-z]+$/.test(job.agent) ||
+      !["read-only", "workspace-write"].includes(job.mode) ||
+      !Array.isArray(job.allowedPaths) || !job.allowedPaths.length ||
+      job.allowedPaths.some((path) => !/^[a-z0-9_/-]+\/$/.test(path) || path.includes("..")) ||
+      typeof job.task !== "string" || job.task.length < 30 ||
+      typeof job.acceptance !== "string" || job.acceptance.length < 15 ||
+      !/^codex\/[a-z0-9/-]+$/.test(job.branchPrefix)) {
+    throw new Error(`Invalid job ${job.id || "unknown"}`);
+  }
+}
+
+async function loadQueue() {
+  const queue = JSON.parse(await readFile(queueFile, "utf8"));
+  if (!Array.isArray(queue.jobs)) throw new Error("Missing jobs");
+  queue.jobs.forEach(validateJob);
+  if (new Set(queue.jobs.map((job) => job.id)).size !== queue.jobs.length) throw new Error("Duplicate job ID");
+  return queue;
+}
+
+async function events() {
+  try {
+    return (await readFile(eventsFile, "utf8")).split(/\r?\n/).filter(Boolean).map((line) => JSON.parse(line));
+  } catch (error) {
+    if (error.code === "ENOENT") return [];
+    throw error;
+  }
+}
+
+async function record(event) {
+  await appendFile(eventsFile, JSON.stringify({ at: new Date().toISOString(), ...event }) + "\n", "utf8");
+}
+
+async function run(command, args, { cwd = repo, timeoutMs = 60_000, env = process.env } = {}) {
+  return new Promise((done, fail) => {
+    const child = spawn(command, args, { cwd, env, windowsHide: true, stdio: ["ignore", "pipe", "pipe"] });
+    let stdout = "", stderr = "", timedOut = false;
+    const timer = setTimeout(() => { timedOut = true; child.kill(); }, timeoutMs);
+    child.stdout.on("data", (chunk) => { stdout = (stdout + chunk).slice(-32_000); });
+    child.stderr.on("data", (chunk) => { stderr = (stderr + chunk).slice(-32_000); });
+    child.on("error", (error) => { clearTimeout(timer); fail(error); });
+    child.on("close", (code) => { clearTimeout(timer); done({ code, stdout, stderr, timedOut }); });
+  });
+}
+
+async function git(args, cwd = repo) {
+  const result = await run("git", args, { cwd });
+  if (result.code !== 0 || result.timedOut) throw new Error(`git ${args[0]} failed: ${result.stderr.slice(-500)}`);
+  return result.stdout.trim();
+}
+
+async function withLock(action) {
+  await mkdir(stateDir, { recursive: true });
+  const lock = await open(lockFile, "wx");
+  try { return await action(); }
+  finally { await lock.close(); await unlink(lockFile); }
+}
+
+function checkedUsage() {
+  const checked = Date.parse(process.env.OFFICE_USAGE_CHECKED_AT || "");
+  if (!Number.isFinite(checked) || Math.abs(Date.now() - checked) > 15 * 60_000)
+    throw new Error("Check Codex plan usage first and set OFFICE_USAGE_CHECKED_AT to current ISO time");
+}
+
+function safeCheckout(id, stamp) {
+  const path = resolve(checkoutRoot, `${id}-${stamp}`);
+  if (!path.startsWith(checkoutRoot + sep) || relative(repo, path) === "") throw new Error("Unsafe checkout path");
+  return path;
+}
+
+async function prepare() {
+  checkedUsage();
+  return withLock(async () => {
+    const queue = await loadQueue();
+    if (await git(["status", "--porcelain"])) throw new Error("Office source checkout is dirty");
+    const baseCommit = await git(["rev-parse", "HEAD"]);
+    const selected = selectJobs(queue.jobs, await events(), queue.maxConcurrent);
+    const assignments = [];
+    for (const job of selected) {
+      const stamp = new Date().toISOString().replace(/[-:.TZ]/g, "").slice(0, 14);
+      const branch = `${job.branchPrefix}/${job.id}-${stamp}`;
+      const checkout = safeCheckout(job.id, stamp);
+      try {
+        await git(["clone", "--local", "--no-hardlinks", repo, checkout]);
+        await git(["switch", "-c", branch, baseCommit], checkout);
+        const tempDir = join(checkout, ".office-tmp");
+        await mkdir(tempDir, { recursive: true });
+        await appendFile(join(checkout, ".git", "info", "exclude"), "\n.office-tmp/\n", "utf8");
+        const assignment = {
+          jobId: job.id, lane: job.lane, agent: job.agent, role: job.role,
+          branch, baseCommit, checkout, tempDir, mode: job.mode,
+          allowedPaths: job.allowedPaths, task: job.task, acceptance: job.acceptance,
+          maxMinutes: Math.min(Math.max(Number(job.maxMinutes) || 15, 1), 30),
+        };
+        await record({ jobId: job.id, lane: job.lane, agent: job.agent,
+          state: "assigned", branch, baseCommit, checkout, summary: "มอบหมายงานให้ agent แล้ว" });
+        assignments.push(assignment);
+      } catch (error) {
+        await record({ jobId: job.id, lane: job.lane, agent: job.agent,
+          state: "failed", summary: String(error.message || error) });
+      }
+    }
+    return { assignments };
+  });
+}
+
+async function changedFiles(checkout) {
+  const outputs = await Promise.all([
+    git(["diff", "--name-only", "-z"], checkout),
+    git(["diff", "--cached", "--name-only", "-z"], checkout),
+    git(["ls-files", "--others", "--exclude-standard", "-z"], checkout),
+  ]);
+  return [...new Set(outputs.flatMap((output) => output.split("\0").filter(Boolean)))];
+}
+
+async function finish(jobId) {
+  return withLock(async () => {
+    const queue = await loadQueue();
+    const job = queue.jobs.find((item) => item.id === jobId);
+    if (!job) throw new Error("Unknown job");
+    const latest = new Map((await events()).map((event) => [event.jobId, event])).get(jobId);
+    if (latest?.state !== "assigned") throw new Error("Job is not assigned");
+    const checkout = resolve(latest.checkout);
+    if (!checkout.startsWith(checkoutRoot + sep)) throw new Error("Unsafe checkout path");
+    const changed = await changedFiles(checkout);
+    const headCommit = await git(["rev-parse", "HEAD"], checkout);
+    const scopeValid = changedPathsAllowed(changed, job.allowedPaths);
+    const headUnchanged = headCommit === latest.baseCommit;
+    const hasWork = job.mode === "read-only" || changed.length > 0;
+    const tempDir = join(checkout, ".office-tmp");
+    const env = { ...process.env, TEMP: tempDir, TMP: tempDir, TMPDIR: tempDir };
+    const check = await run(process.env.OFFICE_PYTHON || "python", ["scripts/check.py"], {
+      cwd: checkout, timeoutMs: 300_000, env,
+    });
+    const ok = scopeValid && headUnchanged && hasWork && check.code === 0 && !check.timedOut;
+    const result = {
+      jobId, lane: job.lane, agent: job.agent, state: ok ? "review-ready" : "failed",
+      branch: latest.branch, baseCommit: latest.baseCommit, headCommit, checkout, changed,
+      scopeValid, headUnchanged, checkExit: check.code, checkTimedOut: check.timedOut,
+      summary: ok ? "มีงานและเช็กออฟไลน์ผ่าน รอคนรีวิว" :
+        "ไม่มีงานที่รับได้ หรือขอบเขต/เช็กไม่ผ่าน ดู clone และผลตรวจ",
+    };
+    await record(result);
+    return result;
+  });
+}
+
+export async function main(args = process.argv.slice(2)) {
+  if (args.includes("--dry-run")) {
+    const queue = await loadQueue();
+    return { selected: selectJobs(queue.jobs, await events(), queue.maxConcurrent).map((job) => job.id),
+      checkoutRoot };
+  }
+  if (args.includes("--prepare")) return prepare();
+  if (args.includes("--finish")) {
+    const index = args.indexOf("--job");
+    if (index < 0 || !args[index + 1]) throw new Error("Missing --job ID");
+    return finish(args[index + 1]);
+  }
+  throw new Error("Use --dry-run, --prepare or --finish --job ID");
+}
+
+if (process.argv[1] && fileURLToPath(import.meta.url) === resolve(process.argv[1])) {
+  main().then((result) => console.log(JSON.stringify(result))).catch((error) => {
+    console.error(error.message || error);
+    process.exitCode = 1;
+  });
+}
