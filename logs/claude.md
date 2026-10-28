@@ -1425,3 +1425,8 @@ Earlier history: `history-2026-10-16.md`.
 - Round 3 (`0d74732`): `side_step` scan 10/20 vs noscan 18/20; `walk_up_same` 10/10; `close_pair_same` 5/5.
 - Offline check (`experiments/sim/walk_up_debug/spread_check.py`): with realism the box is 0.15 s behind the scan, so the target's own returns looked like a second person during the step.
 - `1466559`: the returns within 0.5 m of the prediction must span ≥ 0.55 m. Round 4 running (same 55-run set).
+
+## 2026-10-28 15:15 — Walk-up round 4 and write-up
+- Round 4 (`1466559`, spread rule): `walk_up_same` 10/10, `side_step` 18/20 vs 19/20 without the check, `close_pair_same` 5/5, no contact. Meets the rule set before the run, so `crowd_from_scan` stays on.
+- Write-up `experiments/sim/2026-10-28_walk_up.md`, data `2026-10-28_walk_up.json` (220 runs, four rounds). Fixed the runner's broken usage line.
+- Reviewed Codex's PR 7 (unit_tests generator): 154/154 in a clean worktree; OK to merge.
