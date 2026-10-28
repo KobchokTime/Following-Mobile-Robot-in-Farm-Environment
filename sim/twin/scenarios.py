@@ -159,6 +159,17 @@ COLOUR_SCENARIOS: Dict[str, dict] = {
                    ("distractor", False, [(0, 1.0, 0.44), (3, 1.0, 0.44), (13, 4.0, 0.44), (18, 5.5, 3.0)])],
         "clothing": {"distractor": TARGET_CLOTHING},
     },
+    "walk_up_same": {
+        "doc": "A stranger in the same clothes walks up from the right, unseen by the camera until they are 0.40 m "
+               "beside the target at t=8 s (their box comes first in each frame), walks beside them, then turns "
+               "away to the right (T15 follow-up).",
+        "duration_s": 30.0,
+        "people": [("stranger", False, [(0, 3.0, -2.5), (5, 3.0, -2.5), (8, 2.55, -0.40), (13, 4.05, -0.40),
+                                        (18, 5.5, -3.0)]),
+                   ("target", True, [(0, 1.0, 0.0), (3, 1.0, 0.0), (13, 4.0, 0.0), (23, 7.0, 0.0)])],
+        "clothing": {"stranger": TARGET_CLOTHING},
+        "hidden": {"stranger": [(0.0, 8.0)]},
+    },
 }
 
 ALL_SCENARIOS: Dict[str, dict] = {**SCENARIOS, **IDENTITY_SCENARIOS}  # frozen: the Arena 3 scorer checks runs against it
