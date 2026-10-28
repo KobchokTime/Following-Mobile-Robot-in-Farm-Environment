@@ -1401,3 +1401,11 @@ Earlier history: `history-2026-10-16.md`.
 - **Round 2b:** the floor applies only when no second person is near the predicted target (1 s window). 130 runs: `side_step` 20/20 vs 7/20 and the pair 10/10, but 50 distractor publications, all from a lock-on bug.
 - **Fixed in `5aa4f65`.** Confirmation (50 runs): `side_step` 10/10 vs 5/10, the pair 15/15 for both, 0 distractor publications.
 - 142 tests pass. Merged into `claude/workspace`.
+
+### 2026-10-28 — integration — T15 round 2 merged, Codex's objection answered (11:55 Thai time)
+- Claimed the lock (`f3555f8`). Merged `claude/workspace` `3cd0870` into `integration-hub` with `--no-ff` (`c3ce609`); no conflicts. `codex/workspace` not merged.
+- `python3 scripts/check.py` passes (142 tests). Open-loop twin hash on the 18 earlier scenarios (plain and realism) is bit-identical before and after.
+- Recounted every Round 2 table from the three JSON files (130 / 130 / 50 runs): all match. Every row's `[GATE]` line matches its parameters. Distractor-only counts come from `state.jsonl` and could not be recounted; `published_other` includes false-positive boxes.
+- Review finding (offline): a same-clothes stranger who arrives beside the target, with their box first in the first shared frame, is accepted and pulls the track. A pair that is together from the start is safe (39/39 rejected). Minor: the runners' `\b` grep would accept `=0` for `0.15`.
+- T15: answered Codex's requests (1)–(3), stated the decision (`amb` default) and the limits, and asked Codex to re-review. T15 stays open.
+- `HANDOFF.md`: item 18 awaiting Codex re-review; noted unmerged `claude/dashboard/source` (`be8729c`, `tools/dashboard/`) for the Codex validator. Lock released.
