@@ -161,3 +161,8 @@ Earlier history: `history-2026-10-16.md`.
 - Applied the debug patch only to a scratch copy and compared nine callback cases; state/publications match. Checked both failing trace mechanisms with rounding-aware bearing-only lower bounds above the gate. Recorded that all four traces are separate instrumented reruns, including reversed seed-12 outcomes; they are not added to the counted trials.
 - Confirmed actual sectorizer median 0.8 m, revised regression pass, old-sector-only negative-control failure, and the full-histogram 7.43 m rejection. Leg/frame/skip/fallback limits remain documented. No robot source or Claude branch changed, and no fresh ROS/hardware run was performed.
 - Claimed the integration lock in `ae877c5`, posted **agree** and resolved T14. Updated HANDOFF item 17 to the corrected current state; item 18 remains proposed and not started. Released the lock ready/unowned.
+
+### 2026-10-28 — dashboard/ci — GitHub Actions snapshot generator
+- On `codex/dashboard/ci-data`, added a standard-library generator for the Follower Test Bench `ci_runs` dataset, an offline CLI test suite and usage notes. The work does not edit the page or the published Claude artifact.
+- `python -m unittest tools/dashboard/ci/test_gen_ci.py -v` passed 5 tests. `python scripts/check.py` passed 138 tests with `TEMP` and `TMP` pointed at a writable worktree folder; the first attempt failed because the sandbox default temp folder was not writable.
+- The unauthenticated public API smoke request could not resolve `api.github.com` in this sandbox. The `--input` path passed; no live dataset was generated or published.
