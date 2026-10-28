@@ -584,7 +584,7 @@
     <div class="tb-grid">
       <section class="tb-card" id="tests">
       <h2>ผลเทสต์ (unit tests)</h2>
-      <p class="tb-note">ผลจาก <code>python -m unittest discover -s tests</code> บน <code>claude/workspace</code></p>
+      <p class="tb-note">ผลจาก <code>python -m unittest discover -s tests</code> · <span id="tb-tests-when">snapshot ไม่ใช่สถานะสด</span></p>
       <div class="tb-tablewrap">
         <table class="tb-table" id="tb-tests" data-source="unit_tests" data-row-key="test_id">
           <thead><tr><th data-field="file">ไฟล์</th><th data-field="test">เทสต์</th><th data-field="result">ผล</th></tr></thead>
@@ -594,7 +594,7 @@
     </section>
       <section class="tb-card" id="ci">
       <h2>CI บน GitHub (offline-twin)</h2>
-      <p class="tb-note">ช่องละ 1 รอบ เรียงตามเวลา · เขียว = ผ่าน, เทา = กำลังรัน · ชี้เพื่อดู branch และเวลา (เวลาไทย)</p>
+      <p class="tb-note">ช่องละ 1 รอบ เรียงตามเวลา · เขียว = ผ่าน, เทา = กำลังรัน · ชี้เพื่อดู branch และเวลา (เวลาไทย) · <span id="tb-ci-when">snapshot ไม่ใช่สถานะสด</span></p>
       <div class="tb-chart tb-ci dash-skeleton" id="tb-cichart" data-source="ci_runs"></div>
       <div class="tb-tablewrap" style="max-height: 220px">
         <table class="tb-table" id="tb-citable" data-source="ci_runs" data-row-key="run">
@@ -1526,11 +1526,15 @@ dash.calc('robust_totals', {
     const tb = document.querySelector('#tb-tests tbody');
     const d = dash.data('unit_tests');
     if (d.status !== 'ok') { tb.replaceChildren(); return; }
+    const w = document.getElementById('tb-tests-when'), r0 = d.data[0];
+    if (w) w.textContent = r0 && r0.run_utc
+      ? `snapshot: ${r0.branch} @ ${String(r0.commit).slice(0, 8)}${r0.working_tree_dirty ? ' (มีไฟล์ยังไม่ commit)' : ''} · รันเมื่อ ${thai(r0.run_utc)} (เวลาไทย) · ไม่ใช่สถานะสด`
+      : 'snapshot เก่า ไม่มีเวลาที่รัน · ไม่ใช่สถานะสด';
     tb.replaceChildren(...d.data.map((r) => {
       const tr = document.createElement('tr'); tr.dataset.key = r.test_id;
       const a = document.createElement('td'); a.className = 'tb-mono'; a.textContent = r.file;
       const b = document.createElement('td'); b.className = 'tb-mono'; b.textContent = r.test;
-      const c = document.createElement('td'); const p = document.createElement('span'); p.className = 'tb-pill ' + (r.result === 'pass' ? 'tb-ok' : 'tb-bad'); p.textContent = r.result; c.append(p);
+      const c = document.createElement('td'); const p = document.createElement('span'); p.className = 'tb-pill ' + (r.result === 'pass' ? 'tb-ok' : r.result === 'skip' || r.result === 'expected_failure' ? 'tb-warn' : 'tb-bad'); p.textContent = r.result; c.append(p);
       tr.append(a, b, c); return tr;
     }));
   }
@@ -1545,6 +1549,8 @@ dash.calc('robust_totals', {
     if (d.status !== 'ok') { tb.replaceChildren(); return; }
     ready(el);
     const rows = d.data.slice().sort((a, b) => a.run - b.run);
+    const cw = document.getElementById('tb-ci-when'), f = rows.map((r) => r.fetched_utc).filter(Boolean).sort().pop();
+    if (cw) cw.textContent = f ? `ดึงจาก GitHub เมื่อ ${thai(f)} (เวลาไทย) · ไม่ใช่สถานะสด` : 'snapshot ไม่มีเวลาที่ดึง · ไม่ใช่สถานะสด';
     const W = Math.max(280, el.clientWidth), gap = 3, cell = Math.max(8, Math.min(22, (W - gap * (rows.length - 1)) / rows.length)), H = cell + 34;
     const svg = d3.create('svg').attr('width', '100%').attr('viewBox', `0 0 ${W} ${H}`);
     const tip = document.createElement('div'); tip.className = 'tb-tip'; tip.hidden = true;
