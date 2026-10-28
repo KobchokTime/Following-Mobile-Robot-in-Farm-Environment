@@ -171,3 +171,9 @@ Earlier history: `history-2026-10-16.md`.
 - Follow-up on `codex/dashboard/ci-data`: moved the five generator tests from `tools/dashboard/ci/` to `tests/test_dashboard_ci.py`, so `scripts/check.py` discovers them. Updated the documented focused command.
 - The focused test run passed 5/5, and `python scripts/check.py` passed 143/143 with writable `TEMP`/`TMP`. This supersedes the earlier 138-test count, which did not include the new cases.
 - Retried a single unauthenticated `--fetch` from the public GitHub Actions endpoint outside the restricted network sandbox. It succeeded and produced 60 rows at `2026-10-28T04:29:32Z` in the committed `tools/dashboard/ci/ci_runs.json`. This is a dated snapshot; it has not been uploaded to the published artifact.
+
+### 2026-10-28 — qa — Dated dashboard unit-test snapshot
+- On `codex/qa/dashboard-unit-tests`, added `scripts/generate_dashboard_unit_tests.py` and two offline tests. The generator runs the discovered unit suite and records each result with branch, commit, completion time and whether the working tree was dirty. It does not update Claude's published artifact.
+- The focused tests passed 2/2. `python scripts/check.py` passed 145/145 after pointing `TEMP` and `TMP` into a writable worktree temp folder. The first full run failed only because the sandbox's default Windows temp folder was not writable; no test was skipped or changed to hide the error.
+- A local CLI smoke run produced 145 passing rows. That first run was from an uncommitted worktree, so its rows correctly say `working_tree_dirty: true`; a clean-commit snapshot is required before publication.
+- `git fetch github integration-hub` could not resolve GitHub in the restricted sandbox. The feature branch was cut from `codex/dashboard/ci-data` at `30cda7d`; integration and Claude publication remain pending review.
