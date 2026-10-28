@@ -1,0 +1,459 @@
+{
+  "reviewed_hub": "207ceda",
+  "data": {
+    "rows": 165,
+    "sha256": "b87a8ba160908c644e2d04eafe1d533a54debb775af1013390bb63edca185a40",
+    "totals": {
+      "col_shade_crossing": {
+        "n": 10,
+        "passed": 9,
+        "contacts": 0,
+        "failures": [
+          {
+            "scenario": "shade_crossing",
+            "seed": 7
+          }
+        ]
+      },
+      "col_shade_side_by_side": {
+        "n": 10,
+        "passed": 10,
+        "contacts": 0,
+        "failures": []
+      },
+      "look_clean": {
+        "n": 10,
+        "passed": 10,
+        "contacts": 0,
+        "failures": []
+      },
+      "look_real": {
+        "n": 10,
+        "passed": 10,
+        "contacts": 0,
+        "failures": []
+      },
+      "look_ruleoff_clean": {
+        "n": 10,
+        "passed": 0,
+        "contacts": 10,
+        "failures": [
+          {
+            "scenario": "lookalike_after_loss",
+            "seed": 0
+          },
+          {
+            "scenario": "lookalike_after_loss",
+            "seed": 1
+          },
+          {
+            "scenario": "lookalike_after_loss",
+            "seed": 2
+          },
+          {
+            "scenario": "lookalike_after_loss",
+            "seed": 3
+          },
+          {
+            "scenario": "lookalike_after_loss",
+            "seed": 4
+          },
+          {
+            "scenario": "lookalike_after_loss",
+            "seed": 5
+          },
+          {
+            "scenario": "lookalike_after_loss",
+            "seed": 6
+          },
+          {
+            "scenario": "lookalike_after_loss",
+            "seed": 7
+          },
+          {
+            "scenario": "lookalike_after_loss",
+            "seed": 8
+          },
+          {
+            "scenario": "lookalike_after_loss",
+            "seed": 9
+          }
+        ]
+      },
+      "look_ruleoff_real": {
+        "n": 10,
+        "passed": 0,
+        "contacts": 8,
+        "failures": [
+          {
+            "scenario": "lookalike_after_loss",
+            "seed": 0
+          },
+          {
+            "scenario": "lookalike_after_loss",
+            "seed": 1
+          },
+          {
+            "scenario": "lookalike_after_loss",
+            "seed": 2
+          },
+          {
+            "scenario": "lookalike_after_loss",
+            "seed": 3
+          },
+          {
+            "scenario": "lookalike_after_loss",
+            "seed": 4
+          },
+          {
+            "scenario": "lookalike_after_loss",
+            "seed": 5
+          },
+          {
+            "scenario": "lookalike_after_loss",
+            "seed": 6
+          },
+          {
+            "scenario": "lookalike_after_loss",
+            "seed": 7
+          },
+          {
+            "scenario": "lookalike_after_loss",
+            "seed": 8
+          },
+          {
+            "scenario": "lookalike_after_loss",
+            "seed": 9
+          }
+        ]
+      },
+      "reg_identity": {
+        "n": 15,
+        "passed": 15,
+        "contacts": 0,
+        "failures": []
+      },
+      "reg_solo": {
+        "n": 30,
+        "passed": 27,
+        "contacts": 0,
+        "failures": [
+          {
+            "scenario": "zigzag",
+            "seed": 0
+          },
+          {
+            "scenario": "zigzag",
+            "seed": 1
+          },
+          {
+            "scenario": "zigzag",
+            "seed": 2
+          }
+        ]
+      },
+      "ss_off": {
+        "n": 20,
+        "passed": 5,
+        "contacts": 0,
+        "failures": [
+          {
+            "scenario": "side_step",
+            "seed": 10
+          },
+          {
+            "scenario": "side_step",
+            "seed": 11
+          },
+          {
+            "scenario": "side_step",
+            "seed": 12
+          },
+          {
+            "scenario": "side_step",
+            "seed": 13
+          },
+          {
+            "scenario": "side_step",
+            "seed": 15
+          },
+          {
+            "scenario": "side_step",
+            "seed": 16
+          },
+          {
+            "scenario": "side_step",
+            "seed": 20
+          },
+          {
+            "scenario": "side_step",
+            "seed": 21
+          },
+          {
+            "scenario": "side_step",
+            "seed": 22
+          },
+          {
+            "scenario": "side_step",
+            "seed": 23
+          },
+          {
+            "scenario": "side_step",
+            "seed": 25
+          },
+          {
+            "scenario": "side_step",
+            "seed": 26
+          },
+          {
+            "scenario": "side_step",
+            "seed": 27
+          },
+          {
+            "scenario": "side_step",
+            "seed": 8
+          },
+          {
+            "scenario": "side_step",
+            "seed": 9
+          }
+        ]
+      },
+      "ss_on": {
+        "n": 20,
+        "passed": 19,
+        "contacts": 0,
+        "failures": [
+          {
+            "scenario": "side_step",
+            "seed": 17
+          }
+        ]
+      },
+      "zz_off": {
+        "n": 10,
+        "passed": 6,
+        "contacts": 0,
+        "failures": [
+          {
+            "scenario": "zigzag",
+            "seed": 2
+          },
+          {
+            "scenario": "zigzag",
+            "seed": 3
+          },
+          {
+            "scenario": "zigzag",
+            "seed": 5
+          },
+          {
+            "scenario": "zigzag",
+            "seed": 9
+          }
+        ]
+      },
+      "zz_on": {
+        "n": 10,
+        "passed": 8,
+        "contacts": 0,
+        "failures": [
+          {
+            "scenario": "zigzag",
+            "seed": 1
+          },
+          {
+            "scenario": "zigzag",
+            "seed": 8
+          }
+        ]
+      }
+    },
+    "comparisons": {
+      "ss": {
+        "fisher_two_sided": 1.002114461513794e-05,
+        "paired_improved": 15,
+        "paired_worsened": 1,
+        "paired_exact_p": 0.000518798828125
+      },
+      "zz": {
+        "fisher_two_sided": 0.628482972136223,
+        "paired_improved": 4,
+        "paired_worsened": 2,
+        "paired_exact_p": 0.6875
+      }
+    },
+    "full_pass_recomputation_possible": false,
+    "missing": [
+      "target_in_camera_fov_end",
+      "unrounded final_gap_m and target_visible_share",
+      "runtime effective parameters",
+      "per-row code/image provenance",
+      "accepted detection identity"
+    ]
+  },
+  "geometry": {
+    "transition_range_m": 1.7188733853924696,
+    "floor_max_sigma_deg": 28.64788975654116,
+    "floor_finite_cost": 0.4873878716587337,
+    "steady_track_lateral_boundary_m": {
+      "0.0": 0.1872703425790676,
+      "0.075": 0.2261369328428834,
+      "0.1": 0.301290149478823,
+      "0.15": 0.44309888887108373
+    },
+    "differing_colour_cost": {
+      "0.0": {
+        "8": 10.83111111111111,
+        "10": 12.27111111111111
+      },
+      "0.1": {
+        "8": 9.850247815285407,
+        "10": 10.738512211383448
+      },
+      "0.15": {
+        "8": 8.972949646299687,
+        "10": 9.367733822343261
+      }
+    },
+    "synthetic_unit_sidestep": {
+      "0.0": {
+        "cost": 10.669455635041325,
+        "accepted": false
+      },
+      "0.075": {
+        "cost": 6.924214876897286,
+        "accepted": true
+      },
+      "0.1": {
+        "cost": 3.9527221079241444,
+        "accepted": true
+      },
+      "0.15": {
+        "cost": 1.8302272729433298,
+        "accepted": true
+      }
+    },
+    "note": "angle*mean_range is a small-angle arc approximation, not exact Cartesian distance"
+  },
+  "two_separate_people": {
+    "synthetic": true,
+    "same_chroma_and_hist": true,
+    "centre_distance_m": 0.44,
+    "angular_extents_deg": {
+      "target": [
+        -11.536959032815489,
+        11.536959032815489
+      ],
+      "stranger": [
+        13.20127213281164,
+        34.29771685292189
+      ]
+    },
+    "box_range_target_m": 0.8,
+    "box_range_stranger_m": 0.8925662539940133,
+    "results": {
+      "0.0": {
+        "stranger_cost_before_target_callback": 22.94236227460098,
+        "published_bearings_deg": [
+          0.0
+        ],
+        "last_target_is_stranger": false,
+        "learned_bearing_deg": 0.0
+      },
+      "0.1": {
+        "stranger_cost_before_target_callback": 12.686197344401155,
+        "published_bearings_deg": [
+          0.0
+        ],
+        "last_target_is_stranger": false,
+        "learned_bearing_deg": 0.0
+      },
+      "0.15": {
+        "stranger_cost_before_target_callback": 5.849878113029756,
+        "published_bearings_deg": [
+          0.0,
+          23.740750728211214
+        ],
+        "last_target_is_stranger": true,
+        "learned_bearing_deg": 14.24445043692673
+      }
+    },
+    "note": "real production callbacks, fake ROS node, no wheels or closed loop"
+  },
+  "parameter_guard": {
+    "existing_guard_mutations": {
+      "production": {
+        "passed": true,
+        "failures": 0,
+        "errors": 0
+      },
+      "unknown_gate_argument": {
+        "passed": false,
+        "failures": 1,
+        "errors": 0
+      },
+      "default_drift": {
+        "passed": false,
+        "failures": 1,
+        "errors": 0
+      },
+      "forwarding_removed": {
+        "passed": true,
+        "failures": 0,
+        "errors": 0
+      },
+      "declarations_removed": {
+        "passed": true,
+        "failures": 0,
+        "errors": 0
+      }
+    },
+    "real_constructor_with_stub_overrides": {
+      "declared": {
+        "bearing_sigma_deg": 5.0123,
+        "lateral_sigma_m": 0.1623,
+        "range_sigma_m": 0.1623,
+        "hist_weight": 0.2623,
+        "reacquire_after_s": 1.0123,
+        "reacquire_colour_max": 1.0123,
+        "reacquire_bearing_deg": 35.0123,
+        "reacquire_dist_m": 0.8123,
+        "reacquire_speed_mps": 1.5123,
+        "reacquire_dist_max_m": 3.0123
+      },
+      "forwarded": {
+        "bearing_sigma_deg": 5.0123,
+        "lateral_sigma_m": 0.1623,
+        "range_sigma_m": 0.1623,
+        "hist_weight": 0.2623,
+        "reacquire_after_s": 1.0123,
+        "reacquire_colour_max": 1.0123,
+        "reacquire_bearing_deg": 35.0123,
+        "reacquire_dist_m": 0.8123,
+        "reacquire_speed_mps": 1.5123,
+        "reacquire_dist_max_m": 3.0123
+      }
+    },
+    "limitation": "not an actual rclpy parameter service/CLI test"
+  },
+  "t13_gate_level": {
+    "on": {
+      "displacement_m": 6.489181360198667,
+      "reach_m": 2.6000000000000005,
+      "accepted": false
+    },
+    "off": {
+      "displacement_m": 6.489181360198667,
+      "reach_m": 100.0,
+      "accepted": true
+    }
+  },
+  "lateral_zero_equivalence": {
+    "frames": 20000,
+    "tracks": 500,
+    "cost_accept_state_mismatches": 0,
+    "baseline": "13f570b"
+  },
+  "docker_closed_loop_rerun": false
+}
