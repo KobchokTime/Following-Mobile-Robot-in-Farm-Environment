@@ -1,5 +1,5 @@
 import { spawn } from "node:child_process";
-import { appendFile, mkdir, open, readFile, unlink } from "node:fs/promises";
+import { appendFile, mkdir, open, readFile, unlink, writeFile } from "node:fs/promises";
 import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -169,11 +169,13 @@ async function finish(jobId) {
     const check = await run(process.env.OFFICE_PYTHON || "python", ["scripts/check.py"], {
       cwd: checkout, timeoutMs: 300_000, env,
     });
+    const checkLog = join(stateDir, `${jobId}-${Date.now()}-check.txt`);
+    await writeFile(checkLog, `checkout: ${checkout}\ncommand: scripts/check.py\nexit: ${check.code}\ntimed out: ${check.timedOut}\n\nstdout:\n${check.stdout}\n\nstderr:\n${check.stderr}\n`, { flag: "wx" });
     const ok = scopeValid && headUnchanged && hasWork && check.code === 0 && !check.timedOut;
     const result = {
       jobId, lane: job.lane, agent: job.agent, state: ok ? "review-ready" : "failed",
       branch: latest.branch, baseCommit: latest.baseCommit, headCommit, checkout, changed,
-      scopeValid, headUnchanged, checkExit: check.code, checkTimedOut: check.timedOut,
+      scopeValid, headUnchanged, checkExit: check.code, checkTimedOut: check.timedOut, checkLog,
       summary: ok ? "มีงานและเช็กออฟไลน์ผ่าน รอคนรีวิว" :
         "ไม่มีงานที่รับได้ หรือขอบเขต/เช็กไม่ผ่าน ดู clone และผลตรวจ",
     };
