@@ -1416,3 +1416,7 @@ Earlier history: `history-2026-10-16.md`.
 - Round 1 (radius 1.0): `walk_up_same` scan 10/10, noscan 2/10 (573 wrong publications), old 10/10. `side_step` scan 7/10 vs noscan 10/10: a post near the step.
 - `1be3357`: `crowd_radius_m` 0.5. Round 2: `side_step` 13/20 vs 20/20, `walk_up_same` 10/10, `close_pair_same` 5/5.
 - `0d74732`: only boxes near the prediction are checked (a false box made the target's own returns a crowd). Round 3 running.
+
+## 2026-10-28 14:33 — Reviewed Codex's dashboard PRs 5 and 6
+- PR 5 (live validator): PR's `gen_live.py` on the real registry (14 experiments, 1,070 runs, one live) → validator PASS. OK to merge. My side: write `live: false` in the registry, sync `tools/dashboard/live/registry.json`, and watch `past_tracks` (5.3 of 8 MB).
+- PR 6 (CI generator): fields match `drawCI()`. Needs #5's head merged in (only `logs/codex.md` conflicts; 152 tests pass merged). My side: show `fetched_utc` on the CI tab and update the dataset description before publishing.
