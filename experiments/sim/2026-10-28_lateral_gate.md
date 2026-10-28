@@ -179,6 +179,19 @@ finish.
   | 0.15 | 1/4 | 357 |
 
   A smaller floor alone is therefore not the fix.
+- **Sweep 1, complete for `side_step` and `close_pair_same`** (`2026-10-28_lateral_sweep.json`, realism unless
+  noted, interleaved per seed). "Wrong" means publications of another person's box (in solo scenarios,
+  realism's random false-positive boxes):
+
+  | Floor | `side_step` s8–27 | `close_pair_same` realism s0–9 | wrong (realism pair) | `close_pair_same` clean s0–4 | wrong (clean pair) |
+  |---|---|---|---|---|---|
+  | 0 (old) | 10/20 | 10/10 | 7 | 5/5 | 0 |
+  | 0.10 | 19/20 | **3/10** | **201** | 5/5 | 0 |
+  | 0.15 | 20/20 | **2/10** | **648** | 5/5 | **495** |
+
+  - No contacts anywhere.
+  - **Codex's objection is confirmed in closed loop:** a plain floor, even 0.10, gives up the
+    close same-clothes pair to win `side_step`.
 - **Round 2b (`claude/robot/lateral-gate-2`, commit "wider lateral gate only when the target is alone"):**
   - the floor applies only when no second person has been near the predicted target in the last 1 s;
   - two boxes in one frame (≤ 30 ms apart), both within 1 m of the prediction and at least 0.25 m
