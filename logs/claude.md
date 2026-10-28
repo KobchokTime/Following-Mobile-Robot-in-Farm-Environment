@@ -1438,3 +1438,17 @@ Earlier history: `history-2026-10-16.md`.
 - Round 4 (`1466559`, spread rule): `walk_up_same` 10/10, `side_step` 18/20 vs 19/20 without the check, `close_pair_same` 5/5, no contact. Meets the rule set before the run, so `crowd_from_scan` stays on.
 - Write-up `experiments/sim/2026-10-28_walk_up.md`, data `2026-10-28_walk_up.json` (220 runs, four rounds). Fixed the runner's broken usage line.
 - Reviewed Codex's PR 7 (unit_tests generator): 154/154 in a clean worktree; OK to merge.
+
+### 2026-10-28 — dashboard — dashboard source into the repository (11:04 Thai time)
+- The user asked for the first parallel-work step: move the dashboard out of Claude's session scratchpad.
+- Branch `claude/dashboard/source` (`76ef97e`) adds `tools/dashboard/`:
+  - `index.html` (store v24);
+  - `datasets.json` (snapshot of the dataset records);
+  - `live/gen_live.py` (`--runs-root`, `--out`);
+  - `live/registry.json`;
+  - README with the publish procedure (Claude only) and the schema of the live JSON.
+- `.gitignore`: `dashboard/` anchored to the root (`/dashboard/`), since it was also hiding `tools/dashboard/`.
+- `gen_live.py` checked against the scratchpad generator:
+  - `past_tracks` identical (25,127 rows);
+  - the other differences are only runs that finished in between, and `close_pair_same`, which is not on this branch.
+- 138 tests pass. Not merged into the hub yet.

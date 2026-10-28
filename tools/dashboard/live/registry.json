@@ -1,0 +1,8843 @@
+[
+ {
+  "id": "t13_rule",
+  "title": "T13 กฎระยะล็อกกลับ",
+  "code": "808dc6c",
+  "dir": "t13",
+  "runs": [
+   {
+    "tag": "look_clean_new_s0",
+    "scenario": "lookalike_after_loss",
+    "seed": 0,
+    "variant": "กฎระยะเปิด",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "look_clean_old_s0",
+    "scenario": "lookalike_after_loss",
+    "seed": 0,
+    "variant": "กฎระยะปิด",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "look_real_new_s0",
+    "scenario": "lookalike_after_loss",
+    "seed": 0,
+    "variant": "กฎระยะเปิด",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "look_real_old_s0",
+    "scenario": "lookalike_after_loss",
+    "seed": 0,
+    "variant": "กฎระยะปิด",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "look_clean_new_s1",
+    "scenario": "lookalike_after_loss",
+    "seed": 1,
+    "variant": "กฎระยะเปิด",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "look_clean_old_s1",
+    "scenario": "lookalike_after_loss",
+    "seed": 1,
+    "variant": "กฎระยะปิด",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "look_real_new_s1",
+    "scenario": "lookalike_after_loss",
+    "seed": 1,
+    "variant": "กฎระยะเปิด",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "look_real_old_s1",
+    "scenario": "lookalike_after_loss",
+    "seed": 1,
+    "variant": "กฎระยะปิด",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "look_clean_new_s2",
+    "scenario": "lookalike_after_loss",
+    "seed": 2,
+    "variant": "กฎระยะเปิด",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "look_clean_old_s2",
+    "scenario": "lookalike_after_loss",
+    "seed": 2,
+    "variant": "กฎระยะปิด",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "look_real_new_s2",
+    "scenario": "lookalike_after_loss",
+    "seed": 2,
+    "variant": "กฎระยะเปิด",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "look_real_old_s2",
+    "scenario": "lookalike_after_loss",
+    "seed": 2,
+    "variant": "กฎระยะปิด",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "look_clean_new_s3",
+    "scenario": "lookalike_after_loss",
+    "seed": 3,
+    "variant": "กฎระยะเปิด",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "look_clean_old_s3",
+    "scenario": "lookalike_after_loss",
+    "seed": 3,
+    "variant": "กฎระยะปิด",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "look_real_new_s3",
+    "scenario": "lookalike_after_loss",
+    "seed": 3,
+    "variant": "กฎระยะเปิด",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "look_real_old_s3",
+    "scenario": "lookalike_after_loss",
+    "seed": 3,
+    "variant": "กฎระยะปิด",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "look_clean_new_s4",
+    "scenario": "lookalike_after_loss",
+    "seed": 4,
+    "variant": "กฎระยะเปิด",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "look_clean_old_s4",
+    "scenario": "lookalike_after_loss",
+    "seed": 4,
+    "variant": "กฎระยะปิด",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "look_real_new_s4",
+    "scenario": "lookalike_after_loss",
+    "seed": 4,
+    "variant": "กฎระยะเปิด",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "look_real_old_s4",
+    "scenario": "lookalike_after_loss",
+    "seed": 4,
+    "variant": "กฎระยะปิด",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_crossing_s0",
+    "scenario": "shade_crossing",
+    "seed": 0,
+    "variant": "กฎระยะเปิด",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_side_by_side_s0",
+    "scenario": "shade_side_by_side",
+    "seed": 0,
+    "variant": "กฎระยะเปิด",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_crossing_s1",
+    "scenario": "shade_crossing",
+    "seed": 1,
+    "variant": "กฎระยะเปิด",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_side_by_side_s1",
+    "scenario": "shade_side_by_side",
+    "seed": 1,
+    "variant": "กฎระยะเปิด",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_crossing_s2",
+    "scenario": "shade_crossing",
+    "seed": 2,
+    "variant": "กฎระยะเปิด",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_side_by_side_s2",
+    "scenario": "shade_side_by_side",
+    "seed": 2,
+    "variant": "กฎระยะเปิด",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_crossing_s3",
+    "scenario": "shade_crossing",
+    "seed": 3,
+    "variant": "กฎระยะเปิด",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_side_by_side_s3",
+    "scenario": "shade_side_by_side",
+    "seed": 3,
+    "variant": "กฎระยะเปิด",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_crossing_s4",
+    "scenario": "shade_crossing",
+    "seed": 4,
+    "variant": "กฎระยะเปิด",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_side_by_side_s4",
+    "scenario": "shade_side_by_side",
+    "seed": 4,
+    "variant": "กฎระยะเปิด",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_crossing_s5",
+    "scenario": "shade_crossing",
+    "seed": 5,
+    "variant": "กฎระยะเปิด",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_side_by_side_s5",
+    "scenario": "shade_side_by_side",
+    "seed": 5,
+    "variant": "กฎระยะเปิด",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_crossing_s6",
+    "scenario": "shade_crossing",
+    "seed": 6,
+    "variant": "กฎระยะเปิด",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_side_by_side_s6",
+    "scenario": "shade_side_by_side",
+    "seed": 6,
+    "variant": "กฎระยะเปิด",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_crossing_s7",
+    "scenario": "shade_crossing",
+    "seed": 7,
+    "variant": "กฎระยะเปิด",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_side_by_side_s7",
+    "scenario": "shade_side_by_side",
+    "seed": 7,
+    "variant": "กฎระยะเปิด",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_crossing_s8",
+    "scenario": "shade_crossing",
+    "seed": 8,
+    "variant": "กฎระยะเปิด",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_side_by_side_s8",
+    "scenario": "shade_side_by_side",
+    "seed": 8,
+    "variant": "กฎระยะเปิด",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_crossing_s9",
+    "scenario": "shade_crossing",
+    "seed": 9,
+    "variant": "กฎระยะเปิด",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_side_by_side_s9",
+    "scenario": "shade_side_by_side",
+    "seed": 9,
+    "variant": "กฎระยะเปิด",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_s0",
+    "scenario": "crossing",
+    "seed": 0,
+    "variant": "กฎระยะเปิด",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_s0",
+    "scenario": "head_on",
+    "seed": 0,
+    "variant": "กฎระยะเปิด",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_s0",
+    "scenario": "side_by_side",
+    "seed": 0,
+    "variant": "กฎระยะเปิด",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_s0",
+    "scenario": "side_by_side_same",
+    "seed": 0,
+    "variant": "กฎระยะเปิด",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_s0",
+    "scenario": "stand_aside",
+    "seed": 0,
+    "variant": "กฎระยะเปิด",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s0",
+    "scenario": "straight",
+    "seed": 0,
+    "variant": "กฎระยะเปิด",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s0",
+    "scenario": "stop_and_go",
+    "seed": 0,
+    "variant": "กฎระยะเปิด",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s0",
+    "scenario": "curve_left",
+    "seed": 0,
+    "variant": "กฎระยะเปิด",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s0",
+    "scenario": "target_loss",
+    "seed": 0,
+    "variant": "กฎระยะเปิด",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s0",
+    "scenario": "come_back",
+    "seed": 0,
+    "variant": "กฎระยะเปิด",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s0",
+    "scenario": "side_step",
+    "seed": 0,
+    "variant": "กฎระยะเปิด",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s0",
+    "scenario": "turn_90",
+    "seed": 0,
+    "variant": "กฎระยะเปิด",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s0",
+    "scenario": "walk_0p6",
+    "seed": 0,
+    "variant": "กฎระยะเปิด",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s0",
+    "scenario": "walk_1p0",
+    "seed": 0,
+    "variant": "กฎระยะเปิด",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s0",
+    "scenario": "zigzag",
+    "seed": 0,
+    "variant": "กฎระยะเปิด",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_s1",
+    "scenario": "crossing",
+    "seed": 1,
+    "variant": "กฎระยะเปิด",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_s1",
+    "scenario": "head_on",
+    "seed": 1,
+    "variant": "กฎระยะเปิด",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_s1",
+    "scenario": "side_by_side",
+    "seed": 1,
+    "variant": "กฎระยะเปิด",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_s1",
+    "scenario": "side_by_side_same",
+    "seed": 1,
+    "variant": "กฎระยะเปิด",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_s1",
+    "scenario": "stand_aside",
+    "seed": 1,
+    "variant": "กฎระยะเปิด",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s1",
+    "scenario": "straight",
+    "seed": 1,
+    "variant": "กฎระยะเปิด",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s1",
+    "scenario": "stop_and_go",
+    "seed": 1,
+    "variant": "กฎระยะเปิด",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s1",
+    "scenario": "curve_left",
+    "seed": 1,
+    "variant": "กฎระยะเปิด",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s1",
+    "scenario": "target_loss",
+    "seed": 1,
+    "variant": "กฎระยะเปิด",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s1",
+    "scenario": "come_back",
+    "seed": 1,
+    "variant": "กฎระยะเปิด",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s1",
+    "scenario": "side_step",
+    "seed": 1,
+    "variant": "กฎระยะเปิด",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s1",
+    "scenario": "turn_90",
+    "seed": 1,
+    "variant": "กฎระยะเปิด",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s1",
+    "scenario": "walk_0p6",
+    "seed": 1,
+    "variant": "กฎระยะเปิด",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s1",
+    "scenario": "walk_1p0",
+    "seed": 1,
+    "variant": "กฎระยะเปิด",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s1",
+    "scenario": "zigzag",
+    "seed": 1,
+    "variant": "กฎระยะเปิด",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_s2",
+    "scenario": "crossing",
+    "seed": 2,
+    "variant": "กฎระยะเปิด",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_s2",
+    "scenario": "head_on",
+    "seed": 2,
+    "variant": "กฎระยะเปิด",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_s2",
+    "scenario": "side_by_side",
+    "seed": 2,
+    "variant": "กฎระยะเปิด",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_s2",
+    "scenario": "side_by_side_same",
+    "seed": 2,
+    "variant": "กฎระยะเปิด",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_s2",
+    "scenario": "stand_aside",
+    "seed": 2,
+    "variant": "กฎระยะเปิด",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s2",
+    "scenario": "straight",
+    "seed": 2,
+    "variant": "กฎระยะเปิด",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s2",
+    "scenario": "stop_and_go",
+    "seed": 2,
+    "variant": "กฎระยะเปิด",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s2",
+    "scenario": "curve_left",
+    "seed": 2,
+    "variant": "กฎระยะเปิด",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s2",
+    "scenario": "target_loss",
+    "seed": 2,
+    "variant": "กฎระยะเปิด",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s2",
+    "scenario": "come_back",
+    "seed": 2,
+    "variant": "กฎระยะเปิด",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s2",
+    "scenario": "side_step",
+    "seed": 2,
+    "variant": "กฎระยะเปิด",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s2",
+    "scenario": "turn_90",
+    "seed": 2,
+    "variant": "กฎระยะเปิด",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s2",
+    "scenario": "walk_0p6",
+    "seed": 2,
+    "variant": "กฎระยะเปิด",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s2",
+    "scenario": "walk_1p0",
+    "seed": 2,
+    "variant": "กฎระยะเปิด",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s2",
+    "scenario": "zigzag",
+    "seed": 2,
+    "variant": "กฎระยะเปิด",
+    "light": "สมจริง"
+   }
+  ],
+  "started_utc": "2026-10-27T10:50:54Z",
+  "order": 1,
+  "purpose": "Codex พบว่าการล็อกกลับด้วยสียึดคนแปลกหน้าที่ใส่เสื้อเหมือนกันที่ไกล 7.43 m ได้ จึงเพิ่มกฎว่าตำแหน่งต้องอยู่ในระยะที่เป้าเดินไปถึงได้จริง (0.8 m + 1.5 m/s × เวลาที่หาย สูงสุด 3 m)",
+  "compare": "กฎระยะเปิด เทียบ ปิด ในฉากคนเสื้อเหมือนกันโผล่ตอนเป้าหาย · และเช็กว่าชุดอื่นไม่แย่ลงเมื่อเปิดกฎ",
+  "result": "ฉากคนเสื้อเหมือนกัน 9/10 ทั้งเปิดและปิด เพราะที่พลาดมาจากกล่องยืมระยะ LiDAR ของเป้า ไม่ใช่จากการล็อกกลับ · ชุดอื่นไม่แย่ลง · แก้ไข 28 ต.ค.: รอบ \"ปิดกฎ\" ในชุดนี้ไม่ได้ปิดจริง (พารามิเตอร์ไม่ได้ประกาศ) ที่ปิดจริงอยู่ในการทดลอง \"gate คิดเป็นเมตรด้านข้าง\": 0/20",
+  "live": false
+ },
+ {
+  "id": "box_v1",
+  "title": "ระยะของกล่อง รุ่นแรก",
+  "code": "adac5b5",
+  "dir": "br",
+  "runs": [
+   {
+    "tag": "look_clean_true_s0",
+    "scenario": "lookalike_after_loss",
+    "seed": 0,
+    "variant": "ระยะของกล่อง v1",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "look_clean_false_s0",
+    "scenario": "lookalike_after_loss",
+    "seed": 0,
+    "variant": "วิธีเดิม",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "look_real_true_s0",
+    "scenario": "lookalike_after_loss",
+    "seed": 0,
+    "variant": "ระยะของกล่อง v1",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "look_real_false_s0",
+    "scenario": "lookalike_after_loss",
+    "seed": 0,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "look_clean_true_s1",
+    "scenario": "lookalike_after_loss",
+    "seed": 1,
+    "variant": "ระยะของกล่อง v1",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "look_clean_false_s1",
+    "scenario": "lookalike_after_loss",
+    "seed": 1,
+    "variant": "วิธีเดิม",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "look_real_true_s1",
+    "scenario": "lookalike_after_loss",
+    "seed": 1,
+    "variant": "ระยะของกล่อง v1",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "look_real_false_s1",
+    "scenario": "lookalike_after_loss",
+    "seed": 1,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "look_clean_true_s2",
+    "scenario": "lookalike_after_loss",
+    "seed": 2,
+    "variant": "ระยะของกล่อง v1",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "look_clean_false_s2",
+    "scenario": "lookalike_after_loss",
+    "seed": 2,
+    "variant": "วิธีเดิม",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "look_real_true_s2",
+    "scenario": "lookalike_after_loss",
+    "seed": 2,
+    "variant": "ระยะของกล่อง v1",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "look_real_false_s2",
+    "scenario": "lookalike_after_loss",
+    "seed": 2,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "look_clean_true_s3",
+    "scenario": "lookalike_after_loss",
+    "seed": 3,
+    "variant": "ระยะของกล่อง v1",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "look_clean_false_s3",
+    "scenario": "lookalike_after_loss",
+    "seed": 3,
+    "variant": "วิธีเดิม",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "look_real_true_s3",
+    "scenario": "lookalike_after_loss",
+    "seed": 3,
+    "variant": "ระยะของกล่อง v1",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "look_real_false_s3",
+    "scenario": "lookalike_after_loss",
+    "seed": 3,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "look_clean_true_s4",
+    "scenario": "lookalike_after_loss",
+    "seed": 4,
+    "variant": "ระยะของกล่อง v1",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "look_clean_false_s4",
+    "scenario": "lookalike_after_loss",
+    "seed": 4,
+    "variant": "วิธีเดิม",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "look_real_true_s4",
+    "scenario": "lookalike_after_loss",
+    "seed": 4,
+    "variant": "ระยะของกล่อง v1",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "look_real_false_s4",
+    "scenario": "lookalike_after_loss",
+    "seed": 4,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "look_clean_true_s5",
+    "scenario": "lookalike_after_loss",
+    "seed": 5,
+    "variant": "ระยะของกล่อง v1",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "look_clean_false_s5",
+    "scenario": "lookalike_after_loss",
+    "seed": 5,
+    "variant": "วิธีเดิม",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "look_real_true_s5",
+    "scenario": "lookalike_after_loss",
+    "seed": 5,
+    "variant": "ระยะของกล่อง v1",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "look_real_false_s5",
+    "scenario": "lookalike_after_loss",
+    "seed": 5,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "look_clean_true_s6",
+    "scenario": "lookalike_after_loss",
+    "seed": 6,
+    "variant": "ระยะของกล่อง v1",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "look_clean_false_s6",
+    "scenario": "lookalike_after_loss",
+    "seed": 6,
+    "variant": "วิธีเดิม",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "look_real_true_s6",
+    "scenario": "lookalike_after_loss",
+    "seed": 6,
+    "variant": "ระยะของกล่อง v1",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "look_real_false_s6",
+    "scenario": "lookalike_after_loss",
+    "seed": 6,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "look_clean_true_s7",
+    "scenario": "lookalike_after_loss",
+    "seed": 7,
+    "variant": "ระยะของกล่อง v1",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "look_clean_false_s7",
+    "scenario": "lookalike_after_loss",
+    "seed": 7,
+    "variant": "วิธีเดิม",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "look_real_true_s7",
+    "scenario": "lookalike_after_loss",
+    "seed": 7,
+    "variant": "ระยะของกล่อง v1",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "look_real_false_s7",
+    "scenario": "lookalike_after_loss",
+    "seed": 7,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "look_clean_true_s8",
+    "scenario": "lookalike_after_loss",
+    "seed": 8,
+    "variant": "ระยะของกล่อง v1",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "look_clean_false_s8",
+    "scenario": "lookalike_after_loss",
+    "seed": 8,
+    "variant": "วิธีเดิม",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "look_real_true_s8",
+    "scenario": "lookalike_after_loss",
+    "seed": 8,
+    "variant": "ระยะของกล่อง v1",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "look_real_false_s8",
+    "scenario": "lookalike_after_loss",
+    "seed": 8,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "look_clean_true_s9",
+    "scenario": "lookalike_after_loss",
+    "seed": 9,
+    "variant": "ระยะของกล่อง v1",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "look_clean_false_s9",
+    "scenario": "lookalike_after_loss",
+    "seed": 9,
+    "variant": "วิธีเดิม",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "look_real_true_s9",
+    "scenario": "lookalike_after_loss",
+    "seed": 9,
+    "variant": "ระยะของกล่อง v1",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "look_real_false_s9",
+    "scenario": "lookalike_after_loss",
+    "seed": 9,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_crossing_s0",
+    "scenario": "shade_crossing",
+    "seed": 0,
+    "variant": "ระยะของกล่อง v1",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_side_by_side_s0",
+    "scenario": "shade_side_by_side",
+    "seed": 0,
+    "variant": "ระยะของกล่อง v1",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_crossing_s1",
+    "scenario": "shade_crossing",
+    "seed": 1,
+    "variant": "ระยะของกล่อง v1",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_side_by_side_s1",
+    "scenario": "shade_side_by_side",
+    "seed": 1,
+    "variant": "ระยะของกล่อง v1",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_crossing_s2",
+    "scenario": "shade_crossing",
+    "seed": 2,
+    "variant": "ระยะของกล่อง v1",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_side_by_side_s2",
+    "scenario": "shade_side_by_side",
+    "seed": 2,
+    "variant": "ระยะของกล่อง v1",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_crossing_s3",
+    "scenario": "shade_crossing",
+    "seed": 3,
+    "variant": "ระยะของกล่อง v1",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_side_by_side_s3",
+    "scenario": "shade_side_by_side",
+    "seed": 3,
+    "variant": "ระยะของกล่อง v1",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_crossing_s4",
+    "scenario": "shade_crossing",
+    "seed": 4,
+    "variant": "ระยะของกล่อง v1",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_side_by_side_s4",
+    "scenario": "shade_side_by_side",
+    "seed": 4,
+    "variant": "ระยะของกล่อง v1",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_crossing_s5",
+    "scenario": "shade_crossing",
+    "seed": 5,
+    "variant": "ระยะของกล่อง v1",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_side_by_side_s5",
+    "scenario": "shade_side_by_side",
+    "seed": 5,
+    "variant": "ระยะของกล่อง v1",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_crossing_s6",
+    "scenario": "shade_crossing",
+    "seed": 6,
+    "variant": "ระยะของกล่อง v1",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_side_by_side_s6",
+    "scenario": "shade_side_by_side",
+    "seed": 6,
+    "variant": "ระยะของกล่อง v1",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_crossing_s7",
+    "scenario": "shade_crossing",
+    "seed": 7,
+    "variant": "ระยะของกล่อง v1",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_side_by_side_s7",
+    "scenario": "shade_side_by_side",
+    "seed": 7,
+    "variant": "ระยะของกล่อง v1",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_crossing_s8",
+    "scenario": "shade_crossing",
+    "seed": 8,
+    "variant": "ระยะของกล่อง v1",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_side_by_side_s8",
+    "scenario": "shade_side_by_side",
+    "seed": 8,
+    "variant": "ระยะของกล่อง v1",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_crossing_s9",
+    "scenario": "shade_crossing",
+    "seed": 9,
+    "variant": "ระยะของกล่อง v1",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_side_by_side_s9",
+    "scenario": "shade_side_by_side",
+    "seed": 9,
+    "variant": "ระยะของกล่อง v1",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_s0",
+    "scenario": "crossing",
+    "seed": 0,
+    "variant": "ระยะของกล่อง v1",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_s0",
+    "scenario": "head_on",
+    "seed": 0,
+    "variant": "ระยะของกล่อง v1",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_s0",
+    "scenario": "side_by_side",
+    "seed": 0,
+    "variant": "ระยะของกล่อง v1",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_s0",
+    "scenario": "side_by_side_same",
+    "seed": 0,
+    "variant": "ระยะของกล่อง v1",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_s0",
+    "scenario": "stand_aside",
+    "seed": 0,
+    "variant": "ระยะของกล่อง v1",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s0",
+    "scenario": "straight",
+    "seed": 0,
+    "variant": "ระยะของกล่อง v1",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s0",
+    "scenario": "stop_and_go",
+    "seed": 0,
+    "variant": "ระยะของกล่อง v1",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s0",
+    "scenario": "curve_left",
+    "seed": 0,
+    "variant": "ระยะของกล่อง v1",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s0",
+    "scenario": "target_loss",
+    "seed": 0,
+    "variant": "ระยะของกล่อง v1",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s0",
+    "scenario": "come_back",
+    "seed": 0,
+    "variant": "ระยะของกล่อง v1",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s0",
+    "scenario": "side_step",
+    "seed": 0,
+    "variant": "ระยะของกล่อง v1",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s0",
+    "scenario": "turn_90",
+    "seed": 0,
+    "variant": "ระยะของกล่อง v1",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s0",
+    "scenario": "walk_0p6",
+    "seed": 0,
+    "variant": "ระยะของกล่อง v1",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s0",
+    "scenario": "walk_1p0",
+    "seed": 0,
+    "variant": "ระยะของกล่อง v1",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s0",
+    "scenario": "zigzag",
+    "seed": 0,
+    "variant": "ระยะของกล่อง v1",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_s1",
+    "scenario": "crossing",
+    "seed": 1,
+    "variant": "ระยะของกล่อง v1",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_s1",
+    "scenario": "head_on",
+    "seed": 1,
+    "variant": "ระยะของกล่อง v1",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_s1",
+    "scenario": "side_by_side",
+    "seed": 1,
+    "variant": "ระยะของกล่อง v1",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_s1",
+    "scenario": "side_by_side_same",
+    "seed": 1,
+    "variant": "ระยะของกล่อง v1",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_s1",
+    "scenario": "stand_aside",
+    "seed": 1,
+    "variant": "ระยะของกล่อง v1",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s1",
+    "scenario": "straight",
+    "seed": 1,
+    "variant": "ระยะของกล่อง v1",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s1",
+    "scenario": "stop_and_go",
+    "seed": 1,
+    "variant": "ระยะของกล่อง v1",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s1",
+    "scenario": "curve_left",
+    "seed": 1,
+    "variant": "ระยะของกล่อง v1",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s1",
+    "scenario": "target_loss",
+    "seed": 1,
+    "variant": "ระยะของกล่อง v1",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s1",
+    "scenario": "come_back",
+    "seed": 1,
+    "variant": "ระยะของกล่อง v1",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s1",
+    "scenario": "side_step",
+    "seed": 1,
+    "variant": "ระยะของกล่อง v1",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s1",
+    "scenario": "turn_90",
+    "seed": 1,
+    "variant": "ระยะของกล่อง v1",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s1",
+    "scenario": "walk_0p6",
+    "seed": 1,
+    "variant": "ระยะของกล่อง v1",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s1",
+    "scenario": "walk_1p0",
+    "seed": 1,
+    "variant": "ระยะของกล่อง v1",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s1",
+    "scenario": "zigzag",
+    "seed": 1,
+    "variant": "ระยะของกล่อง v1",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_s2",
+    "scenario": "crossing",
+    "seed": 2,
+    "variant": "ระยะของกล่อง v1",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_s2",
+    "scenario": "head_on",
+    "seed": 2,
+    "variant": "ระยะของกล่อง v1",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_s2",
+    "scenario": "side_by_side",
+    "seed": 2,
+    "variant": "ระยะของกล่อง v1",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_s2",
+    "scenario": "side_by_side_same",
+    "seed": 2,
+    "variant": "ระยะของกล่อง v1",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_s2",
+    "scenario": "stand_aside",
+    "seed": 2,
+    "variant": "ระยะของกล่อง v1",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s2",
+    "scenario": "straight",
+    "seed": 2,
+    "variant": "ระยะของกล่อง v1",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s2",
+    "scenario": "stop_and_go",
+    "seed": 2,
+    "variant": "ระยะของกล่อง v1",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s2",
+    "scenario": "curve_left",
+    "seed": 2,
+    "variant": "ระยะของกล่อง v1",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s2",
+    "scenario": "target_loss",
+    "seed": 2,
+    "variant": "ระยะของกล่อง v1",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s2",
+    "scenario": "come_back",
+    "seed": 2,
+    "variant": "ระยะของกล่อง v1",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s2",
+    "scenario": "side_step",
+    "seed": 2,
+    "variant": "ระยะของกล่อง v1",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s2",
+    "scenario": "turn_90",
+    "seed": 2,
+    "variant": "ระยะของกล่อง v1",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s2",
+    "scenario": "walk_0p6",
+    "seed": 2,
+    "variant": "ระยะของกล่อง v1",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s2",
+    "scenario": "walk_1p0",
+    "seed": 2,
+    "variant": "ระยะของกล่อง v1",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s2",
+    "scenario": "zigzag",
+    "seed": 2,
+    "variant": "ระยะของกล่อง v1",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "sc2_true_s10",
+    "scenario": "shade_crossing",
+    "seed": 10,
+    "variant": "ระยะของกล่อง v1",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "sc2_false_s10",
+    "scenario": "shade_crossing",
+    "seed": 10,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "sc2_true_s11",
+    "scenario": "shade_crossing",
+    "seed": 11,
+    "variant": "ระยะของกล่อง v1",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "sc2_false_s11",
+    "scenario": "shade_crossing",
+    "seed": 11,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "sc2_true_s12",
+    "scenario": "shade_crossing",
+    "seed": 12,
+    "variant": "ระยะของกล่อง v1",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "sc2_false_s12",
+    "scenario": "shade_crossing",
+    "seed": 12,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "sc2_true_s13",
+    "scenario": "shade_crossing",
+    "seed": 13,
+    "variant": "ระยะของกล่อง v1",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "sc2_false_s13",
+    "scenario": "shade_crossing",
+    "seed": 13,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "sc2_true_s14",
+    "scenario": "shade_crossing",
+    "seed": 14,
+    "variant": "ระยะของกล่อง v1",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "sc2_false_s14",
+    "scenario": "shade_crossing",
+    "seed": 14,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "sc2_true_s15",
+    "scenario": "shade_crossing",
+    "seed": 15,
+    "variant": "ระยะของกล่อง v1",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "sc2_false_s15",
+    "scenario": "shade_crossing",
+    "seed": 15,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "sc2_true_s16",
+    "scenario": "shade_crossing",
+    "seed": 16,
+    "variant": "ระยะของกล่อง v1",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "sc2_false_s16",
+    "scenario": "shade_crossing",
+    "seed": 16,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "sc2_true_s17",
+    "scenario": "shade_crossing",
+    "seed": 17,
+    "variant": "ระยะของกล่อง v1",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "sc2_false_s17",
+    "scenario": "shade_crossing",
+    "seed": 17,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "sc2_true_s18",
+    "scenario": "shade_crossing",
+    "seed": 18,
+    "variant": "ระยะของกล่อง v1",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "sc2_false_s18",
+    "scenario": "shade_crossing",
+    "seed": 18,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "sc2_true_s19",
+    "scenario": "shade_crossing",
+    "seed": 19,
+    "variant": "ระยะของกล่อง v1",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "sc2_false_s19",
+    "scenario": "shade_crossing",
+    "seed": 19,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   }
+  ],
+  "started_utc": "2026-10-27T12:15:54Z",
+  "order": 2,
+  "purpose": "กล่องของคนที่ไกลยืมระยะ LiDAR ของเป้าที่อยู่ใกล้ จึงให้กล่องใช้ระยะจากกลุ่มจุด LiDAR ที่ \"กลางกลุ่มใกล้กล่องที่สุด\"",
+  "compare": "ระยะของกล่อง เทียบ วิธีเดิม (ค่าต่ำสุดในเซกเตอร์)",
+  "result": "ฉากคนเสื้อเหมือนกันดีขึ้น 20/20 เทียบ 17/20 แต่ฉากตัดหน้าในเงาพลาด 2/20: คนตัดหน้ามอบระยะให้กล่องของเป้าก่อนบังจริง",
+  "live": false
+ },
+ {
+  "id": "box_v2",
+  "title": "ระยะของกล่อง แก้คนตัดหน้า",
+  "code": "445b0e9",
+  "dir": "br2",
+  "runs": [
+   {
+    "tag": "col_shade_crossing_s0",
+    "scenario": "shade_crossing",
+    "seed": 0,
+    "variant": "ระยะของกล่อง v2",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_crossing_s1",
+    "scenario": "shade_crossing",
+    "seed": 1,
+    "variant": "ระยะของกล่อง v2",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_crossing_s2",
+    "scenario": "shade_crossing",
+    "seed": 2,
+    "variant": "ระยะของกล่อง v2",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_crossing_s3",
+    "scenario": "shade_crossing",
+    "seed": 3,
+    "variant": "ระยะของกล่อง v2",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_crossing_s4",
+    "scenario": "shade_crossing",
+    "seed": 4,
+    "variant": "ระยะของกล่อง v2",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_crossing_s5",
+    "scenario": "shade_crossing",
+    "seed": 5,
+    "variant": "ระยะของกล่อง v2",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_crossing_s6",
+    "scenario": "shade_crossing",
+    "seed": 6,
+    "variant": "ระยะของกล่อง v2",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_crossing_s7",
+    "scenario": "shade_crossing",
+    "seed": 7,
+    "variant": "ระยะของกล่อง v2",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_crossing_s8",
+    "scenario": "shade_crossing",
+    "seed": 8,
+    "variant": "ระยะของกล่อง v2",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_crossing_s9",
+    "scenario": "shade_crossing",
+    "seed": 9,
+    "variant": "ระยะของกล่อง v2",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_crossing_s10",
+    "scenario": "shade_crossing",
+    "seed": 10,
+    "variant": "ระยะของกล่อง v2",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_crossing_s11",
+    "scenario": "shade_crossing",
+    "seed": 11,
+    "variant": "ระยะของกล่อง v2",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_crossing_s12",
+    "scenario": "shade_crossing",
+    "seed": 12,
+    "variant": "ระยะของกล่อง v2",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_crossing_s13",
+    "scenario": "shade_crossing",
+    "seed": 13,
+    "variant": "ระยะของกล่อง v2",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_crossing_s14",
+    "scenario": "shade_crossing",
+    "seed": 14,
+    "variant": "ระยะของกล่อง v2",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_crossing_s15",
+    "scenario": "shade_crossing",
+    "seed": 15,
+    "variant": "ระยะของกล่อง v2",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_crossing_s16",
+    "scenario": "shade_crossing",
+    "seed": 16,
+    "variant": "ระยะของกล่อง v2",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_crossing_s17",
+    "scenario": "shade_crossing",
+    "seed": 17,
+    "variant": "ระยะของกล่อง v2",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_crossing_s18",
+    "scenario": "shade_crossing",
+    "seed": 18,
+    "variant": "ระยะของกล่อง v2",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_crossing_s19",
+    "scenario": "shade_crossing",
+    "seed": 19,
+    "variant": "ระยะของกล่อง v2",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "look_clean_true_s0",
+    "scenario": "lookalike_after_loss",
+    "seed": 0,
+    "variant": "ระยะของกล่อง v2",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "look_real_true_s0",
+    "scenario": "lookalike_after_loss",
+    "seed": 0,
+    "variant": "ระยะของกล่อง v2",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_side_by_side_s0",
+    "scenario": "shade_side_by_side",
+    "seed": 0,
+    "variant": "ระยะของกล่อง v2",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "look_clean_true_s1",
+    "scenario": "lookalike_after_loss",
+    "seed": 1,
+    "variant": "ระยะของกล่อง v2",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "look_real_true_s1",
+    "scenario": "lookalike_after_loss",
+    "seed": 1,
+    "variant": "ระยะของกล่อง v2",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_side_by_side_s1",
+    "scenario": "shade_side_by_side",
+    "seed": 1,
+    "variant": "ระยะของกล่อง v2",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "look_clean_true_s2",
+    "scenario": "lookalike_after_loss",
+    "seed": 2,
+    "variant": "ระยะของกล่อง v2",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "look_real_true_s2",
+    "scenario": "lookalike_after_loss",
+    "seed": 2,
+    "variant": "ระยะของกล่อง v2",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_side_by_side_s2",
+    "scenario": "shade_side_by_side",
+    "seed": 2,
+    "variant": "ระยะของกล่อง v2",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "look_clean_true_s3",
+    "scenario": "lookalike_after_loss",
+    "seed": 3,
+    "variant": "ระยะของกล่อง v2",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "look_real_true_s3",
+    "scenario": "lookalike_after_loss",
+    "seed": 3,
+    "variant": "ระยะของกล่อง v2",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_side_by_side_s3",
+    "scenario": "shade_side_by_side",
+    "seed": 3,
+    "variant": "ระยะของกล่อง v2",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "look_clean_true_s4",
+    "scenario": "lookalike_after_loss",
+    "seed": 4,
+    "variant": "ระยะของกล่อง v2",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "look_real_true_s4",
+    "scenario": "lookalike_after_loss",
+    "seed": 4,
+    "variant": "ระยะของกล่อง v2",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_side_by_side_s4",
+    "scenario": "shade_side_by_side",
+    "seed": 4,
+    "variant": "ระยะของกล่อง v2",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "look_clean_true_s5",
+    "scenario": "lookalike_after_loss",
+    "seed": 5,
+    "variant": "ระยะของกล่อง v2",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "look_real_true_s5",
+    "scenario": "lookalike_after_loss",
+    "seed": 5,
+    "variant": "ระยะของกล่อง v2",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_side_by_side_s5",
+    "scenario": "shade_side_by_side",
+    "seed": 5,
+    "variant": "ระยะของกล่อง v2",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "look_clean_true_s6",
+    "scenario": "lookalike_after_loss",
+    "seed": 6,
+    "variant": "ระยะของกล่อง v2",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "look_real_true_s6",
+    "scenario": "lookalike_after_loss",
+    "seed": 6,
+    "variant": "ระยะของกล่อง v2",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_side_by_side_s6",
+    "scenario": "shade_side_by_side",
+    "seed": 6,
+    "variant": "ระยะของกล่อง v2",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "look_clean_true_s7",
+    "scenario": "lookalike_after_loss",
+    "seed": 7,
+    "variant": "ระยะของกล่อง v2",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "look_real_true_s7",
+    "scenario": "lookalike_after_loss",
+    "seed": 7,
+    "variant": "ระยะของกล่อง v2",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_side_by_side_s7",
+    "scenario": "shade_side_by_side",
+    "seed": 7,
+    "variant": "ระยะของกล่อง v2",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "look_clean_true_s8",
+    "scenario": "lookalike_after_loss",
+    "seed": 8,
+    "variant": "ระยะของกล่อง v2",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "look_real_true_s8",
+    "scenario": "lookalike_after_loss",
+    "seed": 8,
+    "variant": "ระยะของกล่อง v2",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_side_by_side_s8",
+    "scenario": "shade_side_by_side",
+    "seed": 8,
+    "variant": "ระยะของกล่อง v2",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "look_clean_true_s9",
+    "scenario": "lookalike_after_loss",
+    "seed": 9,
+    "variant": "ระยะของกล่อง v2",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "look_real_true_s9",
+    "scenario": "lookalike_after_loss",
+    "seed": 9,
+    "variant": "ระยะของกล่อง v2",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_side_by_side_s9",
+    "scenario": "shade_side_by_side",
+    "seed": 9,
+    "variant": "ระยะของกล่อง v2",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_s0",
+    "scenario": "crossing",
+    "seed": 0,
+    "variant": "ระยะของกล่อง v2",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_s0",
+    "scenario": "head_on",
+    "seed": 0,
+    "variant": "ระยะของกล่อง v2",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_s0",
+    "scenario": "side_by_side",
+    "seed": 0,
+    "variant": "ระยะของกล่อง v2",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_s0",
+    "scenario": "side_by_side_same",
+    "seed": 0,
+    "variant": "ระยะของกล่อง v2",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_s0",
+    "scenario": "stand_aside",
+    "seed": 0,
+    "variant": "ระยะของกล่อง v2",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s0",
+    "scenario": "straight",
+    "seed": 0,
+    "variant": "ระยะของกล่อง v2",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s0",
+    "scenario": "stop_and_go",
+    "seed": 0,
+    "variant": "ระยะของกล่อง v2",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s0",
+    "scenario": "curve_left",
+    "seed": 0,
+    "variant": "ระยะของกล่อง v2",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s0",
+    "scenario": "target_loss",
+    "seed": 0,
+    "variant": "ระยะของกล่อง v2",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s0",
+    "scenario": "come_back",
+    "seed": 0,
+    "variant": "ระยะของกล่อง v2",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s0",
+    "scenario": "side_step",
+    "seed": 0,
+    "variant": "ระยะของกล่อง v2",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s0",
+    "scenario": "turn_90",
+    "seed": 0,
+    "variant": "ระยะของกล่อง v2",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s0",
+    "scenario": "walk_0p6",
+    "seed": 0,
+    "variant": "ระยะของกล่อง v2",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s0",
+    "scenario": "walk_1p0",
+    "seed": 0,
+    "variant": "ระยะของกล่อง v2",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s0",
+    "scenario": "zigzag",
+    "seed": 0,
+    "variant": "ระยะของกล่อง v2",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_s1",
+    "scenario": "crossing",
+    "seed": 1,
+    "variant": "ระยะของกล่อง v2",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_s1",
+    "scenario": "head_on",
+    "seed": 1,
+    "variant": "ระยะของกล่อง v2",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_s1",
+    "scenario": "side_by_side",
+    "seed": 1,
+    "variant": "ระยะของกล่อง v2",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_s1",
+    "scenario": "side_by_side_same",
+    "seed": 1,
+    "variant": "ระยะของกล่อง v2",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_s1",
+    "scenario": "stand_aside",
+    "seed": 1,
+    "variant": "ระยะของกล่อง v2",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s1",
+    "scenario": "straight",
+    "seed": 1,
+    "variant": "ระยะของกล่อง v2",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s1",
+    "scenario": "stop_and_go",
+    "seed": 1,
+    "variant": "ระยะของกล่อง v2",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s1",
+    "scenario": "curve_left",
+    "seed": 1,
+    "variant": "ระยะของกล่อง v2",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s1",
+    "scenario": "target_loss",
+    "seed": 1,
+    "variant": "ระยะของกล่อง v2",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s1",
+    "scenario": "come_back",
+    "seed": 1,
+    "variant": "ระยะของกล่อง v2",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s1",
+    "scenario": "side_step",
+    "seed": 1,
+    "variant": "ระยะของกล่อง v2",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s1",
+    "scenario": "turn_90",
+    "seed": 1,
+    "variant": "ระยะของกล่อง v2",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s1",
+    "scenario": "walk_0p6",
+    "seed": 1,
+    "variant": "ระยะของกล่อง v2",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s1",
+    "scenario": "walk_1p0",
+    "seed": 1,
+    "variant": "ระยะของกล่อง v2",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s1",
+    "scenario": "zigzag",
+    "seed": 1,
+    "variant": "ระยะของกล่อง v2",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_s2",
+    "scenario": "crossing",
+    "seed": 2,
+    "variant": "ระยะของกล่อง v2",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_s2",
+    "scenario": "head_on",
+    "seed": 2,
+    "variant": "ระยะของกล่อง v2",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_s2",
+    "scenario": "side_by_side",
+    "seed": 2,
+    "variant": "ระยะของกล่อง v2",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_s2",
+    "scenario": "side_by_side_same",
+    "seed": 2,
+    "variant": "ระยะของกล่อง v2",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_s2",
+    "scenario": "stand_aside",
+    "seed": 2,
+    "variant": "ระยะของกล่อง v2",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s2",
+    "scenario": "straight",
+    "seed": 2,
+    "variant": "ระยะของกล่อง v2",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s2",
+    "scenario": "stop_and_go",
+    "seed": 2,
+    "variant": "ระยะของกล่อง v2",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s2",
+    "scenario": "curve_left",
+    "seed": 2,
+    "variant": "ระยะของกล่อง v2",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s2",
+    "scenario": "target_loss",
+    "seed": 2,
+    "variant": "ระยะของกล่อง v2",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s2",
+    "scenario": "come_back",
+    "seed": 2,
+    "variant": "ระยะของกล่อง v2",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s2",
+    "scenario": "side_step",
+    "seed": 2,
+    "variant": "ระยะของกล่อง v2",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s2",
+    "scenario": "turn_90",
+    "seed": 2,
+    "variant": "ระยะของกล่อง v2",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s2",
+    "scenario": "walk_0p6",
+    "seed": 2,
+    "variant": "ระยะของกล่อง v2",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s2",
+    "scenario": "walk_1p0",
+    "seed": 2,
+    "variant": "ระยะของกล่อง v2",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s2",
+    "scenario": "zigzag",
+    "seed": 2,
+    "variant": "ระยะของกล่อง v2",
+    "light": "สมจริง"
+   }
+  ],
+  "started_utc": "2026-10-27T14:20:22Z",
+  "order": 3,
+  "purpose": "แก้รุ่นแรก: เลือกกลุ่มจุดที่ครอบทิศของกล่องจริงก่อน ถ้าไม่มีค่อยใช้กลุ่มที่ขอบใกล้ที่สุดใน 5°",
+  "compare": "เช็กซ้ำทุกชุดด้วยรุ่นที่แก้",
+  "result": "ทุกชุดผ่าน: ตัดหน้าในเงา 20/20, คนเสื้อเหมือนกัน 20/20, solo 29/30",
+  "live": false
+ },
+ {
+  "id": "box_v3",
+  "title": "ระยะของกล่อง เฉพาะจุดใกล้กล่อง",
+  "code": "d23e7b2",
+  "dir": "br3",
+  "runs": [
+   {
+    "tag": "col_shade_crossing_s0",
+    "scenario": "shade_crossing",
+    "seed": 0,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_crossing_s1",
+    "scenario": "shade_crossing",
+    "seed": 1,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_crossing_s2",
+    "scenario": "shade_crossing",
+    "seed": 2,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_crossing_s3",
+    "scenario": "shade_crossing",
+    "seed": 3,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_crossing_s4",
+    "scenario": "shade_crossing",
+    "seed": 4,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_crossing_s5",
+    "scenario": "shade_crossing",
+    "seed": 5,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_crossing_s6",
+    "scenario": "shade_crossing",
+    "seed": 6,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_crossing_s7",
+    "scenario": "shade_crossing",
+    "seed": 7,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_crossing_s8",
+    "scenario": "shade_crossing",
+    "seed": 8,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_crossing_s9",
+    "scenario": "shade_crossing",
+    "seed": 9,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_crossing_s10",
+    "scenario": "shade_crossing",
+    "seed": 10,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_crossing_s11",
+    "scenario": "shade_crossing",
+    "seed": 11,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_crossing_s12",
+    "scenario": "shade_crossing",
+    "seed": 12,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_crossing_s13",
+    "scenario": "shade_crossing",
+    "seed": 13,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_crossing_s14",
+    "scenario": "shade_crossing",
+    "seed": 14,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_crossing_s15",
+    "scenario": "shade_crossing",
+    "seed": 15,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_crossing_s16",
+    "scenario": "shade_crossing",
+    "seed": 16,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_crossing_s17",
+    "scenario": "shade_crossing",
+    "seed": 17,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_crossing_s18",
+    "scenario": "shade_crossing",
+    "seed": 18,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_crossing_s19",
+    "scenario": "shade_crossing",
+    "seed": 19,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_crossing_s20",
+    "scenario": "shade_crossing",
+    "seed": 20,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_crossing_s21",
+    "scenario": "shade_crossing",
+    "seed": 21,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_crossing_s22",
+    "scenario": "shade_crossing",
+    "seed": 22,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_crossing_s23",
+    "scenario": "shade_crossing",
+    "seed": 23,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_crossing_s24",
+    "scenario": "shade_crossing",
+    "seed": 24,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_crossing_s25",
+    "scenario": "shade_crossing",
+    "seed": 25,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_crossing_s26",
+    "scenario": "shade_crossing",
+    "seed": 26,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_crossing_s27",
+    "scenario": "shade_crossing",
+    "seed": 27,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_crossing_s28",
+    "scenario": "shade_crossing",
+    "seed": 28,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_crossing_s29",
+    "scenario": "shade_crossing",
+    "seed": 29,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "look_clean_true_s0",
+    "scenario": "lookalike_after_loss",
+    "seed": 0,
+    "variant": "ระยะของกล่อง v3",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "look_real_true_s0",
+    "scenario": "lookalike_after_loss",
+    "seed": 0,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "look_clean_true_s1",
+    "scenario": "lookalike_after_loss",
+    "seed": 1,
+    "variant": "ระยะของกล่อง v3",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "look_real_true_s1",
+    "scenario": "lookalike_after_loss",
+    "seed": 1,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "look_clean_true_s2",
+    "scenario": "lookalike_after_loss",
+    "seed": 2,
+    "variant": "ระยะของกล่อง v3",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "look_real_true_s2",
+    "scenario": "lookalike_after_loss",
+    "seed": 2,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "look_clean_true_s3",
+    "scenario": "lookalike_after_loss",
+    "seed": 3,
+    "variant": "ระยะของกล่อง v3",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "look_real_true_s3",
+    "scenario": "lookalike_after_loss",
+    "seed": 3,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "look_clean_true_s4",
+    "scenario": "lookalike_after_loss",
+    "seed": 4,
+    "variant": "ระยะของกล่อง v3",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "look_real_true_s4",
+    "scenario": "lookalike_after_loss",
+    "seed": 4,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "look_clean_true_s5",
+    "scenario": "lookalike_after_loss",
+    "seed": 5,
+    "variant": "ระยะของกล่อง v3",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "look_real_true_s5",
+    "scenario": "lookalike_after_loss",
+    "seed": 5,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "look_clean_true_s6",
+    "scenario": "lookalike_after_loss",
+    "seed": 6,
+    "variant": "ระยะของกล่อง v3",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "look_real_true_s6",
+    "scenario": "lookalike_after_loss",
+    "seed": 6,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "look_clean_true_s7",
+    "scenario": "lookalike_after_loss",
+    "seed": 7,
+    "variant": "ระยะของกล่อง v3",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "look_real_true_s7",
+    "scenario": "lookalike_after_loss",
+    "seed": 7,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "look_clean_true_s8",
+    "scenario": "lookalike_after_loss",
+    "seed": 8,
+    "variant": "ระยะของกล่อง v3",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "look_real_true_s8",
+    "scenario": "lookalike_after_loss",
+    "seed": 8,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "look_clean_true_s9",
+    "scenario": "lookalike_after_loss",
+    "seed": 9,
+    "variant": "ระยะของกล่อง v3",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "look_real_true_s9",
+    "scenario": "lookalike_after_loss",
+    "seed": 9,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_s0",
+    "scenario": "crossing",
+    "seed": 0,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_s0",
+    "scenario": "head_on",
+    "seed": 0,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_s0",
+    "scenario": "side_by_side",
+    "seed": 0,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_s0",
+    "scenario": "side_by_side_same",
+    "seed": 0,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_s0",
+    "scenario": "stand_aside",
+    "seed": 0,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s0",
+    "scenario": "straight",
+    "seed": 0,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s0",
+    "scenario": "stop_and_go",
+    "seed": 0,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s0",
+    "scenario": "curve_left",
+    "seed": 0,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s0",
+    "scenario": "target_loss",
+    "seed": 0,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s0",
+    "scenario": "come_back",
+    "seed": 0,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s0",
+    "scenario": "side_step",
+    "seed": 0,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s0",
+    "scenario": "turn_90",
+    "seed": 0,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s0",
+    "scenario": "walk_0p6",
+    "seed": 0,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s0",
+    "scenario": "walk_1p0",
+    "seed": 0,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s0",
+    "scenario": "zigzag",
+    "seed": 0,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_s1",
+    "scenario": "crossing",
+    "seed": 1,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_s1",
+    "scenario": "head_on",
+    "seed": 1,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_s1",
+    "scenario": "side_by_side",
+    "seed": 1,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_s1",
+    "scenario": "side_by_side_same",
+    "seed": 1,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_s1",
+    "scenario": "stand_aside",
+    "seed": 1,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s1",
+    "scenario": "straight",
+    "seed": 1,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s1",
+    "scenario": "stop_and_go",
+    "seed": 1,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s1",
+    "scenario": "curve_left",
+    "seed": 1,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s1",
+    "scenario": "target_loss",
+    "seed": 1,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s1",
+    "scenario": "come_back",
+    "seed": 1,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s1",
+    "scenario": "side_step",
+    "seed": 1,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s1",
+    "scenario": "turn_90",
+    "seed": 1,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s1",
+    "scenario": "walk_0p6",
+    "seed": 1,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s1",
+    "scenario": "walk_1p0",
+    "seed": 1,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s1",
+    "scenario": "zigzag",
+    "seed": 1,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_s2",
+    "scenario": "crossing",
+    "seed": 2,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_s2",
+    "scenario": "head_on",
+    "seed": 2,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_s2",
+    "scenario": "side_by_side",
+    "seed": 2,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_s2",
+    "scenario": "side_by_side_same",
+    "seed": 2,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_s2",
+    "scenario": "stand_aside",
+    "seed": 2,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s2",
+    "scenario": "straight",
+    "seed": 2,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s2",
+    "scenario": "stop_and_go",
+    "seed": 2,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s2",
+    "scenario": "curve_left",
+    "seed": 2,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s2",
+    "scenario": "target_loss",
+    "seed": 2,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s2",
+    "scenario": "come_back",
+    "seed": 2,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s2",
+    "scenario": "side_step",
+    "seed": 2,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s2",
+    "scenario": "turn_90",
+    "seed": 2,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s2",
+    "scenario": "walk_0p6",
+    "seed": 2,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s2",
+    "scenario": "walk_1p0",
+    "seed": 2,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s2",
+    "scenario": "zigzag",
+    "seed": 2,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   }
+  ],
+  "started_utc": "2026-10-27T15:18:28Z",
+  "order": 4,
+  "purpose": "integration ทักว่าคนที่ยืนชิดแถวพืชจะต่อเป็นกลุ่มจุดยาว ค่าต่ำสุดอาจเป็นแถวพืช จึงนับเฉพาะจุดภายใน 5° จากกล่อง",
+  "compare": "เช็กซ้ำทุกชุดด้วยรุ่นนี้",
+  "result": "ตัดหน้าในเงา 29/30 (seed 0 พลาด รันซ้ำ 3 ครั้งผ่าน) · คนเสื้อเหมือนกัน 20/20 · solo 26/30 (side_step พลาด 3)",
+  "live": false
+ },
+ {
+  "id": "box_v3_solo",
+  "title": "solo: ระยะของกล่อง เปิด vs ปิด",
+  "code": "d23e7b2",
+  "dir": "br3solo",
+  "runs": [
+   {
+    "tag": "reg_solo_true_s3",
+    "scenario": "straight",
+    "seed": 3,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_true_s3",
+    "scenario": "stop_and_go",
+    "seed": 3,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_true_s3",
+    "scenario": "curve_left",
+    "seed": 3,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_true_s3",
+    "scenario": "target_loss",
+    "seed": 3,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_true_s3",
+    "scenario": "come_back",
+    "seed": 3,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_true_s3",
+    "scenario": "side_step",
+    "seed": 3,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_true_s3",
+    "scenario": "turn_90",
+    "seed": 3,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_true_s3",
+    "scenario": "walk_0p6",
+    "seed": 3,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_true_s3",
+    "scenario": "walk_1p0",
+    "seed": 3,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_true_s3",
+    "scenario": "zigzag",
+    "seed": 3,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_true_s4",
+    "scenario": "straight",
+    "seed": 4,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_true_s4",
+    "scenario": "stop_and_go",
+    "seed": 4,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_true_s4",
+    "scenario": "curve_left",
+    "seed": 4,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_true_s4",
+    "scenario": "target_loss",
+    "seed": 4,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_true_s4",
+    "scenario": "come_back",
+    "seed": 4,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_true_s4",
+    "scenario": "side_step",
+    "seed": 4,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_true_s4",
+    "scenario": "turn_90",
+    "seed": 4,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_true_s4",
+    "scenario": "walk_0p6",
+    "seed": 4,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_true_s4",
+    "scenario": "walk_1p0",
+    "seed": 4,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_true_s4",
+    "scenario": "zigzag",
+    "seed": 4,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_true_s5",
+    "scenario": "straight",
+    "seed": 5,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_true_s5",
+    "scenario": "stop_and_go",
+    "seed": 5,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_true_s5",
+    "scenario": "curve_left",
+    "seed": 5,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_true_s5",
+    "scenario": "target_loss",
+    "seed": 5,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_true_s5",
+    "scenario": "come_back",
+    "seed": 5,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_true_s5",
+    "scenario": "side_step",
+    "seed": 5,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_true_s5",
+    "scenario": "turn_90",
+    "seed": 5,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_true_s5",
+    "scenario": "walk_0p6",
+    "seed": 5,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_true_s5",
+    "scenario": "walk_1p0",
+    "seed": 5,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_true_s5",
+    "scenario": "zigzag",
+    "seed": 5,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_true_s6",
+    "scenario": "straight",
+    "seed": 6,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_true_s6",
+    "scenario": "stop_and_go",
+    "seed": 6,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_true_s6",
+    "scenario": "curve_left",
+    "seed": 6,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_true_s6",
+    "scenario": "target_loss",
+    "seed": 6,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_true_s6",
+    "scenario": "come_back",
+    "seed": 6,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_true_s6",
+    "scenario": "side_step",
+    "seed": 6,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_true_s6",
+    "scenario": "turn_90",
+    "seed": 6,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_true_s6",
+    "scenario": "walk_0p6",
+    "seed": 6,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_true_s6",
+    "scenario": "walk_1p0",
+    "seed": 6,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_true_s6",
+    "scenario": "zigzag",
+    "seed": 6,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_true_s7",
+    "scenario": "straight",
+    "seed": 7,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_true_s7",
+    "scenario": "stop_and_go",
+    "seed": 7,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_true_s7",
+    "scenario": "curve_left",
+    "seed": 7,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_true_s7",
+    "scenario": "target_loss",
+    "seed": 7,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_true_s7",
+    "scenario": "come_back",
+    "seed": 7,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_true_s7",
+    "scenario": "side_step",
+    "seed": 7,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_true_s7",
+    "scenario": "turn_90",
+    "seed": 7,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_true_s7",
+    "scenario": "walk_0p6",
+    "seed": 7,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_true_s7",
+    "scenario": "walk_1p0",
+    "seed": 7,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_true_s7",
+    "scenario": "zigzag",
+    "seed": 7,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_false_s3",
+    "scenario": "straight",
+    "seed": 3,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_false_s3",
+    "scenario": "stop_and_go",
+    "seed": 3,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_false_s3",
+    "scenario": "curve_left",
+    "seed": 3,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_false_s3",
+    "scenario": "target_loss",
+    "seed": 3,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_false_s3",
+    "scenario": "come_back",
+    "seed": 3,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_false_s3",
+    "scenario": "side_step",
+    "seed": 3,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_false_s3",
+    "scenario": "turn_90",
+    "seed": 3,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_false_s3",
+    "scenario": "walk_0p6",
+    "seed": 3,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_false_s3",
+    "scenario": "walk_1p0",
+    "seed": 3,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_false_s3",
+    "scenario": "zigzag",
+    "seed": 3,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_false_s4",
+    "scenario": "straight",
+    "seed": 4,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_false_s4",
+    "scenario": "stop_and_go",
+    "seed": 4,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_false_s4",
+    "scenario": "curve_left",
+    "seed": 4,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_false_s4",
+    "scenario": "target_loss",
+    "seed": 4,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_false_s4",
+    "scenario": "come_back",
+    "seed": 4,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_false_s4",
+    "scenario": "side_step",
+    "seed": 4,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_false_s4",
+    "scenario": "turn_90",
+    "seed": 4,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_false_s4",
+    "scenario": "walk_0p6",
+    "seed": 4,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_false_s4",
+    "scenario": "walk_1p0",
+    "seed": 4,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_false_s4",
+    "scenario": "zigzag",
+    "seed": 4,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_false_s5",
+    "scenario": "straight",
+    "seed": 5,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_false_s5",
+    "scenario": "stop_and_go",
+    "seed": 5,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_false_s5",
+    "scenario": "curve_left",
+    "seed": 5,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_false_s5",
+    "scenario": "target_loss",
+    "seed": 5,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_false_s5",
+    "scenario": "come_back",
+    "seed": 5,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_false_s5",
+    "scenario": "side_step",
+    "seed": 5,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_false_s5",
+    "scenario": "turn_90",
+    "seed": 5,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_false_s5",
+    "scenario": "walk_0p6",
+    "seed": 5,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_false_s5",
+    "scenario": "walk_1p0",
+    "seed": 5,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_false_s5",
+    "scenario": "zigzag",
+    "seed": 5,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_false_s6",
+    "scenario": "straight",
+    "seed": 6,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_false_s6",
+    "scenario": "stop_and_go",
+    "seed": 6,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_false_s6",
+    "scenario": "curve_left",
+    "seed": 6,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_false_s6",
+    "scenario": "target_loss",
+    "seed": 6,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_false_s6",
+    "scenario": "come_back",
+    "seed": 6,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_false_s6",
+    "scenario": "side_step",
+    "seed": 6,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_false_s6",
+    "scenario": "turn_90",
+    "seed": 6,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_false_s6",
+    "scenario": "walk_0p6",
+    "seed": 6,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_false_s6",
+    "scenario": "walk_1p0",
+    "seed": 6,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_false_s6",
+    "scenario": "zigzag",
+    "seed": 6,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_false_s7",
+    "scenario": "straight",
+    "seed": 7,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_false_s7",
+    "scenario": "stop_and_go",
+    "seed": 7,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_false_s7",
+    "scenario": "curve_left",
+    "seed": 7,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_false_s7",
+    "scenario": "target_loss",
+    "seed": 7,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_false_s7",
+    "scenario": "come_back",
+    "seed": 7,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_false_s7",
+    "scenario": "side_step",
+    "seed": 7,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_false_s7",
+    "scenario": "turn_90",
+    "seed": 7,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_false_s7",
+    "scenario": "walk_0p6",
+    "seed": 7,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_false_s7",
+    "scenario": "walk_1p0",
+    "seed": 7,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_false_s7",
+    "scenario": "zigzag",
+    "seed": 7,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   }
+  ],
+  "started_utc": "2026-10-27T16:16:12Z",
+  "order": 5,
+  "purpose": "solo ด้วยรุ่น v3 ได้ 26/30 ต่ำกว่า v2 (29/30) จึงทดสอบว่าเกี่ยวกับระยะของกล่องจริงหรือเป็นความแปรผันของท่า side_step",
+  "compare": "ระยะของกล่อง v3 เปิด เทียบ ปิด (วิธีเดิม) ในชุด solo 10 ท่า × seed 3–7 ทั้งสองแบบ",
+  "result": "ไม่ต่างกัน: เปิด 47/50 ปิด 48/50 ไม่มีการชนทั้งคู่ · ที่พลาดคือ side_step และ zigzag ซึ่งเป็นท่าที่เป้าหลุดภาพกล้อง (ใช้ LiDAR ตาม ไม่ผ่านระยะของกล่อง) · solo 26/30 ก่อนหน้านี้จึงเป็นความแปรผันระหว่างรอบ",
+  "live": false
+ },
+ {
+  "id": "side_step_check",
+  "title": "side_step: ระยะของกล่อง เปิด vs ปิด",
+  "code": "d23e7b2",
+  "dir": "sidestep",
+  "runs": [
+   {
+    "tag": "ss_true_s8",
+    "scenario": "side_step",
+    "seed": 8,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_true_s9",
+    "scenario": "side_step",
+    "seed": 9,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_true_s10",
+    "scenario": "side_step",
+    "seed": 10,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_true_s11",
+    "scenario": "side_step",
+    "seed": 11,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_true_s12",
+    "scenario": "side_step",
+    "seed": 12,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_true_s13",
+    "scenario": "side_step",
+    "seed": 13,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_true_s14",
+    "scenario": "side_step",
+    "seed": 14,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_true_s15",
+    "scenario": "side_step",
+    "seed": 15,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_true_s16",
+    "scenario": "side_step",
+    "seed": 16,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_true_s17",
+    "scenario": "side_step",
+    "seed": 17,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_true_s18",
+    "scenario": "side_step",
+    "seed": 18,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_true_s19",
+    "scenario": "side_step",
+    "seed": 19,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_true_s20",
+    "scenario": "side_step",
+    "seed": 20,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_true_s21",
+    "scenario": "side_step",
+    "seed": 21,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_true_s22",
+    "scenario": "side_step",
+    "seed": 22,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_true_s23",
+    "scenario": "side_step",
+    "seed": 23,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_true_s24",
+    "scenario": "side_step",
+    "seed": 24,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_true_s25",
+    "scenario": "side_step",
+    "seed": 25,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_true_s26",
+    "scenario": "side_step",
+    "seed": 26,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_true_s27",
+    "scenario": "side_step",
+    "seed": 27,
+    "variant": "ระยะของกล่อง v3",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_false_s8",
+    "scenario": "side_step",
+    "seed": 8,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_false_s9",
+    "scenario": "side_step",
+    "seed": 9,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_false_s10",
+    "scenario": "side_step",
+    "seed": 10,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_false_s11",
+    "scenario": "side_step",
+    "seed": 11,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_false_s12",
+    "scenario": "side_step",
+    "seed": 12,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_false_s13",
+    "scenario": "side_step",
+    "seed": 13,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_false_s14",
+    "scenario": "side_step",
+    "seed": 14,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_false_s15",
+    "scenario": "side_step",
+    "seed": 15,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_false_s16",
+    "scenario": "side_step",
+    "seed": 16,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_false_s17",
+    "scenario": "side_step",
+    "seed": 17,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_false_s18",
+    "scenario": "side_step",
+    "seed": 18,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_false_s19",
+    "scenario": "side_step",
+    "seed": 19,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_false_s20",
+    "scenario": "side_step",
+    "seed": 20,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_false_s21",
+    "scenario": "side_step",
+    "seed": 21,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_false_s22",
+    "scenario": "side_step",
+    "seed": 22,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_false_s23",
+    "scenario": "side_step",
+    "seed": 23,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_false_s24",
+    "scenario": "side_step",
+    "seed": 24,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_false_s25",
+    "scenario": "side_step",
+    "seed": 25,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_false_s26",
+    "scenario": "side_step",
+    "seed": 26,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_false_s27",
+    "scenario": "side_step",
+    "seed": 27,
+    "variant": "วิธีเดิม",
+    "light": "สมจริง"
+   }
+  ],
+  "order": 6,
+  "started_utc": "2026-10-27T17:15:17Z",
+  "purpose": "integration พบว่า side_step พลาดบ่อยขึ้นเมื่อเปิดระยะของกล่อง (5/8 เทียบ 2/8) และรอบที่พลาดเป้ายังอยู่ในภาพ 88–90% ของเวลา จึงเช็กว่าเกี่ยวกับระยะของกล่องจริงหรือไม่",
+  "compare": "ระยะของกล่อง v3 เปิด เทียบ ปิด ในท่า side_step 20 seed (8–27) ทั้งสองแบบ",
+  "result": "ไม่ต่างกัน: เปิด 12/20 ปิด 13/20 · side_step พลาดราว 35–40% ทั้งสองแบบ · สาเหตุ (จาก log ของ gate): เป้าก้าวข้างเร็ว มุมกระโดด 6.5°→27.5° ใน 0.3 s ที่ระยะ 0.7 m แต่ gate เผื่อมุมไว้ σ 5° จึงไม่รับ แล้วการตามด้วย LiDAR ไม่เริ่มเพราะมุมสุดท้ายที่รับไม่ใกล้ขอบภาพ · ระยะของกล่องถูกต้อง ไม่ใช่สาเหตุ",
+  "live": false
+ },
+ {
+  "id": "lateral_gate",
+  "title": "gate คิดเป็นเมตรด้านข้าง",
+  "code": "efa24f1",
+  "dir": "lateral/out",
+  "runs": [
+   {
+    "tag": "ss_on_s8",
+    "scenario": "side_step",
+    "seed": 8,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_off_s8",
+    "scenario": "side_step",
+    "seed": 8,
+    "variant": "gate มุมเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_on_s9",
+    "scenario": "side_step",
+    "seed": 9,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_off_s9",
+    "scenario": "side_step",
+    "seed": 9,
+    "variant": "gate มุมเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_on_s10",
+    "scenario": "side_step",
+    "seed": 10,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_off_s10",
+    "scenario": "side_step",
+    "seed": 10,
+    "variant": "gate มุมเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_on_s11",
+    "scenario": "side_step",
+    "seed": 11,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_off_s11",
+    "scenario": "side_step",
+    "seed": 11,
+    "variant": "gate มุมเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_on_s12",
+    "scenario": "side_step",
+    "seed": 12,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_off_s12",
+    "scenario": "side_step",
+    "seed": 12,
+    "variant": "gate มุมเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_on_s13",
+    "scenario": "side_step",
+    "seed": 13,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_off_s13",
+    "scenario": "side_step",
+    "seed": 13,
+    "variant": "gate มุมเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_on_s14",
+    "scenario": "side_step",
+    "seed": 14,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_off_s14",
+    "scenario": "side_step",
+    "seed": 14,
+    "variant": "gate มุมเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_on_s15",
+    "scenario": "side_step",
+    "seed": 15,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_off_s15",
+    "scenario": "side_step",
+    "seed": 15,
+    "variant": "gate มุมเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_on_s16",
+    "scenario": "side_step",
+    "seed": 16,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_off_s16",
+    "scenario": "side_step",
+    "seed": 16,
+    "variant": "gate มุมเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_on_s17",
+    "scenario": "side_step",
+    "seed": 17,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_off_s17",
+    "scenario": "side_step",
+    "seed": 17,
+    "variant": "gate มุมเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_on_s18",
+    "scenario": "side_step",
+    "seed": 18,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_off_s18",
+    "scenario": "side_step",
+    "seed": 18,
+    "variant": "gate มุมเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_on_s19",
+    "scenario": "side_step",
+    "seed": 19,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_off_s19",
+    "scenario": "side_step",
+    "seed": 19,
+    "variant": "gate มุมเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_on_s20",
+    "scenario": "side_step",
+    "seed": 20,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_off_s20",
+    "scenario": "side_step",
+    "seed": 20,
+    "variant": "gate มุมเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_on_s21",
+    "scenario": "side_step",
+    "seed": 21,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_off_s21",
+    "scenario": "side_step",
+    "seed": 21,
+    "variant": "gate มุมเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_on_s22",
+    "scenario": "side_step",
+    "seed": 22,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_off_s22",
+    "scenario": "side_step",
+    "seed": 22,
+    "variant": "gate มุมเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_on_s23",
+    "scenario": "side_step",
+    "seed": 23,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_off_s23",
+    "scenario": "side_step",
+    "seed": 23,
+    "variant": "gate มุมเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_on_s24",
+    "scenario": "side_step",
+    "seed": 24,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_off_s24",
+    "scenario": "side_step",
+    "seed": 24,
+    "variant": "gate มุมเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_on_s25",
+    "scenario": "side_step",
+    "seed": 25,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_off_s25",
+    "scenario": "side_step",
+    "seed": 25,
+    "variant": "gate มุมเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_on_s26",
+    "scenario": "side_step",
+    "seed": 26,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_off_s26",
+    "scenario": "side_step",
+    "seed": 26,
+    "variant": "gate มุมเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_on_s27",
+    "scenario": "side_step",
+    "seed": 27,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_off_s27",
+    "scenario": "side_step",
+    "seed": 27,
+    "variant": "gate มุมเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_s0",
+    "scenario": "crossing",
+    "seed": 0,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_s0",
+    "scenario": "head_on",
+    "seed": 0,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_s0",
+    "scenario": "side_by_side",
+    "seed": 0,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_s0",
+    "scenario": "side_by_side_same",
+    "seed": 0,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_s0",
+    "scenario": "stand_aside",
+    "seed": 0,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s0",
+    "scenario": "straight",
+    "seed": 0,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s0",
+    "scenario": "stop_and_go",
+    "seed": 0,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s0",
+    "scenario": "curve_left",
+    "seed": 0,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s0",
+    "scenario": "target_loss",
+    "seed": 0,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s0",
+    "scenario": "come_back",
+    "seed": 0,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s0",
+    "scenario": "side_step",
+    "seed": 0,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s0",
+    "scenario": "turn_90",
+    "seed": 0,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s0",
+    "scenario": "walk_0p6",
+    "seed": 0,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s0",
+    "scenario": "walk_1p0",
+    "seed": 0,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s0",
+    "scenario": "zigzag",
+    "seed": 0,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_s1",
+    "scenario": "crossing",
+    "seed": 1,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_s1",
+    "scenario": "head_on",
+    "seed": 1,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_s1",
+    "scenario": "side_by_side",
+    "seed": 1,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_s1",
+    "scenario": "side_by_side_same",
+    "seed": 1,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_s1",
+    "scenario": "stand_aside",
+    "seed": 1,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s1",
+    "scenario": "straight",
+    "seed": 1,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s1",
+    "scenario": "stop_and_go",
+    "seed": 1,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s1",
+    "scenario": "curve_left",
+    "seed": 1,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s1",
+    "scenario": "target_loss",
+    "seed": 1,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s1",
+    "scenario": "come_back",
+    "seed": 1,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s1",
+    "scenario": "side_step",
+    "seed": 1,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s1",
+    "scenario": "turn_90",
+    "seed": 1,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s1",
+    "scenario": "walk_0p6",
+    "seed": 1,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s1",
+    "scenario": "walk_1p0",
+    "seed": 1,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s1",
+    "scenario": "zigzag",
+    "seed": 1,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_s2",
+    "scenario": "crossing",
+    "seed": 2,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_s2",
+    "scenario": "head_on",
+    "seed": 2,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_s2",
+    "scenario": "side_by_side",
+    "seed": 2,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_s2",
+    "scenario": "side_by_side_same",
+    "seed": 2,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_s2",
+    "scenario": "stand_aside",
+    "seed": 2,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s2",
+    "scenario": "straight",
+    "seed": 2,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s2",
+    "scenario": "stop_and_go",
+    "seed": 2,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s2",
+    "scenario": "curve_left",
+    "seed": 2,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s2",
+    "scenario": "target_loss",
+    "seed": 2,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s2",
+    "scenario": "come_back",
+    "seed": 2,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s2",
+    "scenario": "side_step",
+    "seed": 2,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s2",
+    "scenario": "turn_90",
+    "seed": 2,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s2",
+    "scenario": "walk_0p6",
+    "seed": 2,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s2",
+    "scenario": "walk_1p0",
+    "seed": 2,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_solo_s2",
+    "scenario": "zigzag",
+    "seed": 2,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_crossing_s0",
+    "scenario": "shade_crossing",
+    "seed": 0,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_side_by_side_s0",
+    "scenario": "shade_side_by_side",
+    "seed": 0,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "look_clean_s0",
+    "scenario": "lookalike_after_loss",
+    "seed": 0,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "look_real_s0",
+    "scenario": "lookalike_after_loss",
+    "seed": 0,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_crossing_s1",
+    "scenario": "shade_crossing",
+    "seed": 1,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_side_by_side_s1",
+    "scenario": "shade_side_by_side",
+    "seed": 1,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "look_clean_s1",
+    "scenario": "lookalike_after_loss",
+    "seed": 1,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "look_real_s1",
+    "scenario": "lookalike_after_loss",
+    "seed": 1,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_crossing_s2",
+    "scenario": "shade_crossing",
+    "seed": 2,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_side_by_side_s2",
+    "scenario": "shade_side_by_side",
+    "seed": 2,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "look_clean_s2",
+    "scenario": "lookalike_after_loss",
+    "seed": 2,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "look_real_s2",
+    "scenario": "lookalike_after_loss",
+    "seed": 2,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_crossing_s3",
+    "scenario": "shade_crossing",
+    "seed": 3,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_side_by_side_s3",
+    "scenario": "shade_side_by_side",
+    "seed": 3,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "look_clean_s3",
+    "scenario": "lookalike_after_loss",
+    "seed": 3,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "look_real_s3",
+    "scenario": "lookalike_after_loss",
+    "seed": 3,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_crossing_s4",
+    "scenario": "shade_crossing",
+    "seed": 4,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_side_by_side_s4",
+    "scenario": "shade_side_by_side",
+    "seed": 4,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "look_clean_s4",
+    "scenario": "lookalike_after_loss",
+    "seed": 4,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "look_real_s4",
+    "scenario": "lookalike_after_loss",
+    "seed": 4,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_crossing_s5",
+    "scenario": "shade_crossing",
+    "seed": 5,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_side_by_side_s5",
+    "scenario": "shade_side_by_side",
+    "seed": 5,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "look_clean_s5",
+    "scenario": "lookalike_after_loss",
+    "seed": 5,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "look_real_s5",
+    "scenario": "lookalike_after_loss",
+    "seed": 5,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_crossing_s6",
+    "scenario": "shade_crossing",
+    "seed": 6,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_side_by_side_s6",
+    "scenario": "shade_side_by_side",
+    "seed": 6,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "look_clean_s6",
+    "scenario": "lookalike_after_loss",
+    "seed": 6,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "look_real_s6",
+    "scenario": "lookalike_after_loss",
+    "seed": 6,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_crossing_s7",
+    "scenario": "shade_crossing",
+    "seed": 7,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_side_by_side_s7",
+    "scenario": "shade_side_by_side",
+    "seed": 7,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "look_clean_s7",
+    "scenario": "lookalike_after_loss",
+    "seed": 7,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "look_real_s7",
+    "scenario": "lookalike_after_loss",
+    "seed": 7,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_crossing_s8",
+    "scenario": "shade_crossing",
+    "seed": 8,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_side_by_side_s8",
+    "scenario": "shade_side_by_side",
+    "seed": 8,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "look_clean_s8",
+    "scenario": "lookalike_after_loss",
+    "seed": 8,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "look_real_s8",
+    "scenario": "lookalike_after_loss",
+    "seed": 8,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_crossing_s9",
+    "scenario": "shade_crossing",
+    "seed": 9,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "col_shade_side_by_side_s9",
+    "scenario": "shade_side_by_side",
+    "seed": 9,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "look_clean_s9",
+    "scenario": "lookalike_after_loss",
+    "seed": 9,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "look_real_s9",
+    "scenario": "lookalike_after_loss",
+    "seed": 9,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "look_ruleoff_clean_s0",
+    "scenario": "lookalike_after_loss",
+    "seed": 0,
+    "variant": "ปิดกฎระยะล็อกกลับ (จริง)",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "look_ruleoff_real_s0",
+    "scenario": "lookalike_after_loss",
+    "seed": 0,
+    "variant": "ปิดกฎระยะล็อกกลับ (จริง)",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "look_ruleoff_clean_s1",
+    "scenario": "lookalike_after_loss",
+    "seed": 1,
+    "variant": "ปิดกฎระยะล็อกกลับ (จริง)",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "look_ruleoff_real_s1",
+    "scenario": "lookalike_after_loss",
+    "seed": 1,
+    "variant": "ปิดกฎระยะล็อกกลับ (จริง)",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "look_ruleoff_clean_s2",
+    "scenario": "lookalike_after_loss",
+    "seed": 2,
+    "variant": "ปิดกฎระยะล็อกกลับ (จริง)",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "look_ruleoff_real_s2",
+    "scenario": "lookalike_after_loss",
+    "seed": 2,
+    "variant": "ปิดกฎระยะล็อกกลับ (จริง)",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "look_ruleoff_clean_s3",
+    "scenario": "lookalike_after_loss",
+    "seed": 3,
+    "variant": "ปิดกฎระยะล็อกกลับ (จริง)",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "look_ruleoff_real_s3",
+    "scenario": "lookalike_after_loss",
+    "seed": 3,
+    "variant": "ปิดกฎระยะล็อกกลับ (จริง)",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "look_ruleoff_clean_s4",
+    "scenario": "lookalike_after_loss",
+    "seed": 4,
+    "variant": "ปิดกฎระยะล็อกกลับ (จริง)",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "look_ruleoff_real_s4",
+    "scenario": "lookalike_after_loss",
+    "seed": 4,
+    "variant": "ปิดกฎระยะล็อกกลับ (จริง)",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "look_ruleoff_clean_s5",
+    "scenario": "lookalike_after_loss",
+    "seed": 5,
+    "variant": "ปิดกฎระยะล็อกกลับ (จริง)",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "look_ruleoff_real_s5",
+    "scenario": "lookalike_after_loss",
+    "seed": 5,
+    "variant": "ปิดกฎระยะล็อกกลับ (จริง)",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "look_ruleoff_clean_s6",
+    "scenario": "lookalike_after_loss",
+    "seed": 6,
+    "variant": "ปิดกฎระยะล็อกกลับ (จริง)",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "look_ruleoff_real_s6",
+    "scenario": "lookalike_after_loss",
+    "seed": 6,
+    "variant": "ปิดกฎระยะล็อกกลับ (จริง)",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "look_ruleoff_clean_s7",
+    "scenario": "lookalike_after_loss",
+    "seed": 7,
+    "variant": "ปิดกฎระยะล็อกกลับ (จริง)",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "look_ruleoff_real_s7",
+    "scenario": "lookalike_after_loss",
+    "seed": 7,
+    "variant": "ปิดกฎระยะล็อกกลับ (จริง)",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "look_ruleoff_clean_s8",
+    "scenario": "lookalike_after_loss",
+    "seed": 8,
+    "variant": "ปิดกฎระยะล็อกกลับ (จริง)",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "look_ruleoff_real_s8",
+    "scenario": "lookalike_after_loss",
+    "seed": 8,
+    "variant": "ปิดกฎระยะล็อกกลับ (จริง)",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "look_ruleoff_clean_s9",
+    "scenario": "lookalike_after_loss",
+    "seed": 9,
+    "variant": "ปิดกฎระยะล็อกกลับ (จริง)",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "look_ruleoff_real_s9",
+    "scenario": "lookalike_after_loss",
+    "seed": 9,
+    "variant": "ปิดกฎระยะล็อกกลับ (จริง)",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "zz_on_s0",
+    "scenario": "zigzag",
+    "seed": 0,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "zz_off_s0",
+    "scenario": "zigzag",
+    "seed": 0,
+    "variant": "gate มุมเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "zz_on_s1",
+    "scenario": "zigzag",
+    "seed": 1,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "zz_off_s1",
+    "scenario": "zigzag",
+    "seed": 1,
+    "variant": "gate มุมเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "zz_on_s2",
+    "scenario": "zigzag",
+    "seed": 2,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "zz_off_s2",
+    "scenario": "zigzag",
+    "seed": 2,
+    "variant": "gate มุมเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "zz_on_s3",
+    "scenario": "zigzag",
+    "seed": 3,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "zz_off_s3",
+    "scenario": "zigzag",
+    "seed": 3,
+    "variant": "gate มุมเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "zz_on_s4",
+    "scenario": "zigzag",
+    "seed": 4,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "zz_off_s4",
+    "scenario": "zigzag",
+    "seed": 4,
+    "variant": "gate มุมเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "zz_on_s5",
+    "scenario": "zigzag",
+    "seed": 5,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "zz_off_s5",
+    "scenario": "zigzag",
+    "seed": 5,
+    "variant": "gate มุมเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "zz_on_s6",
+    "scenario": "zigzag",
+    "seed": 6,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "zz_off_s6",
+    "scenario": "zigzag",
+    "seed": 6,
+    "variant": "gate มุมเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "zz_on_s7",
+    "scenario": "zigzag",
+    "seed": 7,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "zz_off_s7",
+    "scenario": "zigzag",
+    "seed": 7,
+    "variant": "gate มุมเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "zz_on_s8",
+    "scenario": "zigzag",
+    "seed": 8,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "zz_off_s8",
+    "scenario": "zigzag",
+    "seed": 8,
+    "variant": "gate มุมเดิม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "zz_on_s9",
+    "scenario": "zigzag",
+    "seed": 9,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "zz_off_s9",
+    "scenario": "zigzag",
+    "seed": 9,
+    "variant": "gate มุมเดิม",
+    "light": "สมจริง"
+   }
+  ],
+  "order": 7,
+  "started_utc": "2026-10-27T23:51:05Z",
+  "purpose": "side_step พลาดเพราะ gate เผื่อมุมไว้แค่ 5°: ที่ระยะ 0.7 m ก้าวข้าง 0.25 m = 20° จึงให้ gate เผื่อด้านข้างอย่างน้อย 0.15 m (มุม = max(5°, 0.15 m / ระยะ)) · ไกลกว่า ~1.7 m เหมือนเดิม · พร้อมแก้ข้อผิดพลาดของ T13: รอบ \"ปิดกฎระยะ\" ตอนนั้นไม่ได้ปิดจริง (พารามิเตอร์ไม่ได้ประกาศ) จึงรันปิดกฎจริงเพิ่ม",
+  "compare": "side_step 20 seed: gate ด้านข้าง เทียบ gate มุมเดิม · ชุดกันถอยหลังด้วย gate ใหม่ · คนเสื้อเหมือนกัน: ปิดกฎระยะจริง เทียบ เปิด · zigzag 10 seed: gate ใหม่ เทียบ เดิม (solo พลาด zigzag 3/3 ด้วย gate ใหม่)",
+  "result": "gate ใหม่แก้ side_step ได้: 19/20 เทียบ 5/20 (p = 0.00001) · ไม่พบผลเสีย: identity 15/15, ตัดหน้าในเงา 9/10, เดินคู่ในเงา 10/10, คนเสื้อเหมือนกัน 20/20, zigzag 8/10 เทียบ 6/10 · ปิดกฎระยะล็อกกลับจริง: 0/20 ชน 18 รอบ (เปิด 20/20) จึงยืนยันว่ากฎของ T13 จำเป็น",
+  "live": false
+ },
+ {
+  "id": "lateral_sweep",
+  "title": "เลือกค่า gate ด้านข้าง: 0 / 0.10 / 0.15 m",
+  "code": "T15 round 2",
+  "dir": "sweep/out",
+  "runs": [
+   {
+    "tag": "ss_0.0_s8",
+    "scenario": "side_step",
+    "seed": 8,
+    "variant": "gate มุมเดิม (0)",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_0.10_s8",
+    "scenario": "side_step",
+    "seed": 8,
+    "variant": "gate ด้านข้าง 0.10 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_0.15_s8",
+    "scenario": "side_step",
+    "seed": 8,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_0.0_s9",
+    "scenario": "side_step",
+    "seed": 9,
+    "variant": "gate มุมเดิม (0)",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_0.10_s9",
+    "scenario": "side_step",
+    "seed": 9,
+    "variant": "gate ด้านข้าง 0.10 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_0.15_s9",
+    "scenario": "side_step",
+    "seed": 9,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_0.0_s10",
+    "scenario": "side_step",
+    "seed": 10,
+    "variant": "gate มุมเดิม (0)",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_0.10_s10",
+    "scenario": "side_step",
+    "seed": 10,
+    "variant": "gate ด้านข้าง 0.10 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_0.15_s10",
+    "scenario": "side_step",
+    "seed": 10,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_0.0_s11",
+    "scenario": "side_step",
+    "seed": 11,
+    "variant": "gate มุมเดิม (0)",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_0.10_s11",
+    "scenario": "side_step",
+    "seed": 11,
+    "variant": "gate ด้านข้าง 0.10 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_0.15_s11",
+    "scenario": "side_step",
+    "seed": 11,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_0.0_s12",
+    "scenario": "side_step",
+    "seed": 12,
+    "variant": "gate มุมเดิม (0)",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_0.10_s12",
+    "scenario": "side_step",
+    "seed": 12,
+    "variant": "gate ด้านข้าง 0.10 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_0.15_s12",
+    "scenario": "side_step",
+    "seed": 12,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_0.0_s13",
+    "scenario": "side_step",
+    "seed": 13,
+    "variant": "gate มุมเดิม (0)",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_0.10_s13",
+    "scenario": "side_step",
+    "seed": 13,
+    "variant": "gate ด้านข้าง 0.10 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_0.15_s13",
+    "scenario": "side_step",
+    "seed": 13,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_0.0_s14",
+    "scenario": "side_step",
+    "seed": 14,
+    "variant": "gate มุมเดิม (0)",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_0.10_s14",
+    "scenario": "side_step",
+    "seed": 14,
+    "variant": "gate ด้านข้าง 0.10 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_0.15_s14",
+    "scenario": "side_step",
+    "seed": 14,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_0.0_s15",
+    "scenario": "side_step",
+    "seed": 15,
+    "variant": "gate มุมเดิม (0)",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_0.10_s15",
+    "scenario": "side_step",
+    "seed": 15,
+    "variant": "gate ด้านข้าง 0.10 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_0.15_s15",
+    "scenario": "side_step",
+    "seed": 15,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_0.0_s16",
+    "scenario": "side_step",
+    "seed": 16,
+    "variant": "gate มุมเดิม (0)",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_0.10_s16",
+    "scenario": "side_step",
+    "seed": 16,
+    "variant": "gate ด้านข้าง 0.10 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_0.15_s16",
+    "scenario": "side_step",
+    "seed": 16,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_0.0_s17",
+    "scenario": "side_step",
+    "seed": 17,
+    "variant": "gate มุมเดิม (0)",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_0.10_s17",
+    "scenario": "side_step",
+    "seed": 17,
+    "variant": "gate ด้านข้าง 0.10 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_0.15_s17",
+    "scenario": "side_step",
+    "seed": 17,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_0.0_s18",
+    "scenario": "side_step",
+    "seed": 18,
+    "variant": "gate มุมเดิม (0)",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_0.10_s18",
+    "scenario": "side_step",
+    "seed": 18,
+    "variant": "gate ด้านข้าง 0.10 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_0.15_s18",
+    "scenario": "side_step",
+    "seed": 18,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_0.0_s19",
+    "scenario": "side_step",
+    "seed": 19,
+    "variant": "gate มุมเดิม (0)",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_0.10_s19",
+    "scenario": "side_step",
+    "seed": 19,
+    "variant": "gate ด้านข้าง 0.10 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_0.15_s19",
+    "scenario": "side_step",
+    "seed": 19,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_0.0_s20",
+    "scenario": "side_step",
+    "seed": 20,
+    "variant": "gate มุมเดิม (0)",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_0.10_s20",
+    "scenario": "side_step",
+    "seed": 20,
+    "variant": "gate ด้านข้าง 0.10 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_0.15_s20",
+    "scenario": "side_step",
+    "seed": 20,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_0.0_s21",
+    "scenario": "side_step",
+    "seed": 21,
+    "variant": "gate มุมเดิม (0)",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_0.10_s21",
+    "scenario": "side_step",
+    "seed": 21,
+    "variant": "gate ด้านข้าง 0.10 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_0.15_s21",
+    "scenario": "side_step",
+    "seed": 21,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_0.0_s22",
+    "scenario": "side_step",
+    "seed": 22,
+    "variant": "gate มุมเดิม (0)",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_0.10_s22",
+    "scenario": "side_step",
+    "seed": 22,
+    "variant": "gate ด้านข้าง 0.10 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_0.15_s22",
+    "scenario": "side_step",
+    "seed": 22,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_0.0_s23",
+    "scenario": "side_step",
+    "seed": 23,
+    "variant": "gate มุมเดิม (0)",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_0.10_s23",
+    "scenario": "side_step",
+    "seed": 23,
+    "variant": "gate ด้านข้าง 0.10 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_0.15_s23",
+    "scenario": "side_step",
+    "seed": 23,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_0.0_s24",
+    "scenario": "side_step",
+    "seed": 24,
+    "variant": "gate มุมเดิม (0)",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_0.10_s24",
+    "scenario": "side_step",
+    "seed": 24,
+    "variant": "gate ด้านข้าง 0.10 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_0.15_s24",
+    "scenario": "side_step",
+    "seed": 24,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_0.0_s25",
+    "scenario": "side_step",
+    "seed": 25,
+    "variant": "gate มุมเดิม (0)",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_0.10_s25",
+    "scenario": "side_step",
+    "seed": 25,
+    "variant": "gate ด้านข้าง 0.10 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_0.15_s25",
+    "scenario": "side_step",
+    "seed": 25,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_0.0_s26",
+    "scenario": "side_step",
+    "seed": 26,
+    "variant": "gate มุมเดิม (0)",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_0.10_s26",
+    "scenario": "side_step",
+    "seed": 26,
+    "variant": "gate ด้านข้าง 0.10 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_0.15_s26",
+    "scenario": "side_step",
+    "seed": 26,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_0.0_s27",
+    "scenario": "side_step",
+    "seed": 27,
+    "variant": "gate มุมเดิม (0)",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_0.10_s27",
+    "scenario": "side_step",
+    "seed": 27,
+    "variant": "gate ด้านข้าง 0.10 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_0.15_s27",
+    "scenario": "side_step",
+    "seed": 27,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "cp_real_0.0_s0",
+    "scenario": "close_pair_same",
+    "seed": 0,
+    "variant": "gate มุมเดิม (0)",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "cp_real_0.10_s0",
+    "scenario": "close_pair_same",
+    "seed": 0,
+    "variant": "gate ด้านข้าง 0.10 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "cp_real_0.15_s0",
+    "scenario": "close_pair_same",
+    "seed": 0,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "cp_real_0.0_s1",
+    "scenario": "close_pair_same",
+    "seed": 1,
+    "variant": "gate มุมเดิม (0)",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "cp_real_0.10_s1",
+    "scenario": "close_pair_same",
+    "seed": 1,
+    "variant": "gate ด้านข้าง 0.10 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "cp_real_0.15_s1",
+    "scenario": "close_pair_same",
+    "seed": 1,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "cp_real_0.0_s2",
+    "scenario": "close_pair_same",
+    "seed": 2,
+    "variant": "gate มุมเดิม (0)",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "cp_real_0.10_s2",
+    "scenario": "close_pair_same",
+    "seed": 2,
+    "variant": "gate ด้านข้าง 0.10 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "cp_real_0.15_s2",
+    "scenario": "close_pair_same",
+    "seed": 2,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "cp_real_0.0_s3",
+    "scenario": "close_pair_same",
+    "seed": 3,
+    "variant": "gate มุมเดิม (0)",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "cp_real_0.10_s3",
+    "scenario": "close_pair_same",
+    "seed": 3,
+    "variant": "gate ด้านข้าง 0.10 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "cp_real_0.15_s3",
+    "scenario": "close_pair_same",
+    "seed": 3,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "cp_real_0.0_s4",
+    "scenario": "close_pair_same",
+    "seed": 4,
+    "variant": "gate มุมเดิม (0)",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "cp_real_0.10_s4",
+    "scenario": "close_pair_same",
+    "seed": 4,
+    "variant": "gate ด้านข้าง 0.10 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "cp_real_0.15_s4",
+    "scenario": "close_pair_same",
+    "seed": 4,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "cp_real_0.0_s5",
+    "scenario": "close_pair_same",
+    "seed": 5,
+    "variant": "gate มุมเดิม (0)",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "cp_real_0.10_s5",
+    "scenario": "close_pair_same",
+    "seed": 5,
+    "variant": "gate ด้านข้าง 0.10 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "cp_real_0.15_s5",
+    "scenario": "close_pair_same",
+    "seed": 5,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "cp_real_0.0_s6",
+    "scenario": "close_pair_same",
+    "seed": 6,
+    "variant": "gate มุมเดิม (0)",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "cp_real_0.10_s6",
+    "scenario": "close_pair_same",
+    "seed": 6,
+    "variant": "gate ด้านข้าง 0.10 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "cp_real_0.15_s6",
+    "scenario": "close_pair_same",
+    "seed": 6,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "cp_real_0.0_s7",
+    "scenario": "close_pair_same",
+    "seed": 7,
+    "variant": "gate มุมเดิม (0)",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "cp_real_0.10_s7",
+    "scenario": "close_pair_same",
+    "seed": 7,
+    "variant": "gate ด้านข้าง 0.10 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "cp_real_0.15_s7",
+    "scenario": "close_pair_same",
+    "seed": 7,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "cp_real_0.0_s8",
+    "scenario": "close_pair_same",
+    "seed": 8,
+    "variant": "gate มุมเดิม (0)",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "cp_real_0.10_s8",
+    "scenario": "close_pair_same",
+    "seed": 8,
+    "variant": "gate ด้านข้าง 0.10 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "cp_real_0.15_s8",
+    "scenario": "close_pair_same",
+    "seed": 8,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "cp_real_0.0_s9",
+    "scenario": "close_pair_same",
+    "seed": 9,
+    "variant": "gate มุมเดิม (0)",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "cp_real_0.10_s9",
+    "scenario": "close_pair_same",
+    "seed": 9,
+    "variant": "gate ด้านข้าง 0.10 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "cp_real_0.15_s9",
+    "scenario": "close_pair_same",
+    "seed": 9,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "cp_clean_0.0_s0",
+    "scenario": "close_pair_same",
+    "seed": 0,
+    "variant": "gate มุมเดิม (0)",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "cp_clean_0.10_s0",
+    "scenario": "close_pair_same",
+    "seed": 0,
+    "variant": "gate ด้านข้าง 0.10 m",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "cp_clean_0.15_s0",
+    "scenario": "close_pair_same",
+    "seed": 0,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "cp_clean_0.0_s1",
+    "scenario": "close_pair_same",
+    "seed": 1,
+    "variant": "gate มุมเดิม (0)",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "cp_clean_0.10_s1",
+    "scenario": "close_pair_same",
+    "seed": 1,
+    "variant": "gate ด้านข้าง 0.10 m",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "cp_clean_0.15_s1",
+    "scenario": "close_pair_same",
+    "seed": 1,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "cp_clean_0.0_s2",
+    "scenario": "close_pair_same",
+    "seed": 2,
+    "variant": "gate มุมเดิม (0)",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "cp_clean_0.10_s2",
+    "scenario": "close_pair_same",
+    "seed": 2,
+    "variant": "gate ด้านข้าง 0.10 m",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "cp_clean_0.15_s2",
+    "scenario": "close_pair_same",
+    "seed": 2,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "cp_clean_0.0_s3",
+    "scenario": "close_pair_same",
+    "seed": 3,
+    "variant": "gate มุมเดิม (0)",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "cp_clean_0.10_s3",
+    "scenario": "close_pair_same",
+    "seed": 3,
+    "variant": "gate ด้านข้าง 0.10 m",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "cp_clean_0.15_s3",
+    "scenario": "close_pair_same",
+    "seed": 3,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "cp_clean_0.0_s4",
+    "scenario": "close_pair_same",
+    "seed": 4,
+    "variant": "gate มุมเดิม (0)",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "cp_clean_0.10_s4",
+    "scenario": "close_pair_same",
+    "seed": 4,
+    "variant": "gate ด้านข้าง 0.10 m",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "cp_clean_0.15_s4",
+    "scenario": "close_pair_same",
+    "seed": 4,
+    "variant": "gate ด้านข้าง 0.15 m",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "reg_identity_0.10_s0",
+    "scenario": "crossing",
+    "seed": 0,
+    "variant": "gate ด้านข้าง 0.10 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_0.10_s0",
+    "scenario": "head_on",
+    "seed": 0,
+    "variant": "gate ด้านข้าง 0.10 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_0.10_s0",
+    "scenario": "side_by_side",
+    "seed": 0,
+    "variant": "gate ด้านข้าง 0.10 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_0.10_s0",
+    "scenario": "side_by_side_same",
+    "seed": 0,
+    "variant": "gate ด้านข้าง 0.10 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_0.10_s0",
+    "scenario": "stand_aside",
+    "seed": 0,
+    "variant": "gate ด้านข้าง 0.10 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_0.10_s1",
+    "scenario": "crossing",
+    "seed": 1,
+    "variant": "gate ด้านข้าง 0.10 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_0.10_s1",
+    "scenario": "head_on",
+    "seed": 1,
+    "variant": "gate ด้านข้าง 0.10 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_0.10_s1",
+    "scenario": "side_by_side",
+    "seed": 1,
+    "variant": "gate ด้านข้าง 0.10 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_0.10_s1",
+    "scenario": "side_by_side_same",
+    "seed": 1,
+    "variant": "gate ด้านข้าง 0.10 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_0.10_s1",
+    "scenario": "stand_aside",
+    "seed": 1,
+    "variant": "gate ด้านข้าง 0.10 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_0.10_s2",
+    "scenario": "crossing",
+    "seed": 2,
+    "variant": "gate ด้านข้าง 0.10 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_0.10_s2",
+    "scenario": "head_on",
+    "seed": 2,
+    "variant": "gate ด้านข้าง 0.10 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_0.10_s2",
+    "scenario": "side_by_side",
+    "seed": 2,
+    "variant": "gate ด้านข้าง 0.10 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_0.10_s2",
+    "scenario": "side_by_side_same",
+    "seed": 2,
+    "variant": "gate ด้านข้าง 0.10 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_0.10_s2",
+    "scenario": "stand_aside",
+    "seed": 2,
+    "variant": "gate ด้านข้าง 0.10 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "zz_0.10_s0",
+    "scenario": "zigzag",
+    "seed": 0,
+    "variant": "gate ด้านข้าง 0.10 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "zz_0.10_s1",
+    "scenario": "zigzag",
+    "seed": 1,
+    "variant": "gate ด้านข้าง 0.10 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "zz_0.10_s2",
+    "scenario": "zigzag",
+    "seed": 2,
+    "variant": "gate ด้านข้าง 0.10 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "zz_0.10_s3",
+    "scenario": "zigzag",
+    "seed": 3,
+    "variant": "gate ด้านข้าง 0.10 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "zz_0.10_s4",
+    "scenario": "zigzag",
+    "seed": 4,
+    "variant": "gate ด้านข้าง 0.10 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "zz_0.10_s5",
+    "scenario": "zigzag",
+    "seed": 5,
+    "variant": "gate ด้านข้าง 0.10 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "zz_0.10_s6",
+    "scenario": "zigzag",
+    "seed": 6,
+    "variant": "gate ด้านข้าง 0.10 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "zz_0.10_s7",
+    "scenario": "zigzag",
+    "seed": 7,
+    "variant": "gate ด้านข้าง 0.10 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "zz_0.10_s8",
+    "scenario": "zigzag",
+    "seed": 8,
+    "variant": "gate ด้านข้าง 0.10 m",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "zz_0.10_s9",
+    "scenario": "zigzag",
+    "seed": 9,
+    "variant": "gate ด้านข้าง 0.10 m",
+    "light": "สมจริง"
+   }
+  ],
+  "order": 8,
+  "started_utc": "2026-10-28T01:56:48Z",
+  "purpose": "Codex พบว่า gate ด้านข้าง 0.15 m รับคนแปลกหน้าใส่เสื้อเหมือนกันที่ยืนข้างเป้า 0.44 m เป็นเป้าได้ ทั้งที่เห็นแยกกันชัด จึงเทียบ 3 ค่า และเพิ่มฉากคนเดินคู่ใกล้กัน (close_pair_same) พร้อมนับว่าระบบส่ง \"คนผิด\" เป็นเป้ากี่ครั้ง",
+  "compare": "0 / 0.10 / 0.15 m สลับกันทุก seed: side_step 20 seed, คนเดินคู่ใกล้กัน 15 seed · ที่ 0.10: identity และ zigzag",
+  "result": "gate ด้านข้างแบบไม่มีเช็ก ใช้ไม่ได้: side_step ดีขึ้น (0.10: 19/20, 0.15: 20/20 เทียบ 10/20) แต่คนเดินคู่เสื้อเหมือนกันพัง (0.10: 3/10 ส่งคนผิด 201 ครั้ง, 0.15: 2/10 ส่งคนผิด 648 ครั้ง เทียบ gate เดิม 10/10, 7 ครั้ง) · ยืนยันข้อทักท้วงของ Codex",
+  "live": false
+ },
+ {
+  "id": "ambiguity_sweep",
+  "title": "gate ด้านข้างแบบเช็กความกำกวม",
+  "code": "lateral-gate-2",
+  "dir": "amb/out",
+  "runs": [
+   {
+    "tag": "ss_old_s8",
+    "scenario": "side_step",
+    "seed": 8,
+    "variant": "gate มุมเดิม (0)",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_amb_s8",
+    "scenario": "side_step",
+    "seed": 8,
+    "variant": "ด้านข้าง 0.15 m + เช็กความกำกวม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_floor_s8",
+    "scenario": "side_step",
+    "seed": 8,
+    "variant": "ด้านข้าง 0.15 m ไม่เช็ก",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_old_s9",
+    "scenario": "side_step",
+    "seed": 9,
+    "variant": "gate มุมเดิม (0)",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_amb_s9",
+    "scenario": "side_step",
+    "seed": 9,
+    "variant": "ด้านข้าง 0.15 m + เช็กความกำกวม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_floor_s9",
+    "scenario": "side_step",
+    "seed": 9,
+    "variant": "ด้านข้าง 0.15 m ไม่เช็ก",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_old_s10",
+    "scenario": "side_step",
+    "seed": 10,
+    "variant": "gate มุมเดิม (0)",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_amb_s10",
+    "scenario": "side_step",
+    "seed": 10,
+    "variant": "ด้านข้าง 0.15 m + เช็กความกำกวม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_floor_s10",
+    "scenario": "side_step",
+    "seed": 10,
+    "variant": "ด้านข้าง 0.15 m ไม่เช็ก",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_old_s11",
+    "scenario": "side_step",
+    "seed": 11,
+    "variant": "gate มุมเดิม (0)",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_amb_s11",
+    "scenario": "side_step",
+    "seed": 11,
+    "variant": "ด้านข้าง 0.15 m + เช็กความกำกวม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_floor_s11",
+    "scenario": "side_step",
+    "seed": 11,
+    "variant": "ด้านข้าง 0.15 m ไม่เช็ก",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_old_s12",
+    "scenario": "side_step",
+    "seed": 12,
+    "variant": "gate มุมเดิม (0)",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_amb_s12",
+    "scenario": "side_step",
+    "seed": 12,
+    "variant": "ด้านข้าง 0.15 m + เช็กความกำกวม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_floor_s12",
+    "scenario": "side_step",
+    "seed": 12,
+    "variant": "ด้านข้าง 0.15 m ไม่เช็ก",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_old_s13",
+    "scenario": "side_step",
+    "seed": 13,
+    "variant": "gate มุมเดิม (0)",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_amb_s13",
+    "scenario": "side_step",
+    "seed": 13,
+    "variant": "ด้านข้าง 0.15 m + เช็กความกำกวม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_floor_s13",
+    "scenario": "side_step",
+    "seed": 13,
+    "variant": "ด้านข้าง 0.15 m ไม่เช็ก",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_old_s14",
+    "scenario": "side_step",
+    "seed": 14,
+    "variant": "gate มุมเดิม (0)",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_amb_s14",
+    "scenario": "side_step",
+    "seed": 14,
+    "variant": "ด้านข้าง 0.15 m + เช็กความกำกวม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_floor_s14",
+    "scenario": "side_step",
+    "seed": 14,
+    "variant": "ด้านข้าง 0.15 m ไม่เช็ก",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_old_s15",
+    "scenario": "side_step",
+    "seed": 15,
+    "variant": "gate มุมเดิม (0)",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_amb_s15",
+    "scenario": "side_step",
+    "seed": 15,
+    "variant": "ด้านข้าง 0.15 m + เช็กความกำกวม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_floor_s15",
+    "scenario": "side_step",
+    "seed": 15,
+    "variant": "ด้านข้าง 0.15 m ไม่เช็ก",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_old_s16",
+    "scenario": "side_step",
+    "seed": 16,
+    "variant": "gate มุมเดิม (0)",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_amb_s16",
+    "scenario": "side_step",
+    "seed": 16,
+    "variant": "ด้านข้าง 0.15 m + เช็กความกำกวม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_floor_s16",
+    "scenario": "side_step",
+    "seed": 16,
+    "variant": "ด้านข้าง 0.15 m ไม่เช็ก",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_old_s17",
+    "scenario": "side_step",
+    "seed": 17,
+    "variant": "gate มุมเดิม (0)",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_amb_s17",
+    "scenario": "side_step",
+    "seed": 17,
+    "variant": "ด้านข้าง 0.15 m + เช็กความกำกวม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_floor_s17",
+    "scenario": "side_step",
+    "seed": 17,
+    "variant": "ด้านข้าง 0.15 m ไม่เช็ก",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_old_s18",
+    "scenario": "side_step",
+    "seed": 18,
+    "variant": "gate มุมเดิม (0)",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_amb_s18",
+    "scenario": "side_step",
+    "seed": 18,
+    "variant": "ด้านข้าง 0.15 m + เช็กความกำกวม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_floor_s18",
+    "scenario": "side_step",
+    "seed": 18,
+    "variant": "ด้านข้าง 0.15 m ไม่เช็ก",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_old_s19",
+    "scenario": "side_step",
+    "seed": 19,
+    "variant": "gate มุมเดิม (0)",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_amb_s19",
+    "scenario": "side_step",
+    "seed": 19,
+    "variant": "ด้านข้าง 0.15 m + เช็กความกำกวม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_floor_s19",
+    "scenario": "side_step",
+    "seed": 19,
+    "variant": "ด้านข้าง 0.15 m ไม่เช็ก",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_old_s20",
+    "scenario": "side_step",
+    "seed": 20,
+    "variant": "gate มุมเดิม (0)",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_amb_s20",
+    "scenario": "side_step",
+    "seed": 20,
+    "variant": "ด้านข้าง 0.15 m + เช็กความกำกวม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_floor_s20",
+    "scenario": "side_step",
+    "seed": 20,
+    "variant": "ด้านข้าง 0.15 m ไม่เช็ก",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_old_s21",
+    "scenario": "side_step",
+    "seed": 21,
+    "variant": "gate มุมเดิม (0)",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_amb_s21",
+    "scenario": "side_step",
+    "seed": 21,
+    "variant": "ด้านข้าง 0.15 m + เช็กความกำกวม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_floor_s21",
+    "scenario": "side_step",
+    "seed": 21,
+    "variant": "ด้านข้าง 0.15 m ไม่เช็ก",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_old_s22",
+    "scenario": "side_step",
+    "seed": 22,
+    "variant": "gate มุมเดิม (0)",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_amb_s22",
+    "scenario": "side_step",
+    "seed": 22,
+    "variant": "ด้านข้าง 0.15 m + เช็กความกำกวม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_floor_s22",
+    "scenario": "side_step",
+    "seed": 22,
+    "variant": "ด้านข้าง 0.15 m ไม่เช็ก",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_old_s23",
+    "scenario": "side_step",
+    "seed": 23,
+    "variant": "gate มุมเดิม (0)",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_amb_s23",
+    "scenario": "side_step",
+    "seed": 23,
+    "variant": "ด้านข้าง 0.15 m + เช็กความกำกวม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_floor_s23",
+    "scenario": "side_step",
+    "seed": 23,
+    "variant": "ด้านข้าง 0.15 m ไม่เช็ก",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_old_s24",
+    "scenario": "side_step",
+    "seed": 24,
+    "variant": "gate มุมเดิม (0)",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_amb_s24",
+    "scenario": "side_step",
+    "seed": 24,
+    "variant": "ด้านข้าง 0.15 m + เช็กความกำกวม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_floor_s24",
+    "scenario": "side_step",
+    "seed": 24,
+    "variant": "ด้านข้าง 0.15 m ไม่เช็ก",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_old_s25",
+    "scenario": "side_step",
+    "seed": 25,
+    "variant": "gate มุมเดิม (0)",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_amb_s25",
+    "scenario": "side_step",
+    "seed": 25,
+    "variant": "ด้านข้าง 0.15 m + เช็กความกำกวม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_floor_s25",
+    "scenario": "side_step",
+    "seed": 25,
+    "variant": "ด้านข้าง 0.15 m ไม่เช็ก",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_old_s26",
+    "scenario": "side_step",
+    "seed": 26,
+    "variant": "gate มุมเดิม (0)",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_amb_s26",
+    "scenario": "side_step",
+    "seed": 26,
+    "variant": "ด้านข้าง 0.15 m + เช็กความกำกวม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_floor_s26",
+    "scenario": "side_step",
+    "seed": 26,
+    "variant": "ด้านข้าง 0.15 m ไม่เช็ก",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_old_s27",
+    "scenario": "side_step",
+    "seed": 27,
+    "variant": "gate มุมเดิม (0)",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_amb_s27",
+    "scenario": "side_step",
+    "seed": 27,
+    "variant": "ด้านข้าง 0.15 m + เช็กความกำกวม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "ss_floor_s27",
+    "scenario": "side_step",
+    "seed": 27,
+    "variant": "ด้านข้าง 0.15 m ไม่เช็ก",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "cp_real_old_s0",
+    "scenario": "close_pair_same",
+    "seed": 0,
+    "variant": "gate มุมเดิม (0)",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "cp_real_amb_s0",
+    "scenario": "close_pair_same",
+    "seed": 0,
+    "variant": "ด้านข้าง 0.15 m + เช็กความกำกวม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "cp_real_floor_s0",
+    "scenario": "close_pair_same",
+    "seed": 0,
+    "variant": "ด้านข้าง 0.15 m ไม่เช็ก",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "cp_real_old_s1",
+    "scenario": "close_pair_same",
+    "seed": 1,
+    "variant": "gate มุมเดิม (0)",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "cp_real_amb_s1",
+    "scenario": "close_pair_same",
+    "seed": 1,
+    "variant": "ด้านข้าง 0.15 m + เช็กความกำกวม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "cp_real_floor_s1",
+    "scenario": "close_pair_same",
+    "seed": 1,
+    "variant": "ด้านข้าง 0.15 m ไม่เช็ก",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "cp_real_old_s2",
+    "scenario": "close_pair_same",
+    "seed": 2,
+    "variant": "gate มุมเดิม (0)",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "cp_real_amb_s2",
+    "scenario": "close_pair_same",
+    "seed": 2,
+    "variant": "ด้านข้าง 0.15 m + เช็กความกำกวม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "cp_real_floor_s2",
+    "scenario": "close_pair_same",
+    "seed": 2,
+    "variant": "ด้านข้าง 0.15 m ไม่เช็ก",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "cp_real_old_s3",
+    "scenario": "close_pair_same",
+    "seed": 3,
+    "variant": "gate มุมเดิม (0)",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "cp_real_amb_s3",
+    "scenario": "close_pair_same",
+    "seed": 3,
+    "variant": "ด้านข้าง 0.15 m + เช็กความกำกวม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "cp_real_floor_s3",
+    "scenario": "close_pair_same",
+    "seed": 3,
+    "variant": "ด้านข้าง 0.15 m ไม่เช็ก",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "cp_real_old_s4",
+    "scenario": "close_pair_same",
+    "seed": 4,
+    "variant": "gate มุมเดิม (0)",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "cp_real_amb_s4",
+    "scenario": "close_pair_same",
+    "seed": 4,
+    "variant": "ด้านข้าง 0.15 m + เช็กความกำกวม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "cp_real_floor_s4",
+    "scenario": "close_pair_same",
+    "seed": 4,
+    "variant": "ด้านข้าง 0.15 m ไม่เช็ก",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "cp_real_old_s5",
+    "scenario": "close_pair_same",
+    "seed": 5,
+    "variant": "gate มุมเดิม (0)",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "cp_real_amb_s5",
+    "scenario": "close_pair_same",
+    "seed": 5,
+    "variant": "ด้านข้าง 0.15 m + เช็กความกำกวม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "cp_real_floor_s5",
+    "scenario": "close_pair_same",
+    "seed": 5,
+    "variant": "ด้านข้าง 0.15 m ไม่เช็ก",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "cp_real_old_s6",
+    "scenario": "close_pair_same",
+    "seed": 6,
+    "variant": "gate มุมเดิม (0)",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "cp_real_amb_s6",
+    "scenario": "close_pair_same",
+    "seed": 6,
+    "variant": "ด้านข้าง 0.15 m + เช็กความกำกวม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "cp_real_floor_s6",
+    "scenario": "close_pair_same",
+    "seed": 6,
+    "variant": "ด้านข้าง 0.15 m ไม่เช็ก",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "cp_real_old_s7",
+    "scenario": "close_pair_same",
+    "seed": 7,
+    "variant": "gate มุมเดิม (0)",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "cp_real_amb_s7",
+    "scenario": "close_pair_same",
+    "seed": 7,
+    "variant": "ด้านข้าง 0.15 m + เช็กความกำกวม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "cp_real_floor_s7",
+    "scenario": "close_pair_same",
+    "seed": 7,
+    "variant": "ด้านข้าง 0.15 m ไม่เช็ก",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "cp_real_old_s8",
+    "scenario": "close_pair_same",
+    "seed": 8,
+    "variant": "gate มุมเดิม (0)",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "cp_real_amb_s8",
+    "scenario": "close_pair_same",
+    "seed": 8,
+    "variant": "ด้านข้าง 0.15 m + เช็กความกำกวม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "cp_real_floor_s8",
+    "scenario": "close_pair_same",
+    "seed": 8,
+    "variant": "ด้านข้าง 0.15 m ไม่เช็ก",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "cp_real_old_s9",
+    "scenario": "close_pair_same",
+    "seed": 9,
+    "variant": "gate มุมเดิม (0)",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "cp_real_amb_s9",
+    "scenario": "close_pair_same",
+    "seed": 9,
+    "variant": "ด้านข้าง 0.15 m + เช็กความกำกวม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "cp_real_floor_s9",
+    "scenario": "close_pair_same",
+    "seed": 9,
+    "variant": "ด้านข้าง 0.15 m ไม่เช็ก",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "cp_clean_old_s0",
+    "scenario": "close_pair_same",
+    "seed": 0,
+    "variant": "gate มุมเดิม (0)",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "cp_clean_amb_s0",
+    "scenario": "close_pair_same",
+    "seed": 0,
+    "variant": "ด้านข้าง 0.15 m + เช็กความกำกวม",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "cp_clean_floor_s0",
+    "scenario": "close_pair_same",
+    "seed": 0,
+    "variant": "ด้านข้าง 0.15 m ไม่เช็ก",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "cp_clean_old_s1",
+    "scenario": "close_pair_same",
+    "seed": 1,
+    "variant": "gate มุมเดิม (0)",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "cp_clean_amb_s1",
+    "scenario": "close_pair_same",
+    "seed": 1,
+    "variant": "ด้านข้าง 0.15 m + เช็กความกำกวม",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "cp_clean_floor_s1",
+    "scenario": "close_pair_same",
+    "seed": 1,
+    "variant": "ด้านข้าง 0.15 m ไม่เช็ก",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "cp_clean_old_s2",
+    "scenario": "close_pair_same",
+    "seed": 2,
+    "variant": "gate มุมเดิม (0)",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "cp_clean_amb_s2",
+    "scenario": "close_pair_same",
+    "seed": 2,
+    "variant": "ด้านข้าง 0.15 m + เช็กความกำกวม",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "cp_clean_floor_s2",
+    "scenario": "close_pair_same",
+    "seed": 2,
+    "variant": "ด้านข้าง 0.15 m ไม่เช็ก",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "cp_clean_old_s3",
+    "scenario": "close_pair_same",
+    "seed": 3,
+    "variant": "gate มุมเดิม (0)",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "cp_clean_amb_s3",
+    "scenario": "close_pair_same",
+    "seed": 3,
+    "variant": "ด้านข้าง 0.15 m + เช็กความกำกวม",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "cp_clean_floor_s3",
+    "scenario": "close_pair_same",
+    "seed": 3,
+    "variant": "ด้านข้าง 0.15 m ไม่เช็ก",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "cp_clean_old_s4",
+    "scenario": "close_pair_same",
+    "seed": 4,
+    "variant": "gate มุมเดิม (0)",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "cp_clean_amb_s4",
+    "scenario": "close_pair_same",
+    "seed": 4,
+    "variant": "ด้านข้าง 0.15 m + เช็กความกำกวม",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "cp_clean_floor_s4",
+    "scenario": "close_pair_same",
+    "seed": 4,
+    "variant": "ด้านข้าง 0.15 m ไม่เช็ก",
+    "light": "ปกติ"
+   },
+   {
+    "tag": "reg_identity_amb_s0",
+    "scenario": "crossing",
+    "seed": 0,
+    "variant": "ด้านข้าง 0.15 m + เช็กความกำกวม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_amb_s0",
+    "scenario": "head_on",
+    "seed": 0,
+    "variant": "ด้านข้าง 0.15 m + เช็กความกำกวม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_amb_s0",
+    "scenario": "side_by_side",
+    "seed": 0,
+    "variant": "ด้านข้าง 0.15 m + เช็กความกำกวม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_amb_s0",
+    "scenario": "side_by_side_same",
+    "seed": 0,
+    "variant": "ด้านข้าง 0.15 m + เช็กความกำกวม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_amb_s0",
+    "scenario": "stand_aside",
+    "seed": 0,
+    "variant": "ด้านข้าง 0.15 m + เช็กความกำกวม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_amb_s1",
+    "scenario": "crossing",
+    "seed": 1,
+    "variant": "ด้านข้าง 0.15 m + เช็กความกำกวม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_amb_s1",
+    "scenario": "head_on",
+    "seed": 1,
+    "variant": "ด้านข้าง 0.15 m + เช็กความกำกวม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_amb_s1",
+    "scenario": "side_by_side",
+    "seed": 1,
+    "variant": "ด้านข้าง 0.15 m + เช็กความกำกวม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_amb_s1",
+    "scenario": "side_by_side_same",
+    "seed": 1,
+    "variant": "ด้านข้าง 0.15 m + เช็กความกำกวม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_amb_s1",
+    "scenario": "stand_aside",
+    "seed": 1,
+    "variant": "ด้านข้าง 0.15 m + เช็กความกำกวม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_amb_s2",
+    "scenario": "crossing",
+    "seed": 2,
+    "variant": "ด้านข้าง 0.15 m + เช็กความกำกวม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_amb_s2",
+    "scenario": "head_on",
+    "seed": 2,
+    "variant": "ด้านข้าง 0.15 m + เช็กความกำกวม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_amb_s2",
+    "scenario": "side_by_side",
+    "seed": 2,
+    "variant": "ด้านข้าง 0.15 m + เช็กความกำกวม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_amb_s2",
+    "scenario": "side_by_side_same",
+    "seed": 2,
+    "variant": "ด้านข้าง 0.15 m + เช็กความกำกวม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "reg_identity_amb_s2",
+    "scenario": "stand_aside",
+    "seed": 2,
+    "variant": "ด้านข้าง 0.15 m + เช็กความกำกวม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "zz_amb_s0",
+    "scenario": "zigzag",
+    "seed": 0,
+    "variant": "ด้านข้าง 0.15 m + เช็กความกำกวม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "zz_amb_s1",
+    "scenario": "zigzag",
+    "seed": 1,
+    "variant": "ด้านข้าง 0.15 m + เช็กความกำกวม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "zz_amb_s2",
+    "scenario": "zigzag",
+    "seed": 2,
+    "variant": "ด้านข้าง 0.15 m + เช็กความกำกวม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "zz_amb_s3",
+    "scenario": "zigzag",
+    "seed": 3,
+    "variant": "ด้านข้าง 0.15 m + เช็กความกำกวม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "zz_amb_s4",
+    "scenario": "zigzag",
+    "seed": 4,
+    "variant": "ด้านข้าง 0.15 m + เช็กความกำกวม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "zz_amb_s5",
+    "scenario": "zigzag",
+    "seed": 5,
+    "variant": "ด้านข้าง 0.15 m + เช็กความกำกวม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "zz_amb_s6",
+    "scenario": "zigzag",
+    "seed": 6,
+    "variant": "ด้านข้าง 0.15 m + เช็กความกำกวม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "zz_amb_s7",
+    "scenario": "zigzag",
+    "seed": 7,
+    "variant": "ด้านข้าง 0.15 m + เช็กความกำกวม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "zz_amb_s8",
+    "scenario": "zigzag",
+    "seed": 8,
+    "variant": "ด้านข้าง 0.15 m + เช็กความกำกวม",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "zz_amb_s9",
+    "scenario": "zigzag",
+    "seed": 9,
+    "variant": "ด้านข้าง 0.15 m + เช็กความกำกวม",
+    "light": "สมจริง"
+   }
+  ],
+  "order": 9,
+  "started_utc": "2026-10-28T02:57:59Z",
+  "purpose": "sweep รอบก่อนพบว่า gate ด้านข้างทุกค่า (แม้ 0.10 m) ส่งคนแปลกหน้าที่เดินข้างเป้าเป็นเป้าเมื่อกล้องหาเป้าไม่เจอบางเฟรม · จึงขยาย gate เฉพาะตอนเป้าอยู่คนเดียว: ถ้ามีกล่อง 2 กล่องในเฟรมเดียวกันใกล้ตำแหน่งที่ทาย (ห่างกัน ≥ 0.25 m) ใช้ gate แคบเดิมต่อ 1 วินาที",
+  "compare": "gate เดิม / ด้านข้าง+เช็กความกำกวม / ด้านข้างไม่เช็ก สลับกันทุก seed: side_step 20 seed, คนเดินคู่ใกล้กัน 15 seed · แบบใหม่: identity และ zigzag",
+  "result": "",
+  "live": false
+ },
+ {
+  "id": "ambiguity_confirm",
+  "title": "ยืนยัน gate เช็กคนข้างเป้า (T15 รอบ 2c)",
+  "code": "5aa4f65",
+  "dir": "amb2/out",
+  "started_utc": "2026-10-28T02:57:59Z",
+  "order": 10,
+  "purpose": "ยืนยันหลังแก้บั๊กตอน lock-on: old vs amb สลับกันทีละ seed",
+  "compare": "old = gate ก่อน T15, amb = ค่าใหม่",
+  "result": "side_step 10/10 vs 5/10, close_pair_same 15/15 ทั้งคู่, ส่งคนผิด 0",
+  "runs": [
+   {
+    "tag": "cp_real_old_s0",
+    "scenario": "close_pair_same",
+    "seed": 0,
+    "variant": "old",
+    "light": "realism"
+   },
+   {
+    "tag": "cp_real_amb_s0",
+    "scenario": "close_pair_same",
+    "seed": 0,
+    "variant": "amb",
+    "light": "realism"
+   },
+   {
+    "tag": "cp_real_old_s1",
+    "scenario": "close_pair_same",
+    "seed": 1,
+    "variant": "old",
+    "light": "realism"
+   },
+   {
+    "tag": "cp_real_amb_s1",
+    "scenario": "close_pair_same",
+    "seed": 1,
+    "variant": "amb",
+    "light": "realism"
+   },
+   {
+    "tag": "cp_real_old_s2",
+    "scenario": "close_pair_same",
+    "seed": 2,
+    "variant": "old",
+    "light": "realism"
+   },
+   {
+    "tag": "cp_real_amb_s2",
+    "scenario": "close_pair_same",
+    "seed": 2,
+    "variant": "amb",
+    "light": "realism"
+   },
+   {
+    "tag": "cp_real_old_s3",
+    "scenario": "close_pair_same",
+    "seed": 3,
+    "variant": "old",
+    "light": "realism"
+   },
+   {
+    "tag": "cp_real_amb_s3",
+    "scenario": "close_pair_same",
+    "seed": 3,
+    "variant": "amb",
+    "light": "realism"
+   },
+   {
+    "tag": "cp_real_old_s4",
+    "scenario": "close_pair_same",
+    "seed": 4,
+    "variant": "old",
+    "light": "realism"
+   },
+   {
+    "tag": "cp_real_amb_s4",
+    "scenario": "close_pair_same",
+    "seed": 4,
+    "variant": "amb",
+    "light": "realism"
+   },
+   {
+    "tag": "cp_real_old_s5",
+    "scenario": "close_pair_same",
+    "seed": 5,
+    "variant": "old",
+    "light": "realism"
+   },
+   {
+    "tag": "cp_real_amb_s5",
+    "scenario": "close_pair_same",
+    "seed": 5,
+    "variant": "amb",
+    "light": "realism"
+   },
+   {
+    "tag": "cp_real_old_s6",
+    "scenario": "close_pair_same",
+    "seed": 6,
+    "variant": "old",
+    "light": "realism"
+   },
+   {
+    "tag": "cp_real_amb_s6",
+    "scenario": "close_pair_same",
+    "seed": 6,
+    "variant": "amb",
+    "light": "realism"
+   },
+   {
+    "tag": "cp_real_old_s7",
+    "scenario": "close_pair_same",
+    "seed": 7,
+    "variant": "old",
+    "light": "realism"
+   },
+   {
+    "tag": "cp_real_amb_s7",
+    "scenario": "close_pair_same",
+    "seed": 7,
+    "variant": "amb",
+    "light": "realism"
+   },
+   {
+    "tag": "cp_real_old_s8",
+    "scenario": "close_pair_same",
+    "seed": 8,
+    "variant": "old",
+    "light": "realism"
+   },
+   {
+    "tag": "cp_real_amb_s8",
+    "scenario": "close_pair_same",
+    "seed": 8,
+    "variant": "amb",
+    "light": "realism"
+   },
+   {
+    "tag": "cp_real_old_s9",
+    "scenario": "close_pair_same",
+    "seed": 9,
+    "variant": "old",
+    "light": "realism"
+   },
+   {
+    "tag": "cp_real_amb_s9",
+    "scenario": "close_pair_same",
+    "seed": 9,
+    "variant": "amb",
+    "light": "realism"
+   },
+   {
+    "tag": "cp_clean_old_s0",
+    "scenario": "close_pair_same",
+    "seed": 0,
+    "variant": "old",
+    "light": "clean"
+   },
+   {
+    "tag": "cp_clean_amb_s0",
+    "scenario": "close_pair_same",
+    "seed": 0,
+    "variant": "amb",
+    "light": "clean"
+   },
+   {
+    "tag": "cp_clean_old_s1",
+    "scenario": "close_pair_same",
+    "seed": 1,
+    "variant": "old",
+    "light": "clean"
+   },
+   {
+    "tag": "cp_clean_amb_s1",
+    "scenario": "close_pair_same",
+    "seed": 1,
+    "variant": "amb",
+    "light": "clean"
+   },
+   {
+    "tag": "cp_clean_old_s2",
+    "scenario": "close_pair_same",
+    "seed": 2,
+    "variant": "old",
+    "light": "clean"
+   },
+   {
+    "tag": "cp_clean_amb_s2",
+    "scenario": "close_pair_same",
+    "seed": 2,
+    "variant": "amb",
+    "light": "clean"
+   },
+   {
+    "tag": "cp_clean_old_s3",
+    "scenario": "close_pair_same",
+    "seed": 3,
+    "variant": "old",
+    "light": "clean"
+   },
+   {
+    "tag": "cp_clean_amb_s3",
+    "scenario": "close_pair_same",
+    "seed": 3,
+    "variant": "amb",
+    "light": "clean"
+   },
+   {
+    "tag": "cp_clean_old_s4",
+    "scenario": "close_pair_same",
+    "seed": 4,
+    "variant": "old",
+    "light": "clean"
+   },
+   {
+    "tag": "cp_clean_amb_s4",
+    "scenario": "close_pair_same",
+    "seed": 4,
+    "variant": "amb",
+    "light": "clean"
+   },
+   {
+    "tag": "ss_old_s8",
+    "scenario": "side_step",
+    "seed": 8,
+    "variant": "old",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_amb_s8",
+    "scenario": "side_step",
+    "seed": 8,
+    "variant": "amb",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_old_s9",
+    "scenario": "side_step",
+    "seed": 9,
+    "variant": "old",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_amb_s9",
+    "scenario": "side_step",
+    "seed": 9,
+    "variant": "amb",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_old_s10",
+    "scenario": "side_step",
+    "seed": 10,
+    "variant": "old",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_amb_s10",
+    "scenario": "side_step",
+    "seed": 10,
+    "variant": "amb",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_old_s11",
+    "scenario": "side_step",
+    "seed": 11,
+    "variant": "old",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_amb_s11",
+    "scenario": "side_step",
+    "seed": 11,
+    "variant": "amb",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_old_s12",
+    "scenario": "side_step",
+    "seed": 12,
+    "variant": "old",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_amb_s12",
+    "scenario": "side_step",
+    "seed": 12,
+    "variant": "amb",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_old_s13",
+    "scenario": "side_step",
+    "seed": 13,
+    "variant": "old",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_amb_s13",
+    "scenario": "side_step",
+    "seed": 13,
+    "variant": "amb",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_old_s14",
+    "scenario": "side_step",
+    "seed": 14,
+    "variant": "old",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_amb_s14",
+    "scenario": "side_step",
+    "seed": 14,
+    "variant": "amb",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_old_s15",
+    "scenario": "side_step",
+    "seed": 15,
+    "variant": "old",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_amb_s15",
+    "scenario": "side_step",
+    "seed": 15,
+    "variant": "amb",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_old_s16",
+    "scenario": "side_step",
+    "seed": 16,
+    "variant": "old",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_amb_s16",
+    "scenario": "side_step",
+    "seed": 16,
+    "variant": "amb",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_old_s17",
+    "scenario": "side_step",
+    "seed": 17,
+    "variant": "old",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_amb_s17",
+    "scenario": "side_step",
+    "seed": 17,
+    "variant": "amb",
+    "light": "realism"
+   }
+  ],
+  "live": false
+ },
+ {
+  "id": "walk_up",
+  "title": "คนแปลกหน้าเดินเข้ามาข้างเป้า (T15 ต่อ)",
+  "code": "cd6eead",
+  "dir": "walkup/out",
+  "started_utc": "2026-10-28T06:06:36Z",
+  "order": 11,
+  "purpose": "คนใส่เสื้อเหมือนเป้าโผล่ข้างเป้า 0.40 m (กล่องมาก่อน) ดูว่า gate ใช้ LiDAR รู้ทันไหม",
+  "compare": "old = gate ก่อน T15, noscan = T15 รอบ 2, scan = เช็ก LiDAR (ค่าใหม่)",
+  "runs": [
+   {
+    "tag": "wu_real_old_s0",
+    "scenario": "walk_up_same",
+    "seed": 0,
+    "variant": "old",
+    "light": "realism"
+   },
+   {
+    "tag": "wu_real_noscan_s0",
+    "scenario": "walk_up_same",
+    "seed": 0,
+    "variant": "noscan",
+    "light": "realism"
+   },
+   {
+    "tag": "wu_real_scan_s0",
+    "scenario": "walk_up_same",
+    "seed": 0,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "wu_real_old_s1",
+    "scenario": "walk_up_same",
+    "seed": 1,
+    "variant": "old",
+    "light": "realism"
+   },
+   {
+    "tag": "wu_real_noscan_s1",
+    "scenario": "walk_up_same",
+    "seed": 1,
+    "variant": "noscan",
+    "light": "realism"
+   },
+   {
+    "tag": "wu_real_scan_s1",
+    "scenario": "walk_up_same",
+    "seed": 1,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "wu_real_old_s2",
+    "scenario": "walk_up_same",
+    "seed": 2,
+    "variant": "old",
+    "light": "realism"
+   },
+   {
+    "tag": "wu_real_noscan_s2",
+    "scenario": "walk_up_same",
+    "seed": 2,
+    "variant": "noscan",
+    "light": "realism"
+   },
+   {
+    "tag": "wu_real_scan_s2",
+    "scenario": "walk_up_same",
+    "seed": 2,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "wu_real_old_s3",
+    "scenario": "walk_up_same",
+    "seed": 3,
+    "variant": "old",
+    "light": "realism"
+   },
+   {
+    "tag": "wu_real_noscan_s3",
+    "scenario": "walk_up_same",
+    "seed": 3,
+    "variant": "noscan",
+    "light": "realism"
+   },
+   {
+    "tag": "wu_real_scan_s3",
+    "scenario": "walk_up_same",
+    "seed": 3,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "wu_real_old_s4",
+    "scenario": "walk_up_same",
+    "seed": 4,
+    "variant": "old",
+    "light": "realism"
+   },
+   {
+    "tag": "wu_real_noscan_s4",
+    "scenario": "walk_up_same",
+    "seed": 4,
+    "variant": "noscan",
+    "light": "realism"
+   },
+   {
+    "tag": "wu_real_scan_s4",
+    "scenario": "walk_up_same",
+    "seed": 4,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "wu_real_old_s5",
+    "scenario": "walk_up_same",
+    "seed": 5,
+    "variant": "old",
+    "light": "realism"
+   },
+   {
+    "tag": "wu_real_noscan_s5",
+    "scenario": "walk_up_same",
+    "seed": 5,
+    "variant": "noscan",
+    "light": "realism"
+   },
+   {
+    "tag": "wu_real_scan_s5",
+    "scenario": "walk_up_same",
+    "seed": 5,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "wu_real_old_s6",
+    "scenario": "walk_up_same",
+    "seed": 6,
+    "variant": "old",
+    "light": "realism"
+   },
+   {
+    "tag": "wu_real_noscan_s6",
+    "scenario": "walk_up_same",
+    "seed": 6,
+    "variant": "noscan",
+    "light": "realism"
+   },
+   {
+    "tag": "wu_real_scan_s6",
+    "scenario": "walk_up_same",
+    "seed": 6,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "wu_real_old_s7",
+    "scenario": "walk_up_same",
+    "seed": 7,
+    "variant": "old",
+    "light": "realism"
+   },
+   {
+    "tag": "wu_real_noscan_s7",
+    "scenario": "walk_up_same",
+    "seed": 7,
+    "variant": "noscan",
+    "light": "realism"
+   },
+   {
+    "tag": "wu_real_scan_s7",
+    "scenario": "walk_up_same",
+    "seed": 7,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "wu_real_old_s8",
+    "scenario": "walk_up_same",
+    "seed": 8,
+    "variant": "old",
+    "light": "realism"
+   },
+   {
+    "tag": "wu_real_noscan_s8",
+    "scenario": "walk_up_same",
+    "seed": 8,
+    "variant": "noscan",
+    "light": "realism"
+   },
+   {
+    "tag": "wu_real_scan_s8",
+    "scenario": "walk_up_same",
+    "seed": 8,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "wu_real_old_s9",
+    "scenario": "walk_up_same",
+    "seed": 9,
+    "variant": "old",
+    "light": "realism"
+   },
+   {
+    "tag": "wu_real_noscan_s9",
+    "scenario": "walk_up_same",
+    "seed": 9,
+    "variant": "noscan",
+    "light": "realism"
+   },
+   {
+    "tag": "wu_real_scan_s9",
+    "scenario": "walk_up_same",
+    "seed": 9,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_noscan_s8",
+    "scenario": "side_step",
+    "seed": 8,
+    "variant": "noscan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_scan_s8",
+    "scenario": "side_step",
+    "seed": 8,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_noscan_s9",
+    "scenario": "side_step",
+    "seed": 9,
+    "variant": "noscan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_scan_s9",
+    "scenario": "side_step",
+    "seed": 9,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_noscan_s10",
+    "scenario": "side_step",
+    "seed": 10,
+    "variant": "noscan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_scan_s10",
+    "scenario": "side_step",
+    "seed": 10,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_noscan_s11",
+    "scenario": "side_step",
+    "seed": 11,
+    "variant": "noscan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_scan_s11",
+    "scenario": "side_step",
+    "seed": 11,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_noscan_s12",
+    "scenario": "side_step",
+    "seed": 12,
+    "variant": "noscan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_scan_s12",
+    "scenario": "side_step",
+    "seed": 12,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_noscan_s13",
+    "scenario": "side_step",
+    "seed": 13,
+    "variant": "noscan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_scan_s13",
+    "scenario": "side_step",
+    "seed": 13,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_noscan_s14",
+    "scenario": "side_step",
+    "seed": 14,
+    "variant": "noscan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_scan_s14",
+    "scenario": "side_step",
+    "seed": 14,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_noscan_s15",
+    "scenario": "side_step",
+    "seed": 15,
+    "variant": "noscan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_scan_s15",
+    "scenario": "side_step",
+    "seed": 15,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_noscan_s16",
+    "scenario": "side_step",
+    "seed": 16,
+    "variant": "noscan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_scan_s16",
+    "scenario": "side_step",
+    "seed": 16,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_noscan_s17",
+    "scenario": "side_step",
+    "seed": 17,
+    "variant": "noscan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_scan_s17",
+    "scenario": "side_step",
+    "seed": 17,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "cp_real_scan_s0",
+    "scenario": "close_pair_same",
+    "seed": 0,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "cp_real_scan_s1",
+    "scenario": "close_pair_same",
+    "seed": 1,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "cp_real_scan_s2",
+    "scenario": "close_pair_same",
+    "seed": 2,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "cp_real_scan_s3",
+    "scenario": "close_pair_same",
+    "seed": 3,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "cp_real_scan_s4",
+    "scenario": "close_pair_same",
+    "seed": 4,
+    "variant": "scan",
+    "light": "realism"
+   }
+  ],
+  "result": "walk_up_same: scan 10/10, noscan 2/10 (ส่งคนผิด 573), old 10/10 · side_step: scan 7/10 vs noscan 10/10 (เสาใกล้เป้าถูกนับเป็นคน → รอบ 2 ลดรัศมี)",
+  "live": false
+ },
+ {
+  "id": "walk_up_r2",
+  "title": "คนเดินเข้ามาข้างเป้า รอบ 2 (รัศมี 0.5 m)",
+  "code": "1be3357",
+  "dir": "walkup/out2",
+  "started_utc": "2026-10-28T06:38:44Z",
+  "order": 12,
+  "purpose": "เช็กว่ารัศมี 0.5 m เก็บ side_step ไว้ได้ และยังกันคนแปลกหน้าได้",
+  "compare": "noscan = T15 รอบ 2, scan = เช็ก LiDAR รัศมี 0.5 m",
+  "runs": [
+   {
+    "tag": "ss_noscan_s8",
+    "scenario": "side_step",
+    "seed": 8,
+    "variant": "noscan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_scan_s8",
+    "scenario": "side_step",
+    "seed": 8,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_noscan_s9",
+    "scenario": "side_step",
+    "seed": 9,
+    "variant": "noscan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_scan_s9",
+    "scenario": "side_step",
+    "seed": 9,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_noscan_s10",
+    "scenario": "side_step",
+    "seed": 10,
+    "variant": "noscan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_scan_s10",
+    "scenario": "side_step",
+    "seed": 10,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_noscan_s11",
+    "scenario": "side_step",
+    "seed": 11,
+    "variant": "noscan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_scan_s11",
+    "scenario": "side_step",
+    "seed": 11,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_noscan_s12",
+    "scenario": "side_step",
+    "seed": 12,
+    "variant": "noscan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_scan_s12",
+    "scenario": "side_step",
+    "seed": 12,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_noscan_s13",
+    "scenario": "side_step",
+    "seed": 13,
+    "variant": "noscan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_scan_s13",
+    "scenario": "side_step",
+    "seed": 13,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_noscan_s14",
+    "scenario": "side_step",
+    "seed": 14,
+    "variant": "noscan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_scan_s14",
+    "scenario": "side_step",
+    "seed": 14,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_noscan_s15",
+    "scenario": "side_step",
+    "seed": 15,
+    "variant": "noscan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_scan_s15",
+    "scenario": "side_step",
+    "seed": 15,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_noscan_s16",
+    "scenario": "side_step",
+    "seed": 16,
+    "variant": "noscan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_scan_s16",
+    "scenario": "side_step",
+    "seed": 16,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_noscan_s17",
+    "scenario": "side_step",
+    "seed": 17,
+    "variant": "noscan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_scan_s17",
+    "scenario": "side_step",
+    "seed": 17,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_noscan_s18",
+    "scenario": "side_step",
+    "seed": 18,
+    "variant": "noscan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_scan_s18",
+    "scenario": "side_step",
+    "seed": 18,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_noscan_s19",
+    "scenario": "side_step",
+    "seed": 19,
+    "variant": "noscan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_scan_s19",
+    "scenario": "side_step",
+    "seed": 19,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_noscan_s20",
+    "scenario": "side_step",
+    "seed": 20,
+    "variant": "noscan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_scan_s20",
+    "scenario": "side_step",
+    "seed": 20,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_noscan_s21",
+    "scenario": "side_step",
+    "seed": 21,
+    "variant": "noscan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_scan_s21",
+    "scenario": "side_step",
+    "seed": 21,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_noscan_s22",
+    "scenario": "side_step",
+    "seed": 22,
+    "variant": "noscan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_scan_s22",
+    "scenario": "side_step",
+    "seed": 22,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_noscan_s23",
+    "scenario": "side_step",
+    "seed": 23,
+    "variant": "noscan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_scan_s23",
+    "scenario": "side_step",
+    "seed": 23,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_noscan_s24",
+    "scenario": "side_step",
+    "seed": 24,
+    "variant": "noscan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_scan_s24",
+    "scenario": "side_step",
+    "seed": 24,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_noscan_s25",
+    "scenario": "side_step",
+    "seed": 25,
+    "variant": "noscan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_scan_s25",
+    "scenario": "side_step",
+    "seed": 25,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_noscan_s26",
+    "scenario": "side_step",
+    "seed": 26,
+    "variant": "noscan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_scan_s26",
+    "scenario": "side_step",
+    "seed": 26,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_noscan_s27",
+    "scenario": "side_step",
+    "seed": 27,
+    "variant": "noscan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_scan_s27",
+    "scenario": "side_step",
+    "seed": 27,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "wu_real_scan_s0",
+    "scenario": "walk_up_same",
+    "seed": 0,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "wu_real_scan_s1",
+    "scenario": "walk_up_same",
+    "seed": 1,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "wu_real_scan_s2",
+    "scenario": "walk_up_same",
+    "seed": 2,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "wu_real_scan_s3",
+    "scenario": "walk_up_same",
+    "seed": 3,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "wu_real_scan_s4",
+    "scenario": "walk_up_same",
+    "seed": 4,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "wu_real_scan_s5",
+    "scenario": "walk_up_same",
+    "seed": 5,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "wu_real_scan_s6",
+    "scenario": "walk_up_same",
+    "seed": 6,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "wu_real_scan_s7",
+    "scenario": "walk_up_same",
+    "seed": 7,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "wu_real_scan_s8",
+    "scenario": "walk_up_same",
+    "seed": 8,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "wu_real_scan_s9",
+    "scenario": "walk_up_same",
+    "seed": 9,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "cp_real_scan_s0",
+    "scenario": "close_pair_same",
+    "seed": 0,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "cp_real_scan_s1",
+    "scenario": "close_pair_same",
+    "seed": 1,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "cp_real_scan_s2",
+    "scenario": "close_pair_same",
+    "seed": 2,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "cp_real_scan_s3",
+    "scenario": "close_pair_same",
+    "seed": 3,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "cp_real_scan_s4",
+    "scenario": "close_pair_same",
+    "seed": 4,
+    "variant": "scan",
+    "light": "realism"
+   }
+  ],
+  "result": "side_step: scan 13/20 vs noscan 20/20 · walk_up_same 10/10 · close_pair_same 5/5 → กล่องที่ไม่ใช่เป้าทำให้นับเป้าเป็นคนอื่น แก้ในรอบ 3",
+  "live": false
+ },
+ {
+  "id": "walk_up_r3",
+  "title": "คนเดินเข้ามาข้างเป้า รอบ 3 (เช็กเฉพาะกล่องใกล้เป้า)",
+  "code": "0d74732",
+  "dir": "walkup/out3",
+  "started_utc": "2026-10-28T07:10:27Z",
+  "order": 13,
+  "purpose": "เช็กว่า side_step กลับมาเท่า noscan และยังกันคนแปลกหน้าได้",
+  "compare": "noscan = T15 รอบ 2, scan = เช็ก LiDAR รัศมี 0.5 m",
+  "runs": [
+   {
+    "tag": "ss_noscan_s8",
+    "scenario": "side_step",
+    "seed": 8,
+    "variant": "noscan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_scan_s8",
+    "scenario": "side_step",
+    "seed": 8,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_noscan_s9",
+    "scenario": "side_step",
+    "seed": 9,
+    "variant": "noscan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_scan_s9",
+    "scenario": "side_step",
+    "seed": 9,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_noscan_s10",
+    "scenario": "side_step",
+    "seed": 10,
+    "variant": "noscan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_scan_s10",
+    "scenario": "side_step",
+    "seed": 10,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_noscan_s11",
+    "scenario": "side_step",
+    "seed": 11,
+    "variant": "noscan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_scan_s11",
+    "scenario": "side_step",
+    "seed": 11,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_noscan_s12",
+    "scenario": "side_step",
+    "seed": 12,
+    "variant": "noscan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_scan_s12",
+    "scenario": "side_step",
+    "seed": 12,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_noscan_s13",
+    "scenario": "side_step",
+    "seed": 13,
+    "variant": "noscan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_scan_s13",
+    "scenario": "side_step",
+    "seed": 13,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_noscan_s14",
+    "scenario": "side_step",
+    "seed": 14,
+    "variant": "noscan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_scan_s14",
+    "scenario": "side_step",
+    "seed": 14,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_noscan_s15",
+    "scenario": "side_step",
+    "seed": 15,
+    "variant": "noscan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_scan_s15",
+    "scenario": "side_step",
+    "seed": 15,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_noscan_s16",
+    "scenario": "side_step",
+    "seed": 16,
+    "variant": "noscan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_scan_s16",
+    "scenario": "side_step",
+    "seed": 16,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_noscan_s17",
+    "scenario": "side_step",
+    "seed": 17,
+    "variant": "noscan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_scan_s17",
+    "scenario": "side_step",
+    "seed": 17,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_noscan_s18",
+    "scenario": "side_step",
+    "seed": 18,
+    "variant": "noscan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_scan_s18",
+    "scenario": "side_step",
+    "seed": 18,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_noscan_s19",
+    "scenario": "side_step",
+    "seed": 19,
+    "variant": "noscan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_scan_s19",
+    "scenario": "side_step",
+    "seed": 19,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_noscan_s20",
+    "scenario": "side_step",
+    "seed": 20,
+    "variant": "noscan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_scan_s20",
+    "scenario": "side_step",
+    "seed": 20,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_noscan_s21",
+    "scenario": "side_step",
+    "seed": 21,
+    "variant": "noscan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_scan_s21",
+    "scenario": "side_step",
+    "seed": 21,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_noscan_s22",
+    "scenario": "side_step",
+    "seed": 22,
+    "variant": "noscan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_scan_s22",
+    "scenario": "side_step",
+    "seed": 22,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_noscan_s23",
+    "scenario": "side_step",
+    "seed": 23,
+    "variant": "noscan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_scan_s23",
+    "scenario": "side_step",
+    "seed": 23,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_noscan_s24",
+    "scenario": "side_step",
+    "seed": 24,
+    "variant": "noscan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_scan_s24",
+    "scenario": "side_step",
+    "seed": 24,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_noscan_s25",
+    "scenario": "side_step",
+    "seed": 25,
+    "variant": "noscan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_scan_s25",
+    "scenario": "side_step",
+    "seed": 25,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_noscan_s26",
+    "scenario": "side_step",
+    "seed": 26,
+    "variant": "noscan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_scan_s26",
+    "scenario": "side_step",
+    "seed": 26,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_noscan_s27",
+    "scenario": "side_step",
+    "seed": 27,
+    "variant": "noscan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_scan_s27",
+    "scenario": "side_step",
+    "seed": 27,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "wu_real_scan_s0",
+    "scenario": "walk_up_same",
+    "seed": 0,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "wu_real_scan_s1",
+    "scenario": "walk_up_same",
+    "seed": 1,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "wu_real_scan_s2",
+    "scenario": "walk_up_same",
+    "seed": 2,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "wu_real_scan_s3",
+    "scenario": "walk_up_same",
+    "seed": 3,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "wu_real_scan_s4",
+    "scenario": "walk_up_same",
+    "seed": 4,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "wu_real_scan_s5",
+    "scenario": "walk_up_same",
+    "seed": 5,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "wu_real_scan_s6",
+    "scenario": "walk_up_same",
+    "seed": 6,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "wu_real_scan_s7",
+    "scenario": "walk_up_same",
+    "seed": 7,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "wu_real_scan_s8",
+    "scenario": "walk_up_same",
+    "seed": 8,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "wu_real_scan_s9",
+    "scenario": "walk_up_same",
+    "seed": 9,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "cp_real_scan_s0",
+    "scenario": "close_pair_same",
+    "seed": 0,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "cp_real_scan_s1",
+    "scenario": "close_pair_same",
+    "seed": 1,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "cp_real_scan_s2",
+    "scenario": "close_pair_same",
+    "seed": 2,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "cp_real_scan_s3",
+    "scenario": "close_pair_same",
+    "seed": 3,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "cp_real_scan_s4",
+    "scenario": "close_pair_same",
+    "seed": 4,
+    "variant": "scan",
+    "light": "realism"
+   }
+  ],
+  "result": "side_step: scan 10/20 vs noscan 18/20 · walk_up_same 10/10 · close_pair_same 5/5 → กล้องช้า 0.15 s ทำให้นับเป้าตัวเองเป็นคนอื่นตอนก้าวข้าง แก้ในรอบ 4",
+  "live": false
+ },
+ {
+  "id": "walk_up_r4",
+  "title": "คนเดินเข้ามาข้างเป้า รอบ 4 (เช็กความกว้างของจุด LiDAR)",
+  "code": "1466559",
+  "dir": "walkup/out4",
+  "started_utc": "2026-10-28T07:43:35Z",
+  "order": 14,
+  "purpose": "จุด LiDAR รอบเป้ากว้าง ≥ 0.55 m = มีสองคน; ดูว่า side_step กลับมาเท่า noscan",
+  "compare": "noscan = T15 รอบ 2, scan = เช็ก LiDAR รัศมี 0.5 m",
+  "runs": [
+   {
+    "tag": "ss_noscan_s8",
+    "scenario": "side_step",
+    "seed": 8,
+    "variant": "noscan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_scan_s8",
+    "scenario": "side_step",
+    "seed": 8,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_noscan_s9",
+    "scenario": "side_step",
+    "seed": 9,
+    "variant": "noscan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_scan_s9",
+    "scenario": "side_step",
+    "seed": 9,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_noscan_s10",
+    "scenario": "side_step",
+    "seed": 10,
+    "variant": "noscan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_scan_s10",
+    "scenario": "side_step",
+    "seed": 10,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_noscan_s11",
+    "scenario": "side_step",
+    "seed": 11,
+    "variant": "noscan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_scan_s11",
+    "scenario": "side_step",
+    "seed": 11,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_noscan_s12",
+    "scenario": "side_step",
+    "seed": 12,
+    "variant": "noscan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_scan_s12",
+    "scenario": "side_step",
+    "seed": 12,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_noscan_s13",
+    "scenario": "side_step",
+    "seed": 13,
+    "variant": "noscan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_scan_s13",
+    "scenario": "side_step",
+    "seed": 13,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_noscan_s14",
+    "scenario": "side_step",
+    "seed": 14,
+    "variant": "noscan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_scan_s14",
+    "scenario": "side_step",
+    "seed": 14,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_noscan_s15",
+    "scenario": "side_step",
+    "seed": 15,
+    "variant": "noscan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_scan_s15",
+    "scenario": "side_step",
+    "seed": 15,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_noscan_s16",
+    "scenario": "side_step",
+    "seed": 16,
+    "variant": "noscan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_scan_s16",
+    "scenario": "side_step",
+    "seed": 16,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_noscan_s17",
+    "scenario": "side_step",
+    "seed": 17,
+    "variant": "noscan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_scan_s17",
+    "scenario": "side_step",
+    "seed": 17,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_noscan_s18",
+    "scenario": "side_step",
+    "seed": 18,
+    "variant": "noscan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_scan_s18",
+    "scenario": "side_step",
+    "seed": 18,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_noscan_s19",
+    "scenario": "side_step",
+    "seed": 19,
+    "variant": "noscan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_scan_s19",
+    "scenario": "side_step",
+    "seed": 19,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_noscan_s20",
+    "scenario": "side_step",
+    "seed": 20,
+    "variant": "noscan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_scan_s20",
+    "scenario": "side_step",
+    "seed": 20,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_noscan_s21",
+    "scenario": "side_step",
+    "seed": 21,
+    "variant": "noscan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_scan_s21",
+    "scenario": "side_step",
+    "seed": 21,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_noscan_s22",
+    "scenario": "side_step",
+    "seed": 22,
+    "variant": "noscan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_scan_s22",
+    "scenario": "side_step",
+    "seed": 22,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_noscan_s23",
+    "scenario": "side_step",
+    "seed": 23,
+    "variant": "noscan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_scan_s23",
+    "scenario": "side_step",
+    "seed": 23,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_noscan_s24",
+    "scenario": "side_step",
+    "seed": 24,
+    "variant": "noscan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_scan_s24",
+    "scenario": "side_step",
+    "seed": 24,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_noscan_s25",
+    "scenario": "side_step",
+    "seed": 25,
+    "variant": "noscan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_scan_s25",
+    "scenario": "side_step",
+    "seed": 25,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_noscan_s26",
+    "scenario": "side_step",
+    "seed": 26,
+    "variant": "noscan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_scan_s26",
+    "scenario": "side_step",
+    "seed": 26,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_noscan_s27",
+    "scenario": "side_step",
+    "seed": 27,
+    "variant": "noscan",
+    "light": "realism"
+   },
+   {
+    "tag": "ss_scan_s27",
+    "scenario": "side_step",
+    "seed": 27,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "wu_real_scan_s0",
+    "scenario": "walk_up_same",
+    "seed": 0,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "wu_real_scan_s1",
+    "scenario": "walk_up_same",
+    "seed": 1,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "wu_real_scan_s2",
+    "scenario": "walk_up_same",
+    "seed": 2,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "wu_real_scan_s3",
+    "scenario": "walk_up_same",
+    "seed": 3,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "wu_real_scan_s4",
+    "scenario": "walk_up_same",
+    "seed": 4,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "wu_real_scan_s5",
+    "scenario": "walk_up_same",
+    "seed": 5,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "wu_real_scan_s6",
+    "scenario": "walk_up_same",
+    "seed": 6,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "wu_real_scan_s7",
+    "scenario": "walk_up_same",
+    "seed": 7,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "wu_real_scan_s8",
+    "scenario": "walk_up_same",
+    "seed": 8,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "wu_real_scan_s9",
+    "scenario": "walk_up_same",
+    "seed": 9,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "cp_real_scan_s0",
+    "scenario": "close_pair_same",
+    "seed": 0,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "cp_real_scan_s1",
+    "scenario": "close_pair_same",
+    "seed": 1,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "cp_real_scan_s2",
+    "scenario": "close_pair_same",
+    "seed": 2,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "cp_real_scan_s3",
+    "scenario": "close_pair_same",
+    "seed": 3,
+    "variant": "scan",
+    "light": "realism"
+   },
+   {
+    "tag": "cp_real_scan_s4",
+    "scenario": "close_pair_same",
+    "seed": 4,
+    "variant": "scan",
+    "light": "realism"
+   }
+  ],
+  "result": "walk_up_same 10/10 · side_step 18/20 vs noscan 19/20 · close_pair_same 5/5 · ไม่ชน → ใช้เป็นค่าเริ่มต้น",
+  "live": false
+ }
+]
