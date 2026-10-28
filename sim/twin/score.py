@@ -67,6 +67,15 @@ def score(rows: List[dict], target_distance_m: float = 0.5) -> dict:
     if others:
         result["min_other_range_m"] = min(r["people"][n]["range_m"] for r in rows for n in others)
 
+    # Whose box the fusion node published as the target (world_node attributes each /synced_target)
+    synced = [n for r in rows for n in r.get("synced", [])]
+    if synced:
+        wrong = [n for n in synced if n not in (target, "?")]
+        result["published"] = len(synced)
+        result["published_other"] = len(wrong)
+        result["published_other_share"] = len(wrong) / len(synced)
+        result["published_unmatched"] = synced.count("?")
+
     start = _first(rows, lambda r: r["blackout"])
     if start is not None:
         after = [r for r in rows if r["t"] >= start["t"]]

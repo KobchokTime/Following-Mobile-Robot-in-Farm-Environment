@@ -151,6 +151,14 @@ COLOUR_SCENARIOS: Dict[str, dict] = {
         "clothing": {"distractor": TARGET_CLOTHING},
         "hidden": {"target": [(10.0, 12.0)]},
     },
+    "close_pair_same": {
+        "doc": "Two people in the same clothes walk side by side 0.44 m apart (centres), both in view and apart "
+               "in the image, then the other one turns left while the target walks on (T15).",
+        "duration_s": 30.0,
+        "people": [("target", True, [(0, 1.0, 0.0), (3, 1.0, 0.0), (13, 4.0, 0.0), (23, 7.0, 0.0)]),
+                   ("distractor", False, [(0, 1.0, 0.44), (3, 1.0, 0.44), (13, 4.0, 0.44), (18, 5.5, 3.0)])],
+        "clothing": {"distractor": TARGET_CLOTHING},
+    },
 }
 
 ALL_SCENARIOS: Dict[str, dict] = {**SCENARIOS, **IDENTITY_SCENARIOS}  # frozen: the Arena 3 scorer checks runs against it

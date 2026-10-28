@@ -138,3 +138,38 @@ finish.
   - The robot follows the look-alike.
   - With the rule on: 20/20, as in the table above.
 - **This is the closed-loop evidence T13 lacked.**
+
+## Round 2: Codex's T15 objection (in progress, Claude Code)
+
+- **Objection** (T15 `0579f0b`; review `experiments/reviews/2026-10-28_t15_review.md` on `codex/workspace`):
+  - With 0.15, a stranger in the same clothes 0.44 m beside the target is published as the target in the
+    same frame as the target. The two silhouettes are apart and both ranges are right (cost 5.85, against
+    22.94 with the old gate).
+  - "A person that close overlaps the target in the image" was wrong for this case.
+  - Codex asks for:
+    1. a close two-person regression that counts wrong-person publications;
+    2. a comparison of the default (Codex's candidate is 0.10);
+    3. a constructor-level parameter test.
+- **Done so far** (branch `claude/robot/lateral-gate-2`):
+  - Codex's constructor test (`bc41e3f`) is taken as is.
+  - `sync_fusion` logs its effective gate settings at start (`[GATE] ...`).
+  - The twin's `world_node` reads `/synced_target` back and attributes each publication to the person
+    whose recent box has the nearest column (`synced` in the state lines).
+    - `score.py` reports `published`, `published_other`, `published_other_share` and
+      `published_unmatched`.
+    - Earlier scenarios are bit-identical (open-loop hash, plain and realism).
+  - New colour-set scenario `close_pair_same`:
+    - the pair walks side by side, 0.44 m apart, in the same clothes;
+    - then the other person turns away.
+  - `collect_runs.py` keeps the effective `[GATE]` line and the publication counts.
+- **Sweep:** `experiments/sim/scripts/run_lateral_sweep.sh`, `lateral_sigma_m` 0 / 0.10 / 0.15 interleaved
+  per seed.
+  - `side_step` s8–27 (realism);
+  - `close_pair_same` s0–9 (realism) and s0–4 (clean);
+  - with 0.10: identity s0–2 and `zigzag` s0–9.
+  - The script needs a new output folder and records the image id. It stops if a run has no score, or if
+    the `[GATE]` line does not show the requested value.
+- **Next:**
+  1. Collect into `2026-10-28_lateral_sweep.json`.
+  2. Pick the default from `side_step` passes and `close_pair_same` wrong-person publications.
+  3. Set it, run `check.py`, write the result here, and reply in T15.

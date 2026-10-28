@@ -11,10 +11,10 @@ ROOT = Path(__file__).resolve().parents[1]
 NODE = ROOT / "ros2_yolo_ws" / "scripts" / "Image" / "sync_fusion_node.py"
 
 
-def _load():
+def _load(node_class=object):
     names = ["rclpy", "rclpy.node", "rclpy.qos", "std_msgs", "std_msgs.msg", "sensor_msgs", "sensor_msgs.msg"]
     stubs = {n: types.ModuleType(n) for n in names}
-    stubs["rclpy.node"].Node = object
+    stubs["rclpy.node"].Node = node_class
     for k in ("QoSProfile", "QoSReliabilityPolicy", "QoSHistoryPolicy", "QoSDurabilityPolicy"):
         setattr(stubs["rclpy.qos"], k, object)
     stubs["std_msgs.msg"].Int32MultiArray = object
@@ -167,6 +167,41 @@ class TargetGateTest(unittest.TestCase):
             self.assertEqual(defaults[name], value, name)
         for name in ('lateral_sigma_m', 'reacquire_dist_m', 'reacquire_dist_max_m', 'hist_weight'):
             self.assertIn(name, self.gate_params)
+
+    def test_gate_ros_overrides_are_declared_and_reach_the_constructed_gate(self):
+        """Exercise actual node initialization: a dictionary-only guard misses the T13 wiring failure."""
+        overrides = {name: default + 0.0123 for name, default in self.gate_params.items()}
+
+        class ParameterNode:
+            def __init__(self, name):
+                self.parameters = {}
+
+            def declare_parameter(self, name, default):
+                self.parameters[name] = overrides.get(name, default)
+
+            def get_parameter(self, name):
+                # Missing declarations must fail rather than silently returning an override.
+                return types.SimpleNamespace(value=self.parameters[name])
+
+            def create_subscription(self, *args):
+                pass
+
+            create_publisher = create_subscription
+            create_timer = create_subscription
+
+            def get_logger(self):
+                return types.SimpleNamespace(info=lambda *args: None)
+
+        module = _load(node_class=ParameterNode)
+        module.QoSProfile = lambda **kwargs: None
+        module.QoSReliabilityPolicy = types.SimpleNamespace(BEST_EFFORT=1)
+        module.QoSHistoryPolicy = types.SimpleNamespace(KEEP_LAST=1)
+        module.QoSDurabilityPolicy = types.SimpleNamespace(VOLATILE=1)
+        node = module.SyncFusionNode()
+        for name, value in overrides.items():
+            self.assertEqual(node.parameters[name], value, name)
+        expected_gate = self.Gate(**overrides)
+        self.assertEqual(node.gate.__dict__, expected_gate.__dict__)
 
     def test_a_fast_close_sidestep_stays_in_the_gate(self):
         """side_step trace (box_range_debug/true_s10_gate.log): 6.5 -> 27.5 deg in 0.3 s at about 0.7 m."""

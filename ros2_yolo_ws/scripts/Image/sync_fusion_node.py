@@ -381,7 +381,10 @@ class SyncFusionNode(Node):
         self.use_gate = bool(self.get_parameter('target_gate').value)
         self.use_chroma = bool(self.get_parameter('use_chroma').value)
         self.use_hs_hist = bool(self.get_parameter('use_hs_hist').value)
-        self.gate = TargetGate(**{name: float(self.get_parameter(name).value) for name in GATE_PARAMS})
+        gate_args = {name: float(self.get_parameter(name).value) for name in GATE_PARAMS}
+        self.gate = TargetGate(**gate_args)
+        # the effective settings, so a run's log shows what it actually ran with
+        self.get_logger().info('[GATE] ' + ' '.join(f'{k}={v:g}' for k, v in sorted(gate_args.items())))
         self.path_half_width = float(self.get_parameter('path_half_width_m').value)
         self.path_hold = float(self.get_parameter('path_hold_s').value)
         self.path_margin = float(self.get_parameter('path_margin_m').value)
