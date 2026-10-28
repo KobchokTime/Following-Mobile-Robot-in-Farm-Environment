@@ -6,6 +6,8 @@ import { spawn, spawnSync } from "node:child_process";
 import { randomUUID } from "node:crypto";
 
 const root = dirname(fileURLToPath(import.meta.url));
+const repoRoot = resolve(root, "../../..");
+const automationRoot = resolve(process.env.OFFICE_WORKTREE_ROOT || join(dirname(repoRoot), "office-agent-worktrees"));
 const port = Number(process.env.PORT || 8765);
 const codexReady = spawnSync("codex", ["login", "status"], { encoding: "utf8", timeout: 6000 }).status === 0;
 const agents = [
@@ -148,6 +150,33 @@ async function askTeam(req, res) {
 
 export async function handleRequest(req, res) {
   const url = new URL(req.url, "http://localhost");
+  if (req.method === "GET" && url.pathname === "/api/automation") {
+    try {
+      const queue = JSON.parse(await readFile(join(root, "automation-jobs.json"), "utf8"));
+      let events = [];
+      try {
+        events = (await readFile(join(automationRoot, ".office-state", "events.jsonl"), "utf8"))
+          .split(/\r?\n/).filter(Boolean).map((line) => JSON.parse(line));
+      } catch (error) {
+        if (error.code !== "ENOENT") throw error;
+      }
+      const latest = new Map(events.map((event) => [event.jobId, event]));
+      return reply(res, 200, {
+        maxConcurrent: Math.min(Number(queue.maxConcurrent) || 0, 3),
+        jobs: queue.jobs.map((job) => {
+          const event = latest.get(job.id);
+          return {
+            id: job.id, lane: job.lane, agent: job.agent,
+            state: event?.state || (job.ready ? "ready" : "paused"),
+            at: event?.at || null, branch: event?.branch || null,
+            summary: event?.summary || null,
+          };
+        }),
+      });
+    } catch {
+      return reply(res, 500, { error: "อ่านสถานะงานอัตโนมัติไม่ได้" });
+    }
+  }
   if (req.method === "GET" && url.pathname === "/api/work-queue") {
     try {
       const queue = JSON.parse(await readFile(join(root, "work-queue.json"), "utf8"));

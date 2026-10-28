@@ -224,3 +224,9 @@ Earlier history: `history-2026-10-16.md`.
 ### 2026-10-28 — thesis-desk — Sync Office automation base
 - Fetched `origin/integration-hub` at `51e4e15` and merged it into `codex/thesis-desk-office-queue` with `--no-ff` before extending the Office scheduler.
 - Resolved only the append-only overlap in `logs/codex.md` by keeping both the Office entries and the hub's dashboard CI/QA entries. No other merge conflict occurred.
+
+### 2026-10-28 — thesis-desk — Bounded Office automation runner
+- On `codex/thesis-desk-office-queue`, added `automation-runner.mjs` and one bounded QA pilot job for Boss. The runner selects at most three independent lanes, creates isolated local clones, uses signed-in Codex CLI without API-key environment variables, enforces a usage-check timestamp, deadline, file scope and offline check, and leaves branches for review.
+- Added append-only runtime events, `GET /api/automation` and an Office status panel. The web page reads status; it cannot start or mutate jobs.
+- Checks: Node syntax, 2 Node runner tests, direct automation endpoint smoke (200, one ready job), dry-run selection and `scripts/check.py` (166 tests) passed. Local clone creation succeeded in a disposable folder under the Office runtime root; the restricted shell could not run Git's local clone transport, so unattended invocation requires the approved local execution context.
+- Follow-up: run one Codex pilot after verifying plan usage, inspect its branch/evidence, then connect the existing hourly heartbeat to the runner. Browser visual smoke of the Office scene remains pending before merge.

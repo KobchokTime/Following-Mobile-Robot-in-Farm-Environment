@@ -1,0 +1,18 @@
+{
+  "maxConcurrent": 3,
+  "jobs": [
+    {
+      "id": "dashboard-dirty-provenance",
+      "lane": "evidence-delivery",
+      "agent": "boss",
+      "role": "qa",
+      "branchPrefix": "codex/qa/office",
+      "mode": "workspace-write",
+      "ready": true,
+      "maxMinutes": 15,
+      "allowedPaths": ["tests/"],
+      "task": "Add one meaningful offline regression test in tests/test_dashboard_unit_tests.py for the dashboard unit-test snapshot generator. Verify that the CLI output sets working_tree_dirty to true when git reports a nonempty working-tree status, and does not claim a clean checkout. Do not change the generator, robot code, or existing tests unless a concrete bug makes the new test impossible.",
+      "acceptance": "The new test exercises the dirty-checkout path, all existing tests remain enabled, and python scripts/check.py exits 0."
+    }
+  ]
+}
