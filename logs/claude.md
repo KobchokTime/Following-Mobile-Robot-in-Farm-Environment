@@ -1350,3 +1350,42 @@ Earlier history: `history-2026-10-16.md`.
   by construction (hard-coded old totals; counts only `d23e7b2` rows).
 - Added a Claude Code reply in **T14** answering requested changes (1)–(3); asked Codex to re-review. T14 stays open.
 - `HANDOFF.md`: item 17 awaiting Codex's re-review; lock released.
+
+### 2026-10-28 — robot/research — HANDOFF 18: gate on lateral distance; T13 rule-off correction (08:28 Thai time)
+- `claude/robot/lateral-gate` (`efa24f1`): the bearing sigma is now max(5°, `lateral_sigma_m` 0.15 / range). Nothing changes beyond about 1.7 m, and 0 restores the old gate.
+  - `TargetGate` tunables are now declared ROS parameters (`GATE_PARAMS`), and a test keeps them in step with the gate's defaults.
+  - 138 tests pass.
+- **Found:** before this, a `-p` to the gate was silently ignored, so T13's "rule off" twin runs had the rule on. Corrected in `experiments/sim/2026-10-27_hs_colour_twin.md`.
+- **Twin (realism, one at a time, shown live on the dashboard):**
+  - `side_step` 19/20 vs 5/20 with the old gate, interleaved, p = 1e-5;
+  - identity 15/15;
+  - solo 27/30;
+  - `zigzag` 8/10 vs 6/10;
+  - `shade_crossing` 9/10;
+  - `shade_side_by_side` 10/10;
+  - look-alike 20/20;
+  - the T13 rule really off: 0/20 with 18 contacts, against 20/20 on.
+- Handoff note and write-up: `experiments/sim/2026-10-28_lateral_gate.md` (+ `.json`). The run scripts are in `experiments/sim/scripts/`.
+
+### 2026-10-28 — integration — lateral target gate merged; T15 opened; T13 correction pointer (08:45 Thai time)
+- Fast-forwarded the hub worktree to `13f570b` (Codex's T14 agree). Lock claimed in `6a29b8f` and pushed.
+- Merged `claude/workspace` (`24e121e`) with `--no-ff`: merge `8b946b7`. No conflicts. `codex/workspace` not merged.
+- `python3 scripts/check.py` passes, 138 tests.
+- Open-loop twin hash before (`6a29b8f`) vs after (`8b946b7`), 18 scenarios, seed 3: bit-identical, plain `27db4268…`,
+  realism `5143d0f7…`; `sim/` unchanged.
+- Verified: `lateral_sigma_m` 0 matches `TargetGate` from `13f570b` exactly (120,000 random `cost`/`accept` calls,
+  0 mismatches in cost, accept or state). Recounted all 165 rows of `2026-10-28_lateral_gate.json`: every write-up
+  number matches (side_step 19/20 vs 5/20, p 1.0e-5; zigzag 8/10 vs 6/10, p 0.63; rule off 0/20 with 18 contacts).
+  `run_scenario` passes `--ros-param` as `-p` to every robot node; at `808dc6c` the gate declared none of the names,
+  so the T13 correction is accurate (T13 table 18/20, all rule on).
+- Found: at 0.7 m with no colour help the gate now accepts up to 0.445 m sideways (was 0.19 m); the grey person
+  at 10° / 1 m costs 9.37 (thin margin); test track cost 10.67/1.83 vs trace 13.4/~3; minor write-up formatting;
+  the hs_colour_twin line-123 claim lacks an inline pointer; the workspace log entry is stamped 08:35, after the
+  merge time. All in T15.
+- Opened **T15** for Codex (questions a–d); added a correction pointer to **T13** (stays resolved).
+- `HANDOFF.md`: item 18 implemented, awaiting Codex in T15; item 16 correction note; lock released.
+
+### 2026-10-28 — research — lateral gate write-up fixes after integration review (08:55 Thai time)
+- Disclosed: at 0.7 m with no colour cost, the gate now accepts someone up to 0.445 m to the side (0.19 m before).
+- Said that the 13.4 / "about 3" costs come from the debug trace; the unit test's synthetic track gives 10.67 / 1.83.
+- Fixed the table, ticked steps 5–6, added a pointer at the old T13 "not a test of the rule" line, and corrected this log's earlier timestamp.

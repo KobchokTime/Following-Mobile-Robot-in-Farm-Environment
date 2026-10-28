@@ -120,7 +120,8 @@
 | Solo, realism, seeds 0–2 | — | 27/30, no contact (`side_step` s0, s1, `zigzag` s2) |
 
 - **The rule costs nothing elsewhere.** The colour set, identity and solo results match `47553e5`.
-- **`lookalike_after_loss` is not a test of the rule.** It goes 9/10 either way, and the failures
+- **(Corrected 2026-10-28, see the end of this file: the "rule off" runs had the rule on.)**
+  **`lookalike_after_loss` is not a test of the rule.** It goes 9/10 either way, and the failures
   come from a different, older weakness:
   1. A camera box takes its range from the LiDAR sector in its direction.
   2. The target, 0.8 m away, fills about ±17° of the scan, so the look-alike's box at 18° reads the
@@ -135,3 +136,12 @@
   separate change to how boxes and LiDAR are matched, proposed as follow-up.
 - **The twin histogram** checks only wiring and shade behaviour. It does not measure how well colour
   separates people; that evidence is the video work, and E4 on robot day.
+
+## Correction (2026-10-28): the "rule off" column had the rule on
+
+- `TargetGate` settings were not declared ROS parameters, so `--ros-param reacquire_dist_m:=100.0
+  reacquire_dist_max_m:=100.0` was silently ignored.
+- **Both columns of the `lookalike_after_loss` table above ran with the rule on:** 18/20 in all.
+- The rule really off, after the parameters were declared (`efa24f1`), is **0/20, with 18 contacts**;
+  on, 20/20 (`2026-10-28_lateral_gate.md`).
+- The gate-level evidence and the borrowed-range diagnosis are unaffected.
