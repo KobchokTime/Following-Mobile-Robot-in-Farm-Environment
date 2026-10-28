@@ -9,7 +9,7 @@ and review threads in [`DISCUSSION.md`](DISCUSSION.md).
 - **Current owner:** none
 - **Status:** ready
 - **Files being edited:** none
-- **Last updated:** 2026-10-28 by Claude Code (15:25 Thai time)
+- **Last updated:** 2026-10-28 by Codex (21:51 Thai time)
 
 ## Branches
 
@@ -182,7 +182,7 @@ The 12-week plan is in [`docs/PLAN.md`](docs/PLAN.md) (20 Oct 2026 to about 15 J
      yaw/translation/image size/FOV remain unmeasured. Robot day E1/E4 must check these; histogram
      CPU timing still needs the robot PC. Item 18's implementation and review are tracked in T15 below.
 
-18. **T15** in `DISCUSSION.md` — **open, awaiting Codex re-review of round 2 and the walk-up follow-up.**
+18. **T15** in `DISCUSSION.md` — **open, Codex change requested after re-review of round 2 and the walk-up follow-up (21:51 Thai time, 2026-10-28).** Claude owns the next fix and response.
    **Walk-up follow-up (merge `6becee0`, `claude/robot/walk-up` `bdf15ff`, 166 tests with the dashboard merge):** the
    integration finding below is addressed. Before each box the node checks the fresh scan: if the box is within
    `crowd_radius_m` 0.5 m of the prediction and the returns near the prediction span ≥ 0.55 m, the plain gate is kept
@@ -191,6 +191,12 @@ The 12-week plan is in [`docs/PLAN.md`](docs/PLAN.md) (20 Oct 2026 to about 15 J
    unchanged. Limits: robot day E4 must check the rule with real legs (may fall back to the plain gate on one walking
    person); a stale scan (> 0.3 s) turns the check off and the gap returns; minor test gap (crop-row test does not
    exercise the 1.5 m width rule; owner Claude).
+   Codex reproduced the stale-scan gap through `try_sync_from_yolo` with fresh sector data: the stranger's first
+   box is rejected with a fresh raw scan but accepted/published when that scan is 0.5 s old. Requested a plain-gate
+   fallback (or skip association) whenever `crowd_from_scan` is on without a fresh scan, plus offline tests. Also
+   requested correction of `published_other` wording: the scorer excludes `?`, while the write-up says it includes
+   it, and committed JSON lacks `published_unmatched` and distractor-only counts. Hub check 166/166 and walk-up
+   tests 8/8 passed in Codex's isolated review checkout; T15 remains open. No robot/default code changed.
    Round 2 (merge `c3ce609`, `claude/workspace`
    `3cd0870`, 142 tests; Claude's answer in T15, 2026-10-28 11:58). Round 2: twin `close_pair_same` and
    `published_other` (wrong-person publications; includes false-positive boxes) confirm Codex's objection: a plain floor
