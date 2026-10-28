@@ -215,6 +215,13 @@ class TargetGateTest(unittest.TestCase):
         self.assertFalse(g.accept(0.6, sb, sr))
         self.assertFalse(g.accept(0.7, sb, sr))
 
+    def test_a_person_beside_the_target_at_lock_on_is_not_taken(self):
+        """Twin close_pair_same: the stranger's box arrives just after the lock-on box, in the same frame."""
+        g = self.Gate()
+        self.assertTrue(g.accept(0.0, 0.0, 0.8))
+        self.assertFalse(g.accept(0.001, math.atan2(0.44, 1.0), math.hypot(1.0, 0.44) - 0.2))
+        self.assertFalse(g.accept(0.1, math.atan2(0.44, 1.0), math.hypot(1.0, 0.44) - 0.2))
+
     def test_the_wider_gate_returns_once_the_other_person_has_gone(self):
         g = self.Gate()
         for k in range(5):
@@ -228,10 +235,12 @@ class TargetGateTest(unittest.TestCase):
         """side_step trace (box_range_debug/true_s10_gate.log): 6.5 -> 27.5 deg in 0.3 s at about 0.7 m."""
         old, new = self.Gate(lateral_sigma_m=0.0), self.Gate()
         for g in (old, new):
+            for k in range(7):  # standing for the first 0.6 s (the plain gate holds for 1 s after lock-on)
+                g.accept(0.1 * k, D(0.5), 0.66)
             for k in range(5):
-                g.accept(0.1 * k, D(0.5 + 1.5 * k), 0.66)
-        self.assertGreater(old.cost(0.7, D(27.5), 0.72), 9.0)  # the old gate rejects the target
-        self.assertTrue(new.accept(0.7, D(27.5), 0.72))
+                g.accept(0.7 + 0.1 * k, D(0.5 + 1.5 * k), 0.66)
+        self.assertGreater(old.cost(1.4, D(27.5), 0.72), 9.0)  # the old gate rejects the target
+        self.assertTrue(new.accept(1.4, D(27.5), 0.72))
 
     def test_lateral_sigma_leaves_far_targets_and_side_people_alone(self):
         far_old, far_new = self.Gate(lateral_sigma_m=0.0), self.Gate()

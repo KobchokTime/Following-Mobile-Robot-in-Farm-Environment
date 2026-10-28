@@ -327,6 +327,10 @@ class TargetGate:
                 self.bearing, self.range = bearing, rng
                 self.chroma = tuple(chroma) if chroma is not None else None
                 self.hists = [hist] if hist is not None else []
+                # the first second after lock-on keeps the plain gate: nobody else has been checked yet,
+                # and a second box in this very frame must meet the lock-on box to count as ambiguous
+                self.ambiguous_until = t + self.ambiguity_window
+                self.boxes = [(t, rng * math.cos(bearing), rng * math.sin(bearing))]
                 return True
             return False
         if self.cost(t, bearing, rng, chroma, hist) > self.gate:
