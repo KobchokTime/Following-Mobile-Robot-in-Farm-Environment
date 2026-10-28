@@ -16,6 +16,9 @@ Open `http://127.0.0.1:8765`. Agent requests use your Codex plan allowance and u
 This copy of the server has no API-key backend. Set `PORT` before starting the server if 8765 is occupied.
 
 The Team Lead delegates chat calls to specialists. Chat requests answer questions and do not edit repository files. A team request can consume five Codex calls.
+If Codex returns a 429 limit response, the server pauses new chat requests and
+shows the limit in the Office panel. Restart the server after included plan usage
+becomes available again. The server never falls back to an API key.
 
 ## Work queue
 

@@ -19,6 +19,7 @@
   const input = card.querySelector("#agentInput");
   const form = card.querySelector("#agentForm");
   let agents = [];
+  let available = false;
 
   function line(author, value) {
     const row = document.createElement("p");
@@ -36,6 +37,7 @@
       if (!response.ok) throw new Error("เซิร์ฟเวอร์ยังไม่พร้อม");
       const data = await response.json();
       agents = data.agents;
+      available = data.ready;
       select.replaceChildren(...agents.map((agent) => {
         const option = document.createElement("option");
         option.value = agent.id;
@@ -43,12 +45,16 @@
         return option;
       }));
       status.textContent = data.ready ? `หัวหน้าทีมพร้อมมอบงาน · ${data.model}` :
-        "ต้องล็อกอิน Codex CLI ด้วย ChatGPT ก่อน";
+        data.reason || "ต้องล็อกอิน Codex CLI ด้วย ChatGPT ก่อน";
+      input.disabled = !available;
+      form.querySelector("button").disabled = !available;
       window.dispatchEvent(new CustomEvent("office:agent-status", {
         detail: { ready: data.ready, message: status.textContent },
       }));
     } catch {
+      available = false;
       status.textContent = "เปิดเว็บผ่าน http://127.0.0.1:8765 เพื่อเชื่อม agent";
+      input.disabled = true;
       form.querySelector("button").disabled = true;
       window.dispatchEvent(new CustomEvent("office:agent-status", {
         detail: { ready: false, message: "ไม่พบเซิร์ฟเวอร์ agent" },
@@ -84,6 +90,13 @@
         body: JSON.stringify({ session, message }),
       });
       const data = await response.json();
+      if (response.status === 429) {
+        available = false;
+        status.textContent = data.error || "Codex จำกัดคำขอชั่วคราว";
+        window.dispatchEvent(new CustomEvent("office:agent-status", {
+          detail: { ready: false, message: status.textContent },
+        }));
+      }
       if (!response.ok) throw new Error(data.error || "agent ตอบกลับไม่ได้");
       if (data.delegates?.length) {
         line("ระบบ", "หัวหน้าทีมส่งงานให้ " + data.delegates.map((d) => d.name).join(", "));
@@ -99,9 +112,9 @@
         detail: { state: "error", agent: agent.id },
       }));
     } finally {
-      input.disabled = false;
-      form.querySelector("button").disabled = false;
-      input.focus();
+      input.disabled = !available;
+      form.querySelector("button").disabled = !available;
+      if (available) input.focus();
     }
   });
   loadAgents();
