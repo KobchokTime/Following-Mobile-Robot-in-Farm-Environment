@@ -170,3 +170,4 @@ Earlier history: `history-2026-10-16.md`.
 ### 2026-10-28 — dashboard/ci — Include CI generator tests in the standard gate
 - Follow-up on `codex/dashboard/ci-data`: moved the five generator tests from `tools/dashboard/ci/` to `tests/test_dashboard_ci.py`, so `scripts/check.py` discovers them. Updated the documented focused command.
 - The focused test run passed 5/5, and `python scripts/check.py` passed 143/143 with writable `TEMP`/`TMP`. This supersedes the earlier 138-test count, which did not include the new cases.
+- Retried a single unauthenticated `--fetch` from the public GitHub Actions endpoint outside the restricted network sandbox. It succeeded and produced 60 rows at `2026-10-28T04:29:32Z` in the committed `tools/dashboard/ci/ci_runs.json`. This is a dated snapshot; it has not been uploaded to the published artifact.

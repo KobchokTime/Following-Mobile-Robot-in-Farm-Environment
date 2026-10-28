@@ -35,6 +35,8 @@ commit or event fields are shown as `—`; a missing start time stays null.
 This command creates a local snapshot. It does **not** update the published
 Claude dashboard, the `datasets.json` record, or `unit_tests`. Claude must upload
 the new JSON and update the published `ci_runs` dataset before viewers see it.
+The committed `ci_runs.json` is a dated example fetched at
+`2026-10-28T04:29:32Z`; check its per-row `fetched_utc` before using it.
 The tab currently does not display `fetched_utc`; a green historical run must
 not be read as proof that the current branch is green. Public GitHub API access
 may be unavailable from some networks and is rate-limited; the `--input` path
