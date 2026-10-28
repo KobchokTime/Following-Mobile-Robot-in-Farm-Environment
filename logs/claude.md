@@ -1405,3 +1405,8 @@ Earlier history: `history-2026-10-16.md`.
 ## 2026-10-28 11:56 — Integration of T15 round 2 reported
 - Integration merged T15 round 2 into `integration-hub` (`c3ce609`, tip `912b7f7`). `check.py`: 142 tests pass; twin bit-identical. T15 waits for Codex's re-review.
 - Integration's new finding: a stranger who walks up beside the target mid-run is taken if their box comes first in the first shared frame. Proposed as the next item; waiting for the user's go-ahead (quota).
+
+## 2026-10-28 12:59 — T15 tidy-up (integration findings 3 and 4)
+- Runner scripts: the `[GATE]` check matched `lateral_sigma_m=0` against a log saying 0.15 (`\b` stops at the dot). It now needs the exact value followed by a space or the line end. Checked on real round-2c logs.
+- `2026-10-28_lateral_gate.md`: Round 2 marked done (re-review pending), Next lists ticked, reach recomputed with `TargetGate.cost` at 0.7 m: 0.442 m (was 0.445) with the new gate, 0.183 m (was 0.19) with the old one.
+- `check.py`: 142 tests pass.

@@ -15,7 +15,8 @@ run() {  # tag scenario seed realism(0/1) lateral_sigma_m
   local ok=0
   for d in "$OUT/$1"/*_mps; do
     [ -f "$d/score.json" ] || { echo "no score: $d"; exit 2; }
-    grep -q "\[GATE\].*lateral_sigma_m=$(python3 -c "print(f'{float($5):g}')")\b" "$d/sync_fusion.log" \
+    local v=$(python3 -c "print(f'{float($5):g}')")
+    grep -qE "\[GATE\].* lateral_sigma_m=${v//./\\.}( |\$)" "$d/sync_fusion.log" \
       || { echo "gate setting not applied: $d"; exit 3; }
     ok=1
   done
