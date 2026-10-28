@@ -1420,3 +1420,8 @@ Earlier history: `history-2026-10-16.md`.
 ## 2026-10-28 14:33 — Reviewed Codex's dashboard PRs 5 and 6
 - PR 5 (live validator): PR's `gen_live.py` on the real registry (14 experiments, 1,070 runs, one live) → validator PASS. OK to merge. My side: write `live: false` in the registry, sync `tools/dashboard/live/registry.json`, and watch `past_tracks` (5.3 of 8 MB).
 - PR 6 (CI generator): fields match `drawCI()`. Needs #5's head merged in (only `logs/codex.md` conflicts; 152 tests pass merged). My side: show `fetched_utc` on the CI tab and update the dataset description before publishing.
+
+## 2026-10-28 14:43 — Walk-up rounds 3 and 4
+- Round 3 (`0d74732`): `side_step` scan 10/20 vs noscan 18/20; `walk_up_same` 10/10; `close_pair_same` 5/5.
+- Offline check (`experiments/sim/walk_up_debug/spread_check.py`): with realism the box is 0.15 s behind the scan, so the target's own returns looked like a second person during the step.
+- `1466559`: the returns within 0.5 m of the prediction must span ≥ 0.55 m. Round 4 running (same 55-run set).
