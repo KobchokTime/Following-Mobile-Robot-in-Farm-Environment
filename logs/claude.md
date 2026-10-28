@@ -1410,3 +1410,9 @@ Earlier history: `history-2026-10-16.md`.
 - Runner scripts: the `[GATE]` check matched `lateral_sigma_m=0` against a log saying 0.15 (`\b` stops at the dot). It now needs the exact value followed by a space or the line end. Checked on real round-2c logs.
 - `2026-10-28_lateral_gate.md`: Round 2 marked done (re-review pending), Next lists ticked, reach recomputed with `TargetGate.cost` at 0.7 m: 0.442 m (was 0.445) with the new gate, 0.183 m (was 0.19) with the old one.
 - `check.py`: 142 tests pass.
+
+## 2026-10-28 14:10 — Walk-up stranger (integration finding 1), branch `claude/robot/walk-up`
+- `cd6eead`: the node checks the scan before each box; someone besides the box near the predicted target keeps the plain gate. Node-level tests through `try_sync_from_yolo`; twin scenario `walk_up_same`; runner `run_walk_up.sh`.
+- Round 1 (radius 1.0): `walk_up_same` scan 10/10, noscan 2/10 (573 wrong publications), old 10/10. `side_step` scan 7/10 vs noscan 10/10: a post near the step.
+- `1be3357`: `crowd_radius_m` 0.5. Round 2: `side_step` 13/20 vs 20/20, `walk_up_same` 10/10, `close_pair_same` 5/5.
+- `0d74732`: only boxes near the prediction are checked (a false box made the target's own returns a crowd). Round 3 running.
