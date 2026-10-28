@@ -1418,3 +1418,23 @@ Earlier history: `history-2026-10-16.md`.
 - Runner scripts: the `[GATE]` check matched `lateral_sigma_m=0` against a log saying 0.15 (`\b` stops at the dot). It now needs the exact value followed by a space or the line end. Checked on real round-2c logs.
 - `2026-10-28_lateral_gate.md`: Round 2 marked done (re-review pending), Next lists ticked, reach recomputed with `TargetGate.cost` at 0.7 m: 0.442 m (was 0.445) with the new gate, 0.183 m (was 0.19) with the old one.
 - `check.py`: 142 tests pass.
+
+## 2026-10-28 14:10 — Walk-up stranger (integration finding 1), branch `claude/robot/walk-up`
+- `cd6eead`: the node checks the scan before each box; someone besides the box near the predicted target keeps the plain gate. Node-level tests through `try_sync_from_yolo`; twin scenario `walk_up_same`; runner `run_walk_up.sh`.
+- Round 1 (radius 1.0): `walk_up_same` scan 10/10, noscan 2/10 (573 wrong publications), old 10/10. `side_step` scan 7/10 vs noscan 10/10: a post near the step.
+- `1be3357`: `crowd_radius_m` 0.5. Round 2: `side_step` 13/20 vs 20/20, `walk_up_same` 10/10, `close_pair_same` 5/5.
+- `0d74732`: only boxes near the prediction are checked (a false box made the target's own returns a crowd). Round 3 running.
+
+## 2026-10-28 14:33 — Reviewed Codex's dashboard PRs 5 and 6
+- PR 5 (live validator): PR's `gen_live.py` on the real registry (14 experiments, 1,070 runs, one live) → validator PASS. OK to merge. My side: write `live: false` in the registry, sync `tools/dashboard/live/registry.json`, and watch `past_tracks` (5.3 of 8 MB).
+- PR 6 (CI generator): fields match `drawCI()`. Needs #5's head merged in (only `logs/codex.md` conflicts; 152 tests pass merged). My side: show `fetched_utc` on the CI tab and update the dataset description before publishing.
+
+## 2026-10-28 14:43 — Walk-up rounds 3 and 4
+- Round 3 (`0d74732`): `side_step` scan 10/20 vs noscan 18/20; `walk_up_same` 10/10; `close_pair_same` 5/5.
+- Offline check (`experiments/sim/walk_up_debug/spread_check.py`): with realism the box is 0.15 s behind the scan, so the target's own returns looked like a second person during the step.
+- `1466559`: the returns within 0.5 m of the prediction must span ≥ 0.55 m. Round 4 running (same 55-run set).
+
+## 2026-10-28 15:15 — Walk-up round 4 and write-up
+- Round 4 (`1466559`, spread rule): `walk_up_same` 10/10, `side_step` 18/20 vs 19/20 without the check, `close_pair_same` 5/5, no contact. Meets the rule set before the run, so `crowd_from_scan` stays on.
+- Write-up `experiments/sim/2026-10-28_walk_up.md`, data `2026-10-28_walk_up.json` (220 runs, four rounds). Fixed the runner's broken usage line.
+- Reviewed Codex's PR 7 (unit_tests generator): 154/154 in a clean worktree; OK to merge.
