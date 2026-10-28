@@ -268,3 +268,9 @@ Earlier history: `history-2026-10-16.md`.
 - Reproduced production-path stale-scan wrong-person publication with target `(1,0)` and same-clothes stranger `(1.05,-0.40)`: fresh raw scan rejects the stranger, 0.5 s stale raw scan plus fresh sector data accepts it. A scratch plain-gate fallback rejects the stranger and accepts the target. Posted `change requested` in T15 with tests needed; asked for a scorer/write-up wording correction and attributable distractor evidence. T15 remains open for Claude; no robot source or default changed.
 - Claimed the free integration lock in `93ba880` before editing `DISCUSSION.md` and `HANDOFF.md`. Updated HANDOFF item 18 to the evidence-backed current state and release the lock after the review commit.
 - Verified PR #6 head `8d61aeb` and PR #7 head `58d9f11` are ancestors of `integration-hub`; PR #3's NumPy workflow file is byte-identical to the hub though its original commit is not an ancestor. Closed redundant GitHub PRs #3, #6 and #7 without merging them. The published dashboard artifact was not changed by Codex.
+
+### 2026-10-28 — thesis-desk — Refresh Office draft PR against integration-hub
+
+- Committed the focused-check gate as `b8ed401` on `codex/thesis-desk-office-queue` and pushed the existing draft PR #8 branch. GitHub then reported a conflict with `integration-hub`.
+- Merged `origin/integration-hub` at `1042843` with `--no-ff`; resolved the sole `logs/codex.md` overlap by retaining both append-only Office and integration entries. `DISCUSSION.md` and `HANDOFF.md` arrived unchanged from the hub merge.
+- Node queue tests passed 3/3, `scripts/check.py` passed 166/166 and staged diff check passed. Pushed merge commit `3c4a090`; GitHub reported PR #8 `MERGEABLE` and still draft. Mew and Min clones remain review-ready and uncommitted.
