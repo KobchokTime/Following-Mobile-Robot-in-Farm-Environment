@@ -37,7 +37,7 @@ continue from the "Next steps" list below. Every step is committed and pushed on
       - a person 0.6 m to the side at the same range is still rejected;
       - with 0, the old cost is reproduced.
 - [x] 3. `python3 scripts/check.py` passes (138). Committed and pushed.
-- [ ] 4. Twin (Docker, `--bridge-mode mps`, one run at a time):
+- [ ] 4. (side_step done; regressions running) Twin (Docker, `--bridge-mode mps`, one run at a time):
       - `side_step` seeds 8–27, realism, `lateral_sigma_m` 0.15 vs 0;
       - then regressions with 0.15: identity s0–2, solo s0–2, `shade_crossing` s0–9,
         `shade_side_by_side` s0–9, and `lookalike_after_loss` s0–9 clean and realism.
@@ -77,4 +77,23 @@ continue from the "Next steps" list below. Every step is committed and pushed on
 
 ## Results
 
-(none yet)
+Data: `2026-10-28_lateral_gate.json`, collected with `scripts/collect_runs.py`. It is updated as runs
+finish.
+
+### `side_step`, seeds 8–27, realism, on and off interleaved in one session (`efa24f1`)
+
+| Gate | Passed | Contacts |
+|---|---|---|
+| `lateral_sigma_m` 0.15 (new) | **19/20** (fails seed 17) | 0 |
+| `lateral_sigma_m` 0 (old) | 5/20 | 0 |
+
+- Fisher two-sided p = 1.0e-5.
+- **The old gate's 5/20 is lower than the 12–13/20 seen the day before on the same seeds** (box ranges on
+  and off, `d23e7b2`).
+  - Its code path is identical: `lateral_sigma_m` 0 gives the old cost, and a test checks it.
+  - So `side_step` also varies a lot from session to session, plausibly with host load. Only the
+    interleaved on/off comparison within this session is a fair test.
+
+### Regressions with 0.15, and T13's rule really off
+
+(running; see the live dashboard)
