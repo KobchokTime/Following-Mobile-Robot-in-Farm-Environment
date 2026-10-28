@@ -26,6 +26,32 @@
       "allowedPaths": ["tests/"],
       "task": "Add one meaningful offline regression test in tests/test_dashboard_unit_tests.py for the dashboard unit-test snapshot generator. Verify that the CLI output sets working_tree_dirty to true when git reports a nonempty working-tree status, and does not claim a clean checkout. Do not change the generator, robot code, or existing tests unless a concrete bug makes the new test impossible.",
       "acceptance": "The new test exercises the dirty-checkout path, all existing tests remain enabled, and python scripts/check.py exits 0."
+    },
+    {
+      "id": "office-review-status-detail",
+      "lane": "office-experience",
+      "agent": "mew",
+      "role": "thesis-desk",
+      "branchPrefix": "codex/thesis-desk-office",
+      "mode": "workspace-write",
+      "ready": true,
+      "maxMinutes": 20,
+      "allowedPaths": ["tools/thesis_desk/virtual_office/"],
+      "task": "Improve the Office automatic-job panel within tools/thesis_desk/virtual_office/ so a failed job displays its recorded reason and a review-ready job displays its branch and check result clearly. Render data as text nodes, preserve the existing scene and all controls, and add a small meaningful offline test for the rendered status mapping. Do not alter robot code or start model jobs from the browser.",
+      "acceptance": "Failed and review-ready states are distinguishable with their recorded evidence, browser controls still work, a focused offline test passes, and python scripts/check.py exits 0."
+    },
+    {
+      "id": "dashboard-provenance-guide",
+      "lane": "evidence-guide",
+      "agent": "min",
+      "role": "research",
+      "branchPrefix": "codex/research/office",
+      "mode": "workspace-write",
+      "ready": true,
+      "maxMinutes": 20,
+      "allowedPaths": ["docs/"],
+      "task": "Write a concise documentation page under docs/ explaining how dashboard ci_runs, unit_tests and live simulation datasets are generated, what branch/time/source fields mean, and which values are merely dated snapshots. Verify every file path and command against the current repository source. Do not invent fresh experiment results or modify generated data, robot code, or the artifact.",
+      "acceptance": "Every referenced generator and validator path exists, the page distinguishes source evidence from published artifact state, and python scripts/check.py exits 0."
     }
   ]
 }

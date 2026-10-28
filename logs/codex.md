@@ -247,3 +247,27 @@ Earlier history: `history-2026-10-16.md`.
 
 - Pushed `codex/qa/office/dashboard-dirty-provenance-v2-20261028084253` at `76aa7c4` and opened draft PR #9 against `codex/thesis-desk-office-queue` for independent review. It is stacked on Office PR #8 and does not merge or publish any dashboard data.
 - PR: https://github.com/KobchokTime/Following-Mobile-Robot-in-Farm-Environment/pull/9
+### 2026-10-28 — thesis-desk — Native Office agent pilot and browser smoke
+
+- Codex plan usage was checked before the pilot (73% in the five-hour window, 11% weekly, zero paid credits). The queue prepared `dashboard-dirty-provenance-v2` in isolated branch `codex/qa/office/dashboard-dirty-provenance-v2-20261028084253` at base `a5f3181`.
+- Native Codex subagent Boss added only `tests/test_dashboard_unit_tests.py`; focused tests passed 3/3 and `scripts/check.py` passed 167/167 in its clone. `--finish` verified unchanged HEAD, allowed scope, nonempty diff and the offline gate, then appended `review-ready`. This is a review state, not an automatic merge.
+- In the feature Office on port 8766, visually confirmed desks and characters render. Walk, seat and meeting controls changed the scene/status; canvas drag rotated the camera and wheel zoom worked. The original server on port 8765 was not changed.
+- At the later usage check Codex was 86% in the five-hour window and 13% weekly, so new model assignments pause until quota recovers. No API key, paid credit, reset, or robot hardware was used.
+
+### 2026-10-28 — thesis-desk — Queue next independent Office lanes
+
+- Added two bounded future jobs: Mew improves the Office review/failed status panel in `tools/thesis_desk/virtual_office/`; Min documents dashboard data provenance in `docs/`. They are separate lanes and remain queued while Codex's five-hour usage is near the agreed limit.
+- The first final `scripts/check.py` attempt failed because the Windows sandbox's default TEMP was unwritable. Re-ran with TEMP/TMP under the writable visualization root: 166/166 offline tests passed. Node queue tests passed 2/2 and syntax/diff checks passed.
+- Added append-only raw check-output paths to future queue finish events, so reviewers can inspect the offline gate result.
+
+### 2026-10-28 — thesis-desk — Activate Office heartbeat and refresh draft PR
+
+- Updated the existing active hourly `follower-test-bench` heartbeat to read the Office queue, check current plan usage, pause at 80% five-hour or 90% weekly usage, and dispatch native subagents only in isolated assignments. It retains the no-key/no-paid-credit and review-before-merge boundaries.
+- Pushed Office feature head `11d75c4` and updated draft PR #8 with the automation flow, visual smoke, pilot QA evidence and current checks. Its GitHub `check` completed successfully; twin and gazebo were still running at inspection time.
+- The Boss pilot was opened separately as draft QA PR #9, stacked on the Office branch. Office UI displayed its `review-ready` branch and time after reload; next Mew and Min jobs remain queued because usage was 86% in the five-hour window.
+
+
+### 2026-10-28 — qa — Align Boss pilot with Office PR head
+
+- Merged Office branch `dc630f9` into the stacked QA branch with `--no-ff`; resolved only the append-only `logs/codex.md` overlap by keeping both agents' entries. This includes the latest queue evidence and ready jobs without changing the QA test.
+- Re-ran the offline gate before completing the merge; no dashboard artifact or robot runtime source was changed.
