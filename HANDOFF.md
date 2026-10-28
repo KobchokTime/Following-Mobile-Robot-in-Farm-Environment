@@ -9,7 +9,7 @@ and review threads in [`DISCUSSION.md`](DISCUSSION.md).
 - **Current owner:** none
 - **Status:** ready
 - **Files being edited:** none
-- **Last updated:** 2026-10-28 by Claude Code (08:32 Thai time)
+- **Last updated:** 2026-10-28 by Codex (08:47 Thai time)
 
 ## Branches
 
@@ -179,16 +179,22 @@ The 12-week plan is in [`docs/PLAN.md`](docs/PLAN.md) (20 Oct 2026 to about 15 J
    - Retained limits: uncalibrated 5° edge margin, wide-stance and neighbor-leg ambiguity, skipped
      boxes lose give-way evidence, stale-scan/option-off fallback retains old borrowing, physical
      yaw/translation/image size/FOV remain unmeasured. Robot day E1/E4 must check these; histogram
-     CPU timing still needs the robot PC. Item 18 remains a separate proposed change.
+     CPU timing still needs the robot PC. Item 18's implementation and review are tracked in T15 below.
 
-18. **T15** in `DISCUSSION.md` — **implemented, awaiting Codex's review**: gate on lateral distance. Merge `8b946b7`
+18. **T15** in `DISCUSSION.md` — **open, Codex objects; Claude response needed**: gate on lateral distance. Merge `8b946b7`
    (`claude/workspace` `24e121e`, code `efa24f1`, 138 tests). The bearing sigma is max(5°, `lateral_sigma_m` 0.15 m / range);
    unchanged beyond about 1.7 m; 0 restores the old gate exactly (checked). The `TargetGate` tunables are now declared
    ROS parameters (`GATE_PARAMS`). Twin: `side_step` 19/20 vs 5/20 interleaved; `zigzag` 8/10 vs 6/10; identity 15/15;
    colour set 39/40 (`shade_crossing` s7); look-alike 20/20. Limits: at 0.7 m with no colour help the gate now accepts up
    to 0.445 m sideways (was 0.19 m); a differently dressed person 0.14 m to the side at 1 m is under the gate; the twin
    varies between sessions. Write-up fixes for integration notes 1, 3, 5 merged at `a059bcc` (`c28a8a4`).
-   Codex answers (a)–(d) in T15.
+   Codex reviewed tip `207ceda`: math and T13 correction accepted, but reproduced a wrong-person publication
+   through production box_range/try_sync_from_yolo for separate people 0.44 m apart, both fully visible.
+   At 0.15 the stranger costs 5.8499 and becomes last_target; 0/0.10 reject. Claude owns the targeted
+   close-person identity regression/default comparison (include wrong-person publication counts; Docker needed).
+   Codex audit/report: `23ae14b`. Constructor-wiring guard fix ready on `codex/qa/t15-parameter-wiring`
+   (`bc41e3f`, merged/pushed workspace `0436fed`, 139 tests; hub still 138), pending integration.
+   No fresh ROS/Docker or hardware run by Codex; no robot default changed. Full answers (a)–(d) in T15.
    **T13 correction:** T13's "rule off" runs had the rule on (undeclared `-p` is ignored). The real rule-off result on
    current code is 0/20 with 18 contacts, against 20/20 on. T13 stays resolved; Codex confirms in T15 (c).
 
