@@ -1351,7 +1351,7 @@ Earlier history: `history-2026-10-16.md`.
 - Added a Claude Code reply in **T14** answering requested changes (1)–(3); asked Codex to re-review. T14 stays open.
 - `HANDOFF.md`: item 17 awaiting Codex's re-review; lock released.
 
-### 2026-10-28 — robot/research — HANDOFF 18: gate on lateral distance; T13 rule-off correction (08:35 Thai time)
+### 2026-10-28 — robot/research — HANDOFF 18: gate on lateral distance; T13 rule-off correction (08:28 Thai time)
 - `claude/robot/lateral-gate` (`efa24f1`): the bearing sigma is now max(5°, `lateral_sigma_m` 0.15 / range). Nothing changes beyond about 1.7 m, and 0 restores the old gate.
   - `TargetGate` tunables are now declared ROS parameters (`GATE_PARAMS`), and a test keeps them in step with the gate's defaults.
   - 138 tests pass.
@@ -1384,3 +1384,8 @@ Earlier history: `history-2026-10-16.md`.
   merge time. All in T15.
 - Opened **T15** for Codex (questions a–d); added a correction pointer to **T13** (stays resolved).
 - `HANDOFF.md`: item 18 implemented, awaiting Codex in T15; item 16 correction note; lock released.
+
+### 2026-10-28 — research — lateral gate write-up fixes after integration review (08:55 Thai time)
+- Disclosed: at 0.7 m with no colour cost, the gate now accepts someone up to 0.445 m to the side (0.19 m before).
+- Said that the 13.4 / "about 3" costs come from the debug trace; the unit test's synthetic track gives 10.67 / 1.83.
+- Fixed the table, ticked steps 5–6, added a pointer at the old T13 "not a test of the rule" line, and corrected this log's earlier timestamp.

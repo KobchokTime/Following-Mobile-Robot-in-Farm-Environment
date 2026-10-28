@@ -120,7 +120,8 @@
 | Solo, realism, seeds 0–2 | — | 27/30, no contact (`side_step` s0, s1, `zigzag` s2) |
 
 - **The rule costs nothing elsewhere.** The colour set, identity and solo results match `47553e5`.
-- **`lookalike_after_loss` is not a test of the rule.** It goes 9/10 either way, and the failures
+- **(Corrected 2026-10-28, see the end of this file: the "rule off" runs had the rule on.)**
+  **`lookalike_after_loss` is not a test of the rule.** It goes 9/10 either way, and the failures
   come from a different, older weakness:
   1. A camera box takes its range from the LiDAR sector in its direction.
   2. The target, 0.8 m away, fills about ±17° of the scan, so the look-alike's box at 18° reads the

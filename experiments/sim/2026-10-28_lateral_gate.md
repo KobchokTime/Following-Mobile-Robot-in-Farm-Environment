@@ -1,6 +1,6 @@
 # Target gate on lateral distance (HANDOFF item 18)
 
-**Status: twin runs done; awaiting integration and Codex review.** This file is the handoff note. Anyone, Claude or Codex, can
+**Status: done; awaiting Codex's review in T15.** This file is the handoff note. Anyone, Claude or Codex, can
 continue from the "Next steps" list below. Every step is committed and pushed on
 `claude/robot/lateral-gate`.
 
@@ -23,9 +23,15 @@ continue from the "Next steps" list below. Every step is committed and pushed on
 - **Beyond about 1.7 m** (`lateral_sigma_m` 0.15 / tan 5°) nothing changes.
 - **Closer in**, the bearing gate is never tighter than 0.15 m sideways.
   - At 0.7 m the sigma is about 12°.
-  - The 6.5° → 27.5° box then costs about 3, not 13.4.
+  - In the traced run (`box_range_debug/true_s10_gate.log`) the 6.5° → 27.5° box cost 13.4 with the old
+    gate.
+    - The unit test's synthetic track gives 10.67 with the old gate and 1.83 with the new one; it is not a
+      replay of the trace.
 - `lateral_sigma_m` = 0 restores the old gate exactly.
-- **Risk:** a second person close to the target could pass the gate more easily at short range. The
+- **Risk:** a second person close to the target could pass the gate more easily at short range.
+  - Integration measured this at 0.7 m with no colour cost. The gate then accepts someone up to
+    **0.445 m** to the side, against 0.19 m with the old gate.
+  - Only colour and the range term keep two people that close apart. The
   identity and colour sets check this, and colour still adds its cost.
 
 ## Next steps (tick as done; commit after each)
@@ -46,8 +52,9 @@ continue from the "Next steps" list below. Every step is committed and pushed on
       - Script: `experiments/sim/scripts/run_lateral_gate.sh`. Results go in
         `2026-10-28_lateral_gate.json`, via `experiments/sim/scripts/collect_runs.py`.
 - [x] 4b. `zigzag` on/off check (`zz_*`): no harm detected (see Results).
-- [ ] 5. Write the results here. Merge into `claude/workspace` and log in `logs/claude.md`.
-- [ ] 6. Integration: merge into `integration-hub` and open a thread for Codex. Update HANDOFF item 18.
+- [x] 5. Results written here; merged into `claude/workspace` (`24e121e`) and logged.
+- [x] 6. Integration: merged into `integration-hub` (`8b946b7`); T15 opened for Codex (`2857f01`).
+- [ ] 7. Codex review in T15.
 
 ## Found on the way: T13's "rule off" runs had the rule on
 
@@ -69,7 +76,8 @@ continue from the "Next steps" list below. Every step is committed and pushed on
 - **The lateral gate fixes the traced `side_step` failure:** 19/20 vs 5/20 interleaved (p = 1e-5).
 - **No harm was detected** on identity (15/15), the colour set (19/20 in shade, 20/20 look-alike) or
   `zigzag` (8/10 vs 6/10).
-- **Not shown:** that it never accepts a second person close in.
+- **Not shown:** that it never accepts a second person close in. With no colour cost, the gate at 0.7 m
+  accepts someone up to 0.445 m to the side (0.19 m before).
   - At 1 m, a differently dressed person 0.14 m to the side now costs 8.97 instead of 10.83, so the gate
     accepts them (the unit test moved to 10°, about 0.17 m).
   - A person that close to the target overlaps them in the image anyway.
@@ -114,15 +122,14 @@ finish.
 |---|---|
 | Identity, seeds 0–2 | 15/15, no contact |
 | Solo, seeds 0–2 | 27/30, no contact. **`zigzag` fails all 3 seeds** |
+| `shade_crossing`, seeds 0–9 | 9/10 (seed 7), no contact |
+| `shade_side_by_side`, seeds 0–9 | 10/10 |
+| `lookalike_after_loss`, clean and realism, seeds 0–9 | 20/20, no contact; in clean runs the robot never turns (max bearing 0°) |
 
 - `zigzag` passed 4/5 with the old gate on seeds 3–7 (`2026-10-27_box_range.md`).
 - **Within-session check:** `zigzag` seeds 0–9, 0.15 vs 0, interleaved. Result **8/10 vs 6/10**, no contact,
   Fisher p = 0.63. No harm detected.
   - The solo 0/3 is run-to-run variation, like the old gate's 5/20 vs 12–13/20 on `side_step`.
-
-| `shade_crossing`, seeds 0–9 | 9/10 (seed 7), no contact |
-| `shade_side_by_side`, seeds 0–9 | 10/10 |
-| `lookalike_after_loss`, clean and realism, seeds 0–9 | 20/20, no contact; in clean runs the robot never turns (max bearing 0°) |
 
 ### T13 correction: the re-acquisition rule really off
 
