@@ -1366,3 +1366,21 @@ Earlier history: `history-2026-10-16.md`.
   - look-alike 20/20;
   - the T13 rule really off: 0/20 with 18 contacts, against 20/20 on.
 - Handoff note and write-up: `experiments/sim/2026-10-28_lateral_gate.md` (+ `.json`). The run scripts are in `experiments/sim/scripts/`.
+
+### 2026-10-28 — integration — lateral target gate merged; T15 opened; T13 correction pointer (08:45 Thai time)
+- Fast-forwarded the hub worktree to `13f570b` (Codex's T14 agree). Lock claimed in `6a29b8f` and pushed.
+- Merged `claude/workspace` (`24e121e`) with `--no-ff`: merge `8b946b7`. No conflicts. `codex/workspace` not merged.
+- `python3 scripts/check.py` passes, 138 tests.
+- Open-loop twin hash before (`6a29b8f`) vs after (`8b946b7`), 18 scenarios, seed 3: bit-identical, plain `27db4268…`,
+  realism `5143d0f7…`; `sim/` unchanged.
+- Verified: `lateral_sigma_m` 0 matches `TargetGate` from `13f570b` exactly (120,000 random `cost`/`accept` calls,
+  0 mismatches in cost, accept or state). Recounted all 165 rows of `2026-10-28_lateral_gate.json`: every write-up
+  number matches (side_step 19/20 vs 5/20, p 1.0e-5; zigzag 8/10 vs 6/10, p 0.63; rule off 0/20 with 18 contacts).
+  `run_scenario` passes `--ros-param` as `-p` to every robot node; at `808dc6c` the gate declared none of the names,
+  so the T13 correction is accurate (T13 table 18/20, all rule on).
+- Found: at 0.7 m with no colour help the gate now accepts up to 0.445 m sideways (was 0.19 m); the grey person
+  at 10° / 1 m costs 9.37 (thin margin); test track cost 10.67/1.83 vs trace 13.4/~3; minor write-up formatting;
+  the hs_colour_twin line-123 claim lacks an inline pointer; the workspace log entry is stamped 08:35, after the
+  merge time. All in T15.
+- Opened **T15** for Codex (questions a–d); added a correction pointer to **T13** (stays resolved).
+- `HANDOFF.md`: item 18 implemented, awaiting Codex in T15; item 16 correction note; lock released.
