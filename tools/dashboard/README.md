@@ -25,8 +25,10 @@
   3. Then check `data/users/me/check` in the store.
 - **To publish data:**
   1. Run `gen_live.py`.
-  2. Claude uploads each output as an asset.
-  3. Then one `ArtifactData update` points `datasets/<id>.source.url` at it, and old blobs are deleted.
+  2. Run `python3 scripts/validate_dashboard_live.py <out_dir>` before uploading. This checks
+     the five live JSON files against the registry and each other, including the 8 MB file limit.
+  3. Claude uploads each output as an asset.
+  4. Then one `ArtifactData update` points `datasets/<id>.source.url` at it, and old blobs are deleted.
 
 ## Making the live data
 

@@ -69,7 +69,7 @@ def run_rows(e, base, now):
                    visible_share=None, contact=None, max_bearing_deg=None, in_view_end=None, published=None,
                    published_other=None, started_utc=None, finished_utc=None)
         if os.path.exists(sc):
-            s = json.load(open(sc))
+            s = json.load(open(sc, encoding='utf-8'))
             row.update(status='pass' if passed(s) else 'fail', final_gap_m=round(s['final_gap_m'], 2),
                        visible_share=round(s.get('target_visible_share', 0), 3), contact=bool(s['contact']),
                        max_bearing_deg=round(s['max_abs_target_bearing_deg'], 1),
@@ -109,7 +109,7 @@ def experiment_row(e, rows, now):
 def track_points(key, state_path):
     """World-frame positions at 2 Hz (every 5th 10 Hz state line)."""
     pts = []
-    for i, line in enumerate(open(state_path)):
+    for i, line in enumerate(open(state_path, encoding='utf-8')):
         if i % 5:
             continue
         s = json.loads(line)
@@ -135,7 +135,7 @@ def main(argv=None):
     ap.add_argument('--out', required=True)
     a = ap.parse_args(argv)
     os.makedirs(a.out, exist_ok=True)
-    reg = json.load(open(a.registry))
+    reg = json.load(open(a.registry, encoding='utf-8'))
     now = datetime.datetime.now(datetime.timezone.utc)
 
     runs, exps = [], []
@@ -143,11 +143,11 @@ def main(argv=None):
         rows = run_rows(e, os.path.join(a.runs_root, e['dir']), now)
         runs += rows
         exps.append(experiment_row(e, rows, now))
-    json.dump(exps, open(os.path.join(a.out, 'live_experiments.json'), 'w'), ensure_ascii=False)
-    json.dump(runs, open(os.path.join(a.out, 'live_runs.json'), 'w'), ensure_ascii=False)
+    json.dump(exps, open(os.path.join(a.out, 'live_experiments.json'), 'w', encoding='utf-8'), ensure_ascii=False)
+    json.dump(runs, open(os.path.join(a.out, 'live_runs.json'), 'w', encoding='utf-8'), ensure_ascii=False)
 
     cache_p = os.path.join(a.out, 'tracks_cache.json')
-    cache = json.load(open(cache_p)) if os.path.exists(cache_p) else {}
+    cache = json.load(open(cache_p, encoding='utf-8')) if os.path.exists(cache_p) else {}
     tracks, live_tracks = [], []
     for e in reg:
         for r in e['runs']:
@@ -161,9 +161,9 @@ def main(argv=None):
                 live_tracks.extend(pts)
             else:
                 tracks.extend(pts[::2])
-    json.dump(cache, open(cache_p, 'w'))
-    json.dump(tracks, open(os.path.join(a.out, 'past_tracks.json'), 'w'), separators=(',', ':'))
-    json.dump(live_tracks, open(os.path.join(a.out, 'live_tracks.json'), 'w'), separators=(',', ':'))
+    json.dump(cache, open(cache_p, 'w', encoding='utf-8'))
+    json.dump(tracks, open(os.path.join(a.out, 'past_tracks.json'), 'w', encoding='utf-8'), separators=(',', ':'))
+    json.dump(live_tracks, open(os.path.join(a.out, 'live_tracks.json'), 'w', encoding='utf-8'), separators=(',', ':'))
 
     names = sorted({r['scenario'] for e in reg for r in e['runs']})
     scen = []
@@ -174,7 +174,7 @@ def main(argv=None):
                          paths=json.dumps([dict(name=pn, target=tg, wp=wp) for pn, tg, wp in sp['people']]),
                          notes=json.dumps(dict(blackouts=sp.get('blackouts', []), hidden=sp.get('hidden', {}),
                                                shade=sp.get('shade', []), clothing=sp.get('clothing', {})))))
-    json.dump(scen, open(os.path.join(a.out, 'live_scenarios.json'), 'w'), ensure_ascii=False)
+    json.dump(scen, open(os.path.join(a.out, 'live_scenarios.json'), 'w', encoding='utf-8'), ensure_ascii=False)
     print(' | '.join(f"{x['experiment']} {x['done']}/{x['total']} {x['status']}" for x in exps))
     return 0
 
