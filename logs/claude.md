@@ -1531,3 +1531,7 @@ Earlier history: `history-2026-10-16.md`.
 
 ## 2026-10-29 23:22 — Dashboard tabs named after the features in development
 - User found the tab names confusing. New names and order: ภาพรวมความพร้อม, ตามคน (ตัวควบคุม), เลือกเป้า (target gate), แยกคนด้วยสีเสื้อ, กรองจุดนิ่ง (ทดลอง), การทดลองที่กำลังรัน, เทสต์และ CI, then history: เส้นทางโค้ดรุ่นก่อน, Arena (ปิดแล้ว). Tab ids unchanged. Published page v28.
+
+## 2026-10-29 23:36 — Whole-twin baseline on hub 5c72c4d: 98/100
+- Every scenario, realism, seeds 0–4: 98/100 pass, no contact. Only `zigzag` fails: seed 0 (visible 0.889, just under 0.9) and seed 1 (visible 0.472).
+- Published: `current_runs` v2 (all 100 runs), live datasets with the finished baseline.
