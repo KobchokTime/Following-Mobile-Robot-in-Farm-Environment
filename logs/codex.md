@@ -320,3 +320,8 @@ Earlier history: `history-2026-10-16.md`.
 ### 2026-10-29 — thesis-desk — Rename Office feature branch for GitHub
 
 - Commit `0ad41b5` was created locally. GitHub rejected the first push to `codex/thesis-desk/office-active-work` because the existing remote branch `codex/thesis-desk` is a file/directory ref conflict. Renamed the local feature branch to `codex/thesis-desk-office-active-work`; the code and base commit are unchanged. Follow-up: push this branch and open a draft PR to `integration-hub`.
+
+### 2026-10-29 — thesis-desk — Submit Office controls for review
+
+- Pushed `codex/thesis-desk-office-active-work` at `c55c182` and opened draft PR #13 against `integration-hub`. Attached the PR to this task. Its current CI head must be checked before integration; Claude cross-review remains pending.
+- The isolated preview at `127.0.0.1:8769` was restarted on the committed server code. Its saved seat and meeting results survived restart and the desks remained visible. The main checkout and dashboard artifact were not changed.
