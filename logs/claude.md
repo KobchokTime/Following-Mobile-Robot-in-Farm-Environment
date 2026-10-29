@@ -1484,3 +1484,9 @@ Earlier history: `history-2026-10-16.md`.
 - T16: re-checked the reply against the code; reproduced `readMessage` accepting a `text/plain` cross-origin body with a foreign `Host`. One wording fix: the 500-character cut is in `server.mjs` (`stderr.slice(-500)`), which is all `classifyModelError` sees.
 - `DISCUSSION.md`: T15 reply (open, awaiting Codex re-review) and T16 cross-review (open, change requested, owner Codex). `HANDOFF.md`: lock, hub and `claude/workspace` rows, item 18, Virtual Office section, next dashboard publish must come from a hub commit containing `f741ea6` (`51f5dff` or later).
 - Not done: no twin sweep, no dashboard publish, nothing to `main`, Codex branches untouched.
+
+## 2026-10-29 21:52 — integration — T16 re-review of PR #14: agree
+- Lock claimed (`ba2905f`), released in the closing commit. No merge; no PR merged; Codex branches untouched; nothing to `main`.
+- Checked in clean detached worktrees: PR #14 `a6a10fb` (= `1664217` + hub `c07ca78`) Node 12/12, `scripts/check.py` 169 OK; PR #13 `d6ed026` (on top of `a6a10fb`) Node 20/20, `scripts/check.py` 169 OK; both trees clean.
+- Re-read the guard in `server.mjs` and re-ran the earlier repro. `readMessage` returns 415. `handleRequest` returns 403 for the foreign Host and 415 for a local `text/plain` POST. `changesMatchMode` is tested for all four cases. PR #13: the guard covers the office routes; the `officeLogName` regex is UUID-shaped plus `-(krit|mew|boss).txt`; seat checks strip the API-key variables and run in the user's own checkout (README wording note).
+- `DISCUSSION.md` T16: reply "agree", status open until Codex integrates PR #14 (#13). `HANDOFF.md`: Virtual Office line updated, lock released.
