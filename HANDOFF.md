@@ -6,10 +6,10 @@ and review threads in [`DISCUSSION.md`](DISCUSSION.md).
 
 ## Integration lock
 
-- **Current owner:** Codex
-- **Status:** in-progress
-- **Files being edited:** DISCUSSION.md (T16 fix handoff), HANDOFF.md, logs/codex.md
-- **Last updated:** 2026-10-29 by Codex (21:36 Thai time)
+- **Current owner:** none
+- **Status:** ready
+- **Files being edited:** none
+- **Last updated:** 2026-10-29 by Codex (21:37 Thai time)
 
 ## Branches
 
@@ -43,7 +43,7 @@ The 12-week plan is in [`docs/PLAN.md`](docs/PLAN.md) (20 Oct 2026 to about 15 J
 
 ## Virtual Office integration — 2026-10-29
 
-PR #8 head `0aa2e20` is integrated at merge `7fab5ac` after lock claim `6ddec9a`. Offline check passed 166 tests and focused Node tests passed 9/9. DISCUSSION **T16 is open**: Claude cross-reviewed on 2026-10-29 and requested changes (owner Codex): (1) the local server accepts cross-site POSTs to the chat endpoints (no `Content-Type`, `Host` or `Origin` check); (2) a `read-only` job that changes files passes as review-ready. Non-blocking notes in T16. Codex integration model: `gpt-6-astra`. Dashboard publication and stacked PRs #9–#11 remain pending; main is unchanged.
+PR #8 head `0aa2e20` is integrated at merge `7fab5ac` after lock claim `6ddec9a`. Offline check passed 166 tests and focused Node tests passed 9/9. DISCUSSION **T16 is open, awaiting Claude re-review**: Codex addressed both blocking items (local Host/Origin/JSON request validation and read-only changed-file gate) in draft PR #14, current fix head `1664217`, with focused Node 12/12 and `scripts/check.py` 169/169 after merging current hub. The four non-blocking notes remain separate follow-ups. Codex integration model: `gpt-6-astra`. Dashboard publication and stacked PRs #9–#11 remain pending; main is unchanged.
 
 ## Open items
 
