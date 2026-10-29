@@ -1571,3 +1571,10 @@ Earlier history: `history-2026-10-16.md`.
 - `f6373c4`: returns within the body's length count only inside the body's half width. Round 5: pass_by 10/10 (min 0.54 m, gap ~0.52 m, visible 1.0); blind_corner 0/5 following, no contacts.
 - Full run on `f6373c4` (22 scenarios × s0–4): 99/110, no contacts. Baseline set 94/100 (baseline 98): zigzag s0 now passes; crossing s2–4, shade_crossing s1–2 lose the target (avoid aimed beside a walker crossing; target went to the image edge; LiDAR edge tracking followed the walker); zigzag s1 visible 0.85.
 - `b618b40`: avoid only after the path is blocked 1 s (`avoid_delay_s`). Targeted run (crossing, shade_crossing, pass_by, zigzag × s0–4) running.
+
+## 2026-10-30 04:20 — crossing cause found and fixed; targeted run 25/25
+- Targeted run on `b618b40` (avoid delay): crossing 2/5, shade_crossing 2/5 still lost the target (no contacts).
+- Attribution (crossing s0/s2/s4): avoid branch with `lidar_assist:=false` 3/3; with `obstacle_stop:=false` 0/3 with contacts; assist branch alone 1/3 with contacts. So the assist loses the target; the stop prevents the contacts.
+- Debug log: the crosser lent their range to the target's box (pred range 0.55 → 0.33 m), then the assist followed their cluster sideways.
+- `458d4d0` (lidar-assist2): assist waits out the gate's ambiguity window. Test added (fails without, passes with). Merged into avoid `546bd57`; 197 tests pass.
+- Targeted run on `546bd57` (crossing, shade_crossing, pass_by, zigzag, side_step × s0–4): 25/25, no contacts. Full run started.
