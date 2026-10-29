@@ -118,6 +118,7 @@
   .tb-table th { position: sticky; top: 0; background: var(--color-panel); text-align: left; font-weight: var(--cds-font-weight-medium); color: var(--color-fg-muted); padding: .4rem .5rem; border-bottom: 1px solid var(--color-border-line); }
   .tb-table td { padding: .35rem .5rem; border-bottom: 1px solid var(--color-border-line); vertical-align: top; }
   .tb-table td.tb-mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; word-break: break-all; }
+  .tb-history { margin: 0; padding: var(--cds-pad-sm, .5rem) var(--cds-pad-md, .75rem); border-left: 3px solid var(--color-warn); background: var(--color-panel); color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); border-radius: var(--cds-radius); }
   .tb-pill { display: inline-block; padding: .05rem .5rem; border-radius: 999px; font-size: var(--cds-font-size-caption); border: 1px solid currentColor; }
   .tb-failed { display: flex; align-items: center; justify-content: center; gap: .5rem; color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); min-height: inherit; }
   .tb-failed::before { content: ""; width: .375rem; height: .375rem; border-radius: 50%; background: var(--color-bad); }
@@ -167,7 +168,7 @@
 <div class="tb">
   <header class="tb-head" id="top">
     <h1 class="tb-title">Follower Test Bench</h1>
-    <p class="tb-take dash-skeleton" data-source="solo_totals test_totals"></p>
+    <p class="tb-take dash-skeleton" data-source="solo_totals test_totals current_all"></p>
     <p class="tb-sub">หุ่นตามคนในฟาร์ม · ทุกตัวเลขในหน้านี้มาจาก simulation (twin และ Gazebo) ยังไม่ใช่หุ่นจริง</p>
   </header>
   <nav class="tb-tabs" role="tablist" aria-label="หน้า">
@@ -237,12 +238,17 @@
 
     <section class="tb-kpis" id="headline" aria-label="ตัวเลขหลัก">
       <div class="tb-kpi">
-        <span class="tb-kpi-label">ตามคนเดียว · twin สมจริง · เลี้ยวตามมุม</span>
+        <span class="tb-kpi-label">ทุกฉาก · twin สมจริง · โค้ดปัจจุบัน</span>
+        <span class="tb-kpi-value"><b class="dash-skeleton tb-ok" data-source="current_all" data-field="passed">—</b><span class="tb-kpi-unit">/ <span data-source="current_all" data-field="runs">—</span> รอบ</span></span>
+        <span class="tb-kpi-note">ตามคนเดียว · เลือกคน · สีเสื้อ · <span class="cur-code"></span></span>
+      </div>
+      <div class="tb-kpi">
+        <span class="tb-kpi-label">ตามคนเดียว · สมจริง · เลี้ยวตามมุม (ผล 25 ต.ค.)</span>
         <span class="tb-kpi-value"><b class="dash-skeleton tb-ok" data-source="solo_totals" data-where="condition=realism_bearing" data-field="passed">—</b><span class="tb-kpi-unit">/ <span data-source="solo_totals" data-where="condition=realism_bearing" data-field="runs">—</span> รอบ</span></span>
         <span class="tb-kpi-note">โหมดใหม่ <code>steer_mode:=bearing</code> · ลองได้หลังรอบแบบเดิม (Codex T12)</span>
       </div>
       <div class="tb-kpi">
-        <span class="tb-kpi-label">ตามคนเดียว · twin สมจริง · แบบเดิม</span>
+        <span class="tb-kpi-label">ตามคนเดียว · สมจริง · แบบเดิม (ผล 25 ต.ค.)</span>
         <span class="tb-kpi-value"><b class="dash-skeleton" data-source="solo_totals" data-where="condition=realism_after" data-field="passed">—</b><span class="tb-kpi-unit">/ <span data-source="solo_totals" data-where="condition=realism_after" data-field="runs">—</span> รอบ</span></span>
         <span class="tb-kpi-note">ค่าเริ่มต้น · ก่อนแก้ <span data-source="solo_totals" data-where="condition=realism_before" data-field="passed">—</span>/<span data-source="solo_totals" data-where="condition=realism_before" data-field="runs">—</span></span>
       </div>
@@ -266,16 +272,22 @@
     <div class="tb-grid">
       <section class="tb-card" id="cond">
         <h2>ตามคนเดียว ผ่านกี่รอบ แต่ละแบบ</h2>
-        <p class="tb-note">10 ท่าเดิน × 3 seed ต่อแบบ · ผ่าน = เป้าอยู่ในภาพตอนจบ ห่าง ≤ 1.5 m ไม่ชน และอยู่ในภาพ ≥ 90% ของเวลา · ทั้งหมดเป็นผลจาก simulation</p>
+        <p class="tb-note">ผลวันที่ 25 ต.ค. ก่อน box_range, lateral gate และเช็กคนข้างเป้า · ผลโค้ดปัจจุบันอยู่ในการ์ดด้านล่าง · 10 ท่าเดิน × 3 seed ต่อแบบ · ผ่าน = เป้าอยู่ในภาพตอนจบ ห่าง ≤ 1.5 m ไม่ชน และอยู่ในภาพ ≥ 90% ของเวลา · ทั้งหมดเป็นผลจาก simulation</p>
         <div class="tb-chart tb-cond dash-skeleton" id="tb-condchart" data-source="solo_totals"></div>
       </section>
       <section class="tb-card" id="close">
         <h2>เข้าใกล้คนที่สุด ในแต่ละท่า</h2>
-        <p class="tb-note">ระยะกลางหุ่นถึงกลางตัวคน ค่าต่ำสุดของ 3 seed · เส้นแดง = เกณฑ์ชน 0.40 m · ชี้ที่จุดเพื่อดูค่า</p>
+        <p class="tb-note">ผลวันที่ 25 ต.ค. · ระยะกลางหุ่นถึงกลางตัวคน ค่าต่ำสุดของ 3 seed · เส้นแดง = เกณฑ์ชน 0.40 m · ชี้ที่จุดเพื่อดูค่า</p>
         <div class="tb-legend" id="tb-closelegend"></div>
         <div class="tb-chart tb-close dash-skeleton" id="tb-closechart" data-source="solo_runs"></div>
       </section>
     </div>
+
+    <section class="tb-card" id="cur-ready">
+      <h2>ทุกฉาก ด้วยโค้ดปัจจุบัน</h2>
+      <p class="tb-note cur-meta"></p>
+      <div class="tb-tablewrap"><table class="tb-table cur-table dash-skeleton" data-source="current_runs" data-row-key="scenario" data-group=""><thead><tr><th>กลุ่ม</th><th>ฉาก</th><th>ผ่าน</th><th>ชน</th><th>ใกล้คนสุด (m)</th><th>เห็นเป้าต่ำสุด</th></tr></thead><tbody></tbody></table></div>
+    </section>
 
     <div class="tb-grid">
       <section class="tb-card" id="steps">
@@ -293,6 +305,7 @@
       <section class="tb-card" id="open">
         <h2>เรื่องที่ยังเปิดอยู่</h2>
         <ul class="tb-open">
+          <li>E4b: เช็กบนหุ่นจริงว่า LiDAR แยกขาคนเดียวกับสองคนยืนชิดกันได้ (log <code>[CROWD]</code>)</li>
           <li>come_back: จะให้หุ่นถอยหนีเร็วขึ้น หรือยอมให้คนเดินเข้ามาใกล้ ตัดสินจากผลบนหุ่นจริง</li>
           <li>คำสั่งเปิด driver กล้องและ LiDAR บนหุ่น ยังไม่มีใน repo</li>
           <li>รัศมีล้อ ระยะหน่วงของภาพ (E2) และความเร็วจริง ยังเป็นค่าสมมติจนกว่าจะวัดในวันลงพื้นที่</li>
@@ -303,13 +316,24 @@
 
   </div>
   <div class="tb-panel" role="tabpanel" id="panel-solo" aria-labelledby="tab-solo" hidden>
+    <section class="tb-card" id="cur-solo">
+      <h2>ตามคนเดียว ทุกท่าเดิน ด้วยโค้ดปัจจุบัน</h2>
+      <p class="tb-note cur-meta"></p>
+      <div class="tb-tablewrap"><table class="tb-table cur-table dash-skeleton" data-source="current_runs" data-row-key="scenario" data-group="solo"><thead><tr><th>กลุ่ม</th><th>ฉาก</th><th>ผ่าน</th><th>ชน</th><th>ใกล้คนสุด (m)</th><th>เห็นเป้าต่ำสุด</th></tr></thead><tbody></tbody></table></div>
+    </section>
     <section class="tb-card" id="solo">
     <h2>ตามคนเดียว: ทุกท่าเดิน</h2>
-    <p class="tb-note">bridge แบบ m/s · 10 ท่าเดิน × 3 seed ต่อเงื่อนไข · "เลี้ยวตามมุม" = โหมดเลี้ยวใหม่ steer_mode:=bearing (ยังไม่ใช่ค่าเริ่มต้น) · "สมจริง" = มีหน่วงภาพ 0.15 s, YOLO พลาด 10%, กล่องหลอก 3%, ล้อลื่น, เสาและพุ่มไม้ข้างทาง · ผ่าน = เป้าอยู่ในภาพตอนจบ ห่าง ≤ 1.5 m ไม่ชน และอยู่ในภาพ ≥ 90% ของเวลา</p>
+    <p class="tb-note">ผลวันที่ 25 ต.ค. (โค้ดก่อน box_range, lateral gate และเช็กคนข้างเป้า) · bridge แบบ m/s · 10 ท่าเดิน × 3 seed ต่อเงื่อนไข · "เลี้ยวตามมุม" = โหมดเลี้ยวใหม่ steer_mode:=bearing (ยังไม่ใช่ค่าเริ่มต้น) · "สมจริง" = มีหน่วงภาพ 0.15 s, YOLO พลาด 10%, กล่องหลอก 3%, ล้อลื่น, เสาและพุ่มไม้ข้างทาง · ผ่าน = เป้าอยู่ในภาพตอนจบ ห่าง ≤ 1.5 m ไม่ชน และอยู่ในภาพ ≥ 90% ของเวลา</p>
     <div class="tb-chart tb-solo dash-skeleton" id="tb-solochart" data-source="solo_runs"></div>
   </section>
   </div>
   <div class="tb-panel" role="tabpanel" id="panel-identity" aria-labelledby="tab-identity" hidden>
+    <section class="tb-card" id="cur-identity">
+      <h2>ฉากที่มีคนที่สอง ด้วยโค้ดปัจจุบัน</h2>
+      <p class="tb-note cur-meta"></p>
+      <div class="tb-tablewrap"><table class="tb-table cur-table dash-skeleton" data-source="current_runs" data-row-key="scenario" data-group="identity"><thead><tr><th>กลุ่ม</th><th>ฉาก</th><th>ผ่าน</th><th>ชน</th><th>ใกล้คนสุด (m)</th><th>เห็นเป้าต่ำสุด</th></tr></thead><tbody></tbody></table></div>
+    </section>
+    <p class="tb-history">การ์ดด้านล่างเป็นผลตัดสิน Arena 3 (24 ต.ค.) และการปิดทีละส่วน E7 (25 ต.ค.) ของโค้ดรุ่นนั้น ไม่ใช่สถานะของโค้ดปัจจุบัน</p>
     <div class="tb-grid">
       <section class="tb-card" id="arena3runs">
       <h2>Arena 3: ฉากที่มีคนที่สอง ทุกรอบ</h2>
@@ -338,6 +362,7 @@
   </section>
   </div>
   <div class="tb-panel" role="tabpanel" id="panel-replay" aria-labelledby="tab-replay" hidden>
+    <p class="tb-history">ข้อมูลประวัติ: เส้นทางของโค้ดแต่ละรุ่นจนถึง Arena 3 (24 ต.ค.) ใช้เทียบพัฒนาการ ไม่ใช่สถานะของโค้ดปัจจุบัน · เส้นทางของการทดลองล่าสุดดูได้ในแท็บติดตามสด</p>
     <section class="tb-card" id="replay">
     <h2>เล่นซ้ำในสนาม (มองจากด้านบน)</h2>
     <p class="tb-note">เส้นทางจริงจาก sim ของหุ่น (เส้นสี) และคนเป้าหมาย (เส้นประ) ทุก 0.5 วินาที · หุ่นเริ่มที่ (0, 0) หันไปทางขวา · แปลงผักเป็นผังเดียวกับใน Gazebo ใช้ดูตำแหน่งเท่านั้น · ผลจาก simulation ไม่ใช่หุ่นจริง</p>
@@ -396,6 +421,12 @@
     </section>
   </div>
   <div class="tb-panel" role="tabpanel" id="panel-colour" aria-labelledby="tab-colour" hidden>
+    <section class="tb-card" id="cur-colour">
+      <h2>ฉากสีเสื้อ ด้วยโค้ดปัจจุบัน</h2>
+      <p class="tb-note cur-meta"></p>
+      <div class="tb-tablewrap"><table class="tb-table cur-table dash-skeleton" data-source="current_runs" data-row-key="scenario" data-group="colour"><thead><tr><th>กลุ่ม</th><th>ฉาก</th><th>ผ่าน</th><th>ชน</th><th>ใกล้คนสุด (m)</th><th>เห็นเป้าต่ำสุด</th></tr></thead><tbody></tbody></table></div>
+    </section>
+    <p class="tb-history">การ์ดด้านล่างวัดจากคลิปจริงและการทดลอง twin วันที่ 26–27 ต.ค. (branch hs-colour <code>47553e5</code>) ใช้ดูว่าทำไมเลือกวิธีสีนี้ ผลของโค้ดปัจจุบันอยู่ในการ์ดด้านบน</p>
     <section class="tb-card" id="col-why">
       <h2>ทีละคลิป: ภาพจริง กับค่าสีที่วัดได้</h2>
       <p class="tb-note">ภาพตัดจากเฟรมจริง ใต้ภาพ = Cb/Cr ลำตัวที่วัดได้ (128 = เทา) · กราฟขวา = Cb/Cr ทุกกรอบในคลิป แยกสีตามคน · คลิปที่มีคนเดียว: จุดเทาจาง = คนจากคลิปอื่น ไว้เทียบ · YOLO ของโปรเจกต์ 10 fps · สีลำตัววัดแบบเดียวกับ ros2_yolo_live · ติดป้ายด้วยตา</p>
@@ -495,6 +526,7 @@
     </section>
   </div>
   <div class="tb-panel" role="tabpanel" id="panel-filter" aria-labelledby="tab-filter" hidden>
+    <p class="tb-history">ข้อมูลประวัติ: ตัวกรองของนิ่งเป็นการทดลองบน branch แยก (26 ต.ค.) ยังไม่ได้รวมเข้าโค้ดหลักและปิดเป็นค่าเริ่มต้น</p>
 
     <section class="tb-card" id="sf-why">
       <h2>ลองหลักการจากเปเปอร์: กรองของนิ่งออกจาก LiDAR</h2>
@@ -547,6 +579,7 @@
 
   </div>
   <div class="tb-panel" role="tabpanel" id="panel-arenas" aria-labelledby="tab-arenas" hidden>
+    <p class="tb-history">ข้อมูลประวัติ: ผลตัดสิน Arena 1–2 (21 ต.ค.) ตามกติกาที่ล็อกไว้ ปิดไปแล้ว ไม่ใช่สถานะของโค้ดปัจจุบัน</p>
     <div class="tb-grid">
       <section class="tb-card" id="arena2">
       <h2>Arena 2: ตามให้ทัน (คะแนน)</h2>
@@ -649,6 +682,12 @@ dash.calc('solo_totals', {
   fn: (solo_runs) => Array.from(d3.group(solo_runs, (r) => r.condition), ([condition, v]) => ({
     condition, passed: v.filter((r) => r.pass).length, runs: v.length,
     contacts: v.filter((r) => r.contact).length, closest_m: d3.min(v, (r) => r.min_person_range_m) })),
+});
+dash.calc('current_all', {
+  title: 'Current code totals',
+  description: 'Runs passed and contacts over every scenario of the latest whole-twin baseline (current_runs).',
+  inputs: ['current_runs'],
+  fn: (rows) => [{ passed: rows.filter((r) => r.pass).length, runs: rows.length, contacts: rows.filter((r) => r.contact).length }],
 });
 dash.calc('arena3_totals', {
   title: 'Arena 3 identity totals',
@@ -1521,6 +1560,36 @@ dash.calc('robust_totals', {
     el.replaceChildren(svg.node(), tip);
   }
 
+  // ---------- current code, every scenario ----------
+  const CUR_G = { solo: 'ตามคนเดียว', identity: 'เลือกคน', colour: 'สีเสื้อ', other: 'อื่น ๆ' };
+  function drawCurrent() {
+    const d = dash.data('current_runs');
+    if (d.status !== 'ok') return;
+    const rows = d.data;
+    const seeds = rows.map((r) => r.seed), fin = rows.map((r) => r.finished_utc).sort();
+    const code = rows.length ? rows[0].code : '—';
+    const meta = `โค้ด integration-hub ${code} · twin สมจริง · seed ${d3.min(seeds)}–${d3.max(seeds)} · ${rows.length} รอบ · รันเสร็จล่าสุด ${thai(fin[fin.length - 1])} (เวลาไทย) · ผ่าน = เป้าอยู่ในภาพตอนจบ ห่าง ≤ 1.5 m ไม่ชน และอยู่ในภาพ ≥ 90% ของเวลา`;
+    document.querySelectorAll('.cur-meta').forEach((el) => { el.textContent = meta; });
+    document.querySelectorAll('.cur-code').forEach((el) => { el.textContent = `hub ${code}`; });
+    document.querySelectorAll('.cur-table').forEach((tbl) => {
+      ready(tbl);
+      const g = tbl.dataset.group;
+      const groups = d3.groups(rows.filter((r) => !g || r.group === g), (r) => r.group, (r) => r.scenario);
+      const trs = [];
+      groups.forEach(([grp, scen]) => scen.forEach(([s, v]) => {
+        const p = v.filter((r) => r.pass).length, c = v.filter((r) => r.contact).length;
+        const tr = document.createElement('tr'); tr.dataset.key = s;
+        const td = (t, cls) => { const e = document.createElement('td'); if (cls) e.className = cls; e.textContent = t; return e; };
+        const res = document.createElement('td'); const pill = document.createElement('span');
+        pill.className = 'tb-pill ' + (p === v.length ? 'tb-ok' : 'tb-bad'); pill.textContent = `${p}/${v.length}`; res.append(pill);
+        tr.append(td(CUR_G[grp] || grp), td(s, 'tb-mono'), res, td(String(c), c ? 'tb-bad' : ''),
+          td(d3.min(v, (r) => r.min_person_range_m).toFixed(2)), td(`${Math.round(100 * d3.min(v, (r) => r.visible_share))}%`));
+        trs.push(tr);
+      }));
+      tbl.querySelector('tbody').replaceChildren(...trs);
+    });
+  }
+
   // ---------- unit tests ----------
   function drawTests() {
     const tb = document.querySelector('#tb-tests tbody');
@@ -1891,13 +1960,14 @@ dash.calc('robust_totals', {
   // ---------- takeaway ----------
   function drawTake() {
     const el = document.querySelector('.tb-take');
-    const st = dash.data('solo_totals'), tt = dash.data('test_totals');
+    const st = dash.data('solo_totals'), tt = dash.data('test_totals'), ca = dash.data('current_all');
     if (st.status !== 'ok' || tt.status !== 'ok') return;
     ready(el);
     const g = (c) => st.data.find((r) => r.condition === c);
-    const b = g('realism_bearing'), a = g('realism_after'), z = g('gazebo_after'), t = tt.data[0];
+    const z = g('gazebo_after'), t = tt.data[0], c = ca.status === 'ok' ? ca.data[0] : null;
     const n = (r) => (r ? `${r.passed}/${r.runs}` : '—');
-    el.textContent = `พร้อมทดลองบนหุ่นจริง: ตามคนเดียวใน twin สมจริงผ่าน ${n(a)} รอบด้วยการเลี้ยวแบบเดิม และ ${n(b)} รอบด้วยการเลี้ยวตามมุม · Gazebo ผ่าน ${n(z)} · unit tests ผ่าน ${t.passed}/${t.total}`;
+    el.textContent = `โค้ดปัจจุบันใน twin สมจริง ทุกฉาก (ตามคนเดียว เลือกคน สีเสื้อ) ผ่าน ${n(c)} รอบ` +
+      (c ? ` ชน ${c.contacts} รอบ` : '') + ` · unit tests ผ่าน ${t.passed}/${t.total} · Gazebo ตามคนเดียว (25 ต.ค.) ผ่าน ${n(z)} · ทั้งหมดเป็น simulation ยังไม่ได้ทดสอบบนหุ่นจริง`;
   }
 
 
@@ -2186,12 +2256,12 @@ dash.calc('robust_totals', {
   setInterval(() => { if (S.tab === 'live' && !lvTimer) drawLive(); }, 30000);
   const PANELS = {
     live: () => drawLive(),
-    ready: () => { drawCond(); drawClose(); },
-    solo: () => drawSolo(),
-    identity: () => { drawA3Runs(); drawArena3(); drawE7(); },
+    ready: () => { drawCurrent(); drawCond(); drawClose(); },
+    solo: () => { drawCurrent(); drawSolo(); },
+    identity: () => { drawCurrent(); drawA3Runs(); drawArena3(); drawE7(); },
     replay: () => { document.getElementById('tb-fixednote').hidden = S.bridge !== 'fixed'; drawMap(); drawGap(); drawSpeed(); drawMatrix(); drawLidar(); },
     filter: () => { drawSFBar(); drawICPBar(); drawSFPaths(); },
-    colour: () => { drawColScatter(); drawColSepAll(); drawColMethods(); drawColHeld(); drawColVtest(); drawColWeights(); drawColTwin(); },
+    colour: () => { drawCurrent(); drawColScatter(); drawColSepAll(); drawColMethods(); drawColHeld(); drawColVtest(); drawColWeights(); drawColTwin(); },
     arenas: () => { drawArena2(); drawA2Runs(); drawArena(); drawRobust(); },
     tests: () => { drawTests(); drawCI(); },
   };

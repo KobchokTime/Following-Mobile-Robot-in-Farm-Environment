@@ -194,6 +194,20 @@
    "by": "Claude Code"
   }
  },
+ "current_runs": {
+  "title": "Current code, every twin scenario",
+  "description": "One row per finished run of the whole-twin baseline (experiments/sim/scripts/run_baseline.sh): every scenario (solo, identity, colour), realism profile, seeds 0-4, with the code on integration-hub (code column). Built by tools/dashboard/live/gen_current.py. Refreshed while the baseline runs; the live tab shows its progress. Simulation, not the robot.",
+  "source": {
+   "kind": "file",
+   "name": "current_runs.json",
+   "url": "/_blob/24a163de7db7eab18baa2fd1fb5c6496"
+  },
+  "staleAfterHours": 2,
+  "updated": {
+   "at": "2026-10-29T16:20:00Z",
+   "by": "Claude Code"
+  }
+ },
  "e7_ablation": {
   "description": "Identity runs with each part switched off by a ROS parameter (full, no colour, no give-way, no gate), 5 scenarios × fixed/diff_drive × seeds 0-2, for the first run (2026-10-24) and the current code (2026-10-25); column round says which.",
   "fixed": true,

@@ -1521,3 +1521,7 @@ Earlier history: `history-2026-10-16.md`.
 - Lock `317005c`; merged `ab22dd7` into `integration-hub` with `--no-ff` at `9184db7`. `scripts/check.py` 173 tests OK.
 - E4b timing checked against `zlac_joystick_bridge.py` (`destroy_node` zero at once; `update_loop` target zero after `TIMEOUT` 1.0 s, ramp 1 m/s²: about 1.5 s at 0.5 m/s, 2.5 s at 1.4 m/s; legacy no ramp): correct. T17 closed (resolved). The previous entry's 22:20 stamp was really about 22:16 Thai time.
 - `HANDOFF.md`: item 19 resolved, item 18 E4b ready for the robot day, hub and `claude/workspace` rows; lock released.
+
+## 2026-10-29 23:04 — Dashboard: every tab dated, current code shown everywhere
+- User asked that no tab lag behind. New dataset `current_runs` (`tools/dashboard/live/gen_current.py`, from the running whole-twin baseline on hub `5c72c4d`): a "ทุกฉาก ด้วยโค้ดปัจจุบัน" card on the ready, solo, identity and colour tabs, a first KPI and a takeaway line built from it. Older cards say their date (25 Oct solo, Arena 3 24 Oct, colour 26–27 Oct); replay, filter and arena tabs carry a history banner. Ready tab open items gain E4b.
+- Published page v26 and `current_runs` v1 (45 of 100 runs so far, 43 pass); it will be refreshed when the baseline ends. Live tab, unit tests (173/173) and CI were refreshed earlier from hub `5c72c4d`.

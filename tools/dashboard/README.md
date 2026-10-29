@@ -133,3 +133,14 @@ All times are UTC ISO 8601 (`YYYY-MM-DDTHH:MM:SSZ`). The page shows them in Thai
   - move each tab's drawing code into `tabs/<tab>.js`;
   - the dashboard type loads `<script src>` from other `files/<name>` documents;
   - then each tab can have its own owner and branch.
+
+## Current code, every scenario (`current_runs`)
+
+- `experiments/sim/scripts/run_baseline.sh <out> <image> 0 4` runs every twin scenario with realism on one image.
+- `tools/dashboard/live/gen_current.py --runs <out> --code <hub commit> --out current_runs.json` makes one row per
+  finished run: `run`, `scenario`, `group` (solo, identity, colour), `seed`, `realism`, `code`, `pass`, `contact`,
+  `final_gap_m`, `visible_share`, `min_person_range_m`, `published_other`, `finished_utc`.
+- The page shows it in the "ทุกฉาก ด้วยโค้ดปัจจุบัน" cards (ready, solo, identity and colour tabs), the first KPI
+  and the takeaway line. Dated experiments keep their own cards, labelled with their date; the replay, filter
+  and arena tabs carry a history banner.
+- Rebuild it from the hub commit the baseline ran on, whenever that commit changes the gate or the controller.
