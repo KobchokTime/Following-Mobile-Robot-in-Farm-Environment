@@ -77,7 +77,13 @@ def speed_command(error_dist, speed_ff, dt, linear_gain, tolerance, max_linear_s
     linear_x = max(min(linear_x, max_linear_speed), -max_linear_speed)
     return linear_x, speed_ff
 
-def corridor_clearance(points, half_width, direction=1.0, exclude=None, exclude_r=0.0, curvature=0.0):
+# The robot's own body (thesis slides: 47 cm wide, 52 cm long, LiDAR at the centre). A return no farther along
+# the path than the body's front is beside the robot, not ahead of it: driving on slides past it unless it is
+# inside the body's own half width (pass_by s3/s8: the robot stopped level with the worker for good).
+FLANK = (0.26, 0.235)
+
+
+def corridor_clearance(points, half_width, direction=1.0, exclude=None, exclude_r=0.0, curvature=0.0, flank=FLANK):
     """Distance along the path to the nearest return inside the robot's swept corridor, or inf.
 
     points: (x, y) in the robot frame (x ahead, metres). direction 1 looks ahead, -1 behind. curvature
@@ -97,7 +103,7 @@ def corridor_clearance(points, half_width, direction=1.0, exclude=None, exclude_
             r = 1.0 / curvature  # turning centre at (0, r)
             ang = math.atan2(xd, (r - y) if r > 0 else (y - r))
             along, off = abs(r) * ang, abs(math.hypot(xd, y - r) - abs(r))
-        if along <= 0.0 or off > half_width:
+        if along <= 0.0 or off > (flank[1] if along <= flank[0] else half_width):
             continue
         best = min(best, along)
     return best
@@ -111,7 +117,7 @@ def obstacle_speed_cap(clearance, stop_m, max_decel, latency_s, v_now):
     return math.sqrt(2.0 * max(max_decel, 0.1) * left)
 
 
-def segment_blocked(points, half_width, end, exclude=None, exclude_r=0.0):
+def segment_blocked(points, half_width, end, exclude=None, exclude_r=0.0, flank=FLANK):
     """True if a return, other than within exclude_r of exclude, lies within half_width of the straight
     path from the robot to end (x, y)."""
     length = math.hypot(end[0], end[1])
@@ -122,7 +128,7 @@ def segment_blocked(points, half_width, end, exclude=None, exclude_r=0.0):
         if exclude is not None and math.hypot(x - exclude[0], y - exclude[1]) <= exclude_r:
             continue
         along = x * ux + y * uy
-        if 0.0 < along <= length and abs(y * ux - x * uy) <= half_width:
+        if 0.0 < along <= length and abs(y * ux - x * uy) <= (flank[1] if along <= flank[0] else half_width):
             return True
     return False
 

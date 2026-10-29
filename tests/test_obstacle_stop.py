@@ -144,6 +144,14 @@ class AvoidTest(unittest.TestCase):
         node.obstacle_avoid, node.avoid_offset = False, 0.0
         self.assertEqual(node.obstacle_command(0.4, 0.0, self.TARGET, 0.0)[1], 0.0)
 
+    def test_someone_level_with_the_robot_is_beside_it_not_ahead(self):
+        # pass_by s3/s8: the worker 0.28 m from the robot's centre line, level with it, inside the 0.30 m
+        # corridor but outside the 0.235 m body; driving on slides past them
+        pts = person(0.05, 0.48)
+        self.assertEqual(M.corridor_clearance(pts, 0.3), math.inf)
+        self.assertFalse(M.segment_blocked(pts, 0.3, (1.5, 0.0)))
+        self.assertLess(M.corridor_clearance(person(0.5, 0.48), 0.3), 1.0)  # the same, ahead: in the way
+
     def test_a_robot_held_beside_an_obstacle_can_start_again(self):
         # pass_by s4: the robot stood beside the worker (left) while the target walked on. The speed ramp from
         # a stop asks for 0.05 m/s with a left turn, a tight arc into the worker, which the stop held at zero
