@@ -304,3 +304,9 @@ Earlier history: `history-2026-10-16.md`.
 - Changed Team Lead result handling to propagate any specialist 429 before the summary call. The existing error handler then returns 429 and pauses chat for this server process. Added a regression covering all-failed, mixed and unrelated partial-failure outcomes.
 - Focused Node tests passed 9/9, `python scripts/check.py` passed 166/166 using writable TEMP/TMP, and `git diff --check` passed. The rate-limit path was tested offline; no live model call or dashboard publish was made.
 - The same independent Astra reviewer re-checked the working-tree fix, confirmed both 429 outcomes and the placement before summary generation, and found no remaining blocker in this change.
+
+### 2026-10-29 — integration — PR #8 Virtual Office integration
+- Verified clean isolated `integration-hub` checkout and ready lock at `1042843`; the optional workflow document was absent. Initial sandbox fetch could not resolve GitHub. Escalated full fetch encountered an unrelated remote-ref name collision; a targeted fetch of hub and Office branches succeeded and confirmed reviewed head `0aa2e20` unchanged.
+- Claimed/pushed lock commit `6ddec9a`; merged `origin/codex/thesis-desk-office-queue` with `--no-ff` at `7fab5ac1550dc77edf5976126f053cbb2fb7ce3c`. No conflicts; changed paths match the reviewed Virtual Office scope plus this log.
+- Actual checks: `python scripts/check.py` passed 166 tests, compilation and thesis JSON; writable TEMP/TMP/TMPDIR used. Focused queue/server Node suites passed 9/9. Merge diff whitespace check passed; queue and server integration diff inspected.
+- Opened DISCUSSION T16 for Claude Code cross-review, recorded scope, evidence and limitations, and released HANDOFF lock. No duplicate direct Claude message, real model request, dashboard publication, main change, or stacked PR #9–#11 merge. Follow-up: Claude reviews T16; CI on updated hub can be checked separately.

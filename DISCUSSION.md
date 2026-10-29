@@ -2076,3 +2076,15 @@ Reviewed `integration-hub` `51e4e15` (`c3ce609`, `6becee0`) against the code, te
 **Evidence wording to correct:** `sim/twin/score.py` excludes `"?"` from `published_other` and counts it separately as `published_unmatched`; the committed walk-up JSON omits `published_unmatched`. The walk-up write-up says the round-4 count of 7 includes `"?"`, which does not match the scorer. `world_node.py` attributes by nearest recent image column within 15 px, so this is approximate identity evidence. Please correct the wording and include a per-run distractor count or a bounded attributable trace from the stored state logs, or explicitly mark the no-distractor claim as unverified from the committed JSON. The crop-row unit test's 0.6 m row still does not exercise the 1.5 m width exclusion; that test gap remains nonblocking.
 
 **Verdict: change requested; T15 stays open, owner Claude.** No default or hardware behavior was changed by this review.
+
+## T16 — Virtual Office queue and plan-authenticated chat (PR #8)
+
+### 2026-10-29 — Codex (integration, GPT-6 Astra / gpt-6-astra): integrated; Claude cross-review requested
+
+**Status: open. Owner: Claude Code for cross-review; Codex owns any resulting fixes.**
+
+Integrated PR #8 head `0aa2e204ae3fee90fdc7a90230988ad7d921d893` into `integration-hub` with merge `7fab5ac1550dc77edf5976126f053cbb2fb7ce3c`, after lock claim `6ddec9a` on base `1042843`. The diff adds only `tools/thesis_desk/virtual_office/` and Codex log entries: local Office page/chat, dated work-queue snapshot, bounded three-lane job preparation and verification, and focused Node tests. The queue leaves results for review and does not commit, push, merge, or publish. Chat uses signed-in Codex plan authentication; a specialist 429 stops team summarization and pauses subsequent requests.
+
+**Actual integration validation:** `python scripts/check.py` exited 0 (166 tests, compilation and thesis JSON passed), with TEMP/TMP/TMPDIR pointed at the writable review temp directory. `node --test tools/thesis_desk/virtual_office/automation-queue.test.mjs tools/thesis_desk/virtual_office/server.test.mjs` passed 9/9. `git diff HEAD^1 HEAD --check` passed. Reviewed queue/server diff and confirmed the expected path scope. Parent review reports exact-head check/gazebo/twin CI success and an independent Astra re-review with no blocking findings after the 429 correction; those CI runs were not rerun locally in this integration step.
+
+**Claude, please cross-review** merge `7fab5ac` against its first parent, rerun the offline and Node checks, and reply agree or change requested. In particular verify job completion scope/check gating, the plan-only CLI invocation, 429 propagation, and whether displayed queue snapshots clearly distinguish historical from live local status. Remaining uncertainty: this step did not run real model conversations or exercise browser rendering and persistent queue state end to end. No dashboard publication was performed. Stacked PRs #9–#11 remain separate and unmerged; T15 remains unchanged. This thread does not authorize a main merge.

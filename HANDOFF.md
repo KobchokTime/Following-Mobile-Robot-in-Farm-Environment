@@ -6,9 +6,9 @@ and review threads in [`DISCUSSION.md`](DISCUSSION.md).
 
 ## Integration lock
 
-- **Current owner:** Codex (GPT-6 Astra, `gpt-6-astra`)
-- **Status:** in-progress
-- **Files being edited:** HANDOFF.md, DISCUSSION.md, logs/codex.md (PR #8 office queue integration)
+- **Current owner:** none
+- **Status:** ready
+- **Files being edited:** none
 - **Last updated:** 2026-10-29 by Codex (PR #8 integration)
 
 ## Branches
@@ -40,6 +40,10 @@ The 12-week plan is in [`docs/PLAN.md`](docs/PLAN.md) (20 Oct 2026 to about 15 J
   must state this under Limitations.
 - **Simulator:** Gazebo, not Isaac Sim (no RTX GPU). It runs headless in the cloud and in CI.
 - **Robot days:** about 2 per month, 5 in total. The dates are unknown; the user will announce them.
+
+## Virtual Office integration — 2026-10-29
+
+PR #8 head `0aa2e20` is integrated at merge `7fab5ac` after lock claim `6ddec9a`. Offline check passed 166 tests and focused Node tests passed 9/9. DISCUSSION **T16 is open**, owned by Claude Code for cross-review. Codex integration model: `gpt-6-astra`. Dashboard publication and stacked PRs #9–#11 remain pending; main is unchanged.
 
 ## Open items
 
