@@ -3,6 +3,7 @@ import rclpy
 from rclpy.node import Node
 from std_msgs.msg import Float32MultiArray
 from geometry_msgs.msg import Twist
+from sensor_msgs.msg import LaserScan
 import math
 from math import exp, isfinite
 
@@ -76,6 +77,40 @@ def speed_command(error_dist, speed_ff, dt, linear_gain, tolerance, max_linear_s
     linear_x = max(min(linear_x, max_linear_speed), -max_linear_speed)
     return linear_x, speed_ff
 
+def corridor_clearance(points, half_width, direction=1.0, exclude=None, exclude_r=0.0, curvature=0.0):
+    """Distance along the path to the nearest return inside the robot's swept corridor, or inf.
+
+    points: (x, y) in the robot frame (x ahead, metres). direction 1 looks ahead, -1 behind. curvature
+    (1/m, left positive) bends the corridor along the arc the robot is turning on, so something the turn
+    will pass is not a reason to stop, and something on the turn is. A return within exclude_r of exclude
+    (x, y), the target being followed, does not count: the follower keeps its own gap to the target.
+    Anything else counts, person or not, seen by the camera or not.
+    """
+    best = math.inf
+    for x, y in points:
+        if exclude is not None and math.hypot(x - exclude[0], y - exclude[1]) <= exclude_r:
+            continue
+        xd = x * direction
+        if abs(curvature) < 1e-3:
+            along, off = xd, abs(y)
+        else:
+            r = 1.0 / curvature  # turning centre at (0, r)
+            ang = math.atan2(xd, (r - y) if r > 0 else (y - r))
+            along, off = abs(r) * ang, abs(math.hypot(xd, y - r) - abs(r))
+        if along <= 0.0 or off > half_width:
+            continue
+        best = min(best, along)
+    return best
+
+
+def obstacle_speed_cap(clearance, stop_m, max_decel, latency_s, v_now):
+    """Fastest speed the robot can still stop from before stop_m short of the obstacle (0 when closer)."""
+    left = clearance - stop_m - max(0.0, v_now) * latency_s
+    if left <= 0.0:
+        return 0.0
+    return math.sqrt(2.0 * max(max_decel, 0.1) * left)
+
+
 class FollowStopNode(Node):
     def __init__(self):
         super().__init__('follow_stop_node')
@@ -120,6 +155,15 @@ class FollowStopNode(Node):
         # bearing mode only: publish a stop when target messages stop for this long, instead of leaving
         # the bridge to repeat the last turn until its own 1 s timeout (Codex, T12)
         self.declare_parameter('target_timeout_s', 0.3)
+        # obstacle stop: anything the LiDAR sees in the corridor ahead (or behind when reversing), other than
+        # the target, caps the speed so the robot stops stop_m short of it. No physical E-stop exists.
+        self.declare_parameter('obstacle_stop', True)
+        self.declare_parameter('obstacle_half_width_m', 0.30)   # robot 0.47 m wide (thesis slides) + 6.5 cm margin
+        self.declare_parameter('obstacle_stop_m', 0.45)         # stop this far from the LiDAR to the obstacle
+        self.declare_parameter('obstacle_target_exclude_m', 0.30)  # returns this close to the target are the target
+        self.declare_parameter('scan_topic', '/scan')
+        self.declare_parameter('lidar_angle_offset_deg', 180.0)  # as sync_fusion_node / lidar_sectorizer_node
+        self.declare_parameter('scan_max_age_s', 0.3)
 
         # ---------- Load ----------
         self.target_distance   = float(self.get_parameter('target_distance').value)
@@ -156,6 +200,17 @@ class FollowStopNode(Node):
         self.target_timeout    = float(self.get_parameter('target_timeout_s').value) if self.steer_mode == 'bearing' else 0.0
         self.last_msg_time     = None
         self.stale_stopped     = False
+        self.obstacle_stop     = bool(self.get_parameter('obstacle_stop').value)
+        self.obstacle_half_w   = float(self.get_parameter('obstacle_half_width_m').value)
+        self.obstacle_stop_m   = float(self.get_parameter('obstacle_stop_m').value)
+        self.obstacle_excl     = float(self.get_parameter('obstacle_target_exclude_m').value)
+        self.lidar_offset      = math.radians(float(self.get_parameter('lidar_angle_offset_deg').value))
+        self.scan_max_age      = float(self.get_parameter('scan_max_age_s').value)
+        self.scan_xy           = []     # latest scan in the robot frame
+        self.scan_time         = None
+        self.obstacle_capped   = False  # last [OBST] state written to the log
+        self.moving_cmd        = None   # last command sent while moving, re-checked on every scan
+        self.moving_target     = None   # (x, y, time) of the target point that command was checked with
 
         # ---------- State ----------
         self.initialized   = False
@@ -174,6 +229,8 @@ class FollowStopNode(Node):
 
         # ---------- ROS ----------
         self.sub = self.create_subscription(Float32MultiArray, '/target_fused_prob', self.cb_fused, 10)
+        if self.obstacle_stop:
+            self.create_subscription(LaserScan, str(self.get_parameter('scan_topic').value), self.cb_scan, 10)
         self.pub = self.create_publisher(Twist, '/cmd_vel', 10)
         if self.target_timeout > 0.0:
             self.stale_timer = self.create_timer(0.05, self.check_stale)
@@ -184,6 +241,60 @@ class FollowStopNode(Node):
         )
 
     # ==================================================
+    def cb_scan(self, msg: LaserScan):
+        pts = []
+        for i, r in enumerate(msg.ranges):
+            if math.isfinite(r) and msg.range_min < r < msg.range_max:
+                a = msg.angle_min + i * msg.angle_increment + self.lidar_offset
+                pts.append((r * math.cos(a), r * math.sin(a)))
+        self.scan_xy = pts
+        self.scan_time = self.get_clock().now().nanoseconds / 1e9
+        self.recheck_last_cmd()
+
+    def recheck_last_cmd(self):
+        """Each scan re-checks the last moving command against the new returns. Target messages can stop
+        (a lost target, a single false box), and the bridge keeps the last command until the stale stop and
+        its own ramp; whoever walks into the corridor meanwhile still slows the robot (blind_corner run)."""
+        cmd = self.moving_cmd
+        if cmd is None or cmd.linear.x == 0.0:
+            return
+        tgt = self.moving_target
+        target_xy = tgt[:2] if tgt is not None and self.scan_time - tgt[2] <= self.scan_max_age else None
+        capped = self.obstacle_limited(cmd.linear.x, target_xy, cmd.angular.z)
+        if abs(capped) < abs(cmd.linear.x):
+            twist = Twist()
+            twist.linear.x = capped
+            twist.angular.z = cmd.angular.z
+            self.send(twist)
+            self.last_linear = capped
+
+    def send(self, twist, target_xy=None):
+        """Publish a command and keep it for the per-scan re-check while it moves the robot."""
+        self.pub.publish(twist)
+        now = self.get_clock().now().nanoseconds / 1e9
+        self.moving_cmd = twist if twist.linear.x != 0.0 else None
+        if target_xy is not None:
+            self.moving_target = (target_xy[0], target_xy[1], now)
+
+    def obstacle_limited(self, linear_x, target_xy, angular_z=0.0):
+        """linear_x capped by the corridor clearance; a stale or missing scan stops forward and reverse motion."""
+        if not self.obstacle_stop or linear_x == 0.0:
+            return linear_x
+        now = self.get_clock().now().nanoseconds / 1e9
+        fresh = self.scan_time is not None and 0.0 <= now - self.scan_time <= self.scan_max_age
+        direction = 1.0 if linear_x > 0.0 else -1.0
+        curvature = angular_z / linear_x if abs(linear_x) > 0.05 else 0.0
+        clearance = corridor_clearance(self.scan_xy, self.obstacle_half_w, direction,
+                                       target_xy, self.obstacle_excl, curvature) if fresh else 0.0
+        cap = obstacle_speed_cap(clearance, self.obstacle_stop_m, self.max_decel, self.latency_s,
+                                 abs(self.v_wheels))
+        capped = abs(linear_x) > cap
+        if capped != self.obstacle_capped:
+            self.get_logger().info(f"[OBST] {'on' if capped else 'off'} clearance={clearance:.2f} m"
+                                   + ('' if fresh else ' (no fresh scan)'))
+            self.obstacle_capped = capped
+        return direction * min(abs(linear_x), cap)
+
     def cb_fused(self, msg: Float32MultiArray):
         if len(msg.data) < 8:
             return
@@ -219,7 +330,11 @@ class FollowStopNode(Node):
         self.v_wheels_time = now
         if P_fused_smooth < self.p_fused_threshold or not isfinite(dist):
             if (now - self.last_good_time).nanoseconds / 1e9 < 1.0:
-                self.pub.publish(self.last_good_cmd)
+                held = Twist()
+                held.linear.x = self.obstacle_limited(self.last_good_cmd.linear.x, None,
+                                                      self.last_good_cmd.angular.z)
+                held.angular.z = self.last_good_cmd.angular.z
+                self.send(held)
                 self.get_logger().info(f"[HOLD] Low conf {P_fused_smooth:.2f} → keep last cmd")
             else:
                 self.publish_stop()
@@ -293,11 +408,18 @@ class FollowStopNode(Node):
             angular_z = bearing_turn(bearing, self.bearing_rate, self.latency_s,
                                      self.bearing_gain, self.bearing_limit, self.bearing_deadband)
 
+        # ---------- Obstacle stop ----------
+        tb = (math.radians(self.camera_hfov_deg / 2.0) * (1.0 if cx <= 0 else -1.0)
+              if cx <= 0 or cx >= self.image_width - 1 else camera_bearing(cx, self.image_width, self.camera_hfov_deg))
+        target_xy = (dist * math.cos(tb), dist * math.sin(tb))
+        linear_x = self.obstacle_limited(linear_x, target_xy, angular_z)
+        self.last_linear = linear_x
+
         # ---------- Publish ----------
         twist = Twist()
         twist.linear.x = linear_x
         twist.angular.z = angular_z
-        self.pub.publish(twist)
+        self.send(twist, target_xy)
 
         self.last_good_cmd = twist
         self.last_good_time = now
@@ -327,6 +449,7 @@ class FollowStopNode(Node):
     def publish_stop(self):
         twist = Twist()
         self.pub.publish(twist)
+        self.moving_cmd = None
 
 
 def main():
