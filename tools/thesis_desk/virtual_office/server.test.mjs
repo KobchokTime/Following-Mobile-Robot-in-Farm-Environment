@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { Readable } from "node:stream";
 import { test } from "node:test";
-import { classifyModelError, codexChildEnv, loggedInWithChatGPT, readMessage, teamDelegates } from "./server.mjs";
+import { classifyModelError, codexChildEnv, loggedInWithChatGPT, officeLogName, readMessage, teamDelegates } from "./server.mjs";
 
 function response() {
   return {
@@ -41,6 +41,7 @@ test("rate-limit errors are safe to show and other CLI stderr stays private", ()
   const limited = classifyModelError(new Error("private prompt\nlast status: 429 Too Many Requests"));
   assert.deepEqual(limited, { status: 429,
     error: "Codex จำกัดคำขอชั่วคราว (429) โปรดลองอีกครั้งภายหลัง" });
+  assert.equal(classifyModelError({ status: 429 }).status, 429);
   const other = classifyModelError(new Error("private prompt and local path"));
   assert.deepEqual(other, { status: 502, error: "agent ตอบกลับไม่ได้ โปรดลองอีกครั้ง" });
 });
@@ -58,4 +59,10 @@ test("Team Lead stops before summary when any specialist hits 429", () => {
     { status: "rejected", reason: new Error("temporary failure") },
     { status: "fulfilled", value: answered },
   ]), [answered]);
+});
+
+test("raw Office log links cannot escape their recorded file names", () => {
+  assert.equal(officeLogName("4ef21a55-ea50-4e11-90e7-42b0248aea41-krit.txt"), true);
+  for (const name of ["../secret", "..\\secret", "meeting.txt", "4ef21a55-ea50-4e11-90e7-42b0248aea41-krit.txt/../secret"])
+    assert.equal(officeLogName(name), false);
 });

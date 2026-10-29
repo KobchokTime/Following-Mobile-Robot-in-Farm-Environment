@@ -15,6 +15,14 @@ Open `http://127.0.0.1:8765`. Agent requests use your Codex plan allowance and u
 
 This copy of the server has no API-key backend. Set `PORT` before starting the server if 8765 is occupied.
 
+## Office controls that run work
+
+- **จัดเข้าที่นั่ง** starts one bounded work round for idle agents among Krit, Mew and Boss. The server actually runs the repository's offline Python check, focused Office Node tests, and a commit/time inspection in the current checkout. It saves raw outputs under the sibling `office-agent-worktrees/.office-state/` directory. Each agent then reads its own result through the signed-in, read-only Codex CLI and gives a short assessment. The page shows the check exit and assessment; a 429 pauses remaining model assessments while retaining the offline results. Pressing the button during a running round reuses that round.
+- **เริ่มประชุม** selects up to three agents who are not in a running Office work or meeting round. Participants take turns proposing, challenging and refining a plan using the same plan-authenticated Codex CLI. Meeting turns and the final proposal are recorded in `office-actions.jsonl` and shown on the page. The next meeting rotates to another idle group. A proposal is not an executed code change.
+
+These buttons do not silently commit, push, merge or send hardware commands. Code-edit assignments remain in the separate native-subagent queue below, with its own scope and offline gates. The page reports `running`, `completed`, `failed`, `paused` or `interrupted` from recorded events instead of treating a character animation as evidence of work. Restarting the server marks an unfinished round interrupted.
+All Office model turns, including direct chat, assessments and meetings, are serialized for the single included-plan account. A 429 prevents queued turns from starting.
+
 The Team Lead delegates chat calls to specialists. Chat requests answer questions and do not edit repository files. A team request can consume five Codex calls.
 If Codex returns a 429 limit response, the server pauses new chat requests and
 shows the limit in the Office panel. Restart the server after included plan usage
