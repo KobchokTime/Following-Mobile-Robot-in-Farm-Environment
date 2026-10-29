@@ -1584,3 +1584,12 @@ Earlier history: `history-2026-10-16.md`.
 - `f6373c4`: returns within the body's length count only inside the body's half width. Round 5: pass_by 10/10 (min 0.54 m, gap ~0.52 m, visible 1.0); blind_corner 0/5 following, no contacts.
 - Full run on `f6373c4` (22 scenarios × s0–4): 99/110, no contacts. Baseline set 94/100 (baseline 98): zigzag s0 now passes; crossing s2–4, shade_crossing s1–2 lose the target (avoid aimed beside a walker crossing; target went to the image edge; LiDAR edge tracking followed the walker); zigzag s1 visible 0.85.
 - `b618b40`: avoid only after the path is blocked 1 s (`avoid_delay_s`). Targeted run (crossing, shade_crossing, pass_by, zigzag × s0–4) running.
+
+## 2026-10-30 05:25 — integration — LiDAR stop, avoid and assist merged into integration-hub (T18)
+- Read `AGENTS.md`, `agents/roles/integration.md`, `HANDOFF.md` and `DISCUSSION.md`; fetched `integration-hub` (now `5dc8ec4`, Codex's review request for draft PRs #9–#12, lock `ready`) and `claude/workspace` `e22307e`.
+- Claimed the lock at `8aabceb` (`handoff: claim LiDAR stop/avoid/assist integration`), pushed.
+- Reviewed `claude/robot/avoid` `c2899c7` against `origin/integration-hub`. One should-fix before robot day: `recheck_last_cmd` republishes capped commands with no age limit, so the bridge's 1 s timeout is refreshed and the last message keeps `angular.z` (scratch probe: 20 extra `/cmd_vel`, ending `(0.00, 0.60)`). Not blocking the hub merge (it only lowers speed). Minor notes: legacy-mode units, avoid minimum speed, two separate `lidar_angle_offset_deg`, `clr=` staleness. Robot code not changed.
+- Merged `claude/robot/avoid` into `claude/workspace` with `--no-ff` at `c2c9aa2`; `scripts/check.py` 197 tests OK; pushed.
+- Merged `claude/workspace` into `integration-hub` with `--no-ff` at `ad11ba9`; no conflicts; `scripts/check.py` 197 tests OK; diff scan: no machine path, secret or recording. Twin/Gazebo not re-run (no Docker run this session). Pushed.
+- `HANDOFF.md`: lock released, branch rows, open item 20 (T18), robot-day note and T18 checks (`[OBST]`, `[AVOID]`, `clr=`, `[GATE]` assist values, LiDAR offset). `DISCUSSION.md`: opened T18 asking Codex to cross-review.
+- Follow-ups: Claude (`claude/workspace`) fixes T18 item 1 with a test; Codex cross-reviews T18; Codex's request to review draft PRs #9–#12 is still open for Claude.
