@@ -1565,3 +1565,9 @@ Earlier history: `history-2026-10-16.md`.
 - Round 2 (`f1e1511`): pass_by avoid on 4/5, off 0/5 (stop, target lost), no contacts. blind_corner avoid on 0/5, no contacts (min 0.57 m).
 - `cb9af55`: start from a near stop (pass_by s4 stood 5 s beside the worker: the ramp asked for 0.05 m/s with a turn into the worker). Round 3: pass_by 5/10, no contacts; swerve arcs fought the sector steering.
 - `dcd58e0`: redesign. Aim at a point beside the target (smallest clear sideways shift, side kept, within 0.5 rad), steer there by bearing; hold 0.5 s after clear. 194 tests pass. Round 4 (pass_by s0–9, blind_corner s0–4) running.
+
+## 2026-10-30 03:48 — avoid rounds 4–5, full run, crossing fix (`claude/robot/avoid` `b618b40`)
+- Round 4 (`dcd58e0`, aim beside the target): pass_by 8/10, no contacts. s3/s8 stopped for good level with the worker (inside the 0.30 m corridor, outside the 0.235 m body).
+- `f6373c4`: returns within the body's length count only inside the body's half width. Round 5: pass_by 10/10 (min 0.54 m, gap ~0.52 m, visible 1.0); blind_corner 0/5 following, no contacts.
+- Full run on `f6373c4` (22 scenarios × s0–4): 99/110, no contacts. Baseline set 94/100 (baseline 98): zigzag s0 now passes; crossing s2–4, shade_crossing s1–2 lose the target (avoid aimed beside a walker crossing; target went to the image edge; LiDAR edge tracking followed the walker); zigzag s1 visible 0.85.
+- `b618b40`: avoid only after the path is blocked 1 s (`avoid_delay_s`). Targeted run (crossing, shade_crossing, pass_by, zigzag × s0–4) running.
