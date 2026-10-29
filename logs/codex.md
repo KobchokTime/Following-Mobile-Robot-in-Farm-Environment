@@ -311,6 +311,32 @@ Earlier history: `history-2026-10-16.md`.
 - Actual checks: `python scripts/check.py` passed 166 tests, compilation and thesis JSON; writable TEMP/TMP/TMPDIR used. Focused queue/server Node suites passed 9/9. Merge diff whitespace check passed; queue and server integration diff inspected.
 - Opened DISCUSSION T16 for Claude Code cross-review, recorded scope, evidence and limitations, and released HANDOFF lock. No duplicate direct Claude message, real model request, dashboard publication, main change, or stacked PR #9–#11 merge. Follow-up: Claude reviews T16; CI on updated hub can be checked separately.
 
+### 2026-10-29 — thesis-desk — Run Office seat work and idle-agent meetings
+
+- Developed on isolated `codex/thesis-desk/office-active-work` from verified `integration-hub` `c265d9a`. The seat button now starts actual offline Python and Office Node checks plus commit/time inspection, followed by plan-authenticated read-only Codex assessments. The meeting button selects up to three idle agents for sequential proposal, challenge and plan turns. Results and raw check logs are persisted outside the checkout and displayed in Office.
+- Kept the 3D desks and scene controls. Browser smoke at `127.0.0.1:8769` confirmed the desks remain visible with the results panel, a completed seat round (Python 166/166, Office Node 15/15, three recorded assessments), and a completed three-agent meeting with recorded turns. An earlier preview stop was marked `interrupted` on restart, as designed. Coding assignments still use the separate native-subagent queue; a meeting proposal does not execute itself.
+- Independent review found and fixes addressed concurrent agent reservation, append failure recovery, missing workflow tests in the seat check, meeting evidence context, and scene state after reload. Focused Node tests passed 15/15; `python scripts/check.py` passed 166/166 with writable TEMP/TMP; JavaScript syntax and `git diff --check` passed. No dashboard artifact was published from this branch.
+
+### 2026-10-29 — thesis-desk — Rename Office feature branch for GitHub
+
+- Commit `0ad41b5` was created locally. GitHub rejected the first push to `codex/thesis-desk/office-active-work` because the existing remote branch `codex/thesis-desk` is a file/directory ref conflict. Renamed the local feature branch to `codex/thesis-desk-office-active-work`; the code and base commit are unchanged. Follow-up: push this branch and open a draft PR to `integration-hub`.
+
+### 2026-10-29 — thesis-desk — Submit Office controls for review
+
+- Pushed `codex/thesis-desk-office-active-work` at `c55c182` and opened draft PR #13 against `integration-hub`. Attached the PR to this task. Its current CI head must be checked before integration; Claude cross-review remains pending.
+- The isolated preview at `127.0.0.1:8769` was restarted on the committed server code. Its saved seat and meeting results survived restart and the desks remained visible. The main checkout and dashboard artifact were not changed.
+
+### 2026-10-29 — thesis-desk — Include every idle agent in meeting rotation
+
+- Follow-up on draft PR #13: the meeting rotation now reaches Krit, Mew and Boss after the other nine agents, so a free desk agent can also join. Added an offline four-round rotation test.
+- Focused Office Node tests passed 16/16, `python scripts/check.py` passed 166/166, and `git diff --check` passed. No new model run or sweep was needed for this change.
+
+### 2026-10-29 — thesis-desk — Keep busy Office agents at work while idle agents rest
+
+- On isolated `codex/thesis-desk-office-active-work` / draft PR #13, renamed the walk control to พักผ่อน. The browser now starts continuous aisle walking only for agents free in the server's action and direct-chat state; desk work and meeting participants stay at their positions until their recorded action ends. A running meeting restores its full seating order after page reload.
+- Local Chrome smoke on the separate `127.0.0.1:8769` preview saw all 12 initially idle agents move, remain moving after about 20 seconds, and stop resting when toggled off. The scene screenshot showed desks visible. An offline browser-controller regression covered running meetings, desk work, direct chat, completion and repeated polling without interrupting busy agents.
+- Office Node suites passed 17/17; `python scripts/check.py` passed 166/166 with writable TEMP/TMP after the sandbox default Temp produced permission errors. Scene and server JavaScript syntax checks and `git diff --check` passed. No live model call, robot action, main merge or dashboard publication was made for this change.
+
 ### 2026-10-29 — thesis-desk — Address T16 Office cross-review blockers
 
 - In isolated `codex/thesis-desk-t16-review-fix` from `integration-hub` `61742ce`, added a local Host check for all Office requests and matching Origin plus JSON media-type checks for POST. A foreign page or DNS-rebound hostname is rejected before a chat request can start Codex. Direct `readMessage` also rejects non-JSON bodies.
@@ -333,3 +359,13 @@ Earlier history: `history-2026-10-16.md`.
 - Verified Claude's `agree` in DISCUSSION on hub `4c8d657` and exact PR #14 head `a6a10fb` with GitHub check, twin and Gazebo jobs passing. Claimed the HANDOFF lock at `8f87d41`.
 - Merged PR #14 with `--no-ff` into `integration-hub` at `961b92d` and pushed. Focused Office Node tests passed 12/12, `python scripts/check.py` passed 169/169, and first-parent merge diff whitespace check passed.
 - Recorded T16 resolved in DISCUSSION and released the HANDOFF lock. PR #13 remains separate at `327b07b` pending its exact-head CI; no main merge or dashboard publication.
+
+### 2026-10-29 — thesis-desk — Secure the active Office preview after T16 review
+
+- Brought the tested T16 fix branch into isolated Office feature branch `codex/thesis-desk-office-active-work` so the active `127.0.0.1:8769` preview can use the same Host/Origin/JSON guard. Preserved both append-only log histories and the latest T15/T16 hub notes. The Office seat/meeting POSTs now send JSON, which the new guard requires; the older route-specific Origin check was removed in favor of the common guard.
+- Added a browser-controller regression for JSON seat and meeting POSTs. Focused Office Node suites passed 20/20; `python scripts/check.py` passed 169/169 with writable TEMP/TMP, and JavaScript syntax plus diff checks passed. The preview will be restarted only after this merge commit is complete; no model job was started during this verification.
+
+### 2026-10-29 — thesis-desk — Clarify the Office seat-check checkout before integration
+
+- Claude agreed with T16 on hub `4c8d657` and confirmed PR #13 head `d6ed026` passed focused Node 20/20 and `scripts/check.py` 169/169. Follow-up on `codex/thesis-desk-office-active-work`: README now says explicitly that seat checks run in the user's own working checkout containing `server.mjs` (`repoRoot`), not an isolated clone; uncommitted files there can affect the checks. The separate automatic feature queue creates clones.
+- No new model, sweep, robot command or dashboard publication was used for this documentation correction. PR #13 remains a draft pending this commit's CI and hub integration.
