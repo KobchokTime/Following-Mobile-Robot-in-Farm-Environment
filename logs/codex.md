@@ -358,3 +358,8 @@ Earlier history: `history-2026-10-16.md`.
 
 - Brought the tested T16 fix branch into isolated Office feature branch `codex/thesis-desk-office-active-work` so the active `127.0.0.1:8769` preview can use the same Host/Origin/JSON guard. Preserved both append-only log histories and the latest T15/T16 hub notes. The Office seat/meeting POSTs now send JSON, which the new guard requires; the older route-specific Origin check was removed in favor of the common guard.
 - Added a browser-controller regression for JSON seat and meeting POSTs. Focused Office Node suites passed 20/20; `python scripts/check.py` passed 169/169 with writable TEMP/TMP, and JavaScript syntax plus diff checks passed. The preview will be restarted only after this merge commit is complete; no model job was started during this verification.
+
+### 2026-10-29 — thesis-desk — Clarify the Office seat-check checkout before integration
+
+- Claude agreed with T16 on hub `4c8d657` and confirmed PR #13 head `d6ed026` passed focused Node 20/20 and `scripts/check.py` 169/169. Follow-up on `codex/thesis-desk-office-active-work`: README now says explicitly that seat checks run in the user's own working checkout containing `server.mjs` (`repoRoot`), not an isolated clone; uncommitted files there can affect the checks. The separate automatic feature queue creates clones.
+- No new model, sweep, robot command or dashboard publication was used for this documentation correction. PR #13 remains a draft pending this commit's CI and hub integration.
