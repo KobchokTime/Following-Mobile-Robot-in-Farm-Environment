@@ -211,6 +211,7 @@ class FollowStopNode(Node):
         self.declare_parameter('obstacle_avoid', True)
         self.declare_parameter('avoid_min_speed_mps', 0.12)  # an arc slower than this is no better than stopping
         self.declare_parameter('avoid_hold_s', 0.5)          # keep the shift this long once the path is clear
+        self.declare_parameter('avoid_delay_s', 1.0)         # go round only what blocks the path this long
         self.declare_parameter('scan_topic', '/scan')
         self.declare_parameter('lidar_angle_offset_deg', 180.0)  # as sync_fusion_node / lidar_sectorizer_node
         self.declare_parameter('scan_max_age_s', 0.3)
@@ -262,6 +263,8 @@ class FollowStopNode(Node):
         self.obstacle_avoid    = bool(self.get_parameter('obstacle_avoid').value)
         self.avoid_min_speed   = float(self.get_parameter('avoid_min_speed_mps').value)
         self.avoid_hold        = float(self.get_parameter('avoid_hold_s').value)
+        self.avoid_delay       = float(self.get_parameter('avoid_delay_s').value)
+        self.blocked_since     = None   # when the straight path to the target was first seen blocked
         self.avoid_offset      = 0.0    # m beside the target the robot aims at to pass an obstacle
         self.avoid_time        = 0.0    # when the current shift was last needed
         self.last_clearance    = math.inf  # corridor clearance of the last command, for the [MOVE] line
@@ -363,8 +366,15 @@ class FollowStopNode(Node):
         offset = 0.0
         if self.obstacle_stop and self.obstacle_avoid and fresh and not at_edge and linear_x > 0.0:
             found = aim_offset(self.scan_xy, self.obstacle_half_w, target_xy, self.obstacle_excl, self.avoid_offset)
-            if found:  # blocked, and a shift clears it (None: no shift does; the stop alone applies)
-                offset, self.avoid_time = found, now
+            if found == 0.0:
+                self.blocked_since = None
+            elif self.blocked_since is None:
+                self.blocked_since = now
+            # someone walking across the path is gone within about a second; going round them turned the
+            # target out of the image (twin crossing runs). Only what stays in the way is gone round.
+            waited = self.blocked_since is not None and now - self.blocked_since >= self.avoid_delay
+            if found and (waited or self.avoid_offset != 0.0):
+                offset, self.avoid_time = found, now  # None: no shift clears it; the stop alone applies
             elif found == 0.0 and self.avoid_offset != 0.0 and now - self.avoid_time < self.avoid_hold:
                 offset = self.avoid_offset  # just past it: keep the shift a moment so the robot does not clip it
         if offset != 0.0:

@@ -136,6 +136,7 @@ class AvoidTest(unittest.TestCase):
 
     def test_the_node_aims_beside_the_target_past_a_worker(self):
         node = M.FollowStopNode()
+        node.avoid_delay = 0.0
         pts = person(1.8, 0.0) + person(0.9, 0.42)
         node.cb_scan(scan(pts))
         v, w = node.obstacle_command(0.4, 0.0, self.TARGET, 0.0)
@@ -151,6 +152,12 @@ class AvoidTest(unittest.TestCase):
         self.assertEqual(M.corridor_clearance(pts, 0.3), math.inf)
         self.assertFalse(M.segment_blocked(pts, 0.3, (1.5, 0.0)))
         self.assertLess(M.corridor_clearance(person(0.5, 0.48), 0.3), 1.0)  # the same, ahead: in the way
+
+    def test_someone_crossing_is_waited_for_not_gone_round(self):
+        node = M.FollowStopNode()  # avoid_delay_s 1.0; the test clock stands still
+        node.cb_scan(scan(person(1.8, 0.0) + person(0.9, 0.42)))
+        self.assertEqual(node.obstacle_command(0.4, 0.0, self.TARGET, 0.0)[1], 0.0)
+        self.assertIsNotNone(node.blocked_since)
 
     def test_a_robot_held_beside_an_obstacle_can_start_again(self):
         # pass_by s4: the robot stood beside the worker (left) while the target walked on. The speed ramp from
