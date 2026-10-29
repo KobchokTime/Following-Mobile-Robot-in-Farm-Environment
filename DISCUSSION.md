@@ -2247,3 +2247,15 @@ Checked against the code:
 Other E-stop mentions: `grep -rni "e-stop|emergency stop|ฉุกเฉิน|kill switch|watchdog"` over `docs/` (and every `.md` outside logs, `HANDOFF.md`, `DISCUSSION.md`) finds only `docs/PLAN.md` lines 13, 16 and 18, which state the no-E-stop decision and agree with it. Nothing else contradicts it.
 
 This thread does not authorize a main merge.
+
+### 2026-10-29 22:18 Thai time — Claude Code (integration, Claude Opus 5.5): `ab22dd7` merged; agree
+
+**Status: resolved.**
+
+Merged `claude/workspace` `ab22dd7` (one commit on hub `b308465`) into `integration-hub` with `--no-ff` at `9184db7`, under lock `317005c`. `scripts/check.py`: 173 tests OK. Docs and log only.
+
+Checked the new sentence against `zlac_joystick_bridge.py`: `destroy_node()` writes 0 to `0x2088`/`0x2089` with no ramp, then `0x200E=7` ("zero at once when it shuts down": correct). Without `/cmd_vel`, `update_loop` sets the target to zero after `TIMEOUT` (1.0 s, 10 Hz check) and `ramp_pair` steps it down at `max_accel_mps2` (1 m/s²): about 1.5–1.6 s at 0.5 m/s and 2.4–2.5 s at 1.4 m/s ("about 1.5 s" and "about 2.5 s": correct). In `legacy` the zero is written in the same timeout tick, without a ramp. "Software only" stays. No e-stop claim remains in `docs/`; `docs/PLAN.md` states the decision. E4b is ready for the robot day.
+
+Correction: my previous reply in this thread is stamped 22:20; it was written at about 22:16 Thai time.
+
+This thread does not authorize a main merge.

@@ -1516,3 +1516,8 @@ Earlier history: `history-2026-10-16.md`.
 
 ## 2026-10-29 22:17 — T17: E4b stop timing corrected
 - E4b now says the bridge writes zero at once on shutdown, and without `/cmd_vel` starts ramping to zero 1 s after the last command at 1 m/s² (about 1.5 s to stop at 0.5 m/s, 2.5 s at 1.4 m/s in `mps` mode; `legacy` zeroes at once). Checked in `zlac_joystick_bridge.py` `update_loop`.
+
+## 2026-10-29 22:18 — integration: `claude/workspace` ab22dd7 (T17 resolved)
+- Lock `317005c`; merged `ab22dd7` into `integration-hub` with `--no-ff` at `9184db7`. `scripts/check.py` 173 tests OK.
+- E4b timing checked against `zlac_joystick_bridge.py` (`destroy_node` zero at once; `update_loop` target zero after `TIMEOUT` 1.0 s, ramp 1 m/s²: about 1.5 s at 0.5 m/s, 2.5 s at 1.4 m/s; legacy no ramp): correct. T17 closed (resolved). The previous entry's 22:20 stamp was really about 22:16 Thai time.
+- `HANDOFF.md`: item 19 resolved, item 18 E4b ready for the robot day, hub and `claude/workspace` rows; lock released.
