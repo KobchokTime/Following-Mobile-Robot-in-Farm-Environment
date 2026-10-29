@@ -310,3 +310,9 @@ Earlier history: `history-2026-10-16.md`.
 - Claimed/pushed lock commit `6ddec9a`; merged `origin/codex/thesis-desk-office-queue` with `--no-ff` at `7fab5ac1550dc77edf5976126f053cbb2fb7ce3c`. No conflicts; changed paths match the reviewed Virtual Office scope plus this log.
 - Actual checks: `python scripts/check.py` passed 166 tests, compilation and thesis JSON; writable TEMP/TMP/TMPDIR used. Focused queue/server Node suites passed 9/9. Merge diff whitespace check passed; queue and server integration diff inspected.
 - Opened DISCUSSION T16 for Claude Code cross-review, recorded scope, evidence and limitations, and released HANDOFF lock. No duplicate direct Claude message, real model request, dashboard publication, main change, or stacked PR #9–#11 merge. Follow-up: Claude reviews T16; CI on updated hub can be checked separately.
+
+### 2026-10-29 — qa — Warn on empty live dashboard data and track growth
+- Created isolated branch codex/qa/dashboard-validator-warnings from verified integration-hub c265d9a970beb31bca5e902b0cd7800a577a6e28; no shared checkout or Claude branch changed.
+- scripts/validate_dashboard_live.py now emits non-failing CLI warnings for empty live_tracks, no registry experiment with live: true, and past_tracks.json above 6,500,000 bytes. The 8,000,000-byte failure limit remains unchanged.
+- Added focused cases for all three warnings and checked a warning still prints PASS with exit 0. Focused validator tests passed 12/12; python scripts/check.py passed 169/169; git diff --check passed.
+- Tests use generated offline fixtures; no simulator sweep, artifact publish, API key, PR, or integration merge was run.

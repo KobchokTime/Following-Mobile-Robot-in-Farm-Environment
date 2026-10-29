@@ -66,6 +66,36 @@ class DashboardLiveValidatorTest(unittest.TestCase):
     def test_generated_done_and_queued_files_pass(self):
         self.assertEqual(validate(self.registry, self.out), [])
 
+    def test_empty_live_tracks_warns_but_still_passes(self):
+        self.mutate("live_tracks.json", lambda rows: rows.clear())
+        warnings = []
+        self.assertEqual(validate(self.registry, self.out, warnings), [])
+        self.assertTrue(any("live_tracks.json: no track samples" in warning for warning in warnings))
+
+    def test_no_live_experiment_warns_but_still_passes(self):
+        registry = json.loads(self.registry.read_text(encoding="utf-8"))
+        registry[0]["live"] = False
+        self.registry.write_text(json.dumps(registry, ensure_ascii=False), encoding="utf-8")
+        self.generate()
+        warnings = []
+        self.assertEqual(validate(self.registry, self.out, warnings), [])
+        self.assertTrue(any("no experiment has live: true" in warning for warning in warnings))
+        self.assertTrue(any("live_tracks.json: no track samples" in warning for warning in warnings))
+
+    def test_past_tracks_size_warns_before_hard_limit_without_failing_cli(self):
+        path = self.out / "past_tracks.json"
+        with path.open("ab") as stream:
+            stream.write(b" " * (6_500_001 - path.stat().st_size))
+        warnings = []
+        self.assertEqual(validate(self.registry, self.out, warnings), [])
+        self.assertTrue(any("6500000-byte warning threshold" in warning for warning in warnings))
+        proc = subprocess.run([sys.executable, "scripts/validate_dashboard_live.py", str(self.out),
+                               "--registry", str(self.registry)], cwd=ROOT,
+                              capture_output=True, text=True, check=False)
+        self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
+        self.assertIn("[WARN] past_tracks.json", proc.stdout)
+        self.assertIn("[PASS]", proc.stdout)
+
     def test_duplicate_and_missing_run_keys_fail(self):
         def corrupt(rows):
             rows.append(dict(rows[0]))
