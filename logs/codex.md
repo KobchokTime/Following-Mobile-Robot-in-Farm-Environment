@@ -237,6 +237,16 @@ Earlier history: `history-2026-10-16.md`.
 - Added a new pilot ID `dashboard-dirty-provenance-v2`; the failed first ID remains visible. Node queue tests pass 2/2, dry-run selects only v2, the status endpoint reports failed/ready correctly, and `scripts/check.py` passes 166 tests.
 - Follow-up: prepare v2, run one native subagent, finish/verify it, and update the existing heartbeat to use this queue only when plan usage permits.
 
+### 2026-10-28 — qa — Office Boss dirty-checkout regression pilot
+
+- Native Codex subagent in `codex/qa/office/dashboard-dirty-provenance-v2-20261028084253` added one offline test in `tests/test_dashboard_unit_tests.py` that confirms every exported test row reports `working_tree_dirty: true` when Git status is nonempty. No generator or robot source changed.
+- Focused unit tests passed 3/3; full `scripts/check.py` passed 167/167 in the isolated clone. The Office queue verified the allowed diff, unchanged base HEAD, and successful offline gate, then recorded `review-ready` for independent review.
+- No API key, paid credits, robot hardware, motor command, or dashboard publication was used.
+
+### 2026-10-28 — qa — Open Boss pilot draft PR
+
+- Pushed `codex/qa/office/dashboard-dirty-provenance-v2-20261028084253` at `76aa7c4` and opened draft PR #9 against `codex/thesis-desk-office-queue` for independent review. It is stacked on Office PR #8 and does not merge or publish any dashboard data.
+- PR: https://github.com/KobchokTime/Following-Mobile-Robot-in-Farm-Environment/pull/9
 ### 2026-10-28 — thesis-desk — Native Office agent pilot and browser smoke
 
 - Codex plan usage was checked before the pilot (73% in the five-hour window, 11% weekly, zero paid credits). The queue prepared `dashboard-dirty-provenance-v2` in isolated branch `codex/qa/office/dashboard-dirty-provenance-v2-20261028084253` at base `a5f3181`.
@@ -255,6 +265,11 @@ Earlier history: `history-2026-10-16.md`.
 - Updated the existing active hourly `follower-test-bench` heartbeat to read the Office queue, check current plan usage, pause at 80% five-hour or 90% weekly usage, and dispatch native subagents only in isolated assignments. It retains the no-key/no-paid-credit and review-before-merge boundaries.
 - Pushed Office feature head `11d75c4` and updated draft PR #8 with the automation flow, visual smoke, pilot QA evidence and current checks. Its GitHub `check` completed successfully; twin and gazebo were still running at inspection time.
 - The Boss pilot was opened separately as draft QA PR #9, stacked on the Office branch. Office UI displayed its `review-ready` branch and time after reload; next Mew and Min jobs remain queued because usage was 86% in the five-hour window.
+
+### 2026-10-28 — qa — Align Boss pilot with Office PR head
+
+- Merged Office branch `dc630f9` into the stacked QA branch with `--no-ff`; resolved only the append-only `logs/codex.md` overlap by keeping both agents' entries. This includes the latest queue evidence and ready jobs without changing the QA test.
+- Re-ran the offline gate before completing the merge; no dashboard artifact or robot runtime source was changed.
 
 ### 2026-10-28 — thesis-desk — Verify two Office lanes and require focused checks
 
@@ -310,3 +325,8 @@ Earlier history: `history-2026-10-16.md`.
 - Claimed/pushed lock commit `6ddec9a`; merged `origin/codex/thesis-desk-office-queue` with `--no-ff` at `7fab5ac1550dc77edf5976126f053cbb2fb7ce3c`. No conflicts; changed paths match the reviewed Virtual Office scope plus this log.
 - Actual checks: `python scripts/check.py` passed 166 tests, compilation and thesis JSON; writable TEMP/TMP/TMPDIR used. Focused queue/server Node suites passed 9/9. Merge diff whitespace check passed; queue and server integration diff inspected.
 - Opened DISCUSSION T16 for Claude Code cross-review, recorded scope, evidence and limitations, and released HANDOFF lock. No duplicate direct Claude message, real model request, dashboard publication, main change, or stacked PR #9–#11 merge. Follow-up: Claude reviews T16; CI on updated hub can be checked separately.
+
+### 2026-10-29 — qa — Retarget Office follow-up PRs after PR #8 integration
+
+- Verified PR #8 was merged into `integration-hub` at `c265d9a`; retargeted draft PRs #9, #10 and #11 from the former Office feature branch to `integration-hub`. PRs #10 and #11 were clean; PR #9 reported a merge conflict in this append-only Codex log.
+- In isolated QA clone `codex/qa/office/dashboard-dirty-provenance-v2-20261028084253`, fetched hub `c265d9a` and resolved the log conflict by retaining both the QA and hub entries. The QA test remains unchanged. `python scripts/check.py` passed 167/167 with writable TEMP/TMP, focused Office Node tests passed 9/9, and diff whitespace checks passed. No dashboard artifact, main branch or robot runtime was changed.
