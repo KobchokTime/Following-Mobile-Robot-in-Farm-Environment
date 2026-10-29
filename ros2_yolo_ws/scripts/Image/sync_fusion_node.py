@@ -101,6 +101,40 @@ def box_range(points, bearing, margin_rad=math.radians(5.0)):
     return best
 
 
+def scan_crowded(points, box_bearing, box_rng, pred_bearing, pred_range, radius_m, spread_m=0.55, max_width_m=1.5):
+    """True if the scan shows more than one person near the predicted target (T15 follow-up).
+
+    Only for a box within radius_m of the predicted target, where the wider gate could take a stranger.
+    The camera can miss the target's box, or send a stranger's box first in a frame; the scan has both
+    people. The returns within radius_m of the prediction are one person if they span less than spread_m
+    (a person seen from one side spans at most about 0.45 m); two people side by side span more. The box
+    position itself is not compared with the returns: the camera is about 0.15 s behind the scan, so a
+    target stepping sideways would look like a second person. Two people side by side chain into one
+    cluster, so returns count one by one; returns in a cluster wider than max_width_m (a crop row, a
+    wall) do not count.
+    """
+    bx, by = box_rng * math.cos(box_bearing), box_rng * math.sin(box_bearing)
+    px, py = pred_range * math.cos(pred_bearing), pred_range * math.sin(pred_bearing)
+    if math.hypot(bx - px, by - py) > radius_m:
+        return False  # a box away from the target (a false box, a post)
+    near = []
+    pts = sorted(points)
+    start = 0
+    for i in range(1, len(pts) + 1):
+        if i < len(pts) and abs(pts[i][1] - pts[i - 1][1]) <= 0.15 and pts[i][0] - pts[i - 1][0] <= math.radians(3.0):
+            continue
+        c = pts[start:i]
+        start = i
+        (b0, r0), (b1, r1) = c[0], c[-1]
+        if math.hypot(r1 * math.cos(b1) - r0 * math.cos(b0), r1 * math.sin(b1) - r0 * math.sin(b0)) > max_width_m:
+            continue
+        for b, r in c:
+            x, y = r * math.cos(b), r * math.sin(b)
+            if math.hypot(x - px, y - py) <= radius_m:
+                near.append((x, y))
+    return any(math.hypot(x0 - x1, y0 - y1) >= spread_m for i, (x0, y0) in enumerate(near) for x1, y1 in near[i + 1:])
+
+
 def scan_is_fresh(now, scan_time, max_age):
     """True if the latest scan arrived at most max_age seconds ago (a stopped LiDAR must not steer)."""
     return scan_time is not None and 0.0 <= now - scan_time <= max_age
@@ -161,7 +195,11 @@ class TargetGate:
 
     Close in, a small sideways step is a large angle (0.25 m is 20 deg at 0.7 m), so the bearing sigma is
     never tighter than lateral_sigma_m sideways: max(bearing_sigma_deg, lateral_sigma_m / range). From
-    about 1.7 m out (0.15 m / tan 5 deg) this is the plain 5 deg; lateral_sigma_m 0 restores it everywhere.
+    about 1.7 m out (0.15 m / 5 deg) this is the plain 5 deg; lateral_sigma_m 0 restores it everywhere.
+    The wider gate applies only when the target is alone: if within ambiguity_window_s two boxes in one
+    frame (ambiguity_frame_s) lay within ambiguity_radius_m of the predicted target and at least
+    ambiguity_min_sep_m apart, someone else is close by and the plain 5 deg is kept, so a person beside
+    the target is not taken when the target's own box is missed (T15).
 
     Lock-on uses the controller's start window: range 0.5-1.0 m, near the image centre.
     """
@@ -172,12 +210,17 @@ class TargetGate:
                  hist_sigma=0.2, hist_window=10, hist_learn_slack=0.1, hist_weight=0.25,
                  reacquire_after_s=1.0, reacquire_colour_max=1.0, reacquire_bearing_deg=35.0,
                  reacquire_dist_m=0.8, reacquire_speed_mps=1.5, reacquire_dist_max_m=3.0,
-                 lateral_sigma_m=0.15):
+                 lateral_sigma_m=0.15, ambiguity_window_s=1.0, ambiguity_radius_m=1.0,
+                 ambiguity_min_sep_m=0.25, ambiguity_frame_s=0.03):
         self.lock_range = lock_range
         self.lock_bearing = math.radians(lock_bearing_deg)
         self.sb = math.radians(bearing_sigma_deg)
         self.sr = range_sigma_m
         self.lateral_sigma = lateral_sigma_m
+        self.ambiguity_window = ambiguity_window_s
+        self.ambiguity_radius = ambiguity_radius_m
+        self.ambiguity_min_sep = ambiguity_min_sep_m
+        self.ambiguity_frame = ambiguity_frame_s
         self.sc = chroma_sigma
         self.gate = gate
         self.widen_per_s = widen_per_s
@@ -210,6 +253,8 @@ class TargetGate:
         self.range = self.range_rate = 0.0
         self.chroma = None
         self.hists = []  # the target's last learned torso histograms (normalised)
+        self.boxes = []  # (t, x, y) of recent boxes near the target, robot frame
+        self.ambiguous_until = -math.inf  # someone else was beside the target until then
 
     def hist_model(self):
         return [sum(col) / len(self.hists) for col in zip(*self.hists)]
@@ -233,7 +278,9 @@ class TargetGate:
             return math.inf
         pb, pr = self._predict(t)
         widen = 1.0 + self.widen_per_s * max(0.0, t - self.t - 0.2)
-        sb = max(self.sb, self.lateral_sigma / max(0.3, (rng + pr) / 2.0))  # never under lateral_sigma sideways
+        sb = self.sb
+        if t >= self.ambiguous_until:  # alone: never under lateral_sigma sideways
+            sb = max(sb, self.lateral_sigma / max(0.3, (rng + pr) / 2.0))
         c = ((bearing - pb) / (sb * widen)) ** 2 + ((rng - pr) / (self.sr * widen)) ** 2
         return c + self.colour_cost(chroma, hist)
 
@@ -290,16 +337,38 @@ class TargetGate:
             self.range_rate += self.beta * er / dt
         self.t = t
 
+    def _note_box(self, t, bearing, rng):
+        """Remember boxes near the predicted target; two people there in one frame make it ambiguous."""
+        pb, pr = self._predict(t)
+        x, y = rng * math.cos(bearing), rng * math.sin(bearing)
+        if math.hypot(x - pr * math.cos(pb), y - pr * math.sin(pb)) > self.ambiguity_radius:
+            return
+        self.boxes = [b for b in self.boxes if t - b[0] <= self.ambiguity_frame] + [(t, x, y)]
+        for _, bx, by in self.boxes[:-1]:
+            if math.hypot(x - bx, y - by) >= self.ambiguity_min_sep:
+                self.ambiguous_until = t + self.ambiguity_window
+                break
+
+    def note_crowded(self, t):
+        """Someone else is near the target (from the scan): keep the plain gate for ambiguity_window_s."""
+        self.ambiguous_until = max(self.ambiguous_until, t + self.ambiguity_window)
+
     def accept(self, t, bearing, rng, chroma=None, hist=None):
         """True if this detection is the target; updates the track when it is."""
         if self.locked and t - self.t > self.unlock_after_s:
             self.reset()
+        if self.locked:
+            self._note_box(t, bearing, rng)
         if not self.locked:
             if self.lock_range[0] <= rng <= self.lock_range[1] and abs(bearing) <= self.lock_bearing:
                 self.locked, self.t = True, t
                 self.bearing, self.range = bearing, rng
                 self.chroma = tuple(chroma) if chroma is not None else None
                 self.hists = [hist] if hist is not None else []
+                # the first second after lock-on keeps the plain gate: nobody else has been checked yet,
+                # and a second box in this very frame must meet the lock-on box to count as ambiguous
+                self.ambiguous_until = t + self.ambiguity_window
+                self.boxes = [(t, rng * math.cos(bearing), rng * math.sin(bearing))]
                 return True
             return False
         if self.cost(t, bearing, rng, chroma, hist) > self.gate:
@@ -322,6 +391,8 @@ class TargetGate:
 GATE_PARAMS = {
     'bearing_sigma_deg': 5.0,
     'lateral_sigma_m': 0.15,
+    'ambiguity_window_s': 1.0,
+    'ambiguity_radius_m': 1.0,
     'range_sigma_m': 0.15,
     'hist_weight': 0.25,
     'reacquire_after_s': 1.0,
@@ -367,6 +438,9 @@ class SyncFusionNode(Node):
         self.declare_parameter('lidar_scan_max_age_s', 0.3)  # older scans are never used to track
         # a box's range from the LiDAR cluster centred on it, not the nearest return in its sector
         self.declare_parameter('box_range_from_scan', True)
+        # the scan tells the gate when someone else is near the target, whatever order the boxes come in
+        self.declare_parameter('crowd_from_scan', True)
+        self.declare_parameter('crowd_radius_m', 0.5)  # only returns this close to the predicted target count
         # TargetGate tunables, so an experiment's -p really reaches the gate (undeclared -p are ignored)
         for name, value in GATE_PARAMS.items():
             self.declare_parameter(name, value)
@@ -381,7 +455,8 @@ class SyncFusionNode(Node):
         self.use_gate = bool(self.get_parameter('target_gate').value)
         self.use_chroma = bool(self.get_parameter('use_chroma').value)
         self.use_hs_hist = bool(self.get_parameter('use_hs_hist').value)
-        self.gate = TargetGate(**{name: float(self.get_parameter(name).value) for name in GATE_PARAMS})
+        gate_args = {name: float(self.get_parameter(name).value) for name in GATE_PARAMS}
+        self.gate = TargetGate(**gate_args)
         self.path_half_width = float(self.get_parameter('path_half_width_m').value)
         self.path_hold = float(self.get_parameter('path_hold_s').value)
         self.path_margin = float(self.get_parameter('path_margin_m').value)
@@ -396,6 +471,11 @@ class SyncFusionNode(Node):
         self.scan_time = None     # when it arrived
         self.scan_max_age = float(self.get_parameter('lidar_scan_max_age_s').value)
         self.box_range_from_scan = bool(self.get_parameter('box_range_from_scan').value)
+        self.crowd_from_scan = bool(self.get_parameter('crowd_from_scan').value)
+        self.crowd_radius = float(self.get_parameter('crowd_radius_m').value)
+        # the effective settings, so a run's log shows what it actually ran with
+        self.get_logger().info('[GATE] ' + ' '.join(f'{k}={v:g}' for k, v in sorted(
+            {**gate_args, 'crowd_from_scan': float(self.crowd_from_scan), 'crowd_radius_m': self.crowd_radius}.items())))
         self.last_camera_fix = None  # time of the last camera detection accepted as the target
         self.last_camera_bearing = 0.0
         self.edge_rad = math.radians(self.camera_hfov_deg / 2.0 - float(self.get_parameter('lidar_edge_deg').value))
@@ -542,6 +622,12 @@ class SyncFusionNode(Node):
         if not math.isfinite(dist):
             self.get_logger().debug(f"Skip frame: invalid LiDAR dist in sector {sector_id}")
             return
+
+        if self.use_gate and self.crowd_from_scan and self.gate.locked \
+                and scan_is_fresh(ty, self.scan_time, self.scan_max_age):
+            pb, pr = self.gate._predict(ty)
+            if scan_crowded(self.scan_points, bearing, dist, pb, pr, self.crowd_radius):
+                self.gate.note_crowded(ty)
 
         if self.use_gate and not self.gate.accept(ty, bearing, dist, chroma, hist):
             # another person, not the one being followed: remember them only if they are in the way

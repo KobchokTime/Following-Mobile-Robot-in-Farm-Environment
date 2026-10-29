@@ -1385,7 +1385,80 @@ Earlier history: `history-2026-10-16.md`.
 - Opened **T15** for Codex (questions a–d); added a correction pointer to **T13** (stays resolved).
 - `HANDOFF.md`: item 18 implemented, awaiting Codex in T15; item 16 correction note; lock released.
 
-### 2026-10-28 — research — lateral gate write-up fixes after integration review (08:55 Thai time)
+### 2026-10-28 — research — lateral gate write-up fixes after integration review (08:30 Thai time)
 - Disclosed: at 0.7 m with no colour cost, the gate now accepts someone up to 0.445 m to the side (0.19 m before).
 - Said that the 13.4 / "about 3" costs come from the debug trace; the unit test's synthetic track gives 10.67 / 1.83.
 - Fixed the table, ticked steps 5–6, added a pointer at the old T13 "not a test of the rule" line, and corrected this log's earlier timestamp.
+
+### 2026-10-28 — robot/research — T15 round 2: ambiguity-aware lateral gate (11:51 Thai time)
+- Codex objected: with 0.15 a same-clothes stranger 0.44 m beside the target was published.
+- **Added:**
+  - Codex's constructor test;
+  - the effective gate settings logged as `[GATE]`;
+  - twin attribution of each `/synced_target` to a person, and the `published_other` score;
+  - scenario `close_pair_same`.
+- **Sweep 1 (130 runs):** a plain floor loses the pair (0.10: 3/10 with 201 wrong publications; 0.15: 2/10 with 648).
+- **Round 2b:** the floor applies only when no second person is near the predicted target (1 s window). 130 runs: `side_step` 20/20 vs 7/20 and the pair 10/10, but 50 distractor publications, all from a lock-on bug.
+- **Fixed in `5aa4f65`.** Confirmation (50 runs): `side_step` 10/10 vs 5/10, the pair 15/15 for both, 0 distractor publications.
+- 142 tests pass. Merged into `claude/workspace`.
+
+### 2026-10-28 — integration — T15 round 2 merged, Codex's objection answered (11:55 Thai time)
+- Claimed the lock (`f3555f8`). Merged `claude/workspace` `3cd0870` into `integration-hub` with `--no-ff` (`c3ce609`); no conflicts. `codex/workspace` not merged.
+- `python3 scripts/check.py` passes (142 tests). Open-loop twin hash on the 18 earlier scenarios (plain and realism) is bit-identical before and after.
+- Recounted every Round 2 table from the three JSON files (130 / 130 / 50 runs): all match. Every row's `[GATE]` line matches its parameters. Distractor-only counts come from `state.jsonl` and could not be recounted; `published_other` includes false-positive boxes.
+- Review finding (offline): a same-clothes stranger who arrives beside the target, with their box first in the first shared frame, is accepted and pulls the track. A pair that is together from the start is safe (39/39 rejected). Minor: the runners' `\b` grep would accept `=0` for `0.15`.
+- T15: answered Codex's requests (1)–(3), stated the decision (`amb` default) and the limits, and asked Codex to re-review. T15 stays open.
+- `HANDOFF.md`: item 18 awaiting Codex re-review; noted unmerged `claude/dashboard/source` (`be8729c`, `tools/dashboard/`) for the Codex validator. Lock released.
+
+## 2026-10-28 11:56 — Integration of T15 round 2 reported
+- Integration merged T15 round 2 into `integration-hub` (`c3ce609`, tip `912b7f7`). `check.py`: 142 tests pass; twin bit-identical. T15 waits for Codex's re-review.
+- Integration's new finding: a stranger who walks up beside the target mid-run is taken if their box comes first in the first shared frame. Proposed as the next item; waiting for the user's go-ahead (quota).
+
+## 2026-10-28 12:59 — T15 tidy-up (integration findings 3 and 4)
+- Runner scripts: the `[GATE]` check matched `lateral_sigma_m=0` against a log saying 0.15 (`\b` stops at the dot). It now needs the exact value followed by a space or the line end. Checked on real round-2c logs.
+- `2026-10-28_lateral_gate.md`: Round 2 marked done (re-review pending), Next lists ticked, reach recomputed with `TargetGate.cost` at 0.7 m: 0.442 m (was 0.445) with the new gate, 0.183 m (was 0.19) with the old one.
+- `check.py`: 142 tests pass.
+
+## 2026-10-28 14:10 — Walk-up stranger (integration finding 1), branch `claude/robot/walk-up`
+- `cd6eead`: the node checks the scan before each box; someone besides the box near the predicted target keeps the plain gate. Node-level tests through `try_sync_from_yolo`; twin scenario `walk_up_same`; runner `run_walk_up.sh`.
+- Round 1 (radius 1.0): `walk_up_same` scan 10/10, noscan 2/10 (573 wrong publications), old 10/10. `side_step` scan 7/10 vs noscan 10/10: a post near the step.
+- `1be3357`: `crowd_radius_m` 0.5. Round 2: `side_step` 13/20 vs 20/20, `walk_up_same` 10/10, `close_pair_same` 5/5.
+- `0d74732`: only boxes near the prediction are checked (a false box made the target's own returns a crowd). Round 3 running.
+
+## 2026-10-28 14:33 — Reviewed Codex's dashboard PRs 5 and 6
+- PR 5 (live validator): PR's `gen_live.py` on the real registry (14 experiments, 1,070 runs, one live) → validator PASS. OK to merge. My side: write `live: false` in the registry, sync `tools/dashboard/live/registry.json`, and watch `past_tracks` (5.3 of 8 MB).
+- PR 6 (CI generator): fields match `drawCI()`. Needs #5's head merged in (only `logs/codex.md` conflicts; 152 tests pass merged). My side: show `fetched_utc` on the CI tab and update the dataset description before publishing.
+
+## 2026-10-28 14:43 — Walk-up rounds 3 and 4
+- Round 3 (`0d74732`): `side_step` scan 10/20 vs noscan 18/20; `walk_up_same` 10/10; `close_pair_same` 5/5.
+- Offline check (`experiments/sim/walk_up_debug/spread_check.py`): with realism the box is 0.15 s behind the scan, so the target's own returns looked like a second person during the step.
+- `1466559`: the returns within 0.5 m of the prediction must span ≥ 0.55 m. Round 4 running (same 55-run set).
+
+## 2026-10-28 15:15 — Walk-up round 4 and write-up
+- Round 4 (`1466559`, spread rule): `walk_up_same` 10/10, `side_step` 18/20 vs 19/20 without the check, `close_pair_same` 5/5, no contact. Meets the rule set before the run, so `crowd_from_scan` stays on.
+- Write-up `experiments/sim/2026-10-28_walk_up.md`, data `2026-10-28_walk_up.json` (220 runs, four rounds). Fixed the runner's broken usage line.
+- Reviewed Codex's PR 7 (unit_tests generator): 154/154 in a clean worktree; OK to merge.
+
+### 2026-10-28 — dashboard — dashboard source into the repository (11:04 Thai time)
+- The user asked for the first parallel-work step: move the dashboard out of Claude's session scratchpad.
+- Branch `claude/dashboard/source` (`76ef97e`) adds `tools/dashboard/`:
+  - `index.html` (store v24);
+  - `datasets.json` (snapshot of the dataset records);
+  - `live/gen_live.py` (`--runs-root`, `--out`);
+  - `live/registry.json`;
+  - README with the publish procedure (Claude only) and the schema of the live JSON.
+- `.gitignore`: `dashboard/` anchored to the root (`/dashboard/`), since it was also hiding `tools/dashboard/`.
+- `gen_live.py` checked against the scratchpad generator:
+  - `past_tracks` identical (25,127 rows);
+  - the other differences are only runs that finished in between, and `close_pair_same`, which is not on this branch.
+- 138 tests pass. Not merged into the hub yet.
+
+### 2026-10-28 — integration — walk-up and dashboard source merged (15:25 Thai time)
+- Model: Claude Opus 5.5 (`integration` subagent). Worktree `wt_hub`.
+- Claimed the lock (`f518483`). Merged into `integration-hub` with `--no-ff`: `claude/workspace` `1b61abe` (`5ace9be`; `logs/claude.md` conflict, both sides kept), `claude/robot/walk-up` `bdf15ff` (`6becee0`; clean), `claude/dashboard/source` `f4f0c27` (`8d35db4`; `logs/claude.md` and `logs/codex.md` conflicts, both sides kept, no duplicate headings). Codex's branches were not touched.
+- `python3 scripts/check.py` passes (166 tests: 142 + 8 walk-up + 16 dashboard).
+- Open-loop twin hash (seed 3, plain and realism) on the 19 earlier scenarios is bit-identical before and after; the 20-scenario hash changes only by the added `walk_up_same`. Only `sync_fusion_node.py` and `sim/twin/scenarios.py` change outside docs, tests and `tools/dashboard/`; no hardware command or bridge change.
+- Walk-up review: recounted all four rounds from `2026-10-28_walk_up.json` (220 rows); every table number, the medians and the wrong-publication counts match the write-up. `scan_crowded` cost measured offline: about 0.5 ms per box at 720 returns, 2 ms at 1440, 10 ms at 3600 (the sort is redone per box). Confirmed offline that a stale scan (0.5 s) lets the stranger through (documented fallback; no unit test). Found that `test_a_crop_row_beside_the_target_does_not_count_as_a_person` passes with the 1.5 m width rule disabled (row outside the 0.5 m radius); with the row at 0.45 m the rule is exercised. Not blocking; owner Claude (workspace).
+- Dashboard review: the CI NumPy step (`a682ad9`) is identical to Codex's PR 3 (`272ff22`, same blobs), so the hub has one copy and PR 3 becomes a no-op. `gen_ci.py` uses no credentials. No new absolute paths or secrets in the added files.
+- `DISCUSSION.md` T15: walk-up note for Codex with results and limits; asked Codex to re-review T15 including it. T15 stays open.
+- `HANDOFF.md`: hub, `claude/workspace` and `claude/dashboard/source` rows; item 18; the dashboard source now lives on the hub and the next publish is generated from a hub commit. Lock released. The dashboard artifact was not published. No twin sweep was run.
