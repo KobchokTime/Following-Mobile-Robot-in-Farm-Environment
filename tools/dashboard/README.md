@@ -61,7 +61,7 @@ All times are UTC ISO 8601 (`YYYY-MM-DDTHH:MM:SSZ`). The page shows them in Thai
 | `dir` | str | Run folder, relative to `--runs-root` |
 | `started_utc` | str | When the experiment started (used for the ETA) |
 | `order` | int | Higher numbers are newer; the page lists them newest first |
-| `live` | bool | At most one experiment is `true`. Its tracks go in `live_tracks` at 2 Hz; the others go in `past_tracks` at 1 Hz. Keep the newest experiment `true` after it finishes: the page shows an empty `live_tracks` as a load failure |
+| `live` | bool | At most one experiment is `true`. Its tracks go in `live_tracks` at 2 Hz; the others go in `past_tracks` at 1 Hz (oldest thinned to 0.5 Hz if needed). Keep the newest experiment `true` after it finishes: the page shows an empty `live_tracks` as a load failure |
 | `purpose`, `compare`, `result` | str | Thai text for the "การทดลองนี้ทดสอบอะไร" card; `result` is empty until written |
 | `stopped` | bool, optional | Marks an abandoned experiment |
 | `runs` | list | `{tag, scenario, seed, variant, light}`: `tag` is the run folder; `variant` and `light` (`ปกติ` / `สมจริง`) group the grid |
@@ -104,7 +104,9 @@ All times are UTC ISO 8601 (`YYYY-MM-DDTHH:MM:SSZ`). The page shows them in Thai
 
 ### `live_tracks.json` and `past_tracks.json`: positions for the replay
 
-- **One row per sample.** `live_tracks` is at 2 Hz; `past_tracks` is at 1 Hz.
+- **One row per sample.** `live_tracks` is at 2 Hz; `past_tracks` is at 1 Hz, except that `gen_live.py`
+  thins the oldest experiments to 0.5 Hz, one at a time, until `past_tracks` fits 6.5 MB
+  (`PAST_TRACKS_BUDGET`).
 - **Fields:** `run` (as above), `t` (s), and robot pose `rx`, `ry` (m, world frame), `ryaw` (deg) and `v`
   (m/s).
 - **Target:** `tx`, `ty`, `gap` (m, range − 0.2) and `tb` (deg). All four are null if the target is not in
