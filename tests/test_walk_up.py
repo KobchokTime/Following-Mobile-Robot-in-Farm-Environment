@@ -160,10 +160,25 @@ class WalkUpTest(unittest.TestCase):
         self.assertFalse(m.scan_crowded(scan(target_now), 0.0, 0.8, 0.0, 0.8, 0.5))
         self.assertTrue(m.scan_crowded(scan(target_now, person(1.05, 0.12)), 0.0, 0.8, 0.0, 0.8, 0.5))
 
+    def test_a_stale_scan_turns_the_check_off(self):
+        """Documented limit: with no scan for over 0.3 s the check is skipped and the round-2 gap returns."""
+        m, node = make_node()
+        t = self.lock(node)
+        node.scan_points = scan(person(1.05, -0.40), person(1.0, 0.0))
+        node.scan_time = t - 0.5
+        f = (self.W / 2.0) / math.tan(math.radians(self.HFOV) / 2.0)
+        n = len(node.published)
+        node.buf_lidar.clear()
+        node.buf_lidar.append((t, [math.hypot(1.05, -0.40) - 0.2]))  # the sector range the node falls back to
+        node.try_sync_from_yolo(t, int(round(self.W / 2.0 - f * math.tan(math.atan2(-0.40, 1.05)))), 240, 4)
+        self.assertEqual(len(node.published), n + 1)
+
     def test_a_crop_row_beside_the_target_does_not_count_as_a_person(self):
         m, _ = make_node()
-        row = [p for k in range(40) for p in person(0.1 * k, -0.6, radius=0.05)]  # plants 0.1 m apart, 0.6 m right
+        # plants 0.1 m apart, 0.45 m right: inside the 0.5 m radius, so only the 1.5 m width rule leaves it out
+        row = [p for k in range(40) for p in person(0.1 * k, -0.45, radius=0.05)]
         self.assertFalse(m.scan_crowded(scan(row, person(1.0, 0.0)), 0.0, 0.8, 0.0, 0.8, 0.5))
+        self.assertTrue(m.scan_crowded(scan(row, person(1.0, 0.0)), 0.0, 0.8, 0.0, 0.8, 0.5, max_width_m=100.0))
         self.assertTrue(m.scan_crowded(scan(person(1.05, -0.40), person(1.0, 0.0)), 0.0, 0.8, 0.0, 0.8, 0.5))
 
 

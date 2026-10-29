@@ -1467,3 +1467,7 @@ Earlier history: `history-2026-10-16.md`.
 - Generated from the hub checkout: `gen_live.py` (14 experiments, 1,235 runs, all done) and `validate_dashboard_live.py` PASS; `gen_ci.py --fetch` (60 runs, fetched 15:23 Thai); `generate_dashboard_unit_tests.py` 166/166 on a clean tree.
 - Uploaded 7 assets, one atomic batch: datasets ci_runs v2, unit_tests v2, live_experiments v44, live_runs v44, live_tracks v42, past_tracks v6, live_scenarios v3, and page `files/index.html` v25 (= hub `tools/dashboard/index.html`, with the snapshot-time lines). Deleted the 7 old blobs.
 - `tools/dashboard/datasets.json` refreshed from the store.
+
+## 2026-10-29 14:46 — Dashboard live_tracks fix; walk-up test gaps from integration
+- The page showed `live_tracks` as a load failure: the published file was `[]` (no live experiment). The newest experiment (`walk_up_r4`) now keeps `live: true`; README says why. Regenerated (validator PASS; experiments, runs and scenarios unchanged), uploaded live_tracks (v43) and past_tracks (v7), deleted the two old blobs, refreshed `tools/dashboard/datasets.json`.
+- `tests/test_walk_up.py`: the crop row is now 0.45 m beside the target, inside the radius, and the test shows it would count without the width rule; new test for the stale-scan fallback. 167 tests pass.
