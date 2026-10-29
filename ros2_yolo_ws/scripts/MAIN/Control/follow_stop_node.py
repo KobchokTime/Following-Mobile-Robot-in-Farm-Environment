@@ -3,6 +3,7 @@ import rclpy
 from rclpy.node import Node
 from std_msgs.msg import Float32MultiArray
 from geometry_msgs.msg import Twist
+from sensor_msgs.msg import LaserScan
 import math
 from math import exp, isfinite
 
@@ -76,6 +77,85 @@ def speed_command(error_dist, speed_ff, dt, linear_gain, tolerance, max_linear_s
     linear_x = max(min(linear_x, max_linear_speed), -max_linear_speed)
     return linear_x, speed_ff
 
+# The robot's own body (thesis slides: 47 cm wide, 52 cm long, LiDAR at the centre). A return no farther along
+# the path than the body's front is beside the robot, not ahead of it: driving on slides past it unless it is
+# inside the body's own half width (pass_by s3/s8: the robot stopped level with the worker for good).
+FLANK = (0.26, 0.235)
+
+
+def corridor_clearance(points, half_width, direction=1.0, exclude=None, exclude_r=0.0, curvature=0.0, flank=FLANK):
+    """Distance along the path to the nearest return inside the robot's swept corridor, or inf.
+
+    points: (x, y) in the robot frame (x ahead, metres). direction 1 looks ahead, -1 behind. curvature
+    (1/m, left positive) bends the corridor along the arc the robot is turning on, so something the turn
+    will pass is not a reason to stop, and something on the turn is. A return within exclude_r of exclude
+    (x, y), the target being followed, does not count: the follower keeps its own gap to the target.
+    Anything else counts, person or not, seen by the camera or not.
+    """
+    best = math.inf
+    for x, y in points:
+        if exclude is not None and math.hypot(x - exclude[0], y - exclude[1]) <= exclude_r:
+            continue
+        xd = x * direction
+        if abs(curvature) < 1e-3:
+            along, off = xd, abs(y)
+        else:
+            r = 1.0 / curvature  # turning centre at (0, r)
+            ang = math.atan2(xd, (r - y) if r > 0 else (y - r))
+            along, off = abs(r) * ang, abs(math.hypot(xd, y - r) - abs(r))
+        if along <= 0.0 or off > (flank[1] if along <= flank[0] else half_width):
+            continue
+        best = min(best, along)
+    return best
+
+
+def obstacle_speed_cap(clearance, stop_m, max_decel, latency_s, v_now):
+    """Fastest speed the robot can still stop from before stop_m short of the obstacle (0 when closer)."""
+    left = clearance - stop_m - max(0.0, v_now) * latency_s
+    if left <= 0.0:
+        return 0.0
+    return math.sqrt(2.0 * max(max_decel, 0.1) * left)
+
+
+def segment_blocked(points, half_width, end, exclude=None, exclude_r=0.0, flank=FLANK):
+    """True if a return, other than within exclude_r of exclude, lies within half_width of the straight
+    path from the robot to end (x, y)."""
+    length = math.hypot(end[0], end[1])
+    if length < 1e-6:
+        return False
+    ux, uy = end[0] / length, end[1] / length
+    for x, y in points:
+        if exclude is not None and math.hypot(x - exclude[0], y - exclude[1]) <= exclude_r:
+            continue
+        along = x * ux + y * uy
+        if 0.0 < along <= length and abs(y * ux - x * uy) <= (flank[1] if along <= flank[0] else half_width):
+            return True
+    return False
+
+
+def aim_offset(points, half_width, target_xy, exclude_r, prefer=0.0, step_m=0.1, max_angle_rad=0.5):
+    """How far (m, left positive) to aim beside the target so the straight path there is clear.
+
+    0.0 when the path to the target itself is clear; the smallest clear shift otherwise, trying the side of
+    prefer first (the side already taken, so the robot does not swap); None when no shift within
+    max_angle_rad of the target's direction is clear (the camera still sees the target there).
+    """
+    tx, ty = target_xy
+    d = math.hypot(tx, ty)
+    if d < 1e-6 or not segment_blocked(points, half_width, target_xy, target_xy, exclude_r):
+        return 0.0
+    nx, ny = -ty / d, tx / d  # left of the line to the target
+    sides = (-1.0, 1.0) if prefer < 0.0 else (1.0, -1.0)
+    n = 1
+    while n * step_m <= d * math.tan(max_angle_rad) + 1e-9:
+        for side in sides:
+            o = side * n * step_m
+            if not segment_blocked(points, half_width, (tx + o * nx, ty + o * ny), target_xy, exclude_r):
+                return o
+        n += 1
+    return None
+
+
 class FollowStopNode(Node):
     def __init__(self):
         super().__init__('follow_stop_node')
@@ -120,6 +200,21 @@ class FollowStopNode(Node):
         # bearing mode only: publish a stop when target messages stop for this long, instead of leaving
         # the bridge to repeat the last turn until its own 1 s timeout (Codex, T12)
         self.declare_parameter('target_timeout_s', 0.3)
+        # obstacle stop: anything the LiDAR sees in the corridor ahead (or behind when reversing), other than
+        # the target, caps the speed so the robot stops stop_m short of it. No physical E-stop exists.
+        self.declare_parameter('obstacle_stop', True)
+        self.declare_parameter('obstacle_half_width_m', 0.30)   # robot 0.47 m wide (thesis slides) + 6.5 cm margin
+        self.declare_parameter('obstacle_stop_m', 0.45)         # stop this far from the LiDAR to the obstacle
+        self.declare_parameter('obstacle_target_exclude_m', 0.30)  # returns this close to the target are the target
+        # obstacle avoid: when the corridor toward the target is blocked, take the nearest clear arc that
+        # keeps the target in view instead of only stopping (blind_corner: someone beside the corner)
+        self.declare_parameter('obstacle_avoid', True)
+        self.declare_parameter('avoid_min_speed_mps', 0.12)  # an arc slower than this is no better than stopping
+        self.declare_parameter('avoid_hold_s', 0.5)          # keep the shift this long once the path is clear
+        self.declare_parameter('avoid_delay_s', 1.0)         # go round only what blocks the path this long
+        self.declare_parameter('scan_topic', '/scan')
+        self.declare_parameter('lidar_angle_offset_deg', 180.0)  # as sync_fusion_node / lidar_sectorizer_node
+        self.declare_parameter('scan_max_age_s', 0.3)
 
         # ---------- Load ----------
         self.target_distance   = float(self.get_parameter('target_distance').value)
@@ -156,6 +251,25 @@ class FollowStopNode(Node):
         self.target_timeout    = float(self.get_parameter('target_timeout_s').value) if self.steer_mode == 'bearing' else 0.0
         self.last_msg_time     = None
         self.stale_stopped     = False
+        self.obstacle_stop     = bool(self.get_parameter('obstacle_stop').value)
+        self.obstacle_half_w   = float(self.get_parameter('obstacle_half_width_m').value)
+        self.obstacle_stop_m   = float(self.get_parameter('obstacle_stop_m').value)
+        self.obstacle_excl     = float(self.get_parameter('obstacle_target_exclude_m').value)
+        self.lidar_offset      = math.radians(float(self.get_parameter('lidar_angle_offset_deg').value))
+        self.scan_max_age      = float(self.get_parameter('scan_max_age_s').value)
+        self.scan_xy           = []     # latest scan in the robot frame
+        self.scan_time         = None
+        self.obstacle_capped   = False  # last [OBST] state written to the log
+        self.obstacle_avoid    = bool(self.get_parameter('obstacle_avoid').value)
+        self.avoid_min_speed   = float(self.get_parameter('avoid_min_speed_mps').value)
+        self.avoid_hold        = float(self.get_parameter('avoid_hold_s').value)
+        self.avoid_delay       = float(self.get_parameter('avoid_delay_s').value)
+        self.blocked_since     = None   # when the straight path to the target was first seen blocked
+        self.avoid_offset      = 0.0    # m beside the target the robot aims at to pass an obstacle
+        self.avoid_time        = 0.0    # when the current shift was last needed
+        self.last_clearance    = math.inf  # corridor clearance of the last command, for the [MOVE] line
+        self.moving_cmd        = None   # last command sent while moving, re-checked on every scan
+        self.moving_target     = None   # (x, y, time) of the target point that command was checked with
 
         # ---------- State ----------
         self.initialized   = False
@@ -174,6 +288,8 @@ class FollowStopNode(Node):
 
         # ---------- ROS ----------
         self.sub = self.create_subscription(Float32MultiArray, '/target_fused_prob', self.cb_fused, 10)
+        if self.obstacle_stop:
+            self.create_subscription(LaserScan, str(self.get_parameter('scan_topic').value), self.cb_scan, 10)
         self.pub = self.create_publisher(Twist, '/cmd_vel', 10)
         if self.target_timeout > 0.0:
             self.stale_timer = self.create_timer(0.05, self.check_stale)
@@ -184,6 +300,98 @@ class FollowStopNode(Node):
         )
 
     # ==================================================
+    def cb_scan(self, msg: LaserScan):
+        pts = []
+        for i, r in enumerate(msg.ranges):
+            if math.isfinite(r) and msg.range_min < r < msg.range_max:
+                a = msg.angle_min + i * msg.angle_increment + self.lidar_offset
+                pts.append((r * math.cos(a), r * math.sin(a)))
+        self.scan_xy = pts
+        self.scan_time = self.get_clock().now().nanoseconds / 1e9
+        self.recheck_last_cmd()
+
+    def recheck_last_cmd(self):
+        """Each scan re-checks the last moving command against the new returns. Target messages can stop
+        (a lost target, a single false box), and the bridge keeps the last command until the stale stop and
+        its own ramp; whoever walks into the corridor meanwhile still slows the robot (blind_corner run)."""
+        cmd = self.moving_cmd
+        if cmd is None or cmd.linear.x == 0.0:
+            return
+        tgt = self.moving_target
+        target_xy = tgt[:2] if tgt is not None and self.scan_time - tgt[2] <= self.scan_max_age else None
+        capped = self.obstacle_limited(cmd.linear.x, target_xy, cmd.angular.z)
+        if abs(capped) < abs(cmd.linear.x):
+            twist = Twist()
+            twist.linear.x = capped
+            twist.angular.z = cmd.angular.z
+            self.send(twist)
+            self.last_linear = capped
+
+    def send(self, twist, target_xy=None):
+        """Publish a command and keep it for the per-scan re-check while it moves the robot."""
+        self.pub.publish(twist)
+        now = self.get_clock().now().nanoseconds / 1e9
+        self.moving_cmd = twist if twist.linear.x != 0.0 else None
+        if target_xy is not None:
+            self.moving_target = (target_xy[0], target_xy[1], now)
+
+    def obstacle_limited(self, linear_x, target_xy, angular_z=0.0):
+        """linear_x capped by the corridor clearance; a stale or missing scan stops forward and reverse motion."""
+        if not self.obstacle_stop or linear_x == 0.0:
+            return linear_x
+        now = self.get_clock().now().nanoseconds / 1e9
+        fresh = self.scan_time is not None and 0.0 <= now - self.scan_time <= self.scan_max_age
+        direction = 1.0 if linear_x > 0.0 else -1.0
+        # a slow start with a turn is a tight arc; past 2/m treat it as straight (a near spin, not a path)
+        curvature = angular_z / linear_x if abs(linear_x) > 0.05 and abs(angular_z / linear_x) <= 2.0 else 0.0
+        clearance = corridor_clearance(self.scan_xy, self.obstacle_half_w, direction,
+                                       target_xy, self.obstacle_excl, curvature) if fresh else 0.0
+        cap = obstacle_speed_cap(clearance, self.obstacle_stop_m, self.max_decel, self.latency_s,
+                                 abs(self.v_wheels))
+        self.last_clearance = clearance
+        capped = abs(linear_x) > cap
+        if capped != self.obstacle_capped:
+            self.get_logger().info(f"[OBST] {'on' if capped else 'off'} clearance={clearance:.2f} m"
+                                   + ('' if fresh else ' (no fresh scan)'))
+            self.obstacle_capped = capped
+        return direction * min(abs(linear_x), cap)
+
+    def obstacle_command(self, linear_x, angular_z, target_xy, target_bearing, at_edge=False):
+        """(linear, angular) after the obstacle stop. With obstacle_avoid, when something other than the target
+        lies on the straight path to the target, aim beside the target by the smallest clear shift (aim_offset)
+        and steer by that bearing; the stop still caps the speed. Not at the image edge, where the target's
+        bearing is not known."""
+        now = self.get_clock().now().nanoseconds / 1e9
+        fresh = self.scan_time is not None and 0.0 <= now - self.scan_time <= self.scan_max_age
+        offset = 0.0
+        if self.obstacle_stop and self.obstacle_avoid and fresh and not at_edge and linear_x > 0.0:
+            found = aim_offset(self.scan_xy, self.obstacle_half_w, target_xy, self.obstacle_excl, self.avoid_offset)
+            if found == 0.0:
+                self.blocked_since = None
+            elif self.blocked_since is None:
+                self.blocked_since = now
+            # someone walking across the path is gone within about a second; going round them turned the
+            # target out of the image (twin crossing runs). Only what stays in the way is gone round.
+            waited = self.blocked_since is not None and now - self.blocked_since >= self.avoid_delay
+            if found and (waited or self.avoid_offset != 0.0):
+                offset, self.avoid_time = found, now  # None: no shift clears it; the stop alone applies
+            elif found == 0.0 and self.avoid_offset != 0.0 and now - self.avoid_time < self.avoid_hold:
+                offset = self.avoid_offset  # just past it: keep the shift a moment so the robot does not clip it
+        if offset != 0.0:
+            if offset != self.avoid_offset:
+                self.get_logger().info(f"[AVOID] aim {offset:+.2f} m beside the target")
+            self.avoid_offset = offset
+            d = math.hypot(*target_xy)
+            aim = (target_xy[0] - offset * target_xy[1] / d, target_xy[1] + offset * target_xy[0] / d)
+            angular_z = bearing_turn(math.atan2(aim[1], aim[0]), 0.0, self.latency_s, self.bearing_gain,
+                                     self.angular_limit, self.bearing_deadband)
+            linear_x = max(linear_x, self.avoid_min_speed)  # from a near stop too (pass_by s4)
+            return self.obstacle_limited(linear_x, target_xy, angular_z), angular_z
+        if self.avoid_offset != 0.0:
+            self.get_logger().info("[AVOID] off")
+            self.avoid_offset = 0.0
+        return self.obstacle_limited(linear_x, target_xy, angular_z), angular_z
+
     def cb_fused(self, msg: Float32MultiArray):
         if len(msg.data) < 8:
             return
@@ -219,7 +427,11 @@ class FollowStopNode(Node):
         self.v_wheels_time = now
         if P_fused_smooth < self.p_fused_threshold or not isfinite(dist):
             if (now - self.last_good_time).nanoseconds / 1e9 < 1.0:
-                self.pub.publish(self.last_good_cmd)
+                held = Twist()
+                held.linear.x = self.obstacle_limited(self.last_good_cmd.linear.x, None,
+                                                      self.last_good_cmd.angular.z)
+                held.angular.z = self.last_good_cmd.angular.z
+                self.send(held)
                 self.get_logger().info(f"[HOLD] Low conf {P_fused_smooth:.2f} → keep last cmd")
             else:
                 self.publish_stop()
@@ -293,11 +505,19 @@ class FollowStopNode(Node):
             angular_z = bearing_turn(bearing, self.bearing_rate, self.latency_s,
                                      self.bearing_gain, self.bearing_limit, self.bearing_deadband)
 
+        # ---------- Obstacle stop ----------
+        tb = (math.radians(self.camera_hfov_deg / 2.0) * (1.0 if cx <= 0 else -1.0)
+              if cx <= 0 or cx >= self.image_width - 1 else camera_bearing(cx, self.image_width, self.camera_hfov_deg))
+        target_xy = (dist * math.cos(tb), dist * math.sin(tb))
+        linear_x, angular_z = self.obstacle_command(linear_x, angular_z, target_xy, tb,
+                                                    at_edge=cx <= 0 or cx >= self.image_width - 1)
+        self.last_linear = linear_x
+
         # ---------- Publish ----------
         twist = Twist()
         twist.linear.x = linear_x
         twist.angular.z = angular_z
-        self.pub.publish(twist)
+        self.send(twist, target_xy)
 
         self.last_good_cmd = twist
         self.last_good_time = now
@@ -307,6 +527,7 @@ class FollowStopNode(Node):
             f"sec_prev={self.prev_sector} sec_now={sector} "
             f"P={P_fused_smooth:.2f} edge_cnt={self.edge_counter} ff={self.speed_ff:.2f} "
             f"→ v=({linear_x:.2f}, {angular_z:.2f})"
+            + (f" clr={self.last_clearance:.2f}" if self.obstacle_stop and math.isfinite(self.last_clearance) else "")
         )
 
     # ==================================================
@@ -327,6 +548,7 @@ class FollowStopNode(Node):
     def publish_stop(self):
         twist = Twist()
         self.pub.publish(twist)
+        self.moving_cmd = None
 
 
 def main():

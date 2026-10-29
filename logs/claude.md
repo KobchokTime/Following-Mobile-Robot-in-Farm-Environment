@@ -1535,3 +1535,52 @@ Earlier history: `history-2026-10-16.md`.
 ## 2026-10-29 23:36 — Whole-twin baseline on hub 5c72c4d: 98/100
 - Every scenario, realism, seeds 0–4: 98/100 pass, no contact. Only `zigzag` fails: seed 0 (visible 0.889, just under 0.9) and seed 1 (visible 0.472).
 - Published: `current_runs` v2 (all 100 runs), live datasets with the finished baseline.
+
+## 2026-10-29 23:45 — zigzag cause found; LiDAR assist ported (branch `claude/robot/lidar-assist2`)
+- Debug build on hub code, `zigzag` realism seeds 0–7: s2 failed (visible 0.47). Gate log: the robot was turning right at 0.5–0.7 rad/s, so the target's bearing in the image swept from −13° to +28° in 0.4 s from the robot's own rotation. The gate's prediction does not include the robot's turn, so every box cost 11–36 and was rejected. LiDAR edge tracking did not start either (last bearing −13°, prediction −17°, both inside the 27° edge). The robot kept turning away and stopped.
+- The LiDAR assist draft (`2eb6e9d`) addresses this: each scan moves the track to the target's own cluster, measured in the robot's current frame. Cherry-picked onto `claude/workspace` `e22307e`; 176 tests pass. Whole-twin run with the assist on to follow.
+
+## 2026-10-30 01:13 — blind_corner round 1; obstacle stop fixed (`claude/robot/obstacle-stop` `c0be756`)
+- Round 1 on `4f573e8` (realism, s0–4, interleaved): stop off — 1 contact (s2, 0.24 m); stop on — 1 contact (s0, 0.34 m). Neither setting passes on following: the bystander's returns shorten the target range at the corner (give-way), the robot backs off, and the target walks beyond the 3 m reacquire limit.
+- Cause of the stop-on contact: one false box set a 0.5 m/s command, then target messages stopped; the command ran until the stale stop and the bridge ramp. The target exclusion (0.45 m) also covered the bystander.
+- Fix: each scan re-checks the last moving command; exclusion 0.30 m. 184 tests pass. Pushed. Round 2 and the LiDAR-assist full run (`3cae4f3`, s0–4) are running.
+
+## 2026-10-30 01:19 — blind_corner round 2 on `c0be756` (realism, s0–4, interleaved off/on)
+- Stop off: contact 2/5 (s0 0.376 m, s2 0.384 m); min range 0.376–0.468 m.
+- Stop on: contact 0/5; min range 0.561–0.640 m.
+- Both lose the target at the corner (visible share about 0.45): the bystander stands 0.45 m from the target's path, so a 47 cm robot cannot follow through without contact. Passing needs avoidance (steer around), not a stop. Results in scratch `bc2/`. Assist full run started.
+## 2026-10-29 23:27 — Obstacle stop (branch `claude/robot/obstacle-stop`), not yet run in the twin
+- `follow_stop_node.py`: subscribes `/scan`; any return in the corridor ahead (half width 0.35 m), or behind when reversing, other than returns within 0.45 m of the target, caps the speed so the robot stops 0.45 m short (`obstacle_speed_cap`, same deceleration and latency as the braking cap). No fresh scan (> 0.3 s) means no motion. Applied to the normal command and the 1 s HOLD. Parameters `obstacle_stop` (true), `obstacle_half_width_m`, `obstacle_stop_m`, `obstacle_target_exclude_m`, `scan_topic`, `lidar_angle_offset_deg`, `scan_max_age_s`; `[OBST] on/off` log lines.
+- `tests/test_obstacle_stop.py` (8); sensor_msgs stubs added to two older tests. 181 tests pass.
+- Twin scenario `blind_bystander` (set `obstacle`): a person the camera never sees stands on the path; the target walks round them. To run: off vs on, plus every scenario with the stop on against the baseline.
+
+## 2026-10-29 23:41 — Obstacle stop, first twin result: the stop as written hurts following
+- `blind_bystander` realism seeds 0–4, interleaved: stop off 5/5 pass, no contact (closest to the bystander 0.47–0.54 m centre to centre; contact is < 0.40). Stop on 0/5 pass, no contact: the robot stops behind the bystander (closest 0.56–0.64 m) and the target walks away (final gap 3.9–4.4 m).
+- So the scenario does not produce a contact without the stop, and the straight 0.35 m corridor stops the robot for an obstacle it would have passed. Next: a corridor along the commanded arc, its width from the real robot's width, and a scenario where the robot would really hit the bystander. Not merged.
+
+## 2026-10-29 23:44 — Obstacle stop v2: robot size from the thesis slides, corridor along the turn
+- The user shared the thesis progress slides (Canva): robot 47 cm wide, 52 cm long, 87 cm tall; wheels Ø13 cm front, Ø10 cm rear (the bridge assumes `wheel_radius_m` 0.085, Ø17 cm — to confirm which wheels drive). The slides' scope lists slowing/stopping for obstacles with LiDAR as an evaluation item.
+- `obstacle_half_width_m` 0.30 (half of 47 cm + 6.5 cm). The corridor now bends with the commanded turn (curvature = angular_z / linear_x), so a turn that passes an obstacle does not stop the robot.
+- Scenario `blind_bystander` (no contact without the stop) replaced by `blind_corner`: `turn_90` with an undetected person at the inside of the corner, where the baseline robot's corner-cutting path passes. 182 tests pass.
+
+## 2026-10-30 01:39 — obstacle avoid started (`claude/robot/avoid` `88af833`)
+- User asked to continue with avoidance. New branch merges LiDAR assist (`lidar-assist2`) and the obstacle stop (`c0be756`).
+- follow_stop_node: when the path is blocked within 1.6 m, score swerves (k for 0.8 m, -k for 0.8 m, then straight) by free path, minus a turning cost; a swerve that turns more than 0.8 rad from the target is not taken. `obstacle_avoid:=false` keeps the stop alone. 192 tests pass.
+- Twin: `blind_corner` avoid off/on s0–4 queued after the LiDAR-assist full run.
+
+## 2026-10-30 02:18 — LiDAR assist full run; assist fix; avoid round 2
+- Assist full run (`3cae4f3`, 20 scenarios × s0–4, realism): 91/100 vs baseline 98/100. zigzag fixed (both baseline failures pass, 5/5). crossing s1–4 failed with contacts and shade_crossing s0–4 failed: a passer-by covering the target from the LiDAR was taken as the target's cluster.
+- Fix `9cb32f2` (lidar-assist2): a cluster 0.2 m nearer than the predicted range, or farther from the last fix than 1.5 m/s allows, is not taken. Test added; 177 pass. Merged into `claude/robot/avoid`.
+- Avoid round 1 (blind_corner): no contacts, but swerve/straighten alternated each frame and the corner still lost the target (needs going wide, beyond a reactive swerve).
+- `f1e1511`: swerve hysteresis; new scenario `pass_by` (hidden worker 0.42 m off a straight line). Running pass_by off/on s0–4 and blind_corner with avoid s0–4.
+
+## 2026-10-30 02:31 — avoid rounds 2–3 and redesign (`claude/robot/avoid` `dcd58e0`)
+- Round 2 (`f1e1511`): pass_by avoid on 4/5, off 0/5 (stop, target lost), no contacts. blind_corner avoid on 0/5, no contacts (min 0.57 m).
+- `cb9af55`: start from a near stop (pass_by s4 stood 5 s beside the worker: the ramp asked for 0.05 m/s with a turn into the worker). Round 3: pass_by 5/10, no contacts; swerve arcs fought the sector steering.
+- `dcd58e0`: redesign. Aim at a point beside the target (smallest clear sideways shift, side kept, within 0.5 rad), steer there by bearing; hold 0.5 s after clear. 194 tests pass. Round 4 (pass_by s0–9, blind_corner s0–4) running.
+
+## 2026-10-30 03:48 — avoid rounds 4–5, full run, crossing fix (`claude/robot/avoid` `b618b40`)
+- Round 4 (`dcd58e0`, aim beside the target): pass_by 8/10, no contacts. s3/s8 stopped for good level with the worker (inside the 0.30 m corridor, outside the 0.235 m body).
+- `f6373c4`: returns within the body's length count only inside the body's half width. Round 5: pass_by 10/10 (min 0.54 m, gap ~0.52 m, visible 1.0); blind_corner 0/5 following, no contacts.
+- Full run on `f6373c4` (22 scenarios × s0–4): 99/110, no contacts. Baseline set 94/100 (baseline 98): zigzag s0 now passes; crossing s2–4, shade_crossing s1–2 lose the target (avoid aimed beside a walker crossing; target went to the image edge; LiDAR edge tracking followed the walker); zigzag s1 visible 0.85.
+- `b618b40`: avoid only after the path is blocked 1 s (`avoid_delay_s`). Targeted run (crossing, shade_crossing, pass_by, zigzag × s0–4) running.
