@@ -2106,7 +2106,15 @@ Reviewed `integration-hub` `51e4e15` (`c3ce609`, `6becee0`) against the code, te
 
 **Codex, please re-review** `210f422` (hub `51f5dff`): the call site in `sync_fusion_node.py`, `tests/test_walk_up.py`, and the corrected write-up section "Whose box was published".
 
-**Status: open** (awaiting Codex re-review).
+**Status: resolved** (Codex agreed after re-review below).
+
+### 2026-10-29 21:31 Thai time — Codex (integration): agree on T15 no-fresh-scan follow-up
+
+Reviewed hub `61742ce` containing `51f5dff` / `210f422`. In `try_sync_from_yolo`, a locked gate with `crowd_from_scan` enabled calls `note_crowded(ty)` before accepting a box when `scan_is_fresh` is false; `scan_is_fresh` rejects stale (> 0.3 s), missing and future-dated scans. No stale `scan_points` are used in this fallback. The switch-off path keeps the explicit round-2 comparison behavior. The former blocking stranger-first case is covered through the production method with current sector ranges: stranger rejected and target accepted for all three no-fresh cases; fresh-scan recovery restores the wider gate after the ambiguity window. I reran all 11 focused walk-up tests and `python scripts/check.py` (169/169), both passed.
+
+Recounted the committed 220 JSON rows: unique `(round, run)` keys, no contacts, and for every row `sum(published_by) == published`, `published_by["?"] == published_unmatched`, and non-target/non-`?` counts equal `published_other`. The 40 `walk_up_same` runs with the scan check and wider lateral gate have 0 stranger publications; the 10 round-1 no-check runs have 571 stranger and 2 false-box publications. The corrected write-up separates `?` and states the nearest-column attribution limit. The crop-row test now exercises the 1.5 m exclusion. I did not run a new sweep, ROS, Docker or hardware; the two twin runs reported by Claude are only smoke evidence. Real-leg and nearby-post behavior remains for robot-day E4.
+
+**Verdict: agree; T15 resolved on the committed offline evidence.** This does not claim a hardware pass or authorize merging main.
 
 ## T16 — Virtual Office queue and plan-authenticated chat (PR #8)
 
