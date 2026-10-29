@@ -1521,3 +1521,8 @@ Earlier history: `history-2026-10-16.md`.
 - Lock `317005c`; merged `ab22dd7` into `integration-hub` with `--no-ff` at `9184db7`. `scripts/check.py` 173 tests OK.
 - E4b timing checked against `zlac_joystick_bridge.py` (`destroy_node` zero at once; `update_loop` target zero after `TIMEOUT` 1.0 s, ramp 1 m/s²: about 1.5 s at 0.5 m/s, 2.5 s at 1.4 m/s; legacy no ramp): correct. T17 closed (resolved). The previous entry's 22:20 stamp was really about 22:16 Thai time.
 - `HANDOFF.md`: item 19 resolved, item 18 E4b ready for the robot day, hub and `claude/workspace` rows; lock released.
+
+## 2026-10-29 22:24 — Twin toward 100%: LiDAR assist draft (branch `claude/robot/lidar-assist`, not validated)
+- User asked to bring the offline (twin) results to 100%. `side_step` failures have two forms: the robot never turns when the target leaves the image (vis 0.86–0.87), or LiDAR tracking latches a post and spins (s15).
+- Draft: `lidar_assist` (default on) moves the gate track to the target's own LiDAR cluster once per fresh scan, only within 0.35 m of the prediction and only when `scan_crowded` says nobody else is near. Tests for following out of view, no move with a stranger beside, no jump to a post. 176 tests pass.
+- Not yet shown to fix the twin failures: a unit test showed the old code also turns in the simulated case, so a debug build (gate decisions logged) is running on side_step seeds 8, 10, 15, 13, 14, 11 to find the real cause first.
