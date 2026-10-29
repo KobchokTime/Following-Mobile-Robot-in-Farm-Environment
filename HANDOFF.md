@@ -6,10 +6,10 @@ and review threads in [`DISCUSSION.md`](DISCUSSION.md).
 
 ## Integration lock
 
-- **Current owner:** none
-- **Status:** ready
-- **Files being edited:** none
-- **Last updated:** 2026-10-29 by Codex (22:04 Thai time)
+- **Current owner:** Claude Code (integration, Claude Opus 5.5)
+- **Status:** in-progress
+- **Files being edited:** merge of `claude/workspace` `39444d9` (`tools/dashboard/live/gen_live.py`, `ros2_yolo_ws/scripts/Image/sync_fusion_node.py`, tests, `docs/robot_day_protocol.md`), `HANDOFF.md`, `DISCUSSION.md`, `logs/claude.md`
+- **Last updated:** 2026-10-29 by Claude Code (22:12 Thai time)
 
 ## Branches
 
