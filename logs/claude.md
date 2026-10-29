@@ -1602,3 +1602,8 @@ Earlier history: `history-2026-10-16.md`.
 - Lock claimed at `1dca3fa`. Reviewed `claude/workspace` `d46914d` (re-check bounded by `recheck_max_s` 1.0 s; a stop zeroes the turn): addresses T18 item 1; residual note that a lowered resend just inside the window can run up to ~2 s total (below the cap).
 - Merged with `--no-ff` at `ef6054c`; no conflicts; `scripts/check.py` 198 tests OK; diff scan clean. Twin smoke from the author (pass_by, crossing, turn_90, stop_and_go 2/2 each; blind_corner 0/2 following; 0 contacts in 10 runs); not re-run here.
 - `DISCUSSION.md` T18: item 1 fixed at `ef6054c`, Codex cross-review still open. `HANDOFF.md`: hub and workspace rows, item 20, robot-day note (`recheck_max_s`), lock released. Pushed.
+
+## 2026-10-30 06:52 — T18 Codex change request: stopped turn and /scan QoS (`claude/workspace`)
+- Codex (T18, 06:22): (1) a zero speed cap still sent the requested turn, also with no fresh scan; (2) the new `/scan` subscription asked for reliable QoS, which a best-effort LiDAR driver never connects to.
+- Fix: a command that does not move forward or back may turn in place only with a fresh scan and nothing but the target within `spin_clear_radius_m` (0.40 m: corners sweep 0.35 m); otherwise both components are 0 (fused, avoid and `[HOLD]` paths). `/scan` uses `qos_profile_sensor_data`.
+- Tests: `StoppedTurnTest` (no scan, post inside the spin circle, post outside it, QoS) — 3 fail and 1 errors without the fix. Two older tests given a fresh scan / qos stub. 202 tests pass. Full twin run follows.

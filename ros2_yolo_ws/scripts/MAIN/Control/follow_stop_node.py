@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import rclpy
 from rclpy.node import Node
+from rclpy.qos import qos_profile_sensor_data
 from std_msgs.msg import Float32MultiArray
 from geometry_msgs.msg import Twist
 from sensor_msgs.msg import LaserScan
@@ -205,6 +206,7 @@ class FollowStopNode(Node):
         self.declare_parameter('obstacle_stop', True)
         self.declare_parameter('obstacle_half_width_m', 0.30)   # robot 0.47 m wide (thesis slides) + 6.5 cm margin
         self.declare_parameter('obstacle_stop_m', 0.45)         # stop this far from the LiDAR to the obstacle
+        self.declare_parameter('spin_clear_radius_m', 0.40)  # corners sweep 0.35 m (47 x 52 cm) + 5 cm
         self.declare_parameter('recheck_max_s', 1.0)  # re-check a command on new scans this long (bridge timeout)
         self.declare_parameter('obstacle_target_exclude_m', 0.30)  # returns this close to the target are the target
         # obstacle avoid: when the corridor toward the target is blocked, take the nearest clear arc that
@@ -273,6 +275,7 @@ class FollowStopNode(Node):
         self.moving_target     = None   # (x, y, time) of the target point that command was checked with
         self.moving_time       = 0.0    # when that command was sent
         self.recheck_max       = float(self.get_parameter('recheck_max_s').value)
+        self.spin_clear_r      = float(self.get_parameter('spin_clear_radius_m').value)
 
         # ---------- State ----------
         self.initialized   = False
@@ -292,7 +295,9 @@ class FollowStopNode(Node):
         # ---------- ROS ----------
         self.sub = self.create_subscription(Float32MultiArray, '/target_fused_prob', self.cb_fused, 10)
         if self.obstacle_stop:
-            self.create_subscription(LaserScan, str(self.get_parameter('scan_topic').value), self.cb_scan, 10)
+            # the LiDAR driver publishes best effort; a reliable subscriber would never connect (T18, Codex)
+            self.create_subscription(LaserScan, str(self.get_parameter('scan_topic').value), self.cb_scan,
+                                     qos_profile_sensor_data)
         self.pub = self.create_publisher(Twist, '/cmd_vel', 10)
         if self.target_timeout > 0.0:
             self.stale_timer = self.create_timer(0.05, self.check_stale)
@@ -367,6 +372,27 @@ class FollowStopNode(Node):
             self.obstacle_capped = capped
         return direction * min(abs(linear_x), cap)
 
+    def turn_allowed(self, target_xy=None):
+        """A turn in place is allowed only with a fresh scan and nothing but the target inside the circle the
+        robot's corners sweep (spin_clear_radius_m). Without it a stopped robot sends no turn either (T18)."""
+        if not self.obstacle_stop:
+            return True
+        now = self.get_clock().now().nanoseconds / 1e9
+        if self.scan_time is None or not 0.0 <= now - self.scan_time <= self.scan_max_age:
+            return False
+        for x, y in self.scan_xy:
+            if target_xy is not None and math.hypot(x - target_xy[0], y - target_xy[1]) <= self.obstacle_excl:
+                continue
+            if math.hypot(x, y) <= self.spin_clear_r:
+                return False
+        return True
+
+    def stopped_turn(self, linear_x, angular_z, target_xy):
+        """angular_z, or 0 when the command does not move forward or back and a turn in place is not allowed."""
+        if linear_x == 0.0 and angular_z != 0.0 and not self.turn_allowed(target_xy):
+            return 0.0
+        return angular_z
+
     def obstacle_command(self, linear_x, angular_z, target_xy, target_bearing, at_edge=False):
         """(linear, angular) after the obstacle stop. With obstacle_avoid, when something other than the target
         lies on the straight path to the target, aim beside the target by the smallest clear shift (aim_offset)
@@ -397,11 +423,13 @@ class FollowStopNode(Node):
             angular_z = bearing_turn(math.atan2(aim[1], aim[0]), 0.0, self.latency_s, self.bearing_gain,
                                      self.angular_limit, self.bearing_deadband)
             linear_x = max(linear_x, self.avoid_min_speed)  # from a near stop too (pass_by s4)
-            return self.obstacle_limited(linear_x, target_xy, angular_z), angular_z
+            linear_x = self.obstacle_limited(linear_x, target_xy, angular_z)
+            return linear_x, self.stopped_turn(linear_x, angular_z, target_xy)
         if self.avoid_offset != 0.0:
             self.get_logger().info("[AVOID] off")
             self.avoid_offset = 0.0
-        return self.obstacle_limited(linear_x, target_xy, angular_z), angular_z
+        linear_x = self.obstacle_limited(linear_x, target_xy, angular_z)
+        return linear_x, self.stopped_turn(linear_x, angular_z, target_xy)
 
     def cb_fused(self, msg: Float32MultiArray):
         if len(msg.data) < 8:
@@ -441,7 +469,7 @@ class FollowStopNode(Node):
                 held = Twist()
                 held.linear.x = self.obstacle_limited(self.last_good_cmd.linear.x, None,
                                                       self.last_good_cmd.angular.z)
-                held.angular.z = self.last_good_cmd.angular.z
+                held.angular.z = self.stopped_turn(held.linear.x, self.last_good_cmd.angular.z, None)
                 self.send(held)
                 self.get_logger().info(f"[HOLD] Low conf {P_fused_smooth:.2f} → keep last cmd")
             else:

@@ -16,7 +16,9 @@ def _load():
              "std_msgs": types.ModuleType("std_msgs"), "std_msgs.msg": types.ModuleType("std_msgs.msg"),
              "geometry_msgs": types.ModuleType("geometry_msgs"),
              "geometry_msgs.msg": types.ModuleType("geometry_msgs.msg"),
-             "sensor_msgs": types.ModuleType("sensor_msgs"), "sensor_msgs.msg": types.ModuleType("sensor_msgs.msg")}
+             "sensor_msgs": types.ModuleType("sensor_msgs"), "sensor_msgs.msg": types.ModuleType("sensor_msgs.msg"),
+             "rclpy.qos": types.ModuleType("rclpy.qos")}
+    stubs["rclpy.qos"].qos_profile_sensor_data = object()
     stubs["rclpy.node"].Node = object
     stubs["std_msgs.msg"].Float32MultiArray = object
     stubs["geometry_msgs.msg"].Twist = object

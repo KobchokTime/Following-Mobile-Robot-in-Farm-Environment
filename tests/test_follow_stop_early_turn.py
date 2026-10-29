@@ -164,7 +164,9 @@ class FollowStopEarlyTurnTests(unittest.TestCase):
             node.cb_fused(message)
             return publisher.messages[-1]
 
+        node.cb_scan(_LaserScan([math.inf] * 360))  # a fresh, empty scan: turning in place is allowed
         send(4)
+        node.cb_scan(_LaserScan([math.inf] * 360))
         self.assertGreater(send(2).angular.z, 0.0)
 
 
