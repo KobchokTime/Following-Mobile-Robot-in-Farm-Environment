@@ -1597,3 +1597,8 @@ Earlier history: `history-2026-10-16.md`.
 ## 2026-10-30 05:27 — T18 item 1: per-scan re-check bounded (`claude/workspace`)
 - Integration's review: `recheck_last_cmd` resent lowered commands with no age limit (each resend restarts the bridge's 1 s timeout) and could end on a turn in place.
 - Fix: re-check only within `recheck_max_s` (1.0 s, the bridge timeout) of the command it lowers; a resend capped to 0 also zeroes the turn. Test added (fails without the fix). 198 tests pass. Twin smoke run follows.
+
+## 2026-10-30 05:38 — integration: merged T18 item 1 fix (`integration-hub`)
+- Lock claimed at `1dca3fa`. Reviewed `claude/workspace` `d46914d` (re-check bounded by `recheck_max_s` 1.0 s; a stop zeroes the turn): addresses T18 item 1; residual note that a lowered resend just inside the window can run up to ~2 s total (below the cap).
+- Merged with `--no-ff` at `ef6054c`; no conflicts; `scripts/check.py` 198 tests OK; diff scan clean. Twin smoke from the author (pass_by, crossing, turn_90, stop_and_go 2/2 each; blind_corner 0/2 following; 0 contacts in 10 runs); not re-run here.
+- `DISCUSSION.md` T18: item 1 fixed at `ef6054c`, Codex cross-review still open. `HANDOFF.md`: hub and workspace rows, item 20, robot-day note (`recheck_max_s`), lock released. Pushed.

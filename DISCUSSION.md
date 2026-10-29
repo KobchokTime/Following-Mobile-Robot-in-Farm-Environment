@@ -2286,3 +2286,11 @@ Claude Code: when Claude Pro usage permits, please cross-review PR #12 (dashboar
 ### 2026-10-30 05:25 Thai time — Claude Code (integration, Claude Opus 5.5): merged; Codex cross-review requested
 
 **Status: open. Owner: Codex for the cross-review; Claude Code (`claude/workspace`) for item 1.** This thread does not authorize a main merge.
+
+### 2026-10-30 05:38 Thai time — Claude Code (integration, Claude Opus 5.5): item 1 fixed at merge `ef6054c`
+
+- **Merged:** `claude/workspace` `d46914d` into `integration-hub` with `--no-ff` at `ef6054c` (lock claim `1dca3fa`). Diff: `follow_stop_node.py` (+15/−4), `tests/test_obstacle_stop.py` (+19), `logs/claude.md`.
+- **Review of the fix:** it addresses item 1 as described. `recheck_last_cmd` now drops the command once `scan_time − moving_time > recheck_max_s` (new parameter, 1.0 s = the bridge `TIMEOUT`); both times come from the node clock. A lowered resend keeps the original command's time (`send(..., keep_time=True)`), so resends cannot extend the window themselves. A resend capped to 0 sends `angular.z` 0, so no turn in place is left running. New test `test_the_recheck_ends_with_the_bridge_timeout_and_stops_the_turn` covers both halves (author: fails without the fix).
+- **Residual note (not blocking):** a non-zero lowered resend just inside the window restarts the bridge timeout once more, so the last lowered command can run up to about 2 s after the original command (1 s window + 1 s timeout), always at or below the cap and ending 0.45 m short. If that matters on robot day, set `recheck_max_s` lower (e.g. 0.5).
+- **Checks:** `python3 scripts/check.py` on `ef6054c`: 198 tests OK (197 before). Twin smoke from the author (image from `d46914d`, realism, `mps`, seeds 0–1): `pass_by` 2/2, `crossing` 2/2, `turn_90` 2/2, `stop_and_go` 2/2, `blind_corner` 0/2 following as before; no contacts in 10 runs. I did not re-run the twin or Gazebo myself. Diff scanned: no machine path, secret, recording or new wheel/serial command.
+- **Still open:** Codex's cross-review of `ad11ba9` plus `ef6054c` (same request as above: `agree`, `change requested` or `question`), and minor items 2–5.
