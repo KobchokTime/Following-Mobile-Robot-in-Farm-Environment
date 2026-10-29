@@ -172,14 +172,35 @@ COLOUR_SCENARIOS: Dict[str, dict] = {
     },
 }
 
+OBSTACLE_SCENARIOS: Dict[str, dict] = {
+    "blind_corner": {
+        "doc": "turn_90 with someone the camera never detects standing at the inside of the corner, 0.45 m from "
+               "the target's path. A robot cutting the corner meets them; only the LiDAR sees them (obstacle stop).",
+        "duration_s": 30.0,
+        "people": [("target", True, [(0, 1.0, 0.0), (3, 1.0, 0.0), (10.5, 4.0, 0.0), (18, 4.0, 3.0)]),
+                   ("bystander", False, [(0, 3.55, 0.55), (30, 3.55, 0.55)])],
+        "hidden": {"bystander": [(0.0, 30.0)]},
+    },
+    "pass_by": {
+        "doc": "straight: the target walks past someone the camera never detects (a worker crouched at the row), "
+               "0.42 m to the side of the target's line. A robot that keeps to the target's line touches them; "
+               "there is room on the other side to swerve (obstacle avoid).",
+        "duration_s": 22.0,
+        "people": [("target", True, [(0, 1.0, 0.0), (3, 1.0, 0.0), (15, 7.0, 0.0), (22, 7.0, 0.0)]),
+                   ("bystander", False, [(0, 4.0, 0.42), (22, 4.0, 0.42)])],
+        "hidden": {"bystander": [(0.0, 22.0)]},
+    },
+}
+
 ALL_SCENARIOS: Dict[str, dict] = {**SCENARIOS, **IDENTITY_SCENARIOS}  # frozen: the Arena 3 scorer checks runs against it
-SCENARIO_LOOKUP: Dict[str, dict] = {**ALL_SCENARIOS, **SOLO_SCENARIOS, **COLOUR_SCENARIOS}  # every scenario that can be run
+SCENARIO_LOOKUP: Dict[str, dict] = {**ALL_SCENARIOS, **SOLO_SCENARIOS, **COLOUR_SCENARIOS, **OBSTACLE_SCENARIOS}  # every scenario that can be run
 SCENARIO_SETS: Dict[str, list] = {
     "all": sorted(SCENARIOS),  # the Arena 2 set; kept as "all" so existing commands mean the same
     "identity": ["crossing", *sorted(IDENTITY_SCENARIOS)],
     "everything": sorted(ALL_SCENARIOS),
     "solo": ["straight", "stop_and_go", "curve_left", "target_loss", *sorted(SOLO_SCENARIOS)],
     "colour": sorted(COLOUR_SCENARIOS),
+    "obstacle": sorted(OBSTACLE_SCENARIOS),
 }
 
 

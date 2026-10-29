@@ -227,3 +227,73 @@ class WalkUpTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class LidarAssistTest(unittest.TestCase):
+    """The target's own LiDAR cluster moves the track between camera frames (twin side_step failures)."""
+    W, HFOV = WalkUpTest.W, WalkUpTest.HFOV
+    frame, lock = WalkUpTest.frame, WalkUpTest.lock
+
+    def scan_at(self, node, t, people):
+        node.scan_points = scan(*(person(x, y) for x, y in people))
+        node.scan_time = t
+        node.now_sec = lambda: t
+        node.on_track_timer()
+
+    def box(self, node, t, x, y):
+        f = (self.W / 2.0) / math.tan(math.radians(self.HFOV) / 2.0)
+        node.scan_time = t
+        node.buf_lidar.clear()
+        node.buf_lidar.append((t, [1.0]))
+        n = len(node.published)
+        node.try_sync_from_yolo(t, int(round(self.W / 2.0 - f * math.tan(math.atan2(y, x)))), 240, 4)
+        return len(node.published) > n
+
+    def side_step(self, **params):
+        """The traced twin failure: the last box is at 20 deg, then the target steps out of the image."""
+        m, node = make_node(**params)
+        t = self.lock(node, target=(0.9, 0.0))
+        node.scan_points = scan(person(0.9, -0.33))
+        self.assertTrue(self.box(node, t, 0.9, -0.33))  # 20 deg: inside the image, not near its edge
+        for k in range(1, 9):  # on to 45 deg and beyond, seen only by the LiDAR
+            self.scan_at(node, t + 0.1 * k, [(0.9, -0.33 - 0.08 * k)])
+        return [p for p in node.published if p[0] == node.image_width - 1]  # turn-right commands at the edge
+
+    def test_a_target_stepping_out_of_view_is_followed_with_the_lidar(self):
+        self.assertTrue(self.side_step())
+
+    def test_a_passer_by_covering_the_target_does_not_move_the_track(self):
+        # twin crossing run: someone walks between the robot and the target, so the LiDAR sees only them,
+        # 0.3 m nearer than the target was 0.1 s before
+        m, node = make_node()
+        t = self.lock(node, target=(0.95, 0.0))
+        before = (node.gate.bearing, node.gate.range)
+        self.scan_at(node, t + 0.1, [(0.62, 0.05)])
+        self.assertAlmostEqual(node.gate.bearing, before[0], places=6)
+        self.assertAlmostEqual(node.gate.range, before[1], places=6)
+
+    def test_no_assist_while_someone_was_just_near_the_target(self):
+        # twin crossing s2: the crosser lent their range to the target's box, then walked off sideways; the
+        # assist followed their cluster. After a crowd flag the camera decides alone for the window.
+        m, node = make_node()
+        t = self.lock(node, target=(0.95, 0.0))
+        node.gate.note_crowded(t)
+        before = (node.gate.bearing, node.gate.range)
+        self.scan_at(node, t + 0.1, [(0.95, -0.06)])  # a cluster the assist would otherwise take
+        self.assertAlmostEqual(node.gate.bearing, before[0], places=6)
+        self.assertAlmostEqual(node.gate.range, before[1], places=6)
+
+    def test_a_stranger_beside_the_target_does_not_move_the_track(self):
+        m, node = make_node()
+        t = self.lock(node)
+        before = (node.gate.bearing, node.gate.range)
+        self.scan_at(node, t + 0.1, [(1.0, 0.0), (1.05, -0.40)])
+        self.assertAlmostEqual(node.gate.bearing, before[0], places=6)
+        self.assertAlmostEqual(node.gate.range, before[1], places=6)
+
+    def test_a_post_away_from_the_prediction_is_not_taken(self):
+        m, node = make_node()
+        t = self.lock(node)
+        before = node.gate.bearing
+        self.scan_at(node, t + 0.1, [(1.45, -0.3)])  # the target gone from the scan, a post 0.5 m off
+        self.assertAlmostEqual(node.gate.bearing, before, places=6)
