@@ -111,6 +111,56 @@ def obstacle_speed_cap(clearance, stop_m, max_decel, latency_s, v_now):
     return math.sqrt(2.0 * max(max_decel, 0.1) * left)
 
 
+def swerve_path(k, swerve_m=0.8, horizon_m=1.6, step_m=0.1):
+    """Robot-centre samples (s, x, y) along a swerve: curvature k for swerve_m, -k for swerve_m (heading back
+    to where it was), then straight, up to horizon_m."""
+    out, x, y, th, s = [], 0.0, 0.0, 0.0, 0.0
+    while s < horizon_m - 1e-9:
+        kk = k if s < swerve_m - 1e-9 else (-k if s < 2.0 * swerve_m - 1e-9 else 0.0)
+        if abs(kk) < 1e-9:
+            x, y = x + step_m * math.cos(th), y + step_m * math.sin(th)
+        else:
+            nth = th + kk * step_m
+            x, y, th = x + (math.sin(nth) - math.sin(th)) / kk, y + (math.cos(th) - math.cos(nth)) / kk, nth
+        s += step_m
+        out.append((s, x, y))
+    return out
+
+
+def path_clearance(points, half_width, path, exclude=None, exclude_r=0.0):
+    """Path length before the robot (a disc of half_width) along path first touches a return, or inf."""
+    reach = (path[-1][0] + half_width) ** 2 if path else 0.0
+    near = [(x, y) for x, y in points if x > -half_width and x * x + y * y <= reach
+            and not (exclude is not None and math.hypot(x - exclude[0], y - exclude[1]) <= exclude_r)]
+    hw2 = half_width * half_width
+    for s, px, py in path:
+        if any((x - px) ** 2 + (y - py) ** 2 <= hw2 for x, y in near):
+            return s
+    return math.inf
+
+
+def avoid_arc(clearance_of, k_want, target_bearing, k_prev=None, horizon_m=1.6, k_max=1.2, steps=13,
+              view_rad=0.8, swerve_m=0.8, turn_cost=0.05):
+    """The swerve curvature (1/m, left positive) with the most free path, up to horizon_m, toward the target.
+
+    clearance_of(k) is the free path of the swerve with curvature k. Each is scored by that free path, less
+    turn_cost metres per 1/m away from the turn the follower wanted (and from the last swerve, so the robot
+    does not swap sides). A swerve that turns the robot more than view_rad away from the target is not
+    taken: past the camera's 35 deg half view, LiDAR edge tracking holds the target for a short while. Returns (curvature, free path), or None if no swerve may be taken.
+    """
+    best = None
+    for i in range(steps):
+        k = -k_max + 2.0 * k_max * i / (steps - 1)
+        if target_bearing is not None and abs(target_bearing - k * swerve_m) > view_rad:
+            continue
+        c = clearance_of(k)
+        score = min(c, horizon_m) - turn_cost * abs(k - k_want) \
+            - (turn_cost * abs(k - k_prev) if k_prev is not None else 0.0)
+        if best is None or score > best[0]:
+            best = (score, k, c)
+    return None if best is None else (best[1], best[2])
+
+
 class FollowStopNode(Node):
     def __init__(self):
         super().__init__('follow_stop_node')
@@ -161,6 +211,11 @@ class FollowStopNode(Node):
         self.declare_parameter('obstacle_half_width_m', 0.30)   # robot 0.47 m wide (thesis slides) + 6.5 cm margin
         self.declare_parameter('obstacle_stop_m', 0.45)         # stop this far from the LiDAR to the obstacle
         self.declare_parameter('obstacle_target_exclude_m', 0.30)  # returns this close to the target are the target
+        # obstacle avoid: when the corridor toward the target is blocked, take the nearest clear arc that
+        # keeps the target in view instead of only stopping (blind_corner: someone beside the corner)
+        self.declare_parameter('obstacle_avoid', True)
+        self.declare_parameter('avoid_min_speed_mps', 0.12)  # an arc slower than this is no better than stopping
+        self.declare_parameter('avoid_horizon_m', 1.6)       # look this far along the path for a way round
         self.declare_parameter('scan_topic', '/scan')
         self.declare_parameter('lidar_angle_offset_deg', 180.0)  # as sync_fusion_node / lidar_sectorizer_node
         self.declare_parameter('scan_max_age_s', 0.3)
@@ -209,6 +264,10 @@ class FollowStopNode(Node):
         self.scan_xy           = []     # latest scan in the robot frame
         self.scan_time         = None
         self.obstacle_capped   = False  # last [OBST] state written to the log
+        self.obstacle_avoid    = bool(self.get_parameter('obstacle_avoid').value)
+        self.avoid_min_speed   = float(self.get_parameter('avoid_min_speed_mps').value)
+        self.avoid_horizon     = float(self.get_parameter('avoid_horizon_m').value)
+        self.avoid_k           = None   # curvature of the arc being taken around an obstacle
         self.moving_cmd        = None   # last command sent while moving, re-checked on every scan
         self.moving_target     = None   # (x, y, time) of the target point that command was checked with
 
@@ -294,6 +353,37 @@ class FollowStopNode(Node):
                                    + ('' if fresh else ' (no fresh scan)'))
             self.obstacle_capped = capped
         return direction * min(abs(linear_x), cap)
+
+    def obstacle_command(self, linear_x, angular_z, target_xy, target_bearing):
+        """(linear, angular) after the obstacle stop. With obstacle_avoid, a forward command whose corridor is
+        blocked within avoid_horizon_m takes the arc with the most free path that keeps the target in view."""
+        now = self.get_clock().now().nanoseconds / 1e9
+        fresh = self.scan_time is not None and 0.0 <= now - self.scan_time <= self.scan_max_age
+        if self.obstacle_stop and self.obstacle_avoid and fresh and linear_x > self.avoid_min_speed:
+            clear = lambda k: path_clearance(self.scan_xy, self.obstacle_half_w,
+                                             swerve_path(k, horizon_m=self.avoid_horizon),
+                                             target_xy, self.obstacle_excl)
+            k_want = angular_z / linear_x
+            c_want = path_clearance(self.scan_xy, self.obstacle_half_w,
+                                    swerve_path(k_want, swerve_m=self.avoid_horizon, horizon_m=self.avoid_horizon),
+                                    target_xy, self.obstacle_excl)
+            arc = avoid_arc(clear, k_want, target_bearing, self.avoid_k, self.avoid_horizon) \
+                if c_want < self.avoid_horizon else None
+            if arc is not None and arc[1] > c_want + 0.1:
+                k = arc[0]
+                v = linear_x
+                if abs(k * v) > self.angular_limit:
+                    v = self.angular_limit / abs(k)
+                if v >= self.avoid_min_speed:
+                    if self.avoid_k is None:
+                        self.get_logger().info(f"[AVOID] on k={k:+.2f}/m free={arc[1]:.2f} m "
+                                               f"(wanted {c_want:.2f} m)")
+                    self.avoid_k = k
+                    return self.obstacle_limited(v, target_xy, k * v), k * v
+        if self.avoid_k is not None:
+            self.get_logger().info("[AVOID] off")
+            self.avoid_k = None
+        return self.obstacle_limited(linear_x, target_xy, angular_z), angular_z
 
     def cb_fused(self, msg: Float32MultiArray):
         if len(msg.data) < 8:
@@ -412,7 +502,7 @@ class FollowStopNode(Node):
         tb = (math.radians(self.camera_hfov_deg / 2.0) * (1.0 if cx <= 0 else -1.0)
               if cx <= 0 or cx >= self.image_width - 1 else camera_bearing(cx, self.image_width, self.camera_hfov_deg))
         target_xy = (dist * math.cos(tb), dist * math.sin(tb))
-        linear_x = self.obstacle_limited(linear_x, target_xy, angular_z)
+        linear_x, angular_z = self.obstacle_command(linear_x, angular_z, target_xy, tb)
         self.last_linear = linear_x
 
         # ---------- Publish ----------

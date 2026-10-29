@@ -55,6 +55,7 @@ class CorridorTest(unittest.TestCase):
 class NodeTest(unittest.TestCase):
     def drive(self, scan_points, **params):
         node = M.FollowStopNode()
+        node.obstacle_avoid = False  # the stop alone; AvoidTest covers the way round
         for k, v in params.items():
             setattr(node, k, v)
         if scan_points is not None:
@@ -106,6 +107,49 @@ class NodeTest(unittest.TestCase):
         self.assertEqual(len(node.pub.messages), sent)
         node.cb_scan(scan(person(1.8, 0.0) + person(0.6, -0.1)))  # someone 0.4 m ahead
         self.assertEqual(node.pub.messages[-1].linear.x, 0.0)
+
+
+class AvoidTest(unittest.TestCase):
+    def arc(self, pts, k_want=0.0, bearing=0.0, k_prev=None):
+        return M.avoid_arc(lambda k: M.path_clearance(pts, 0.3, M.swerve_path(k)), k_want, bearing, k_prev)
+
+    def test_a_clear_path_keeps_the_wanted_arc(self):
+        k, c = self.arc([])
+        self.assertAlmostEqual(k, 0.0)
+
+    def test_a_post_ahead_left_is_passed_on_the_right(self):
+        pts = person(0.9, 0.12, r=0.06)
+        k, c = self.arc(pts)
+        self.assertLess(k, 0.0)
+        self.assertGreater(c, M.path_clearance(pts, 0.3, M.swerve_path(0.0)) + 0.3)
+
+    def test_an_arc_that_loses_the_target_is_not_taken(self):
+        k, _ = self.arc(person(0.9, 0.12, r=0.06), bearing=math.radians(30.0))
+        self.assertLessEqual(abs(math.radians(30.0) - k * 0.8), 0.8 + 1e-9)
+
+    def test_the_side_already_taken_is_kept(self):
+        pts = person(1.0, 0.0, r=0.06)  # dead ahead: both sides are as good
+        self.assertLess(self.arc(pts, k_prev=-0.6)[0], 0.0)
+        self.assertGreater(self.arc(pts, k_prev=0.6)[0], 0.0)
+        self.assertEqual(M.path_clearance(pts, 0.3, M.swerve_path(self.arc(pts, k_prev=0.6)[0])), math.inf)
+
+    def test_the_node_steers_around_a_post_toward_the_target(self):
+        node = M.FollowStopNode()
+        pts = person(2.0, 0.0) + person(0.9, 0.1, r=0.06)
+        msg = _Float32MultiArray()
+        node.cb_scan(scan(pts))
+        msg.data = [320.0, 240.0, 0.8, 4.0, 0.9, 0.9, 0.9, 10.0]
+        node.cb_fused(msg)
+        node.cb_scan(scan(pts))
+        msg.data = [320.0, 240.0, 1.8, 4.0, 0.9, 0.9, 0.9, 10.0]
+        node.cb_fused(msg)
+        cmd = node.pub.messages[-1]
+        self.assertGreater(cmd.linear.x, 0.12)
+        self.assertLess(cmd.angular.z, 0.0)  # around the post on the right
+        node.obstacle_avoid, node.avoid_k = False, None
+        node.cb_scan(scan(pts))
+        node.cb_fused(msg)
+        self.assertEqual(node.pub.messages[-1].angular.z, 0.0)
 
 
 if __name__ == "__main__":
