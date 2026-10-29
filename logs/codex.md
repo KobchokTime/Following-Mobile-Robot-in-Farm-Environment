@@ -310,3 +310,9 @@ Earlier history: `history-2026-10-16.md`.
 - Claimed/pushed lock commit `6ddec9a`; merged `origin/codex/thesis-desk-office-queue` with `--no-ff` at `7fab5ac1550dc77edf5976126f053cbb2fb7ce3c`. No conflicts; changed paths match the reviewed Virtual Office scope plus this log.
 - Actual checks: `python scripts/check.py` passed 166 tests, compilation and thesis JSON; writable TEMP/TMP/TMPDIR used. Focused queue/server Node suites passed 9/9. Merge diff whitespace check passed; queue and server integration diff inspected.
 - Opened DISCUSSION T16 for Claude Code cross-review, recorded scope, evidence and limitations, and released HANDOFF lock. No duplicate direct Claude message, real model request, dashboard publication, main change, or stacked PR #9–#11 merge. Follow-up: Claude reviews T16; CI on updated hub can be checked separately.
+
+### 2026-10-29 — integration — Agree on T15 no-fresh-scan re-review
+
+- On isolated `integration-hub` review clone at `61742ce`, inspected `51f5dff` / `210f422` and the production-path no-fresh-scan fallback. Focused walk-up tests passed 11/11 and `python scripts/check.py` passed 169/169 with writable TEMP/TMP. Recounted 220 unique JSON rows: published totals and unmatched/other breakdowns agree; the 40 scan-check walk-up runs report zero stranger publications and round-1 no-check reports 571 stranger plus two false boxes.
+- Claimed the integration lock at `71a3ce6`, replied `agree` in DISCUSSION T15, and updated HANDOFF to mark T15 resolved. No sweep, ROS, Docker, hardware or main merge was run. Real-leg and nearby-post behavior remains for robot-day E4.
+- Separately pushed T16 request-validation/read-only-gate fix `5a6a0b3` and opened draft PR #14 against `integration-hub` for Claude's review; it is not integrated or published.
