@@ -1504,3 +1504,6 @@ Earlier history: `history-2026-10-16.md`.
 - Checks on `3b13465`: `scripts/check.py` 173 tests OK; Virtual Office `node --test` 20/20; open-loop twin hash (seed 3, 20 scenarios, 150 steps) identical to `af95e3e` (plain `ccfc03e4…`, realism `c2a5ddd9…`).
 - Review: `crowded` reads `gate.locked` / `gate.ambiguous_until` only; logged once per change, not per box; changes made inside `accept` show at the next box as `reason=gate`. `fit_past_tracks` keeps `t` increasing per run and registry order. Change requested: E4b says "stop it with the e-stop", but the project has no physical E-stop. Opened **T17** (owner Claude workspace).
 - `HANDOFF.md`: hub and `claude/workspace` rows, dashboard row (ci_runs/unit_tests republished from `af95e3e`, CI 22:08 Thai, 169/169), item 18 points to E4b, new item 19 (T17); lock released.
+
+## 2026-10-29 22:15 — T17: E4b safety line reworded
+- `docs/robot_day_protocol.md` E4b no longer mentions an e-stop (the project has none, HANDOFF *Plan*). It now says: isolated field with spotters; people step out of the path and the operator stops the bringup; the bridge zeroes the wheels on shutdown and after 1 s without `/cmd_vel` (checked in `zlac_joystick_bridge.py`), which is software only.
