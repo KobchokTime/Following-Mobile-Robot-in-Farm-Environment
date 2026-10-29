@@ -189,8 +189,10 @@ python3 tools/robot_day/turn_check.py
   the check misses real pairs.
 - **Safety:** this project has no physical E-stop (HANDOFF *Plan*), so run E4b only in the isolated field
   with the spotters. If the robot heads for the wrong person, everyone steps out of its path and the
-  operator stops the bringup (Ctrl+C). `zlac_joystick_bridge.py` sets the wheels to zero when it shuts down,
-  and within 1 s of the last `/cmd_vel` (`TIMEOUT`). That is software only, so the spotters keep clear
+  operator stops the bringup (Ctrl+C). `zlac_joystick_bridge.py` writes zero to the wheels at once when it
+  shuts down. If only `/cmd_vel` stops, it starts ramping the wheels to zero 1 s after the last command
+  (`TIMEOUT`) at `max_accel_mps2` (1 m/s²), so they stop about 1.5 s after it at 0.5 m/s and about 2.5 s
+  at 1.4 m/s (default `mps` mode; `legacy` zeroes at once). That is software only, so the spotters keep clear
   whatever the log says. The plain gate is the fallback in every `on` case, so a false `on` costs side
   steps, not a wrong pick.
 
