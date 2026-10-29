@@ -205,6 +205,7 @@ class FollowStopNode(Node):
         self.declare_parameter('obstacle_stop', True)
         self.declare_parameter('obstacle_half_width_m', 0.30)   # robot 0.47 m wide (thesis slides) + 6.5 cm margin
         self.declare_parameter('obstacle_stop_m', 0.45)         # stop this far from the LiDAR to the obstacle
+        self.declare_parameter('recheck_max_s', 1.0)  # re-check a command on new scans this long (bridge timeout)
         self.declare_parameter('obstacle_target_exclude_m', 0.30)  # returns this close to the target are the target
         # obstacle avoid: when the corridor toward the target is blocked, take the nearest clear arc that
         # keeps the target in view instead of only stopping (blind_corner: someone beside the corner)
@@ -270,6 +271,8 @@ class FollowStopNode(Node):
         self.last_clearance    = math.inf  # corridor clearance of the last command, for the [MOVE] line
         self.moving_cmd        = None   # last command sent while moving, re-checked on every scan
         self.moving_target     = None   # (x, y, time) of the target point that command was checked with
+        self.moving_time       = 0.0    # when that command was sent
+        self.recheck_max       = float(self.get_parameter('recheck_max_s').value)
 
         # ---------- State ----------
         self.initialized   = False
@@ -317,21 +320,29 @@ class FollowStopNode(Node):
         cmd = self.moving_cmd
         if cmd is None or cmd.linear.x == 0.0:
             return
+        if self.scan_time - self.moving_time > self.recheck_max:
+            # only the window the bridge would still run it (its 1 s timeout): each resend restarts that
+            # timeout, so an unbounded re-check would keep the robot creeping after the target is gone (T18)
+            self.moving_cmd = None
+            return
         tgt = self.moving_target
         target_xy = tgt[:2] if tgt is not None and self.scan_time - tgt[2] <= self.scan_max_age else None
         capped = self.obstacle_limited(cmd.linear.x, target_xy, cmd.angular.z)
         if abs(capped) < abs(cmd.linear.x):
             twist = Twist()
             twist.linear.x = capped
-            twist.angular.z = cmd.angular.z
-            self.send(twist)
+            twist.angular.z = cmd.angular.z if capped != 0.0 else 0.0  # stopped: no turn in place left running
+            self.send(twist, keep_time=True)
             self.last_linear = capped
 
-    def send(self, twist, target_xy=None):
-        """Publish a command and keep it for the per-scan re-check while it moves the robot."""
+    def send(self, twist, target_xy=None, keep_time=False):
+        """Publish a command and keep it for the per-scan re-check while it moves the robot. keep_time: a
+        re-check's lowered resend, still dated from the command it lowers."""
         self.pub.publish(twist)
         now = self.get_clock().now().nanoseconds / 1e9
         self.moving_cmd = twist if twist.linear.x != 0.0 else None
+        if not keep_time:
+            self.moving_time = now
         if target_xy is not None:
             self.moving_target = (target_xy[0], target_xy[1], now)
 

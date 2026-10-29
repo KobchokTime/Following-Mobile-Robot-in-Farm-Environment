@@ -108,6 +108,25 @@ class NodeTest(unittest.TestCase):
         node.cb_scan(scan(person(1.8, 0.0) + person(0.6, -0.1)))  # someone 0.4 m ahead
         self.assertEqual(node.pub.messages[-1].linear.x, 0.0)
 
+    def test_the_recheck_ends_with_the_bridge_timeout_and_stops_the_turn(self):
+        # T18 review: the re-check resent lowered commands with no age limit, ending in a turn in place
+        node = M.FollowStopNode()
+        clock = {'t': 0.0}
+        now = type('Now', (), {'nanoseconds': property(lambda self_: int(clock['t'] * 1e9))})
+        node.get_clock = lambda: type('Clock', (), {'now': lambda self_: now()})()
+        node.cb_scan(scan(person(1.8, 0.0)))
+        cmd = M.Twist(); cmd.linear.x = 0.5; cmd.angular.z = 0.6
+        node.send(cmd, (1.6, 0.0))
+        clock['t'] = 0.2
+        node.cb_scan(scan(person(1.8, 0.0) + person(0.55, -0.05)))  # someone steps in: stop
+        last = node.pub.messages[-1]
+        self.assertEqual((last.linear.x, last.angular.z), (0.0, 0.0))
+        node.moving_cmd = cmd  # had it not stopped: a command 1.2 s old is no longer re-sent
+        sent = len(node.pub.messages)
+        clock['t'] = 1.2
+        node.cb_scan(scan(person(1.8, 0.0) + person(0.9, -0.05)))
+        self.assertEqual(len(node.pub.messages), sent)
+
 
 class AvoidTest(unittest.TestCase):
     TARGET = (1.6, 0.0)
