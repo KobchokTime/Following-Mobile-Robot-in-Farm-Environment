@@ -187,8 +187,12 @@ python3 tools/robot_day/turn_check.py
   robot stayed with the target (operator note). Too much `on` when alone means legs read as two people:
   raise the 0.55 m spread (or `crowd_radius_m` down) and say so in T15. `off` in the pair runs means
   the check misses real pairs.
-- **Safety:** if the robot follows the wrong person, stop it with the e-stop. The plain gate is the
-  fallback in every `on` case, so a false `on` costs side steps, not a wrong pick.
+- **Safety:** this project has no physical E-stop (HANDOFF *Plan*), so run E4b only in the isolated field
+  with the spotters. If the robot heads for the wrong person, everyone steps out of its path and the
+  operator stops the bringup (Ctrl+C). `zlac_joystick_bridge.py` sets the wheels to zero when it shuts down,
+  and within 1 s of the last `/cmd_vel` (`TIMEOUT`). That is software only, so the spotters keep clear
+  whatever the log says. The plain gate is the fallback in every `on` case, so a false `on` costs side
+  steps, not a wrong pick.
 
 ### E2. Latency. No extra time
 
