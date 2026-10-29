@@ -1560,3 +1560,8 @@ Earlier history: `history-2026-10-16.md`.
 - Fix `9cb32f2` (lidar-assist2): a cluster 0.2 m nearer than the predicted range, or farther from the last fix than 1.5 m/s allows, is not taken. Test added; 177 pass. Merged into `claude/robot/avoid`.
 - Avoid round 1 (blind_corner): no contacts, but swerve/straighten alternated each frame and the corner still lost the target (needs going wide, beyond a reactive swerve).
 - `f1e1511`: swerve hysteresis; new scenario `pass_by` (hidden worker 0.42 m off a straight line). Running pass_by off/on s0–4 and blind_corner with avoid s0–4.
+
+## 2026-10-30 02:31 — avoid rounds 2–3 and redesign (`claude/robot/avoid` `dcd58e0`)
+- Round 2 (`f1e1511`): pass_by avoid on 4/5, off 0/5 (stop, target lost), no contacts. blind_corner avoid on 0/5, no contacts (min 0.57 m).
+- `cb9af55`: start from a near stop (pass_by s4 stood 5 s beside the worker: the ramp asked for 0.05 m/s with a turn into the worker). Round 3: pass_by 5/10, no contacts; swerve arcs fought the sector steering.
+- `dcd58e0`: redesign. Aim at a point beside the target (smallest clear sideways shift, side kept, within 0.5 rad), steer there by bearing; hold 0.5 s after clear. 194 tests pass. Round 4 (pass_by s0–9, blind_corner s0–4) running.
