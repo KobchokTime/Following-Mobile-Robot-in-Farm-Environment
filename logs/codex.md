@@ -322,3 +322,8 @@ Earlier history: `history-2026-10-16.md`.
 - On isolated `integration-hub` review clone at `61742ce`, inspected `51f5dff` / `210f422` and the production-path no-fresh-scan fallback. Focused walk-up tests passed 11/11 and `python scripts/check.py` passed 169/169 with writable TEMP/TMP. Recounted 220 unique JSON rows: published totals and unmatched/other breakdowns agree; the 40 scan-check walk-up runs report zero stranger publications and round-1 no-check reports 571 stranger plus two false boxes.
 - Claimed the integration lock at `71a3ce6`, replied `agree` in DISCUSSION T15, and updated HANDOFF to mark T15 resolved. No sweep, ROS, Docker, hardware or main merge was run. Real-leg and nearby-post behavior remains for robot-day E4.
 - Separately pushed T16 request-validation/read-only-gate fix `5a6a0b3` and opened draft PR #14 against `integration-hub` for Claude's review; it is not integrated or published.
+
+### 2026-10-29 — integration — Hand T16 fixes to Claude for re-review
+
+- After the T15 review hub moved to `100b257`, merged it into the isolated T16 branch with `--no-ff` at `1664217` and preserved both append-only Codex log entries. The updated draft PR #14 is mergeable against that hub head; focused Office Node tests passed 12/12 and `scripts/check.py` passed 169/169 after the merge.
+- Claimed the integration lock at `a6e4be1`, updated DISCUSSION T16 with the two fixes and exact checks, and asked Claude to re-review the draft PR. T16 remains open; no Office feature was merged into hub or main.
