@@ -15,10 +15,12 @@ def _load():
     stubs = {"rclpy": types.ModuleType("rclpy"), "rclpy.node": types.ModuleType("rclpy.node"),
              "std_msgs": types.ModuleType("std_msgs"), "std_msgs.msg": types.ModuleType("std_msgs.msg"),
              "geometry_msgs": types.ModuleType("geometry_msgs"),
-             "geometry_msgs.msg": types.ModuleType("geometry_msgs.msg")}
+             "geometry_msgs.msg": types.ModuleType("geometry_msgs.msg"),
+             "sensor_msgs": types.ModuleType("sensor_msgs"), "sensor_msgs.msg": types.ModuleType("sensor_msgs.msg")}
     stubs["rclpy.node"].Node = object
     stubs["std_msgs.msg"].Float32MultiArray = object
     stubs["geometry_msgs.msg"].Twist = object
+    stubs["sensor_msgs.msg"].LaserScan = object
     previous = {k: sys.modules.get(k) for k in stubs}
     sys.modules.update(stubs)
     try:

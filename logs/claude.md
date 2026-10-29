@@ -1531,3 +1531,8 @@ Earlier history: `history-2026-10-16.md`.
 
 ## 2026-10-29 23:22 — Dashboard tabs named after the features in development
 - User found the tab names confusing. New names and order: ภาพรวมความพร้อม, ตามคน (ตัวควบคุม), เลือกเป้า (target gate), แยกคนด้วยสีเสื้อ, กรองจุดนิ่ง (ทดลอง), การทดลองที่กำลังรัน, เทสต์และ CI, then history: เส้นทางโค้ดรุ่นก่อน, Arena (ปิดแล้ว). Tab ids unchanged. Published page v28.
+
+## 2026-10-29 23:27 — Obstacle stop (branch `claude/robot/obstacle-stop`), not yet run in the twin
+- `follow_stop_node.py`: subscribes `/scan`; any return in the corridor ahead (half width 0.35 m), or behind when reversing, other than returns within 0.45 m of the target, caps the speed so the robot stops 0.45 m short (`obstacle_speed_cap`, same deceleration and latency as the braking cap). No fresh scan (> 0.3 s) means no motion. Applied to the normal command and the 1 s HOLD. Parameters `obstacle_stop` (true), `obstacle_half_width_m`, `obstacle_stop_m`, `obstacle_target_exclude_m`, `scan_topic`, `lidar_angle_offset_deg`, `scan_max_age_s`; `[OBST] on/off` log lines.
+- `tests/test_obstacle_stop.py` (8); sensor_msgs stubs added to two older tests. 181 tests pass.
+- Twin scenario `blind_bystander` (set `obstacle`): a person the camera never sees stands on the path; the target walks round them. To run: off vs on, plus every scenario with the stop on against the baseline.

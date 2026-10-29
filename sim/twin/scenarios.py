@@ -172,14 +172,27 @@ COLOUR_SCENARIOS: Dict[str, dict] = {
     },
 }
 
+OBSTACLE_SCENARIOS: Dict[str, dict] = {
+    "blind_bystander": {
+        "doc": "Someone the camera never detects stands still on the path; the target walks around them 0.5 m to "
+               "the side. Only the LiDAR sees the bystander (obstacle stop).",
+        "duration_s": 30.0,
+        "people": [("target", True, [(0, 1.0, 0.0), (3, 1.0, 0.0), (8, 2.5, 0.0), (10, 2.9, 0.65), (13, 4.3, 0.65),
+                                     (15, 4.9, 0.0), (23, 7.3, 0.0)]),
+                   ("bystander", False, [(0, 3.6, 0.15), (30, 3.6, 0.15)])],
+        "hidden": {"bystander": [(0.0, 30.0)]},
+    },
+}
+
 ALL_SCENARIOS: Dict[str, dict] = {**SCENARIOS, **IDENTITY_SCENARIOS}  # frozen: the Arena 3 scorer checks runs against it
-SCENARIO_LOOKUP: Dict[str, dict] = {**ALL_SCENARIOS, **SOLO_SCENARIOS, **COLOUR_SCENARIOS}  # every scenario that can be run
+SCENARIO_LOOKUP: Dict[str, dict] = {**ALL_SCENARIOS, **SOLO_SCENARIOS, **COLOUR_SCENARIOS, **OBSTACLE_SCENARIOS}  # every scenario that can be run
 SCENARIO_SETS: Dict[str, list] = {
     "all": sorted(SCENARIOS),  # the Arena 2 set; kept as "all" so existing commands mean the same
     "identity": ["crossing", *sorted(IDENTITY_SCENARIOS)],
     "everything": sorted(ALL_SCENARIOS),
     "solo": ["straight", "stop_and_go", "curve_left", "target_loss", *sorted(SOLO_SCENARIOS)],
     "colour": sorted(COLOUR_SCENARIOS),
+    "obstacle": sorted(OBSTACLE_SCENARIOS),
 }
 
 
