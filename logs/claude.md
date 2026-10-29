@@ -1544,3 +1544,8 @@ Earlier history: `history-2026-10-16.md`.
 - Round 1 on `4f573e8` (realism, s0–4, interleaved): stop off — 1 contact (s2, 0.24 m); stop on — 1 contact (s0, 0.34 m). Neither setting passes on following: the bystander's returns shorten the target range at the corner (give-way), the robot backs off, and the target walks beyond the 3 m reacquire limit.
 - Cause of the stop-on contact: one false box set a 0.5 m/s command, then target messages stopped; the command ran until the stale stop and the bridge ramp. The target exclusion (0.45 m) also covered the bystander.
 - Fix: each scan re-checks the last moving command; exclusion 0.30 m. 184 tests pass. Pushed. Round 2 and the LiDAR-assist full run (`3cae4f3`, s0–4) are running.
+
+## 2026-10-30 01:19 — blind_corner round 2 on `c0be756` (realism, s0–4, interleaved off/on)
+- Stop off: contact 2/5 (s0 0.376 m, s2 0.384 m); min range 0.376–0.468 m.
+- Stop on: contact 0/5; min range 0.561–0.640 m.
+- Both lose the target at the corner (visible share about 0.45): the bystander stands 0.45 m from the target's path, so a 47 cm robot cannot follow through without contact. Passing needs avoidance (steer around), not a stop. Results in scratch `bc2/`. Assist full run started.
