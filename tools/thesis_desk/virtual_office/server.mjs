@@ -124,6 +124,16 @@ function modelError(res, error) {
   return reply(res, failure.status, { error: failure.error });
 }
 
+export function teamDelegates(results) {
+  const limited = results.find((result) => result.status === "rejected" &&
+    classifyModelError(result.reason).status === 429);
+  if (limited) throw limited.reason;
+  const delegates = results.filter((result) => result.status === "fulfilled")
+    .map((result) => result.value);
+  if (!delegates.length) throw new Error("ผู้เชี่ยวชาญตอบกลับไม่ได้");
+  return delegates;
+}
+
 async function askAgent(req, res, agent) {
   if (!codexReady) return reply(res, 503, { error: "Codex CLI ยังไม่ได้ล็อกอินด้วย ChatGPT" });
   if (modelRateLimited) return reply(res, 429, { error: quotaMessage });
@@ -164,8 +174,7 @@ async function askTeam(req, res) {
       conversations.set(key, result.id);
       return { id: agent.id, name: agent.name, role: agent.role, answer: result.answer };
     }));
-    const delegates = results.filter((r) => r.status === "fulfilled").map((r) => r.value);
-    if (!delegates.length) throw new Error("ผู้เชี่ยวชาญตอบกลับไม่ได้");
+    const delegates = teamDelegates(results);
     const notes = delegates.map((d) => `${d.name} (${d.role}): ${d.answer}`).join("\n\n");
     const summary = await runModel(
       "คุณคือหัวหน้าทีมสำนักงานเสมือน สรุปเฉพาะคำตอบของผู้เชี่ยวชาญที่ตอบจริงตามรายชื่อที่ให้เป็นภาษาไทยอย่างชัดเจน ระบุข้อเห็นต่างและข้อมูลที่ยังขาด ห้ามเพิ่มชื่อหรือบทบาทผู้เชี่ยวชาญที่ไม่ได้อยู่ในรายชื่อ ถ้าขาดบทบาทให้บอกว่าไม่มีบทบาทนั้นในทีม ห้ามอ้างว่ามีการลงมือทำภายนอก",

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { Readable } from "node:stream";
 import { test } from "node:test";
-import { classifyModelError, codexChildEnv, loggedInWithChatGPT, readMessage } from "./server.mjs";
+import { classifyModelError, codexChildEnv, loggedInWithChatGPT, readMessage, teamDelegates } from "./server.mjs";
 
 function response() {
   return {
@@ -43,4 +43,19 @@ test("rate-limit errors are safe to show and other CLI stderr stays private", ()
     error: "Codex จำกัดคำขอชั่วคราว (429) โปรดลองอีกครั้งภายหลัง" });
   const other = classifyModelError(new Error("private prompt and local path"));
   assert.deepEqual(other, { status: 502, error: "agent ตอบกลับไม่ได้ โปรดลองอีกครั้ง" });
+});
+
+test("Team Lead stops before summary when any specialist hits 429", () => {
+  const limited = new Error("last status: 429 Too Many Requests");
+  const answered = { id: "mew", answer: "ตอบแล้ว" };
+  for (const results of [
+    [{ status: "rejected", reason: limited }],
+    [{ status: "fulfilled", value: answered }, { status: "rejected", reason: limited }],
+  ]) {
+    assert.throws(() => teamDelegates(results), (error) => error === limited);
+  }
+  assert.deepEqual(teamDelegates([
+    { status: "rejected", reason: new Error("temporary failure") },
+    { status: "fulfilled", value: answered },
+  ]), [answered]);
 });

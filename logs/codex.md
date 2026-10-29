@@ -297,3 +297,10 @@ Earlier history: `history-2026-10-16.md`.
 
 - Committed the ChatGPT-only and 429 pause behavior as `4d69aaa` on `codex/thesis-desk-office-queue` and pushed draft PR #8. Confirmed `9d198fe` had check, twin and Gazebo CI all pass; CI for the new head began after the push.
 - Updated draft PR #8's description to remove stale usage and commit claims, and to record the direct Mew/Team Lead HTTP smoke, 429 stop, independent review fixes, and stacked draft PRs #9–#11. PR #10 and PR #11 each had check, twin and Gazebo CI pass at inspection time. No feature PR was merged.
+
+### 2026-10-29 — thesis-desk — Preserve Team Lead rate limits from specialists
+
+- On `codex/thesis-desk-office-queue` / draft PR #8, an independent GPT-6 Astra review of head `209be18` found that `Promise.allSettled` discarded specialist 429 errors. The all-failed path returned a generic 502, and the mixed path could start another model call despite a rate limit.
+- Changed Team Lead result handling to propagate any specialist 429 before the summary call. The existing error handler then returns 429 and pauses chat for this server process. Added a regression covering all-failed, mixed and unrelated partial-failure outcomes.
+- Focused Node tests passed 9/9, `python scripts/check.py` passed 166/166 using writable TEMP/TMP, and `git diff --check` passed. The rate-limit path was tested offline; no live model call or dashboard publish was made.
+- The same independent Astra reviewer re-checked the working-tree fix, confirmed both 429 outcomes and the placement before summary generation, and found no remaining blocker in this change.
