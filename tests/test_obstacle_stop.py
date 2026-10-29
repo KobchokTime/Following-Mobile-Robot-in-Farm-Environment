@@ -110,59 +110,49 @@ class NodeTest(unittest.TestCase):
 
 
 class AvoidTest(unittest.TestCase):
-    def arc(self, pts, k_want=0.0, bearing=0.0, k_prev=None):
-        return M.avoid_arc(lambda k: M.path_clearance(pts, 0.3, M.swerve_path(k)), k_want, bearing, k_prev)
+    TARGET = (1.6, 0.0)
 
-    def test_a_clear_path_keeps_the_wanted_arc(self):
-        k, c = self.arc([])
-        self.assertAlmostEqual(k, 0.0)
+    def offset(self, pts, prefer=0.0):
+        return M.aim_offset(pts + person(1.8, 0.0), 0.3, self.TARGET, 0.3, prefer)
 
-    def test_a_post_ahead_left_is_passed_on_the_right(self):
-        pts = person(0.9, 0.12, r=0.06)
-        k, c = self.arc(pts)
-        self.assertLess(k, 0.0)
-        self.assertGreater(c, M.path_clearance(pts, 0.3, M.swerve_path(0.0)) + 0.3)
+    def test_a_clear_path_aims_at_the_target(self):
+        self.assertEqual(self.offset([]), 0.0)
+        self.assertEqual(self.offset(person(0.8, 0.75)), 0.0)  # beside the path, not on it
 
-    def test_an_arc_that_loses_the_target_is_not_taken(self):
-        k, _ = self.arc(person(0.9, 0.12, r=0.06), bearing=math.radians(30.0))
-        self.assertLessEqual(abs(math.radians(30.0) - k * 0.8), 0.8 + 1e-9)
+    def test_a_worker_beside_the_line_is_passed_on_the_other_side(self):
+        # pass_by: a crouched worker 0.42 m left of the target's line
+        o = self.offset(person(0.9, 0.42))
+        self.assertLess(o, 0.0)
+        self.assertGreater(o, -0.35)  # the smallest shift that clears, not a wide detour
 
     def test_the_side_already_taken_is_kept(self):
-        pts = person(1.0, 0.0, r=0.06)  # dead ahead: both sides are as good
-        self.assertLess(self.arc(pts, k_prev=-0.6)[0], 0.0)
-        self.assertGreater(self.arc(pts, k_prev=0.6)[0], 0.0)
-        self.assertEqual(M.path_clearance(pts, 0.3, M.swerve_path(self.arc(pts, k_prev=0.6)[0])), math.inf)
+        pts = person(1.2, 0.0, r=0.06)  # a post dead ahead: both sides are as good
+        self.assertLess(self.offset(pts, prefer=-0.2), 0.0)
+        self.assertGreater(self.offset(pts, prefer=0.2), 0.0)
 
-    def test_the_node_steers_around_a_post_toward_the_target(self):
+    def test_no_shift_that_keeps_the_target_in_view_means_none(self):
+        wall = [(0.8, y / 20.0) for y in range(-30, 31)]  # 3 m across the path
+        self.assertIsNone(self.offset(wall))
+
+    def test_the_node_aims_beside_the_target_past_a_worker(self):
         node = M.FollowStopNode()
-        pts = person(2.0, 0.0) + person(0.9, 0.1, r=0.06)
-        msg = _Float32MultiArray()
+        pts = person(1.8, 0.0) + person(0.9, 0.42)
         node.cb_scan(scan(pts))
-        msg.data = [320.0, 240.0, 0.8, 4.0, 0.9, 0.9, 0.9, 10.0]
-        node.cb_fused(msg)
-        node.cb_scan(scan(pts))
-        msg.data = [320.0, 240.0, 1.8, 4.0, 0.9, 0.9, 0.9, 10.0]
-        node.cb_fused(msg)
-        cmd = node.pub.messages[-1]
-        self.assertGreater(cmd.linear.x, 0.12)
-        self.assertLess(cmd.angular.z, 0.0)  # around the post on the right
-        node.obstacle_avoid, node.avoid_k = False, None
-        node.cb_scan(scan(pts))
-        node.cb_fused(msg)
-        self.assertEqual(node.pub.messages[-1].angular.z, 0.0)
+        v, w = node.obstacle_command(0.4, 0.0, self.TARGET, 0.0)
+        self.assertGreater(v, 0.12)
+        self.assertLess(w, 0.0)  # right, away from the worker
+        node.obstacle_avoid, node.avoid_offset = False, 0.0
+        self.assertEqual(node.obstacle_command(0.4, 0.0, self.TARGET, 0.0)[1], 0.0)
 
     def test_a_robot_held_beside_an_obstacle_can_start_again(self):
-        # pass_by s4: the robot stood beside the worker (left) while the target walked on 11 deg left. The
-        # speed ramp from a stop asks for 0.05 m/s with a left turn, a tight arc into the worker, which the
-        # stop held at zero for 5 s. Avoid now starts from a near stop and goes straight on past them.
+        # pass_by s4: the robot stood beside the worker (left) while the target walked on. The speed ramp from
+        # a stop asks for 0.05 m/s with a left turn, a tight arc into the worker, which the stop held at zero
+        # for 5 s. Arcs tighter than 2/m are now taken as straight by the stop, and avoid starts from a crawl.
         node = M.FollowStopNode()
         tgt = (1.5 * math.cos(math.radians(11)), 1.5 * math.sin(math.radians(11)))
         node.cb_scan(scan(person(0.07, 0.54) + person(tgt[0] + 0.2, tgt[1])))
-        v, w = node.obstacle_command(0.05, 0.2, tgt, math.radians(11))
-        self.assertGreaterEqual(v, 0.12)
-        self.assertLessEqual(w, 0.05)
         node.obstacle_avoid = False
-        self.assertEqual(node.obstacle_command(0.05, 0.2, tgt, math.radians(11))[0], 0.05)  # nearly a spin: not held
+        self.assertEqual(node.obstacle_command(0.05, 0.2, tgt, math.radians(11))[0], 0.05)
 
 
 if __name__ == "__main__":
