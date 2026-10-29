@@ -6,10 +6,10 @@ and review threads in [`DISCUSSION.md`](DISCUSSION.md).
 
 ## Integration lock
 
-- **Current owner:** none
-- **Status:** ready
-- **Files being edited:** none
-- **Last updated:** 2026-10-29 by Codex (21:33 Thai time)
+- **Current owner:** Codex
+- **Status:** in-progress
+- **Files being edited:** DISCUSSION.md (T16 fix handoff), HANDOFF.md, logs/codex.md
+- **Last updated:** 2026-10-29 by Codex (21:36 Thai time)
 
 ## Branches
 
