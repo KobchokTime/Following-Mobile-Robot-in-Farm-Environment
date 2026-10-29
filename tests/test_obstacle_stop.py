@@ -40,6 +40,12 @@ class CorridorTest(unittest.TestCase):
         pts = [(1.0, 0.0), (1.05, 0.1)]
         self.assertEqual(M.corridor_clearance(pts, 0.35, exclude=(1.0, 0.0), exclude_r=0.45), math.inf)
 
+    def test_the_corridor_bends_with_the_turn(self):
+        on_arc = (math.sin(1.2), 1.0 - math.cos(1.2))  # 1.2 m along a 1 m radius left turn
+        self.assertAlmostEqual(M.corridor_clearance([on_arc], 0.3, curvature=1.0), 1.2)
+        self.assertEqual(M.corridor_clearance([(1.0, 0.0)], 0.3, curvature=1.0), math.inf)  # the turn misses it
+        self.assertEqual(M.corridor_clearance([on_arc], 0.3), math.inf)  # off the straight corridor
+
     def test_speed_cap_stops_short_of_the_obstacle(self):
         self.assertEqual(M.obstacle_speed_cap(0.45, 0.45, 0.8, 0.2, 0.0), 0.0)
         self.assertAlmostEqual(M.obstacle_speed_cap(1.45, 0.45, 0.8, 0.0, 0.0), math.sqrt(1.6))

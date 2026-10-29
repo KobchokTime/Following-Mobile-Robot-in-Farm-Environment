@@ -173,13 +173,12 @@ COLOUR_SCENARIOS: Dict[str, dict] = {
 }
 
 OBSTACLE_SCENARIOS: Dict[str, dict] = {
-    "blind_bystander": {
-        "doc": "Someone the camera never detects stands still on the path; the target walks around them 0.5 m to "
-               "the side. Only the LiDAR sees the bystander (obstacle stop).",
+    "blind_corner": {
+        "doc": "turn_90 with someone the camera never detects standing at the inside of the corner, 0.45 m from "
+               "the target's path. A robot cutting the corner meets them; only the LiDAR sees them (obstacle stop).",
         "duration_s": 30.0,
-        "people": [("target", True, [(0, 1.0, 0.0), (3, 1.0, 0.0), (8, 2.5, 0.0), (10, 2.9, 0.65), (13, 4.3, 0.65),
-                                     (15, 4.9, 0.0), (23, 7.3, 0.0)]),
-                   ("bystander", False, [(0, 3.6, 0.15), (30, 3.6, 0.15)])],
+        "people": [("target", True, [(0, 1.0, 0.0), (3, 1.0, 0.0), (10.5, 4.0, 0.0), (18, 4.0, 3.0)]),
+                   ("bystander", False, [(0, 3.55, 0.55), (30, 3.55, 0.55)])],
         "hidden": {"bystander": [(0.0, 30.0)]},
     },
 }

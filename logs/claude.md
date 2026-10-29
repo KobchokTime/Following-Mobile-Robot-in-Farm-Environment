@@ -1540,3 +1540,8 @@ Earlier history: `history-2026-10-16.md`.
 ## 2026-10-29 23:41 — Obstacle stop, first twin result: the stop as written hurts following
 - `blind_bystander` realism seeds 0–4, interleaved: stop off 5/5 pass, no contact (closest to the bystander 0.47–0.54 m centre to centre; contact is < 0.40). Stop on 0/5 pass, no contact: the robot stops behind the bystander (closest 0.56–0.64 m) and the target walks away (final gap 3.9–4.4 m).
 - So the scenario does not produce a contact without the stop, and the straight 0.35 m corridor stops the robot for an obstacle it would have passed. Next: a corridor along the commanded arc, its width from the real robot's width, and a scenario where the robot would really hit the bystander. Not merged.
+
+## 2026-10-29 23:44 — Obstacle stop v2: robot size from the thesis slides, corridor along the turn
+- The user shared the thesis progress slides (Canva): robot 47 cm wide, 52 cm long, 87 cm tall; wheels Ø13 cm front, Ø10 cm rear (the bridge assumes `wheel_radius_m` 0.085, Ø17 cm — to confirm which wheels drive). The slides' scope lists slowing/stopping for obstacles with LiDAR as an evaluation item.
+- `obstacle_half_width_m` 0.30 (half of 47 cm + 6.5 cm). The corridor now bends with the commanded turn (curvature = angular_z / linear_x), so a turn that passes an obstacle does not stop the robot.
+- Scenario `blind_bystander` (no contact without the stop) replaced by `blind_corner`: `turn_90` with an undetected person at the inside of the corner, where the baseline robot's corner-cutting path passes. 182 tests pass.

@@ -77,22 +77,29 @@ def speed_command(error_dist, speed_ff, dt, linear_gain, tolerance, max_linear_s
     linear_x = max(min(linear_x, max_linear_speed), -max_linear_speed)
     return linear_x, speed_ff
 
-def corridor_clearance(points, half_width, direction=1.0, exclude=None, exclude_r=0.0):
-    """Distance along the drive direction to the nearest return inside the robot's corridor, or inf.
+def corridor_clearance(points, half_width, direction=1.0, exclude=None, exclude_r=0.0, curvature=0.0):
+    """Distance along the path to the nearest return inside the robot's swept corridor, or inf.
 
-    points: (x, y) in the robot frame (x ahead, metres). direction 1 looks ahead, -1 behind. A return
-    within exclude_r of exclude (x, y), the target being followed, does not count: the follower keeps
-    its own gap to the target. Anything else in the corridor counts, person or not, seen by the camera
-    or not.
+    points: (x, y) in the robot frame (x ahead, metres). direction 1 looks ahead, -1 behind. curvature
+    (1/m, left positive) bends the corridor along the arc the robot is turning on, so something the turn
+    will pass is not a reason to stop, and something on the turn is. A return within exclude_r of exclude
+    (x, y), the target being followed, does not count: the follower keeps its own gap to the target.
+    Anything else counts, person or not, seen by the camera or not.
     """
     best = math.inf
     for x, y in points:
-        d = x * direction
-        if d <= 0.0 or abs(y) > half_width:
-            continue
         if exclude is not None and math.hypot(x - exclude[0], y - exclude[1]) <= exclude_r:
             continue
-        best = min(best, d)
+        xd = x * direction
+        if abs(curvature) < 1e-3:
+            along, off = xd, abs(y)
+        else:
+            r = 1.0 / curvature  # turning centre at (0, r)
+            ang = math.atan2(xd, (r - y) if r > 0 else (y - r))
+            along, off = abs(r) * ang, abs(math.hypot(xd, y - r) - abs(r))
+        if along <= 0.0 or off > half_width:
+            continue
+        best = min(best, along)
     return best
 
 
@@ -151,7 +158,7 @@ class FollowStopNode(Node):
         # obstacle stop: anything the LiDAR sees in the corridor ahead (or behind when reversing), other than
         # the target, caps the speed so the robot stops stop_m short of it. No physical E-stop exists.
         self.declare_parameter('obstacle_stop', True)
-        self.declare_parameter('obstacle_half_width_m', 0.35)   # corridor half width from the LiDAR axis
+        self.declare_parameter('obstacle_half_width_m', 0.30)   # robot 0.47 m wide (thesis slides) + 6.5 cm margin
         self.declare_parameter('obstacle_stop_m', 0.45)         # stop this far from the LiDAR to the obstacle
         self.declare_parameter('obstacle_target_exclude_m', 0.45)  # returns this close to the target are the target
         self.declare_parameter('scan_topic', '/scan')
@@ -241,15 +248,16 @@ class FollowStopNode(Node):
         self.scan_xy = pts
         self.scan_time = self.get_clock().now().nanoseconds / 1e9
 
-    def obstacle_limited(self, linear_x, target_xy):
+    def obstacle_limited(self, linear_x, target_xy, angular_z=0.0):
         """linear_x capped by the corridor clearance; a stale or missing scan stops forward and reverse motion."""
         if not self.obstacle_stop or linear_x == 0.0:
             return linear_x
         now = self.get_clock().now().nanoseconds / 1e9
         fresh = self.scan_time is not None and 0.0 <= now - self.scan_time <= self.scan_max_age
         direction = 1.0 if linear_x > 0.0 else -1.0
+        curvature = angular_z / linear_x if abs(linear_x) > 0.05 else 0.0
         clearance = corridor_clearance(self.scan_xy, self.obstacle_half_w, direction,
-                                       target_xy, self.obstacle_excl) if fresh else 0.0
+                                       target_xy, self.obstacle_excl, curvature) if fresh else 0.0
         cap = obstacle_speed_cap(clearance, self.obstacle_stop_m, self.max_decel, self.latency_s,
                                  abs(self.v_wheels))
         capped = abs(linear_x) > cap
@@ -295,7 +303,8 @@ class FollowStopNode(Node):
         if P_fused_smooth < self.p_fused_threshold or not isfinite(dist):
             if (now - self.last_good_time).nanoseconds / 1e9 < 1.0:
                 held = Twist()
-                held.linear.x = self.obstacle_limited(self.last_good_cmd.linear.x, None)
+                held.linear.x = self.obstacle_limited(self.last_good_cmd.linear.x, None,
+                                                      self.last_good_cmd.angular.z)
                 held.angular.z = self.last_good_cmd.angular.z
                 self.pub.publish(held)
                 self.get_logger().info(f"[HOLD] Low conf {P_fused_smooth:.2f} → keep last cmd")
@@ -374,7 +383,7 @@ class FollowStopNode(Node):
         # ---------- Obstacle stop ----------
         tb = (math.radians(self.camera_hfov_deg / 2.0) * (1.0 if cx <= 0 else -1.0)
               if cx <= 0 or cx >= self.image_width - 1 else camera_bearing(cx, self.image_width, self.camera_hfov_deg))
-        linear_x = self.obstacle_limited(linear_x, (dist * math.cos(tb), dist * math.sin(tb)))
+        linear_x = self.obstacle_limited(linear_x, (dist * math.cos(tb), dist * math.sin(tb)), angular_z)
         self.last_linear = linear_x
 
         # ---------- Publish ----------
