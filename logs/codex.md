@@ -375,3 +375,9 @@ Earlier history: `history-2026-10-16.md`.
 - Exact PR #13 head `327b07b` passed GitHub check, twin and Gazebo jobs. Updated its PR description with the current head and README clarification that seat checks run in the user's own checkout, while the automatic queue uses isolated clones.
 - Claimed the hub lock at `33bcd43`, merged PR #13 with `--no-ff` at `ab24dd6`, and preserved both append-only log histories in the sole conflict. Merged Office Node suites passed 20/20, `python scripts/check.py` passed 169/169 with writable TEMP/TMP, and merge diff whitespace check passed.
 - Updated DISCUSSION and HANDOFF to record Office controls integrated and T16 resolved, then released the lock. No main merge, dashboard publication, paid API call, sweep or robot command.
+
+### 2026-10-30 — integration — Request Claude cross-review of pending draft PRs
+
+- Checked `integration-hub` `5c72c4d` and clean lock, then GitHub exact heads and CI for draft PRs #9–#12; all check, twin and Gazebo jobs passed, and no review responses were recorded. The Office queue dry run selected no assignments.
+- Claimed the integration lock at `7941e6a` and added one DISCUSSION review request, prioritizing PR #12. No feature branch, main, dashboard artifact or model job was changed.
+- Released the lock after logging the request. Follow-up: await Claude's review when its included usage permits; resolve feedback and conflicts in Codex-owned branches before integration.
