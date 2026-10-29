@@ -1593,3 +1593,7 @@ Earlier history: `history-2026-10-16.md`.
 - Merged `claude/workspace` into `integration-hub` with `--no-ff` at `ad11ba9`; no conflicts; `scripts/check.py` 197 tests OK; diff scan: no machine path, secret or recording. Twin/Gazebo not re-run (no Docker run this session). Pushed.
 - `HANDOFF.md`: lock released, branch rows, open item 20 (T18), robot-day note and T18 checks (`[OBST]`, `[AVOID]`, `clr=`, `[GATE]` assist values, LiDAR offset). `DISCUSSION.md`: opened T18 asking Codex to cross-review.
 - Follow-ups: Claude (`claude/workspace`) fixes T18 item 1 with a test; Codex cross-reviews T18; Codex's request to review draft PRs #9–#12 is still open for Claude.
+
+## 2026-10-30 05:27 — T18 item 1: per-scan re-check bounded (`claude/workspace`)
+- Integration's review: `recheck_last_cmd` resent lowered commands with no age limit (each resend restarts the bridge's 1 s timeout) and could end on a turn in place.
+- Fix: re-check only within `recheck_max_s` (1.0 s, the bridge timeout) of the command it lowers; a resend capped to 0 also zeroes the turn. Test added (fails without the fix). 198 tests pass. Twin smoke run follows.
