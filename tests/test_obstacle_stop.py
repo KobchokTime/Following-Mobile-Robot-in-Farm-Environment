@@ -84,6 +84,29 @@ class NodeTest(unittest.TestCase):
     def test_the_stop_can_be_turned_off(self):
         self.assertGreater(self.drive(person(1.8, 0.0) + person(0.5, 0.15, r=0.06), obstacle_stop=False), 0.3)
 
+    def test_someone_beside_the_target_still_counts(self):
+        # a bystander a step in front of and beside the target is not part of the target (blind_corner run)
+        pts = person(1.0, 0.0) + person(0.6, 0.25)
+        self.assertLess(M.corridor_clearance(pts, 0.3, exclude=(0.8, 0.0), exclude_r=0.30), 0.6)
+        self.assertEqual(M.corridor_clearance(person(1.0, 0.0), 0.3, exclude=(0.8, 0.0), exclude_r=0.30), math.inf)
+
+    def test_each_scan_rechecks_the_last_command(self):
+        # target messages stop after a moving command (a single false box in the blind_corner run);
+        # someone stepping into the corridor is still seen on the next scan
+        node = M.FollowStopNode()
+        node.cb_scan(scan(person(1.8, 0.0)))
+        msg = _Float32MultiArray()
+        msg.data = [320.0, 240.0, 0.8, 4.0, 0.9, 0.9, 0.9, 10.0]
+        node.cb_fused(msg)
+        msg.data = [320.0, 240.0, 1.6, 4.0, 0.9, 0.9, 0.9, 10.0]
+        node.cb_fused(msg)
+        self.assertGreater(node.pub.messages[-1].linear.x, 0.3)
+        sent = len(node.pub.messages)
+        node.cb_scan(scan(person(1.8, 0.0)))  # nothing new: no extra command
+        self.assertEqual(len(node.pub.messages), sent)
+        node.cb_scan(scan(person(1.8, 0.0) + person(0.6, -0.1)))  # someone 0.4 m ahead
+        self.assertEqual(node.pub.messages[-1].linear.x, 0.0)
+
 
 if __name__ == "__main__":
     unittest.main()

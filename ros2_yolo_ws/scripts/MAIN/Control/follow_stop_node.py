@@ -160,7 +160,7 @@ class FollowStopNode(Node):
         self.declare_parameter('obstacle_stop', True)
         self.declare_parameter('obstacle_half_width_m', 0.30)   # robot 0.47 m wide (thesis slides) + 6.5 cm margin
         self.declare_parameter('obstacle_stop_m', 0.45)         # stop this far from the LiDAR to the obstacle
-        self.declare_parameter('obstacle_target_exclude_m', 0.45)  # returns this close to the target are the target
+        self.declare_parameter('obstacle_target_exclude_m', 0.30)  # returns this close to the target are the target
         self.declare_parameter('scan_topic', '/scan')
         self.declare_parameter('lidar_angle_offset_deg', 180.0)  # as sync_fusion_node / lidar_sectorizer_node
         self.declare_parameter('scan_max_age_s', 0.3)
@@ -209,6 +209,8 @@ class FollowStopNode(Node):
         self.scan_xy           = []     # latest scan in the robot frame
         self.scan_time         = None
         self.obstacle_capped   = False  # last [OBST] state written to the log
+        self.moving_cmd        = None   # last command sent while moving, re-checked on every scan
+        self.moving_target     = None   # (x, y, time) of the target point that command was checked with
 
         # ---------- State ----------
         self.initialized   = False
@@ -247,6 +249,32 @@ class FollowStopNode(Node):
                 pts.append((r * math.cos(a), r * math.sin(a)))
         self.scan_xy = pts
         self.scan_time = self.get_clock().now().nanoseconds / 1e9
+        self.recheck_last_cmd()
+
+    def recheck_last_cmd(self):
+        """Each scan re-checks the last moving command against the new returns. Target messages can stop
+        (a lost target, a single false box), and the bridge keeps the last command until the stale stop and
+        its own ramp; whoever walks into the corridor meanwhile still slows the robot (blind_corner run)."""
+        cmd = self.moving_cmd
+        if cmd is None or cmd.linear.x == 0.0:
+            return
+        tgt = self.moving_target
+        target_xy = tgt[:2] if tgt is not None and self.scan_time - tgt[2] <= self.scan_max_age else None
+        capped = self.obstacle_limited(cmd.linear.x, target_xy, cmd.angular.z)
+        if abs(capped) < abs(cmd.linear.x):
+            twist = Twist()
+            twist.linear.x = capped
+            twist.angular.z = cmd.angular.z
+            self.send(twist)
+            self.last_linear = capped
+
+    def send(self, twist, target_xy=None):
+        """Publish a command and keep it for the per-scan re-check while it moves the robot."""
+        self.pub.publish(twist)
+        now = self.get_clock().now().nanoseconds / 1e9
+        self.moving_cmd = twist if twist.linear.x != 0.0 else None
+        if target_xy is not None:
+            self.moving_target = (target_xy[0], target_xy[1], now)
 
     def obstacle_limited(self, linear_x, target_xy, angular_z=0.0):
         """linear_x capped by the corridor clearance; a stale or missing scan stops forward and reverse motion."""
@@ -306,7 +334,7 @@ class FollowStopNode(Node):
                 held.linear.x = self.obstacle_limited(self.last_good_cmd.linear.x, None,
                                                       self.last_good_cmd.angular.z)
                 held.angular.z = self.last_good_cmd.angular.z
-                self.pub.publish(held)
+                self.send(held)
                 self.get_logger().info(f"[HOLD] Low conf {P_fused_smooth:.2f} → keep last cmd")
             else:
                 self.publish_stop()
@@ -383,14 +411,15 @@ class FollowStopNode(Node):
         # ---------- Obstacle stop ----------
         tb = (math.radians(self.camera_hfov_deg / 2.0) * (1.0 if cx <= 0 else -1.0)
               if cx <= 0 or cx >= self.image_width - 1 else camera_bearing(cx, self.image_width, self.camera_hfov_deg))
-        linear_x = self.obstacle_limited(linear_x, (dist * math.cos(tb), dist * math.sin(tb)), angular_z)
+        target_xy = (dist * math.cos(tb), dist * math.sin(tb))
+        linear_x = self.obstacle_limited(linear_x, target_xy, angular_z)
         self.last_linear = linear_x
 
         # ---------- Publish ----------
         twist = Twist()
         twist.linear.x = linear_x
         twist.angular.z = angular_z
-        self.pub.publish(twist)
+        self.send(twist, target_xy)
 
         self.last_good_cmd = twist
         self.last_good_time = now
@@ -420,6 +449,7 @@ class FollowStopNode(Node):
     def publish_stop(self):
         twist = Twist()
         self.pub.publish(twist)
+        self.moving_cmd = None
 
 
 def main():
