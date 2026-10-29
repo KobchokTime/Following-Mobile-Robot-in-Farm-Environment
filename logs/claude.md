@@ -1539,3 +1539,8 @@ Earlier history: `history-2026-10-16.md`.
 ## 2026-10-29 23:45 — zigzag cause found; LiDAR assist ported (branch `claude/robot/lidar-assist2`)
 - Debug build on hub code, `zigzag` realism seeds 0–7: s2 failed (visible 0.47). Gate log: the robot was turning right at 0.5–0.7 rad/s, so the target's bearing in the image swept from −13° to +28° in 0.4 s from the robot's own rotation. The gate's prediction does not include the robot's turn, so every box cost 11–36 and was rejected. LiDAR edge tracking did not start either (last bearing −13°, prediction −17°, both inside the 27° edge). The robot kept turning away and stopped.
 - The LiDAR assist draft (`2eb6e9d`) addresses this: each scan moves the track to the target's own cluster, measured in the robot's current frame. Cherry-picked onto `claude/workspace` `e22307e`; 176 tests pass. Whole-twin run with the assist on to follow.
+
+## 2026-10-30 01:13 — blind_corner round 1; obstacle stop fixed (`claude/robot/obstacle-stop` `c0be756`)
+- Round 1 on `4f573e8` (realism, s0–4, interleaved): stop off — 1 contact (s2, 0.24 m); stop on — 1 contact (s0, 0.34 m). Neither setting passes on following: the bystander's returns shorten the target range at the corner (give-way), the robot backs off, and the target walks beyond the 3 m reacquire limit.
+- Cause of the stop-on contact: one false box set a 0.5 m/s command, then target messages stopped; the command ran until the stale stop and the bridge ramp. The target exclusion (0.45 m) also covered the bystander.
+- Fix: each scan re-checks the last moving command; exclusion 0.30 m. 184 tests pass. Pushed. Round 2 and the LiDAR-assist full run (`3cae4f3`, s0–4) are running.
