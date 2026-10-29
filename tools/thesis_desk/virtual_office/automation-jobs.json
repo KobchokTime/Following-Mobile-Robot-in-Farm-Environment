@@ -37,6 +37,7 @@
       "ready": true,
       "maxMinutes": 20,
       "allowedPaths": ["tools/thesis_desk/virtual_office/"],
+      "focusedNodeTests": ["tools/thesis_desk/virtual_office/automation-status.test.mjs"],
       "task": "Improve the Office automatic-job panel within tools/thesis_desk/virtual_office/ so a failed job displays its recorded reason and a review-ready job displays its branch and check result clearly. Render data as text nodes, preserve the existing scene and all controls, and add a small meaningful offline test for the rendered status mapping. Do not alter robot code or start model jobs from the browser.",
       "acceptance": "Failed and review-ready states are distinguishable with their recorded evidence, browser controls still work, a focused offline test passes, and python scripts/check.py exits 0."
     },

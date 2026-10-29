@@ -9,7 +9,20 @@ const root = dirname(fileURLToPath(import.meta.url));
 const repoRoot = resolve(root, "../../..");
 const automationRoot = resolve(process.env.OFFICE_WORKTREE_ROOT || join(dirname(repoRoot), "office-agent-worktrees"));
 const port = Number(process.env.PORT || 8765);
-const codexReady = spawnSync("codex", ["login", "status"], { encoding: "utf8", timeout: 6000 }).status === 0;
+export function loggedInWithChatGPT(result) {
+  return result.status === 0 && /Logged in using ChatGPT/i.test(`${result.stdout || ""}\n${result.stderr || ""}`);
+}
+
+export function codexChildEnv(env) {
+  const childEnv = { ...env };
+  for (const key of ["OPENAI_API_KEY", "CODEX_API_KEY", "OPENAI_ADMIN_KEY", "OPENAI_BASE_URL"])
+    delete childEnv[key];
+  return childEnv;
+}
+
+const codexReady = loggedInWithChatGPT(spawnSync("codex", ["login", "status"], { encoding: "utf8", timeout: 6000 }));
+const quotaMessage = "Codex จำกัดคำขอชั่วคราว (429) โปรดลองอีกครั้งภายหลัง";
+let modelRateLimited = false;
 const agents = [
   ["natee", "Natee", "Integration", "จัดลำดับงาน ตรวจ HANDOFF และ DISCUSSION และประสานการรวม branch"],
   ["min", "Min", "Experiment", "อ่านเกณฑ์ทดลอง seed และผลของแต่ละรอบจากหลักฐานที่บันทึกไว้"],
@@ -53,7 +66,7 @@ async function runCodex(instructions, input, previous) {
   const answer = await new Promise((resolveAnswer, reject) => {
     const child = spawn("codex", ["exec", "--sandbox", "read-only", "--ephemeral", "--ignore-user-config", "--skip-git-repo-check", "--color", "never", "-C", root, "-"], {
       cwd: root,
-      env: process.env,
+      env: codexChildEnv(process.env),
       windowsHide: true,
       stdio: ["pipe", "pipe", "pipe"],
     });
@@ -78,12 +91,17 @@ async function runCodex(instructions, input, previous) {
 
 const runModel = runCodex;
 
-async function readMessage(req, res) {
+export async function readMessage(req, res) {
   let payload;
   try { payload = await readJson(req); }
   catch { reply(res, 400, { error: "รูปแบบข้อความไม่ถูกต้องหรือยาวเกินกำหนด" }); return null; }
-  const message = String(payload.message || "").trim();
-  const session = String(payload.session || "").trim();
+  if (payload === null || typeof payload !== "object" || Array.isArray(payload) ||
+      typeof payload.message !== "string" || typeof payload.session !== "string") {
+    reply(res, 400, { error: "ข้อความหรือ session ไม่ถูกต้อง" });
+    return null;
+  }
+  const message = payload.message.trim();
+  const session = payload.session.trim();
   if (!message || message.length > 4000 || !/^[a-zA-Z0-9-]{8,80}$/.test(session)) {
     reply(res, 400, { error: "ข้อความหรือ session ไม่ถูกต้อง" });
     return null;
@@ -91,12 +109,34 @@ async function readMessage(req, res) {
   return { message, session };
 }
 
+export function classifyModelError(error) {
+  const details = String(error?.message || "");
+  if (/(?:last status|status):\s*429\b|\b429 Too Many Requests\b/i.test(details))
+    return { status: 429, error: quotaMessage };
+  if (error?.name === "AbortError")
+    return { status: 504, error: "agent ตอบช้าเกินกำหนด" };
+  return { status: 502, error: "agent ตอบกลับไม่ได้ โปรดลองอีกครั้ง" };
+}
+
 function modelError(res, error) {
-  return reply(res, 502, { error: error.name === "AbortError" ? "agent ตอบช้าเกินกำหนด" : error.message || "ติดต่อบริการโมเดลไม่ได้" });
+  const failure = classifyModelError(error);
+  if (failure.status === 429) modelRateLimited = true;
+  return reply(res, failure.status, { error: failure.error });
+}
+
+export function teamDelegates(results) {
+  const limited = results.find((result) => result.status === "rejected" &&
+    classifyModelError(result.reason).status === 429);
+  if (limited) throw limited.reason;
+  const delegates = results.filter((result) => result.status === "fulfilled")
+    .map((result) => result.value);
+  if (!delegates.length) throw new Error("ผู้เชี่ยวชาญตอบกลับไม่ได้");
+  return delegates;
 }
 
 async function askAgent(req, res, agent) {
   if (!codexReady) return reply(res, 503, { error: "Codex CLI ยังไม่ได้ล็อกอินด้วย ChatGPT" });
+  if (modelRateLimited) return reply(res, 429, { error: quotaMessage });
   const payload = await readMessage(req, res);
   if (!payload) return;
   const { message, session } = payload;
@@ -112,6 +152,7 @@ async function askAgent(req, res, agent) {
 
 async function askTeam(req, res) {
   if (!codexReady) return reply(res, 503, { error: "Codex CLI ยังไม่ได้ล็อกอินด้วย ChatGPT" });
+  if (modelRateLimited) return reply(res, 429, { error: quotaMessage });
   const payload = await readMessage(req, res);
   if (!payload) return;
   const { message, session } = payload;
@@ -133,12 +174,11 @@ async function askTeam(req, res) {
       conversations.set(key, result.id);
       return { id: agent.id, name: agent.name, role: agent.role, answer: result.answer };
     }));
-    const delegates = results.filter((r) => r.status === "fulfilled").map((r) => r.value);
-    if (!delegates.length) throw new Error("ผู้เชี่ยวชาญตอบกลับไม่ได้");
+    const delegates = teamDelegates(results);
     const notes = delegates.map((d) => `${d.name} (${d.role}): ${d.answer}`).join("\n\n");
     const summary = await runModel(
-      "คุณคือหัวหน้าทีมสำนักงานเสมือน สรุปคำตอบของผู้เชี่ยวชาญเป็นภาษาไทยอย่างชัดเจน ระบุข้อเห็นต่างและข้อมูลที่ยังขาด ห้ามอ้างว่ามีการลงมือทำภายนอก",
-      `โจทย์: ${message}\n\nข้อเสนอจากผู้เชี่ยวชาญ:\n${notes}`,
+      "คุณคือหัวหน้าทีมสำนักงานเสมือน สรุปเฉพาะคำตอบของผู้เชี่ยวชาญที่ตอบจริงตามรายชื่อที่ให้เป็นภาษาไทยอย่างชัดเจน ระบุข้อเห็นต่างและข้อมูลที่ยังขาด ห้ามเพิ่มชื่อหรือบทบาทผู้เชี่ยวชาญที่ไม่ได้อยู่ในรายชื่อ ถ้าขาดบทบาทให้บอกว่าไม่มีบทบาทนั้นในทีม ห้ามอ้างว่ามีการลงมือทำภายนอก",
+      `โจทย์: ${message}\n\nผู้เชี่ยวชาญที่ตอบจริง:\n${notes}`,
       routing.id,
     );
     teamConversations.set(teamKey, summary.id);
@@ -186,7 +226,8 @@ export async function handleRequest(req, res) {
     }
   }
   if (req.method === "GET" && url.pathname === "/api/agents")
-    return reply(res, 200, { agents: [teamAgent, ...agents], ready: codexReady, backend: "codex", model: "Codex ผ่าน ChatGPT" });
+    return reply(res, 200, { agents: [teamAgent, ...agents], ready: codexReady && !modelRateLimited,
+      reason: modelRateLimited ? quotaMessage : null, backend: "codex", model: "Codex ผ่าน ChatGPT" });
   const match = url.pathname.match(/^\/api\/agents\/([a-z]+)\/messages$/);
   if (req.method === "POST" && match) {
     if (match[1] === "team") return askTeam(req, res);
@@ -206,4 +247,9 @@ export async function handleRequest(req, res) {
 }
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === resolve(process.argv[1]))
-  createServer(handleRequest).listen(port, "127.0.0.1", () => console.log(`Virtual Office: http://127.0.0.1:${port}`));
+  createServer((req, res) => {
+    Promise.resolve(handleRequest(req, res)).catch(() => {
+      if (!res.headersSent) reply(res, 500, { error: "เซิร์ฟเวอร์ประมวลผลคำขอไม่ได้" });
+      else res.destroy();
+    });
+  }).listen(port, "127.0.0.1", () => console.log(`Virtual Office: http://127.0.0.1:${port}`));

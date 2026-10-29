@@ -16,6 +16,9 @@ Open `http://127.0.0.1:8765`. Agent requests use your Codex plan allowance and u
 This copy of the server has no API-key backend. Set `PORT` before starting the server if 8765 is occupied.
 
 The Team Lead delegates chat calls to specialists. Chat requests answer questions and do not edit repository files. A team request can consume five Codex calls.
+If Codex returns a 429 limit response, the server pauses new chat requests and
+shows the limit in the Office panel. Restart the server after included plan usage
+becomes available again. The server never falls back to an API key.
 
 ## Work queue
 
@@ -30,7 +33,9 @@ per job, with at most three active jobs and one job per lane. The heartbeat
 starts native Codex subagents in those clones using the signed-in ChatGPT plan.
 After a subagent finishes, `automation-queue.mjs --finish --job ID` verifies
 the allowed file scope, unchanged base commit and offline `scripts/check.py`
-gate. The result remains for independent review; no branch is committed,
+gate. Jobs with `focusedNodeTests` must pass those Node tests as well. A failed
+check or missing check executable is recorded as failed, and `--finish` can
+recheck the same clone after repair. The result remains for independent review; no branch is committed,
 pushed or merged by the queue.
 
 The queue stores append-only events under the sibling
