@@ -1,16 +1,17 @@
 (() => {
   const side = document.querySelector(".side");
   const style = document.createElement("style");
-  style.textContent = ".office-action-result{border-top:1px solid var(--line);padding:10px 0;font-size:12px;line-height:1.55}.office-action-result summary{cursor:pointer;font-weight:600}.office-action-result p{margin:5px 0;white-space:pre-wrap;overflow-wrap:anywhere}.action button:disabled{opacity:.55;cursor:wait}";
+  style.textContent = ".office-action-result{border-top:1px solid var(--line);padding:10px 0;font-size:12px;line-height:1.55}.office-action-result summary{cursor:pointer;font-weight:600}.office-action-result p{margin:5px 0;white-space:pre-wrap;overflow-wrap:anywhere}.action button:disabled{opacity:.55;cursor:wait}.action button.active{border-color:#287e70;background:#12332e;color:#a9f5db}";
   document.head.append(style);
   const panel = document.createElement("section");
   panel.className = "card";
   panel.setAttribute("aria-label", "งานจริงและการประชุมของ agent");
   panel.innerHTML = `<h2>งานจริงและการประชุม</h2>
-    <p class="muted">ปุ่มนั่งเริ่มตรวจโปรเจกต์ในเครื่องและบันทึกผล ปุ่มประชุมเลือก agent ที่ว่างสูงสุด 3 คนมาถกแผนผ่าน Codex บัญชี ChatGPT</p>
+    <p class="muted">พักผ่อนให้เฉพาะ agent ที่ว่างเดินวน งานที่โต๊ะและการประชุมจะอยู่ที่เดิมจนจบ ปุ่มนั่งเริ่มตรวจโปรเจกต์ ส่วนปุ่มประชุมให้ agent ว่างสูงสุด 3 คนถกแผนผ่าน Codex บัญชี ChatGPT</p>
     <div id="officeActions" aria-live="polite">กำลังอ่านสถานะ…</div>`;
   side.append(panel);
   const output = panel.querySelector("#officeActions");
+  const restButton = document.querySelector("#walk");
   const seatButton = document.querySelector("#seat");
   const meetingButton = document.querySelector("#meeting");
   const names = { natee: "Natee", min: "Min", palm: "Palm", fah: "Fah", boss: "Boss",
@@ -19,21 +20,32 @@
     failed: "ไม่ผ่าน", interrupted: "หยุดกลางคัน" };
   const sceneState = new Map();
   const expanded = new Map();
+  let restRequested = false;
+  let refreshVersion = 0;
+  try { restRequested = sessionStorage.getItem("officeRestRequested") === "1"; } catch {}
+  restButton.classList.toggle("active", restRequested);
+  restButton.setAttribute("aria-pressed", String(restRequested));
+  restButton.title = "ให้ agent ที่ว่างเดินพักผ่อน กดอีกครั้งเพื่อหยุด";
 
-  function syncScene(actions) {
+  function syncScene(actions, busyAgentIds = []) {
     const desired = new Map();
-    for (const action of actions.filter((item) => item.state === "running"))
+    const running = actions.filter((item) => item.state === "running");
+    for (const action of running)
       for (const id of action.agents) desired.set(id, action.kind);
+    const busy = new Set(busyAgentIds);
+    const meeting = running.find((action) => action.kind === "meeting");
+    let meetingChanged = false;
     for (const id of Object.keys(names)) {
-      const next = desired.get(id);
+      const next = desired.get(id) || (busy.has(id) ? "chat" : restRequested ? "rest" : "idle");
       const prior = sceneState.get(id);
       if (next === prior) continue;
-      if (next === "seat") window.officeSeat?.([id]);
-      else if (next === "meeting") window.officeMeeting?.([id]);
-      else if (prior) window.officeWalk?.([id]);
-      if (next) sceneState.set(id, next);
-      else sceneState.delete(id);
+      if (next === "seat" || next === "chat") window.officeSeat?.([id]);
+      else if (next === "meeting") meetingChanged = true;
+      else if (next === "rest") window.officeRest?.([id]);
+      else if (prior) window.officeIdle?.([id]);
+      sceneState.set(id, next);
     }
+    if (meetingChanged) window.officeMeeting?.(meeting.agents);
   }
 
   function text(parent, tag, content, className) {
@@ -86,21 +98,27 @@
   }
 
   async function refresh() {
+    const version = ++refreshVersion;
     try {
       const response = await fetch("/api/office/actions", { cache: "no-store" });
       if (!response.ok) throw new Error("อ่านสถานะงานไม่ได้");
-      const { actions } = await response.json();
+      const { actions, busyAgents = [] } = await response.json();
+      if (version !== refreshVersion) return null;
       render(actions);
-      syncScene(actions);
+      syncScene(actions, busyAgents);
       const active = actions.filter((action) => action.state === "running");
       seatButton.disabled = active.some((action) => action.kind === "seat");
       meetingButton.disabled = active.some((action) => action.kind === "meeting");
+      return Object.keys(names).filter((id) => !busyAgents.includes(id));
     } catch {
+      if (version !== refreshVersion) return null;
       output.textContent = "อ่านสถานะงานจากเซิร์ฟเวอร์ไม่ได้";
+      return null;
     }
   }
 
   async function start(kind) {
+    refreshVersion++;
     const button = kind === "seat" ? seatButton : meetingButton;
     button.disabled = true;
     try {
@@ -122,6 +140,18 @@
       await refresh();
     }
   }
+
+  restButton.addEventListener("click", async () => {
+    restRequested = !restRequested;
+    try { sessionStorage.setItem("officeRestRequested", restRequested ? "1" : "0"); } catch {}
+    restButton.classList.toggle("active", restRequested);
+    restButton.setAttribute("aria-pressed", String(restRequested));
+    const idle = await refresh();
+    if (idle === null) return window.showToast?.("อ่านสถานะ agent ไม่ได้");
+    const message = restRequested ? `agent ว่าง ${idle.length} คนกำลังพักผ่อน` : "จบเวลาพักผ่อน";
+    window.showToast?.(message);
+    window.addOfficeLog?.(message);
+  });
 
   seatButton.addEventListener("click", () => { void start("seat"); });
   meetingButton.addEventListener("click", () => { void start("meeting"); });

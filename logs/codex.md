@@ -330,3 +330,9 @@ Earlier history: `history-2026-10-16.md`.
 
 - Follow-up on draft PR #13: the meeting rotation now reaches Krit, Mew and Boss after the other nine agents, so a free desk agent can also join. Added an offline four-round rotation test.
 - Focused Office Node tests passed 16/16, `python scripts/check.py` passed 166/166, and `git diff --check` passed. No new model run or sweep was needed for this change.
+
+### 2026-10-29 — thesis-desk — Keep busy Office agents at work while idle agents rest
+
+- On isolated `codex/thesis-desk-office-active-work` / draft PR #13, renamed the walk control to พักผ่อน. The browser now starts continuous aisle walking only for agents free in the server's action and direct-chat state; desk work and meeting participants stay at their positions until their recorded action ends. A running meeting restores its full seating order after page reload.
+- Local Chrome smoke on the separate `127.0.0.1:8769` preview saw all 12 initially idle agents move, remain moving after about 20 seconds, and stop resting when toggled off. The scene screenshot showed desks visible. An offline browser-controller regression covered running meetings, desk work, direct chat, completion and repeated polling without interrupting busy agents.
+- Office Node suites passed 17/17; `python scripts/check.py` passed 166/166 with writable TEMP/TMP after the sandbox default Temp produced permission errors. Scene and server JavaScript syntax checks and `git diff --check` passed. No live model call, robot action, main merge or dashboard publication was made for this change.

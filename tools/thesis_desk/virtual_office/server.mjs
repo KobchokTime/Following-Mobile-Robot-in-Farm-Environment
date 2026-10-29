@@ -328,8 +328,12 @@ export async function handleRequest(req, res) {
       return res.end(content);
     } catch { return reply(res, 404, { error: "ไม่พบบันทึกงาน" }); }
   }
-  if (req.method === "GET" && url.pathname === "/api/office/actions")
-    return reply(res, 200, { actions: await officeWorkflow.list() });
+  if (req.method === "GET" && url.pathname === "/api/office/actions") {
+    const actions = await officeWorkflow.list();
+    const busyAgents = await officeWorkflow.busyAgents();
+    for (const id of activeChatAgents) busyAgents.add(id);
+    return reply(res, 200, { actions, busyAgents: [...busyAgents] });
+  }
   if (req.method === "POST" && ["/api/office/seat", "/api/office/meeting"].includes(url.pathname)) {
     if (req.headers.origin && req.headers.origin !== `http://127.0.0.1:${port}`)
       return reply(res, 403, { error: "คำขอไม่ได้มาจาก Office ในเครื่อง" });
