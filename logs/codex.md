@@ -169,6 +169,26 @@ Earlier history: `history-2026-10-16.md`.
 - Recounted side_step 19/20 vs 5/20 (Fisher p=0.0000100211), zigzag 8/10 vs 6/10 (p=0.628483), actual rule off 0/20 with 18 contacts vs on 20/20. Accepted T13 correction with current-code/historical distinction. Replayed 18-degree, 7.43-m, 1.2-s loss: displacement 6.489181 m vs reach 2.6 m rejects, reach 100.0 accepts. Documented stored-data/provenance and runner-resume limits; no fresh Docker/ROS/hardware trial possible.
 - Claimed free integration lock in `adcdfdc`, recorded objection and updated HANDOFF item 18 with Claude owning the targeted comparison/response. T15 stays open; T13/T14 stay resolved. Released the lock ready/unowned.
 
+### 2026-10-28 — thesis-desk — Office work queue from dated PR evidence
+- Branch: `codex/thesis-desk/office-queue`, based on `origin/integration-hub` `912b7f7`; the normal workspace sync was attempted but aborted after a conflict in `tests/test_target_gate.py` outside this feature scope.
+- Imported the local Virtual Office source under `tools/thesis_desk/virtual_office/`. The 3D scene and controls in `index.html` are byte-identical to the source except for one added script tag.
+- Added a dated, read-only three-lane work queue, project-specific chat roles and a Codex-only backend. No API key or external job dispatcher is used.
+- Checks: Node syntax for all scripts, queue JSON structure, direct GET handler smoke (200; three lanes), and `scripts/check.py` (142 tests) passed. Browser visual smoke could not run: local test URL timed out in the in-app browser; file URL was blocked by browser policy.
+- Follow-up: review this branch and verify the 3D scene/controls in a browser that can reach the local server before integration. The queue is a snapshot, not live execution.
+
+### 2026-10-28 — thesis-desk — Rename Office feature branch for GitHub
+- Initial push of `codex/thesis-desk/office-queue` was rejected by GitHub with `directory file conflict` because the existing `codex/thesis-desk` branch occupies that ref prefix.
+- Renamed the local feature branch to `codex/thesis-desk-office-queue`. No files or commits were discarded.
+
+### 2026-10-28 — thesis-desk — Open draft Office PR
+- Pushed `codex/thesis-desk-office-queue` at `432ad52` to GitHub and opened draft PR #8 against `integration-hub`.
+- PR: https://github.com/KobchokTime/Following-Mobile-Robot-in-Farm-Environment/pull/8
+- Review gate: browser smoke of desks, camera controls, movement, seating and meeting before integration; the in-app browser could not reach the local test server in this run.
+
+### 2026-10-28 — thesis-desk — Fix Office PR CI prerequisite
+- PR #8 check failed on head `150b544` because CI Python 3.10 could not import NumPy in `tests/test_torso_chroma.py`; local check had NumPy installed.
+- Merged the existing PR #3 branch `origin/codex/ci/install-numpy` (`272ff22`) into the Office branch with merge commit `3261572`. This is a CI prerequisite only; no robot code or test was changed.
+- Re-run `scripts/check.py` and CI on the new head before review.
 ### 2026-10-28 — dashboard/ci — GitHub Actions snapshot generator
 - On `codex/dashboard/ci-data`, added a standard-library generator for the Follower Test Bench `ci_runs` dataset, an offline CLI test suite and usage notes. The work does not edit the page or the published Claude artifact.
 - `python -m unittest tools/dashboard/ci/test_gen_ci.py -v` passed 5 tests. `python scripts/check.py` passed 138 tests with `TEMP` and `TMP` pointed at a writable worktree folder; the first attempt failed because the sandbox default temp folder was not writable.
@@ -200,3 +220,93 @@ Earlier history: `history-2026-10-16.md`.
 ### 2026-10-28 — qa — Align downstream PR with validated base
 - Merged the corrected `codex/dashboard/ci-data` branch at `8d61aeb` into `codex/qa/dashboard-unit-tests` with `--no-ff`, preserving both append-only log histories. This makes PR #7 contain the actual source of PR #6 and PR #5, including the NumPy CI dependency, rather than only naming #6 as its comparison base.
 - The first PR #7 Linux `check` failure was the inherited missing-NumPy import in `test_torso_chroma`, not the unit-test generator. Re-run the full gate and GitHub checks on the merge commit; do not merge or publish the old failed head.
+
+### 2026-10-28 — thesis-desk — Sync Office automation base
+- Fetched `origin/integration-hub` at `51e4e15` and merged it into `codex/thesis-desk-office-queue` with `--no-ff` before extending the Office scheduler.
+- Resolved only the append-only overlap in `logs/codex.md` by keeping both the Office entries and the hub's dashboard CI/QA entries. No other merge conflict occurred.
+
+### 2026-10-28 — thesis-desk — Bounded Office automation runner
+- On `codex/thesis-desk-office-queue`, added `automation-runner.mjs` and one bounded QA pilot job for Boss. The runner selects at most three independent lanes, creates isolated local clones, uses signed-in Codex CLI without API-key environment variables, enforces a usage-check timestamp, deadline, file scope and offline check, and leaves branches for review.
+- Added append-only runtime events, `GET /api/automation` and an Office status panel. The web page reads status; it cannot start or mutate jobs.
+- Checks: Node syntax, 2 Node runner tests, direct automation endpoint smoke (200, one ready job), dry-run selection and `scripts/check.py` (166 tests) passed. Local clone creation succeeded in a disposable folder under the Office runtime root; the restricted shell could not run Git's local clone transport, so unattended invocation requires the approved local execution context.
+- Follow-up: run one Codex pilot after verifying plan usage, inspect its branch/evidence, then connect the existing hourly heartbeat to the runner. Browser visual smoke of the Office scene remains pending before merge.
+
+### 2026-10-28 — thesis-desk — Route Office edits through native subagents
+- The first nested `codex exec` pilot on `dashboard-dirty-provenance` could not read or edit: the host forced it to read-only and rejected shell commands. It produced no diff. The runner incorrectly marked it review-ready because the independent offline check passed; appended a correcting failed event without rewriting history.
+- Replaced the nested model runner with `automation-queue.mjs`: it only claims bounded jobs into separate local clones and verifies changed-file scope, unchanged base commit and `scripts/check.py` after a native Codex subagent works there. It cannot call an API or silently mark a no-diff write job successful.
+- Added a new pilot ID `dashboard-dirty-provenance-v2`; the failed first ID remains visible. Node queue tests pass 2/2, dry-run selects only v2, the status endpoint reports failed/ready correctly, and `scripts/check.py` passes 166 tests.
+- Follow-up: prepare v2, run one native subagent, finish/verify it, and update the existing heartbeat to use this queue only when plan usage permits.
+
+### 2026-10-28 — thesis-desk — Native Office agent pilot and browser smoke
+
+- Codex plan usage was checked before the pilot (73% in the five-hour window, 11% weekly, zero paid credits). The queue prepared `dashboard-dirty-provenance-v2` in isolated branch `codex/qa/office/dashboard-dirty-provenance-v2-20261028084253` at base `a5f3181`.
+- Native Codex subagent Boss added only `tests/test_dashboard_unit_tests.py`; focused tests passed 3/3 and `scripts/check.py` passed 167/167 in its clone. `--finish` verified unchanged HEAD, allowed scope, nonempty diff and the offline gate, then appended `review-ready`. This is a review state, not an automatic merge.
+- In the feature Office on port 8766, visually confirmed desks and characters render. Walk, seat and meeting controls changed the scene/status; canvas drag rotated the camera and wheel zoom worked. The original server on port 8765 was not changed.
+- At the later usage check Codex was 86% in the five-hour window and 13% weekly, so new model assignments pause until quota recovers. No API key, paid credit, reset, or robot hardware was used.
+
+### 2026-10-28 — thesis-desk — Queue next independent Office lanes
+
+- Added two bounded future jobs: Mew improves the Office review/failed status panel in `tools/thesis_desk/virtual_office/`; Min documents dashboard data provenance in `docs/`. They are separate lanes and remain queued while Codex's five-hour usage is near the agreed limit.
+- The first final `scripts/check.py` attempt failed because the Windows sandbox's default TEMP was unwritable. Re-ran with TEMP/TMP under the writable visualization root: 166/166 offline tests passed. Node queue tests passed 2/2 and syntax/diff checks passed.
+- Added append-only raw check-output paths to future queue finish events, so reviewers can inspect the offline gate result.
+
+### 2026-10-28 — thesis-desk — Activate Office heartbeat and refresh draft PR
+
+- Updated the existing active hourly `follower-test-bench` heartbeat to read the Office queue, check current plan usage, pause at 80% five-hour or 90% weekly usage, and dispatch native subagents only in isolated assignments. It retains the no-key/no-paid-credit and review-before-merge boundaries.
+- Pushed Office feature head `11d75c4` and updated draft PR #8 with the automation flow, visual smoke, pilot QA evidence and current checks. Its GitHub `check` completed successfully; twin and gazebo were still running at inspection time.
+- The Boss pilot was opened separately as draft QA PR #9, stacked on the Office branch. Office UI displayed its `review-ready` branch and time after reload; next Mew and Min jobs remain queued because usage was 86% in the five-hour window.
+
+### 2026-10-28 — thesis-desk — Verify two Office lanes and require focused checks
+
+- Checked Codex included-plan usage before preparing Mew and Min; the queue assigned separate clones from Office head `dc630f9` without API keys, paid credits or robot hardware.
+- Mew's first Python-only `--finish` incorrectly reported review-ready while its interrupted Node test file contained NUL bytes. Appended a correcting failed event. Mew repaired the file; browser smoke at port 8767 showed desks and the failed/review-ready details, and walk, seat and meeting controls updated the scene activity.
+- The queue now runs each configured focused Node test in addition to `scripts/check.py`, writes both raw logs, and requires all exits to pass. It can recheck a repaired failed assignment using the original clone. Recheck recorded Mew as review-ready with unchanged HEAD, allowed paths, Python 166/166 and focused Node 4/4; Min's documentation clone also passed Python 166/166 and remains review-ready.
+- Node queue tests passed 3/3, `scripts/check.py` passed 166/166, and `git diff --check` passed. Both job clones remain unmerged for review.
+### 2026-10-28 — integration — T15 walk-up re-review and dashboard PR cleanup
+
+- In isolated clone `t15-re-review` on `integration-hub` `51e4e15`, reviewed round-2 ambiguity and walk-up source/tests/scorer, and recounted 220 JSON rows. `python scripts/check.py` passed 166/166; focused walk-up tests passed 8/8. No Docker, ROS or hardware run. An independent GPT-6 Astra review agreed that the stale-scan case blocks T15 closing; its own test attempt hit the sandbox TEMP permission error, so the completed checks are the root agent's.
+- Reproduced production-path stale-scan wrong-person publication with target `(1,0)` and same-clothes stranger `(1.05,-0.40)`: fresh raw scan rejects the stranger, 0.5 s stale raw scan plus fresh sector data accepts it. A scratch plain-gate fallback rejects the stranger and accepts the target. Posted `change requested` in T15 with tests needed; asked for a scorer/write-up wording correction and attributable distractor evidence. T15 remains open for Claude; no robot source or default changed.
+- Claimed the free integration lock in `93ba880` before editing `DISCUSSION.md` and `HANDOFF.md`. Updated HANDOFF item 18 to the evidence-backed current state and release the lock after the review commit.
+- Verified PR #6 head `8d61aeb` and PR #7 head `58d9f11` are ancestors of `integration-hub`; PR #3's NumPy workflow file is byte-identical to the hub though its original commit is not an ancestor. Closed redundant GitHub PRs #3, #6 and #7 without merging them. The published dashboard artifact was not changed by Codex.
+
+### 2026-10-28 — thesis-desk — Refresh Office draft PR against integration-hub
+
+- Committed the focused-check gate as `b8ed401` on `codex/thesis-desk-office-queue` and pushed the existing draft PR #8 branch. GitHub then reported a conflict with `integration-hub`.
+- Merged `origin/integration-hub` at `1042843` with `--no-ff`; resolved the sole `logs/codex.md` overlap by retaining both append-only Office and integration entries. `DISCUSSION.md` and `HANDOFF.md` arrived unchanged from the hub merge.
+- Node queue tests passed 3/3, `scripts/check.py` passed 166/166 and staged diff check passed. Pushed merge commit `3c4a090`; GitHub reported PR #8 `MERGEABLE` and still draft. Mew and Min clones remain review-ready and uncommitted.
+
+### 2026-10-28 — thesis-desk — Open review PRs for two Office lanes
+
+- Codex usage allowed ordinary work (53% five-hour, 24% weekly, no paid credits). PR #8 `45a748d` was mergeable; its `check` passed while twin and Gazebo were still running at inspection time.
+- Reviewed Mew's four-file status-panel diff and Min's documentation links and source fields. Mew's focused Node tests passed 4/4, Python gate 166/166, and browser smoke showed desks and walk/seat/meeting activity. Min's Python gate passed 166/166; source paths and CLI arguments matched the repository.
+- Committed Mew as `d851995` and opened draft PR #11 against `codex/thesis-desk-office-queue`. Committed Min as `770020c` and opened draft PR #10 against the same base. Both changes stay separate for review; neither was merged into the Office branch or dashboard artifact.
+
+### 2026-10-28 — thesis-desk — Address independent Office PR review
+
+- An independent GPT-6 Astra review of draft PR #8 found two P2 cases: JSON `null` could throw in the Office chat request path, and a check executable that could not start left an Office assignment stuck. The review made no file changes.
+- Validated message types before reading fields and added an HTTP listener catch for unexpected request failures. The queue now records a check spawn error as a failed result with a diagnostic and keeps the clone available for recheck.
+- Added focused regression tests for invalid JSON values, a valid message, and a missing check executable. Node tests passed 6/6, `scripts/check.py` passed 166/166, syntax checks and `git diff --check` passed. No external model call, robot or artifact publish was used for these tests.
+
+### 2026-10-28 — thesis-desk — Verify ChatGPT-only Office chat and pause on 429
+
+- On `codex/thesis-desk-office-queue` / draft PR #8, verified the Codex CLI is logged in using ChatGPT in the approved local execution context. The sandboxed terminal reported a separate `Not logged in` state, so the Office server was started under the account context for the smoke test. `GET /api/agents` returned `ready=true`; a Mew chat request returned HTTP 200 with a role-specific answer. A Team Lead request returned HTTP 200 with Mew and Krit as actual delegates.
+- Restricted Office readiness to the CLI's ChatGPT sign-in and removed API-key and alternate API-base environment variables from child Codex processes. A later Team Lead retry returned a CLI `429 Too Many Requests`; stopped all further model calls without using credits or quota resets. The server now returns a short 429 message, pauses chat requests for that process, and does not expose raw CLI stderr or the user's prompt in errors. The page disables chat while paused.
+- Changed the Team Lead summary instruction to name only actual responding specialists after the first smoke summary suggested a role outside the roster. The follow-up model test was rate-limited, so this wording has only syntax/offline verification. Focused Node tests passed 8/8, `scripts/check.py` passed 166/166, and JavaScript syntax and diff checks passed. The prior PR #8 head `9d198fe` had all three GitHub checks pass; new-head CI remains to be checked after push.
+
+### 2026-10-28 — thesis-desk — Refresh Office PR review evidence
+
+- Committed the ChatGPT-only and 429 pause behavior as `4d69aaa` on `codex/thesis-desk-office-queue` and pushed draft PR #8. Confirmed `9d198fe` had check, twin and Gazebo CI all pass; CI for the new head began after the push.
+- Updated draft PR #8's description to remove stale usage and commit claims, and to record the direct Mew/Team Lead HTTP smoke, 429 stop, independent review fixes, and stacked draft PRs #9–#11. PR #10 and PR #11 each had check, twin and Gazebo CI pass at inspection time. No feature PR was merged.
+
+### 2026-10-29 — thesis-desk — Preserve Team Lead rate limits from specialists
+
+- On `codex/thesis-desk-office-queue` / draft PR #8, an independent GPT-6 Astra review of head `209be18` found that `Promise.allSettled` discarded specialist 429 errors. The all-failed path returned a generic 502, and the mixed path could start another model call despite a rate limit.
+- Changed Team Lead result handling to propagate any specialist 429 before the summary call. The existing error handler then returns 429 and pauses chat for this server process. Added a regression covering all-failed, mixed and unrelated partial-failure outcomes.
+- Focused Node tests passed 9/9, `python scripts/check.py` passed 166/166 using writable TEMP/TMP, and `git diff --check` passed. The rate-limit path was tested offline; no live model call or dashboard publish was made.
+- The same independent Astra reviewer re-checked the working-tree fix, confirmed both 429 outcomes and the placement before summary generation, and found no remaining blocker in this change.
+
+### 2026-10-29 — integration — PR #8 Virtual Office integration
+- Verified clean isolated `integration-hub` checkout and ready lock at `1042843`; the optional workflow document was absent. Initial sandbox fetch could not resolve GitHub. Escalated full fetch encountered an unrelated remote-ref name collision; a targeted fetch of hub and Office branches succeeded and confirmed reviewed head `0aa2e20` unchanged.
+- Claimed/pushed lock commit `6ddec9a`; merged `origin/codex/thesis-desk-office-queue` with `--no-ff` at `7fab5ac1550dc77edf5976126f053cbb2fb7ce3c`. No conflicts; changed paths match the reviewed Virtual Office scope plus this log.
+- Actual checks: `python scripts/check.py` passed 166 tests, compilation and thesis JSON; writable TEMP/TMP/TMPDIR used. Focused queue/server Node suites passed 9/9. Merge diff whitespace check passed; queue and server integration diff inspected.
+- Opened DISCUSSION T16 for Claude Code cross-review, recorded scope, evidence and limitations, and released HANDOFF lock. No duplicate direct Claude message, real model request, dashboard publication, main change, or stacked PR #9–#11 merge. Follow-up: Claude reviews T16; CI on updated hub can be checked separately.
