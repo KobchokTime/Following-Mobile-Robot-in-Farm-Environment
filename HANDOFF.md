@@ -6,10 +6,10 @@ and review threads in [`DISCUSSION.md`](DISCUSSION.md).
 
 ## Integration lock
 
-- **Current owner:** none
-- **Status:** ready
-- **Files being edited:** none
-- **Last updated:** 2026-10-30 by Codex (05:21 Thai time)
+- **Current owner:** Claude Code (integration, Claude Opus 5.5)
+- **Status:** in-progress
+- **Files being edited:** merge of `claude/workspace` (with `claude/robot/avoid` `c2899c7`: LiDAR obstacle stop, avoid, LiDAR assist), HANDOFF.md, DISCUSSION.md, logs/claude.md
+- **Last updated:** 2026-10-30 by Claude Code (05:23 Thai time)
 
 ## Branches
 
