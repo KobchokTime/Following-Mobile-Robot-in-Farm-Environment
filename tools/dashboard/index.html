@@ -174,15 +174,15 @@
     <p class="tb-sub">หุ่นตามคนในฟาร์ม · ทุกตัวเลขในหน้านี้มาจาก simulation (twin และ Gazebo) ยังไม่ใช่หุ่นจริง</p>
   </header>
   <nav class="tb-tabs" role="tablist" aria-label="หน้า">
-    <button type="button" class="tb-tab" role="tab" id="tab-live" data-tab="live" aria-selected="false" aria-controls="panel-live">ติดตามสด</button>
-    <button type="button" class="tb-tab" role="tab" id="tab-ready" data-tab="ready" aria-selected="true" aria-controls="panel-ready">พร้อมลงพื้นที่</button>
-    <button type="button" class="tb-tab" role="tab" id="tab-solo" data-tab="solo" aria-selected="false" aria-controls="panel-solo">ตามคนเดียว</button>
-    <button type="button" class="tb-tab" role="tab" id="tab-identity" data-tab="identity" aria-selected="false" aria-controls="panel-identity">เลือกให้ถูกคน</button>
-    <button type="button" class="tb-tab" role="tab" id="tab-replay" data-tab="replay" aria-selected="false" aria-controls="panel-replay">เล่นซ้ำ</button>
-    <button type="button" class="tb-tab" role="tab" id="tab-colour" data-tab="colour" aria-selected="false" aria-controls="panel-colour">สีเสื้อ</button>
-    <button type="button" class="tb-tab" role="tab" id="tab-filter" data-tab="filter" aria-selected="false" aria-controls="panel-filter">ทดลองตัวกรอง</button>
-    <button type="button" class="tb-tab" role="tab" id="tab-arenas" data-tab="arenas" aria-selected="false" aria-controls="panel-arenas">ประวัติ Arena</button>
+    <button type="button" class="tb-tab" role="tab" id="tab-ready" data-tab="ready" aria-selected="true" aria-controls="panel-ready">ภาพรวมความพร้อม</button>
+    <button type="button" class="tb-tab" role="tab" id="tab-solo" data-tab="solo" aria-selected="false" aria-controls="panel-solo">ตามคน (ตัวควบคุม)</button>
+    <button type="button" class="tb-tab" role="tab" id="tab-identity" data-tab="identity" aria-selected="false" aria-controls="panel-identity">เลือกเป้า (target gate)</button>
+    <button type="button" class="tb-tab" role="tab" id="tab-colour" data-tab="colour" aria-selected="false" aria-controls="panel-colour">แยกคนด้วยสีเสื้อ</button>
+    <button type="button" class="tb-tab" role="tab" id="tab-filter" data-tab="filter" aria-selected="false" aria-controls="panel-filter">กรองจุดนิ่ง (ทดลอง)</button>
+    <button type="button" class="tb-tab" role="tab" id="tab-live" data-tab="live" aria-selected="false" aria-controls="panel-live">การทดลองที่กำลังรัน</button>
     <button type="button" class="tb-tab" role="tab" id="tab-tests" data-tab="tests" aria-selected="false" aria-controls="panel-tests">เทสต์และ CI</button>
+    <button type="button" class="tb-tab" role="tab" id="tab-replay" data-tab="replay" aria-selected="false" aria-controls="panel-replay">เส้นทางโค้ดรุ่นก่อน</button>
+    <button type="button" class="tb-tab" role="tab" id="tab-arenas" data-tab="arenas" aria-selected="false" aria-controls="panel-arenas">Arena (ปิดแล้ว)</button>
   </nav>
   <div class="tb-panel" role="tabpanel" id="panel-live" aria-labelledby="tab-live" hidden>
     <section class="tb-card" id="live-now">
@@ -364,7 +364,7 @@
   </section>
   </div>
   <div class="tb-panel" role="tabpanel" id="panel-replay" aria-labelledby="tab-replay" hidden>
-    <p class="tb-history">ข้อมูลประวัติ: เส้นทางของโค้ดแต่ละรุ่นจนถึง Arena 3 (24 ต.ค.) ใช้เทียบพัฒนาการ ไม่ใช่สถานะของโค้ดปัจจุบัน · เส้นทางของการทดลองล่าสุดดูได้ในแท็บติดตามสด</p>
+    <p class="tb-history">ข้อมูลประวัติ: เส้นทางของโค้ดแต่ละรุ่นจนถึง Arena 3 (24 ต.ค.) ใช้เทียบพัฒนาการ ไม่ใช่สถานะของโค้ดปัจจุบัน · เส้นทางของการทดลองล่าสุดดูได้ในแท็บ "การทดลองที่กำลังรัน"</p>
     <section class="tb-card" id="replay">
     <h2>เล่นซ้ำในสนาม (มองจากด้านบน)</h2>
     <p class="tb-note">เส้นทางจริงจาก sim ของหุ่น (เส้นสี) และคนเป้าหมาย (เส้นประ) ทุก 0.5 วินาที · หุ่นเริ่มที่ (0, 0) หันไปทางขวา · แปลงผักเป็นผังเดียวกับใน Gazebo ใช้ดูตำแหน่งเท่านั้น · ผลจาก simulation ไม่ใช่หุ่นจริง</p>

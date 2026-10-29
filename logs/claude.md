@@ -1528,3 +1528,6 @@ Earlier history: `history-2026-10-16.md`.
 
 ## 2026-10-29 23:09 — Dashboard: no pill shapes
 - The clip selector on the colour tab wraps to three lines inside a 999px-radius outline, so it rendered as a large oval that clipped the selected button. All controls now use a 6px radius (segments, chips, tabs, badges, status pills); the two clip selectors (`tb-wrap`) drop the shared outline and border each button. Legend dots stay round. Published page v27.
+
+## 2026-10-29 23:22 — Dashboard tabs named after the features in development
+- User found the tab names confusing. New names and order: ภาพรวมความพร้อม, ตามคน (ตัวควบคุม), เลือกเป้า (target gate), แยกคนด้วยสีเสื้อ, กรองจุดนิ่ง (ทดลอง), การทดลองที่กำลังรัน, เทสต์และ CI, then history: เส้นทางโค้ดรุ่นก่อน, Arena (ปิดแล้ว). Tab ids unchanged. Published page v28.
