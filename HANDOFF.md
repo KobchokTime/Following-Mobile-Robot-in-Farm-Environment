@@ -6,10 +6,10 @@ and review threads in [`DISCUSSION.md`](DISCUSSION.md).
 
 ## Integration lock
 
-- **Current owner:** Codex
-- **Status:** in-progress
-- **Files being edited:** integration-hub merge of PR #13, HANDOFF.md, DISCUSSION.md, logs/codex.md
-- **Last updated:** 2026-10-29 by Codex (22:03 Thai time)
+- **Current owner:** none
+- **Status:** ready
+- **Files being edited:** none
+- **Last updated:** 2026-10-29 by Codex (22:04 Thai time)
 
 ## Branches
 
@@ -43,7 +43,7 @@ The 12-week plan is in [`docs/PLAN.md`](docs/PLAN.md) (20 Oct 2026 to about 15 J
 
 ## Virtual Office integration — 2026-10-29
 
-PR #8 head `0aa2e20` is integrated at merge `7fab5ac` after lock claim `6ddec9a`. DISCUSSION **T16: resolved** after Claude agreed to reviewed PR #14 `a6a10fb` and Codex merged it under lock `8f87d41` at `961b92d`. Focused Office Node tests passed 12/12 and `scripts/check.py` passed 169/169 on the merged hub. PR #13 Office controls remains a separate draft at `327b07b`; its README now explains that seat checks run in the user's Office checkout. Exact-head CI for PR #13 must pass before integration. The four non-blocking notes remain separate follow-ups. Codex integration model: `gpt-6-astra`. Dashboard publication and stacked PRs #9–#11 remain pending; main is unchanged.
+PR #8 head `0aa2e20` is integrated at merge `7fab5ac` after lock claim `6ddec9a`. DISCUSSION **T16: resolved** after Claude agreed to reviewed PR #14 `a6a10fb` and Codex merged it under lock `8f87d41` at `961b92d` (Office Node 12/12, `scripts/check.py` 169/169). PR #13 Office controls head `327b07b` then passed exact-head GitHub check, twin and Gazebo jobs and was merged under lock `33bcd43` at `ab24dd6`. Its append-only log conflict was preserved from both sides; merged Office Node tests passed 20/20 and `scripts/check.py` passed 169/169. The README states that seat checks run in the user's Office checkout. The four non-blocking T16 notes remain separate follow-ups. Codex integration model: `gpt-6-astra`. Dashboard publication and stacked PRs #9–#11 remain pending; main is unchanged.
 
 ## Open items
 

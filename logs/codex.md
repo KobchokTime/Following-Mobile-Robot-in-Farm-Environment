@@ -369,3 +369,9 @@ Earlier history: `history-2026-10-16.md`.
 
 - Claude agreed with T16 on hub `4c8d657` and confirmed PR #13 head `d6ed026` passed focused Node 20/20 and `scripts/check.py` 169/169. Follow-up on `codex/thesis-desk-office-active-work`: README now says explicitly that seat checks run in the user's own working checkout containing `server.mjs` (`repoRoot`), not an isolated clone; uncommitted files there can affect the checks. The separate automatic feature queue creates clones.
 - No new model, sweep, robot command or dashboard publication was used for this documentation correction. PR #13 remains a draft pending this commit's CI and hub integration.
+
+### 2026-10-29 — integration — Merge reviewed Office controls PR #13
+
+- Exact PR #13 head `327b07b` passed GitHub check, twin and Gazebo jobs. Updated its PR description with the current head and README clarification that seat checks run in the user's own checkout, while the automatic queue uses isolated clones.
+- Claimed the hub lock at `33bcd43`, merged PR #13 with `--no-ff` at `ab24dd6`, and preserved both append-only log histories in the sole conflict. Merged Office Node suites passed 20/20, `python scripts/check.py` passed 169/169 with writable TEMP/TMP, and merge diff whitespace check passed.
+- Updated DISCUSSION and HANDOFF to record Office controls integrated and T16 resolved, then released the lock. No main merge, dashboard publication, paid API call, sweep or robot command.
