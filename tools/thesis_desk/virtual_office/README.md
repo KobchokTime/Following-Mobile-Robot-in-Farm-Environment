@@ -14,6 +14,9 @@ node .\tools\thesis_desk\virtual_office\server.mjs
 Open `http://127.0.0.1:8765`. Agent requests use your Codex plan allowance and usage limits. The server runs Codex CLI in read-only, ephemeral mode. Team requests consume several Codex turns. Opening `index.html` directly shows the 3D demo, but the agent chat requires the local server. The scene itself loads Three.js from a CDN, so it needs internet access.
 
 This copy of the server has no API-key backend. Set `PORT` before starting the server if 8765 is occupied.
+The local server accepts requests only with a `127.0.0.1:<port>` or `localhost:<port>` Host.
+POST requests must use `Content-Type: application/json` and, when an Origin is present, it must
+match that Host. This prevents other websites from starting local agent work through the browser.
 
 ## Office controls that run work
 
@@ -46,6 +49,8 @@ gate. Jobs with `focusedNodeTests` must pass those Node tests as well. A failed
 check or missing check executable is recorded as failed, and `--finish` can
 recheck the same clone after repair. The result remains for independent review; no branch is committed,
 pushed or merged by the queue.
+Read-only assignments require zero changed files to become review-ready; writing assignments
+require at least one changed file within their allowed paths.
 
 The queue stores append-only events under the sibling
 `office-agent-worktrees/.office-state/` directory by default. Set

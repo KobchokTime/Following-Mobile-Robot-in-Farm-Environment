@@ -50,6 +50,10 @@ const reply = (res, status, data) => {
   res.writeHead(status, { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" });
   res.end(JSON.stringify(data));
 };
+function isJsonRequest(req) {
+  return String(req.headers?.["content-type"] || "").split(";", 1)[0].trim().toLowerCase() ===
+    "application/json";
+}
 async function readJson(req) {
   let body = "";
   for await (const chunk of req) {
@@ -204,6 +208,10 @@ export function officeLogName(value) {
 }
 
 export async function readMessage(req, res) {
+  if (!isJsonRequest(req)) {
+    reply(res, 415, { error: "ต้องส่ง Content-Type: application/json" });
+    return null;
+  }
   let payload;
   try { payload = await readJson(req); }
   catch { reply(res, 400, { error: "รูปแบบข้อความไม่ถูกต้องหรือยาวเกินกำหนด" }); return null; }
@@ -318,6 +326,15 @@ async function askTeam(req, res) {
 }
 
 export async function handleRequest(req, res) {
+  const host = String(req.headers?.host || "").toLowerCase();
+  if (host !== `127.0.0.1:${port}` && host !== `localhost:${port}`)
+    return reply(res, 403, { error: "คำขอไม่ได้มาจาก Office ในเครื่อง" });
+  if (req.method === "POST") {
+    if (req.headers.origin && req.headers.origin !== `http://${host}`)
+      return reply(res, 403, { error: "คำขอไม่ได้มาจาก Office ในเครื่อง" });
+    if (!isJsonRequest(req))
+      return reply(res, 415, { error: "ต้องส่ง Content-Type: application/json" });
+  }
   const url = new URL(req.url, "http://localhost");
   const logRequest = url.pathname.match(/^\/api\/office\/logs\/([^/]+)$/);
   if (req.method === "GET" && logRequest) {
@@ -335,8 +352,6 @@ export async function handleRequest(req, res) {
     return reply(res, 200, { actions, busyAgents: [...busyAgents] });
   }
   if (req.method === "POST" && ["/api/office/seat", "/api/office/meeting"].includes(url.pathname)) {
-    if (req.headers.origin && req.headers.origin !== `http://127.0.0.1:${port}`)
-      return reply(res, 403, { error: "คำขอไม่ได้มาจาก Office ในเครื่อง" });
     if (url.pathname.endsWith("/meeting") && !codexReady)
       return reply(res, 503, { error: "Codex CLI ยังไม่ได้ล็อกอินด้วย ChatGPT" });
     if (url.pathname.endsWith("/meeting") && modelRateLimited)

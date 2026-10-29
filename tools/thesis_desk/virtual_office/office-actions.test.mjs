@@ -75,4 +75,27 @@ test("rest keeps running meeting, desk work and chat agents at work until comple
   await poll();
   assert.deepEqual(calls.filter(([kind]) => kind === "Rest").map(([, ids]) => ids),
     [["natee"], ["fah"], ["boss"], ["krit"], ["mew"], ["dao"]]);
+
+  const posts = [];
+  context.fetch = async (url, options) => {
+    if (options?.method === "POST") {
+      posts.push({ url, options });
+      const kind = url.endsWith("/seat") ? "seat" : "meeting";
+      const action = { id: `${kind}-2`, kind, state: "running", createdAt,
+        agents: kind === "seat" ? ["krit"] : ["natee", "fah"], summary: "started" };
+      actions = [action, ...actions];
+      busyAgents = [...busyAgents, ...action.agents];
+      return { ok: true, json: async () => ({ action, alreadyRunning: false }) };
+    }
+    return { ok: true, json: async () => ({ actions, busyAgents }) };
+  };
+  seat.click();
+  await new Promise((resolve) => setImmediate(resolve));
+  meeting.click();
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.deepEqual(posts.map(({ url }) => url), ["/api/office/seat", "/api/office/meeting"]);
+  for (const { options } of posts) {
+    assert.equal(options.headers["Content-Type"], "application/json");
+    assert.deepEqual(JSON.parse(options.body), {});
+  }
 });

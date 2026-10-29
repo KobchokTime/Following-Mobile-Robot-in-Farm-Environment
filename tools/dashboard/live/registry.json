@@ -8838,6 +8838,6 @@
    }
   ],
   "result": "walk_up_same 10/10 · side_step 18/20 vs noscan 19/20 · close_pair_same 5/5 · ไม่ชน → ใช้เป็นค่าเริ่มต้น",
-  "live": false
+  "live": true
  }
 ]

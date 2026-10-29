@@ -336,3 +336,25 @@ Earlier history: `history-2026-10-16.md`.
 - On isolated `codex/thesis-desk-office-active-work` / draft PR #13, renamed the walk control to พักผ่อน. The browser now starts continuous aisle walking only for agents free in the server's action and direct-chat state; desk work and meeting participants stay at their positions until their recorded action ends. A running meeting restores its full seating order after page reload.
 - Local Chrome smoke on the separate `127.0.0.1:8769` preview saw all 12 initially idle agents move, remain moving after about 20 seconds, and stop resting when toggled off. The scene screenshot showed desks visible. An offline browser-controller regression covered running meetings, desk work, direct chat, completion and repeated polling without interrupting busy agents.
 - Office Node suites passed 17/17; `python scripts/check.py` passed 166/166 with writable TEMP/TMP after the sandbox default Temp produced permission errors. Scene and server JavaScript syntax checks and `git diff --check` passed. No live model call, robot action, main merge or dashboard publication was made for this change.
+
+### 2026-10-29 — thesis-desk — Address T16 Office cross-review blockers
+
+- In isolated `codex/thesis-desk-t16-review-fix` from `integration-hub` `61742ce`, added a local Host check for all Office requests and matching Origin plus JSON media-type checks for POST. A foreign page or DNS-rebound hostname is rejected before a chat request can start Codex. Direct `readMessage` also rejects non-JSON bodies.
+- The automatic queue now requires zero changed files for a read-only assignment and at least one for a writing assignment before review-ready. Added focused regressions for allowed-path edits in read-only mode and for foreign Host/Origin, text/plain, GET rebinding and local GET acceptance.
+- Focused Office Node tests passed 12/12 and `python scripts/check.py` passed 169/169 with writable TEMP/TMP. A separate local HTTP smoke returned 200 for `/api/agents`; temporary headless Chrome loaded the Office document but its external Three.js module did not initialize in that browser run, so 3D rendering was not confirmed there. No Codex chat, robot action, sweep or paid API call was made.
+
+### 2026-10-29 — integration — Agree on T15 no-fresh-scan re-review
+
+- On isolated `integration-hub` review clone at `61742ce`, inspected `51f5dff` / `210f422` and the production-path no-fresh-scan fallback. Focused walk-up tests passed 11/11 and `python scripts/check.py` passed 169/169 with writable TEMP/TMP. Recounted 220 unique JSON rows: published totals and unmatched/other breakdowns agree; the 40 scan-check walk-up runs report zero stranger publications and round-1 no-check reports 571 stranger plus two false boxes.
+- Claimed the integration lock at `71a3ce6`, replied `agree` in DISCUSSION T15, and updated HANDOFF to mark T15 resolved. No sweep, ROS, Docker, hardware or main merge was run. Real-leg and nearby-post behavior remains for robot-day E4.
+- Separately pushed T16 request-validation/read-only-gate fix `5a6a0b3` and opened draft PR #14 against `integration-hub` for Claude's review; it is not integrated or published.
+
+### 2026-10-29 — integration — Hand T16 fixes to Claude for re-review
+
+- After the T15 review hub moved to `100b257`, merged it into the isolated T16 branch with `--no-ff` at `1664217` and preserved both append-only Codex log entries. The updated draft PR #14 is mergeable against that hub head; focused Office Node tests passed 12/12 and `scripts/check.py` passed 169/169 after the merge.
+- Claimed the integration lock at `a6e4be1`, updated DISCUSSION T16 with the two fixes and exact checks, and asked Claude to re-review the draft PR. T16 remains open; no Office feature was merged into hub or main.
+
+### 2026-10-29 — thesis-desk — Secure the active Office preview after T16 review
+
+- Brought the tested T16 fix branch into isolated Office feature branch `codex/thesis-desk-office-active-work` so the active `127.0.0.1:8769` preview can use the same Host/Origin/JSON guard. Preserved both append-only log histories and the latest T15/T16 hub notes. The Office seat/meeting POSTs now send JSON, which the new guard requires; the older route-specific Origin check was removed in favor of the common guard.
+- Added a browser-controller regression for JSON seat and meeting POSTs. Focused Office Node suites passed 20/20; `python scripts/check.py` passed 169/169 with writable TEMP/TMP, and JavaScript syntax plus diff checks passed. The preview will be restarted only after this merge commit is complete; no model job was started during this verification.

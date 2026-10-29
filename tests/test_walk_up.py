@@ -160,10 +160,54 @@ class WalkUpTest(unittest.TestCase):
         self.assertFalse(m.scan_crowded(scan(target_now), 0.0, 0.8, 0.0, 0.8, 0.5))
         self.assertTrue(m.scan_crowded(scan(target_now, person(1.05, 0.12)), 0.0, 0.8, 0.0, 0.8, 0.5))
 
+    def stale_frame(self, node, t, scan_time, people=((1.05, -0.40), (1.0, 0.0))):
+        """One frame with no fresh scan: the scan is old, missing or dated ahead, the sector ranges are current."""
+        node.scan_points = scan(*(person(x, y) for x, y in people))
+        node.scan_time = scan_time
+        node.lidar_angles = [math.atan2(y, x) for x, y in people]
+        node.buf_lidar.clear()
+        node.buf_lidar.append((t, [math.hypot(x, y) - 0.2 for x, y in people]))
+        f = (self.W / 2.0) / math.tan(math.radians(self.HFOV) / 2.0)
+        out = []
+        for k, (x, y) in enumerate(people):
+            n = len(node.published)
+            node.try_sync_from_yolo(t + 0.001 * k, int(round(self.W / 2.0 - f * math.tan(math.atan2(y, x)))), 240, 4)
+            out.append(len(node.published) > n)
+        return out
+
+    def test_without_a_fresh_scan_the_stranger_is_not_taken(self):
+        """Codex (T15): stale, missing or future-dated scan; the stranger's box first, sector ranges current."""
+        for label, age in (('stale', -0.5), ('missing', None), ('future', 0.5)):
+            with self.subTest(scan=label):
+                m, node = make_node()
+                t = self.lock(node)
+                stranger, target = self.stale_frame(node, t, None if age is None else t + age)
+                self.assertFalse(stranger)
+                self.assertTrue(target)
+
+    def test_without_a_fresh_scan_the_check_off_keeps_the_round_2_behaviour(self):
+        m, node = make_node(crowd_from_scan=False)
+        t = self.lock(node)
+        stranger, _ = self.stale_frame(node, t, t - 0.5)
+        self.assertTrue(stranger)
+
+    def test_the_wider_gate_returns_with_a_fresh_scan_of_the_target_alone(self):
+        m, node = make_node()
+        t = self.lock(node, target=(0.9, 0.0))
+        for _ in range(3):  # the LiDAR stalls for a few frames with the target alone
+            self.assertEqual(self.stale_frame(node, t, t - 0.5, people=((0.9, 0.0),)), [True])
+            t += 0.1
+        node.lidar_angles = [0.0]
+        t += 1.0  # past ambiguity_window_s
+        self.assertEqual(self.frame(node, t, [(0.9, 0.0)]), [True])
+        self.assertEqual(self.frame(node, t + 0.1, [(0.9, -0.25)]), [True])  # the side step needs the wider gate
+
     def test_a_crop_row_beside_the_target_does_not_count_as_a_person(self):
         m, _ = make_node()
-        row = [p for k in range(40) for p in person(0.1 * k, -0.6, radius=0.05)]  # plants 0.1 m apart, 0.6 m right
+        # plants 0.1 m apart, 0.45 m right: inside the 0.5 m radius, so only the 1.5 m width rule leaves it out
+        row = [p for k in range(40) for p in person(0.1 * k, -0.45, radius=0.05)]
         self.assertFalse(m.scan_crowded(scan(row, person(1.0, 0.0)), 0.0, 0.8, 0.0, 0.8, 0.5))
+        self.assertTrue(m.scan_crowded(scan(row, person(1.0, 0.0)), 0.0, 0.8, 0.0, 0.8, 0.5, max_width_m=100.0))
         self.assertTrue(m.scan_crowded(scan(person(1.05, -0.40), person(1.0, 0.0)), 0.0, 0.8, 0.0, 0.8, 0.5))
 
 

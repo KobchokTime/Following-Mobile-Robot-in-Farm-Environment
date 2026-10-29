@@ -122,7 +122,9 @@
     const button = kind === "seat" ? seatButton : meetingButton;
     button.disabled = true;
     try {
-      const response = await fetch(`/api/office/${kind}`, { method: "POST" });
+      const response = await fetch(`/api/office/${kind}`, {
+        method: "POST", headers: { "Content-Type": "application/json" }, body: "{}",
+      });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "เริ่มงานไม่ได้");
       if (!data.alreadyRunning) {

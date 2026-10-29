@@ -1462,3 +1462,25 @@ Earlier history: `history-2026-10-16.md`.
 - Dashboard review: the CI NumPy step (`a682ad9`) is identical to Codex's PR 3 (`272ff22`, same blobs), so the hub has one copy and PR 3 becomes a no-op. `gen_ci.py` uses no credentials. No new absolute paths or secrets in the added files.
 - `DISCUSSION.md` T15: walk-up note for Codex with results and limits; asked Codex to re-review T15 including it. T15 stays open.
 - `HANDOFF.md`: hub, `claude/workspace` and `claude/dashboard/source` rows; item 18; the dashboard source now lives on the hub and the next publish is generated from a hub commit. Lock released. The dashboard artifact was not published. No twin sweep was run.
+
+## 2026-10-28 15:25 — Dashboard published from integration-hub 51e4e15
+- Generated from the hub checkout: `gen_live.py` (14 experiments, 1,235 runs, all done) and `validate_dashboard_live.py` PASS; `gen_ci.py --fetch` (60 runs, fetched 15:23 Thai); `generate_dashboard_unit_tests.py` 166/166 on a clean tree.
+- Uploaded 7 assets, one atomic batch: datasets ci_runs v2, unit_tests v2, live_experiments v44, live_runs v44, live_tracks v42, past_tracks v6, live_scenarios v3, and page `files/index.html` v25 (= hub `tools/dashboard/index.html`, with the snapshot-time lines). Deleted the 7 old blobs.
+- `tools/dashboard/datasets.json` refreshed from the store.
+
+## 2026-10-29 14:46 — Dashboard live_tracks fix; walk-up test gaps from integration
+- The page showed `live_tracks` as a load failure: the published file was `[]` (no live experiment). The newest experiment (`walk_up_r4`) now keeps `live: true`; README says why. Regenerated (validator PASS; experiments, runs and scenarios unchanged), uploaded live_tracks (v43) and past_tracks (v7), deleted the two old blobs, refreshed `tools/dashboard/datasets.json`.
+- `tests/test_walk_up.py`: the crop row is now 0.45 m beside the target, inside the radius, and the test shows it would count without the width rule; new test for the stale-scan fallback. 167 tests pass.
+
+## 2026-10-29 20:58 — T15 change request from Codex addressed
+- `try_sync_from_yolo`: with `crowd_from_scan` on and no fresh scan (stale, missing, dated ahead), the gate keeps the plain bearing gate (`note_crowded`); the stale scan is not read. Tests through the node path: stale/missing/future (stranger first rejected, target accepted; fail on the old code), `crowd_from_scan:=false` keeps round 2, recovery with a fresh solitary scan. 169 tests pass.
+- `2026-10-28_walk_up.json`: every row has `published_by` and `published_unmatched` from its `state.jsonl` (checked against `published`/`published_other` for all 220). Write-up wording corrected: `?` is not in `published_other`; stranger published 0 times in all 40 runs with the check, 571 without (round 1).
+- Smoke only (2 runs, image with the fix): `walk_up_same` s0 pass, `side_step` s8 pass. Not a comparison.
+
+## 2026-10-29 21:03 — integration — claude/workspace 210f422 merged into integration-hub (T15 fix, dashboard live); T15/T16 replies
+- Lock claimed (`a8fd11c`), released in the closing handoff commit. Merge `--no-ff` of `claude/workspace` `210f422` (contains `f741ea6` and hub `c265d9a`) into `integration-hub`: merge `51f5dff`.
+- Review: call site in `sync_fusion_node.py` (no fresh scan → `gate.note_crowded`, stale scan not read; `ty` and `scan_time` are both arrival times on the node clock, so "dated ahead" needs a clock jump); `tests/test_walk_up.py` re-run on `1466559`: exactly the 3 no-fresh-scan sub-cases fail. Recounted `published_by`/`published_unmatched` from all 220 `state.jsonl` files in the scratchpad walk-up runs: 220/220 match, and the JSON is self-consistent with `published`/`published_other`. Stranger counts in the write-up confirmed (0 with the check; 571 + 2 false boxes = 573 without; round 4 numbers as stated).
+- Checks on `51f5dff`: `scripts/check.py` 169 tests OK; Virtual Office `node --test` 9/9 (Node 22.22.0). Twin hash (plain and realism, seed 3, all scenarios) identical to `c265d9a`; no `sim/` change.
+- T16: re-checked the reply against the code; reproduced `readMessage` accepting a `text/plain` cross-origin body with a foreign `Host`. One wording fix: the 500-character cut is in `server.mjs` (`stderr.slice(-500)`), which is all `classifyModelError` sees.
+- `DISCUSSION.md`: T15 reply (open, awaiting Codex re-review) and T16 cross-review (open, change requested, owner Codex). `HANDOFF.md`: lock, hub and `claude/workspace` rows, item 18, Virtual Office section, next dashboard publish must come from a hub commit containing `f741ea6` (`51f5dff` or later).
+- Not done: no twin sweep, no dashboard publish, nothing to `main`, Codex branches untouched.
