@@ -61,7 +61,7 @@ All times are UTC ISO 8601 (`YYYY-MM-DDTHH:MM:SSZ`). The page shows them in Thai
 | `dir` | str | Run folder, relative to `--runs-root` |
 | `started_utc` | str | When the experiment started (used for the ETA) |
 | `order` | int | Higher numbers are newer; the page lists them newest first |
-| `live` | bool | At most one experiment is `true`. Its tracks go in `live_tracks` at 2 Hz; the others go in `past_tracks` at 1 Hz |
+| `live` | bool | At most one experiment is `true`. Its tracks go in `live_tracks` at 2 Hz; the others go in `past_tracks` at 1 Hz. Keep the newest experiment `true` after it finishes: the page shows an empty `live_tracks` as a load failure |
 | `purpose`, `compare`, `result` | str | Thai text for the "การทดลองนี้ทดสอบอะไร" card; `result` is empty until written |
 | `stopped` | bool, optional | Marks an abandoned experiment |
 | `runs` | list | `{tag, scenario, seed, variant, light}`: `tag` is the run folder; `variant` and `light` (`ปกติ` / `สมจริง`) group the grid |

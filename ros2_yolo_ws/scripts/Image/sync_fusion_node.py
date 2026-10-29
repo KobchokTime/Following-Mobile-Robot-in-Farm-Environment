@@ -623,11 +623,15 @@ class SyncFusionNode(Node):
             self.get_logger().debug(f"Skip frame: invalid LiDAR dist in sector {sector_id}")
             return
 
-        if self.use_gate and self.crowd_from_scan and self.gate.locked \
-                and scan_is_fresh(ty, self.scan_time, self.scan_max_age):
-            pb, pr = self.gate._predict(ty)
-            if scan_crowded(self.scan_points, bearing, dist, pb, pr, self.crowd_radius):
+        if self.use_gate and self.crowd_from_scan and self.gate.locked:
+            if not scan_is_fresh(ty, self.scan_time, self.scan_max_age):
+                # no fresh scan (stale, missing or dated ahead): nobody can be ruled out beside the
+                # target, so keep the plain gate rather than let a stranger in (T15, Codex)
                 self.gate.note_crowded(ty)
+            else:
+                pb, pr = self.gate._predict(ty)
+                if scan_crowded(self.scan_points, bearing, dist, pb, pr, self.crowd_radius):
+                    self.gate.note_crowded(ty)
 
         if self.use_gate and not self.gate.accept(ty, bearing, dist, chroma, hist):
             # another person, not the one being followed: remember them only if they are in the way
