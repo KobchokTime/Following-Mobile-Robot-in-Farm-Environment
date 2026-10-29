@@ -1549,3 +1549,8 @@ Earlier history: `history-2026-10-16.md`.
 - Stop off: contact 2/5 (s0 0.376 m, s2 0.384 m); min range 0.376–0.468 m.
 - Stop on: contact 0/5; min range 0.561–0.640 m.
 - Both lose the target at the corner (visible share about 0.45): the bystander stands 0.45 m from the target's path, so a 47 cm robot cannot follow through without contact. Passing needs avoidance (steer around), not a stop. Results in scratch `bc2/`. Assist full run started.
+
+## 2026-10-30 01:39 — obstacle avoid started (`claude/robot/avoid` `88af833`)
+- User asked to continue with avoidance. New branch merges LiDAR assist (`lidar-assist2`) and the obstacle stop (`c0be756`).
+- follow_stop_node: when the path is blocked within 1.6 m, score swerves (k for 0.8 m, -k for 0.8 m, then straight) by free path, minus a turning cost; a swerve that turns more than 0.8 rad from the target is not taken. `obstacle_avoid:=false` keeps the stop alone. 192 tests pass.
+- Twin: `blind_corner` avoid off/on s0–4 queued after the LiDAR-assist full run.
