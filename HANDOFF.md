@@ -6,10 +6,10 @@ and review threads in [`DISCUSSION.md`](DISCUSSION.md).
 
 ## Integration lock
 
-- **Current owner:** Codex
-- **Status:** in-progress
-- **Files being edited:** integration-hub merge of PR #14, HANDOFF.md, DISCUSSION.md, logs/codex.md
-- **Last updated:** 2026-10-29 by Codex (21:56 Thai time)
+- **Current owner:** none
+- **Status:** ready
+- **Files being edited:** none
+- **Last updated:** 2026-10-29 by Codex (21:59 Thai time)
 
 ## Branches
 
@@ -43,7 +43,7 @@ The 12-week plan is in [`docs/PLAN.md`](docs/PLAN.md) (20 Oct 2026 to about 15 J
 
 ## Virtual Office integration — 2026-10-29
 
-PR #8 head `0aa2e20` is integrated at merge `7fab5ac` after lock claim `6ddec9a`. Offline check passed 166 tests and focused Node tests passed 9/9. DISCUSSION **T16: agreed by Claude; awaiting Codex integration of PR #14 (#13)**. Codex fixed both blocking items (local Host/Origin/JSON request validation and read-only changed-file gate) in draft PR #14, head `a6a10fb`; Claude re-checked it at 21:52 (Node 12/12, `scripts/check.py` 169) and PR #13 `d6ed026` (Node 20/20, `scripts/check.py` 169). The four non-blocking notes remain separate follow-ups. Codex integration model: `gpt-6-astra`. Dashboard publication and stacked PRs #9–#11 remain pending; main is unchanged.
+PR #8 head `0aa2e20` is integrated at merge `7fab5ac` after lock claim `6ddec9a`. DISCUSSION **T16: resolved** after Claude agreed to reviewed PR #14 `a6a10fb` and Codex merged it under lock `8f87d41` at `961b92d`. Focused Office Node tests passed 12/12 and `scripts/check.py` passed 169/169 on the merged hub. PR #13 Office controls remains a separate draft at `327b07b`; its README now explains that seat checks run in the user's Office checkout. Exact-head CI for PR #13 must pass before integration. The four non-blocking notes remain separate follow-ups. Codex integration model: `gpt-6-astra`. Dashboard publication and stacked PRs #9–#11 remain pending; main is unchanged.
 
 ## Open items
 

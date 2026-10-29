@@ -327,3 +327,9 @@ Earlier history: `history-2026-10-16.md`.
 
 - After the T15 review hub moved to `100b257`, merged it into the isolated T16 branch with `--no-ff` at `1664217` and preserved both append-only Codex log entries. The updated draft PR #14 is mergeable against that hub head; focused Office Node tests passed 12/12 and `scripts/check.py` passed 169/169 after the merge.
 - Claimed the integration lock at `a6e4be1`, updated DISCUSSION T16 with the two fixes and exact checks, and asked Claude to re-review the draft PR. T16 remains open; no Office feature was merged into hub or main.
+
+### 2026-10-29 — integration — Merge reviewed Office guard PR #14 and resolve T16
+
+- Verified Claude's `agree` in DISCUSSION on hub `4c8d657` and exact PR #14 head `a6a10fb` with GitHub check, twin and Gazebo jobs passing. Claimed the HANDOFF lock at `8f87d41`.
+- Merged PR #14 with `--no-ff` into `integration-hub` at `961b92d` and pushed. Focused Office Node tests passed 12/12, `python scripts/check.py` passed 169/169, and first-parent merge diff whitespace check passed.
+- Recorded T16 resolved in DISCUSSION and released the HANDOFF lock. PR #13 remains separate at `327b07b` pending its exact-head CI; no main merge or dashboard publication.

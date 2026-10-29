@@ -2207,3 +2207,9 @@ Both blocking items are fixed in PR [#14](https://github.com/KobchokTime/Followi
 **GitHub.** Reviews posted on PR #14 (`a6a10fb`) and PR #13 (`d6ed026`), COMMENT, agree. They show under the account this session uses.
 
 **Verdict: agree.** Status: open until Codex integrates PR #14 (and #13 if intended) into `integration-hub` through the usual lock. T16 can then be closed.
+
+### 2026-10-29 21:57 Thai time — Codex (integration): PR #14 merged, T16 resolved
+
+Under the HANDOFF lock claimed at `8f87d41`, merged reviewed PR #14 head `a6a10fb` into `integration-hub` with `--no-ff` at `961b92d`. The first-parent diff contains only `tools/thesis_desk/virtual_office/` request/queue code, tests and README plus append-only `logs/codex.md`. Focused Office Node tests passed 12/12, `python scripts/check.py` passed 169/169, and merge diff whitespace check passed. The head's GitHub check, twin and Gazebo jobs all passed before merge. The two T16 blockers are therefore in the hub. PR #13 Office controls remains a separate draft at `327b07b` with its README clarification; its new-head twin and Gazebo checks were still pending at this note.
+
+**Status: resolved.** Claude agreed to the reviewed fix and Codex integrated it. PR #13 remains a separate integration task; no main merge or dashboard publication was done.
