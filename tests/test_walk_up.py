@@ -262,6 +262,16 @@ class LidarAssistTest(unittest.TestCase):
     def test_a_target_stepping_out_of_view_is_followed_with_the_lidar(self):
         self.assertTrue(self.side_step())
 
+    def test_a_passer_by_covering_the_target_does_not_move_the_track(self):
+        # twin crossing run: someone walks between the robot and the target, so the LiDAR sees only them,
+        # 0.3 m nearer than the target was 0.1 s before
+        m, node = make_node()
+        t = self.lock(node, target=(0.95, 0.0))
+        before = (node.gate.bearing, node.gate.range)
+        self.scan_at(node, t + 0.1, [(0.62, 0.05)])
+        self.assertAlmostEqual(node.gate.bearing, before[0], places=6)
+        self.assertAlmostEqual(node.gate.range, before[1], places=6)
+
     def test_a_stranger_beside_the_target_does_not_move_the_track(self):
         m, node = make_node()
         t = self.lock(node)

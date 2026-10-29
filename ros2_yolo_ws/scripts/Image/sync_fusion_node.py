@@ -445,6 +445,9 @@ class SyncFusionNode(Node):
         # so a fast side step does not leave the camera gate behind (side_step twin failures)
         self.declare_parameter('lidar_assist', True)
         self.declare_parameter('lidar_assist_dist_m', 0.35)  # the cluster must be this close to the prediction
+        # nobody walks faster than this: a cluster farther from the target's last fix is someone else
+        # (a passer-by covering the target from the LiDAR, twin crossing run)
+        self.declare_parameter('lidar_assist_speed_mps', 1.5)
         # TargetGate tunables, so an experiment's -p really reaches the gate (undeclared -p are ignored)
         for name, value in GATE_PARAMS.items():
             self.declare_parameter(name, value)
@@ -481,10 +484,13 @@ class SyncFusionNode(Node):
         self.lidar_assist = bool(self.get_parameter('lidar_assist').value)
         self.assist_dist = float(self.get_parameter('lidar_assist_dist_m').value)
         self.assist_scan_time = None  # the scan the last assist used, so each scan is used once
+        self.assist_speed = float(self.get_parameter('lidar_assist_speed_mps').value)
+        self.assist_last = None       # (time, bearing, range) of the last assist
         # the effective settings, so a run's log shows what it actually ran with
         self.get_logger().info('[GATE] ' + ' '.join(f'{k}={v:g}' for k, v in sorted(
             {**gate_args, 'crowd_from_scan': float(self.crowd_from_scan), 'crowd_radius_m': self.crowd_radius,
-             'lidar_assist': float(self.lidar_assist), 'lidar_assist_dist_m': self.assist_dist}.items())))
+             'lidar_assist': float(self.lidar_assist), 'lidar_assist_dist_m': self.assist_dist,
+             'lidar_assist_speed_mps': self.assist_speed}.items())))
         self.last_camera_fix = None  # time of the last camera detection accepted as the target
         self.last_camera_bearing = 0.0
         self.edge_rad = math.radians(self.camera_hfov_deg / 2.0 - float(self.get_parameter('lidar_edge_deg').value))
@@ -594,7 +600,20 @@ class SyncFusionNode(Node):
             return None
         if scan_crowded(self.scan_points, bearing, rng, pb, pr, self.crowd_radius):
             return None
+        if rng < pr - 0.2:
+            return None  # well in front of where the target should be: someone covering it from the LiDAR
+        # the last fix of the target, by the camera or by an earlier assist
+        last = (self.last_camera_fix, self.last_camera_bearing, self.last_target[3]) \
+            if self.last_target is not None else None
+        if self.assist_last is not None and (last is None or self.assist_last[0] > last[0]):
+            last = self.assist_last
+        if last is not None:
+            _, lb, lr = last
+            moved = math.hypot(rng * math.cos(bearing) - lr * math.cos(lb), rng * math.sin(bearing) - lr * math.sin(lb))
+            if moved > self.assist_speed * max(0.0, now - last[0]) + 0.08:
+                return None  # faster than anyone walks: someone else, such as a passer-by covering the target
         self.gate.accept_lidar(now, bearing, rng)
+        self.assist_last = (now, bearing, rng)
         return found
 
     def track_with_lidar(self, assisted=None):

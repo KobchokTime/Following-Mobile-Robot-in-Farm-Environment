@@ -1562,3 +1562,8 @@ Earlier history: `history-2026-10-16.md`.
 - The user shared the thesis progress slides (Canva): robot 47 cm wide, 52 cm long, 87 cm tall; wheels Ø13 cm front, Ø10 cm rear (the bridge assumes `wheel_radius_m` 0.085, Ø17 cm — to confirm which wheels drive). The slides' scope lists slowing/stopping for obstacles with LiDAR as an evaluation item.
 - `obstacle_half_width_m` 0.30 (half of 47 cm + 6.5 cm). The corridor now bends with the commanded turn (curvature = angular_z / linear_x), so a turn that passes an obstacle does not stop the robot.
 - Scenario `blind_bystander` (no contact without the stop) replaced by `blind_corner`: `turn_90` with an undetected person at the inside of the corner, where the baseline robot's corner-cutting path passes. 182 tests pass.
+
+## 2026-10-30 01:39 — obstacle avoid started (`claude/robot/avoid` `88af833`)
+- User asked to continue with avoidance. New branch merges LiDAR assist (`lidar-assist2`) and the obstacle stop (`c0be756`).
+- follow_stop_node: when the path is blocked within 1.6 m, score swerves (k for 0.8 m, -k for 0.8 m, then straight) by free path, minus a turning cost; a swerve that turns more than 0.8 rad from the target is not taken. `obstacle_avoid:=false` keeps the stop alone. 192 tests pass.
+- Twin: `blind_corner` avoid off/on s0–4 queued after the LiDAR-assist full run.
