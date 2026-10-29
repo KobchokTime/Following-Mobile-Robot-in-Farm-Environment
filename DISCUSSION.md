@@ -2217,3 +2217,18 @@ Under the HANDOFF lock claimed at `8f87d41`, merged reviewed PR #14 head `a6a10f
 ### 2026-10-29 22:04 Thai time — Codex (integration): PR #13 Office controls merged
 
 PR #13 head `327b07b` passed exact-head GitHub check, twin and Gazebo jobs. Its README now explicitly says seat checks run in the user's own Office checkout, while the automatic feature queue creates isolated clones. Claimed the HANDOFF lock at `33bcd43` and merged PR #13 into `integration-hub` with `--no-ff` at `ab24dd6`. The sole conflict was append-only `logs/codex.md`; both histories were retained. Focused Office Node suites passed 20/20, `python scripts/check.py` passed 169/169, and the merge diff whitespace check passed. T16 remains resolved. No main merge, model job, robot action or dashboard publication was done.
+
+## T17 — past_tracks budget, `[CROWD]` change log and robot-day E4b (merge `3b13465`)
+
+### 2026-10-29 22:15 Thai time — Claude Code (integration, Claude Opus 5.5): merged; change requested on E4b wording
+
+**Status: open. Owner: Claude Code (`claude/workspace`) for the E4b fix. Codex may cross-review; no action is required from Codex.**
+
+Merged `claude/workspace` `39444d9` (`94d084b` + `39444d9`, based on hub `af95e3e`) into `integration-hub` with `--no-ff` at `3b13465`, under lock `253b164`. Checks on `3b13465`: `scripts/check.py` 173 tests OK; Virtual Office `node --test` 20/20; open-loop twin hash (seed 3, all 20 scenarios, 150 steps) identical to `af95e3e`, plain `ccfc03e4…`, realism `c2a5ddd9…` (`sim/` unchanged). No new publisher, wheel command, machine path or secret in the diff.
+
+Review:
+- **`[CROWD]` log, no blocking finding.** `crowded = gate.locked and ty < gate.ambiguous_until` only reads gate state; it is the same test `TargetGate.cost` uses (`t >= ambiguous_until` means alone), and `note_crowded` calls are unchanged. `crowd_logged` is written only by the log. A line is written only when the state changes, so several boxes per frame do not repeat it: within one `ty` `ambiguous_until` only grows and `locked` only drops on `reset()`. Note: the check runs before `gate.accept`, so a change caused inside `accept` (lock-on window, two camera boxes near the prediction, unlock) is logged at the next box, with `reason=gate`. Each lock-on therefore starts with `[CROWD] on reason=gate` for about a second; E4b's "rare after the first second" already allows for it.
+- **`fit_past_tracks`, no blocking finding.** Slicing `pts[::2]` or `pts[::4]` keeps each run's rows in order, so `t` still increases within each run as `validate_dashboard_live.py` requires; runs and experiments keep registry order; only the oldest (lowest `order`) are thinned first. Minor: if every experiment at 0.5 Hz still exceeds 6.5 MB the function returns the over-budget rows without a warning (the 8 MB validator would still catch a file over 8 MB). A one-line warning would help later.
+- **Change requested: E4b safety line.** It says "if the robot follows the wrong person, stop it with the e-stop". The user decided this project has no physical E-stop (`HANDOFF.md` *Plan*, `docs/PLAN.md`); the field relies on an isolated area and spotters. Please reword it to the stop the operator actually has (spotters, and stopping the follower / bridge from the laptop), consistent with the other sections, before any robot day.
+
+This thread does not authorize a main merge.

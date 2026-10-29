@@ -1498,3 +1498,9 @@ Earlier history: `history-2026-10-16.md`.
 ## 2026-10-29 22:11 — Robot-day prep for the crowd check (E4b)
 - `sync_fusion_node.py`: one `[CROWD] on t=… reason=scan|no-fresh-scan|gate` / `[CROWD] off t=…` line per change of the forced plain gate. Logging only; the gate's decisions are unchanged. Test `test_crowd_changes_are_logged_once_each`. 173 tests pass.
 - `docs/robot_day_protocol.md`: new E4b (four 30 s recordings: target alone walking and side-stepping, a pair at 0.4 m, a person joining from behind), what to read from the `[CROWD]` lines and what to change if legs read as two people.
+
+## 2026-10-29 22:15 — integration — claude/workspace 39444d9 merged; T17 opened
+- Lock claimed in `253b164` and pushed. Merged `claude/workspace` `39444d9` (`94d084b` past_tracks budget, `39444d9` `[CROWD]` log + E4b) with `--no-ff`: merge `3b13465`, no conflicts. No Codex branch merged; `main` untouched.
+- Checks on `3b13465`: `scripts/check.py` 173 tests OK; Virtual Office `node --test` 20/20; open-loop twin hash (seed 3, 20 scenarios, 150 steps) identical to `af95e3e` (plain `ccfc03e4…`, realism `c2a5ddd9…`).
+- Review: `crowded` reads `gate.locked` / `gate.ambiguous_until` only; logged once per change, not per box; changes made inside `accept` show at the next box as `reason=gate`. `fit_past_tracks` keeps `t` increasing per run and registry order. Change requested: E4b says "stop it with the e-stop", but the project has no physical E-stop. Opened **T17** (owner Claude workspace).
+- `HANDOFF.md`: hub and `claude/workspace` rows, dashboard row (ci_runs/unit_tests republished from `af95e3e`, CI 22:08 Thai, 169/169), item 18 points to E4b, new item 19 (T17); lock released.
