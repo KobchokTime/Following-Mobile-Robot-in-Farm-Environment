@@ -1526,3 +1526,7 @@ Earlier history: `history-2026-10-16.md`.
 - User asked to bring the offline (twin) results to 100%. `side_step` failures have two forms: the robot never turns when the target leaves the image (vis 0.86–0.87), or LiDAR tracking latches a post and spins (s15).
 - Draft: `lidar_assist` (default on) moves the gate track to the target's own LiDAR cluster once per fresh scan, only within 0.35 m of the prediction and only when `scan_crowded` says nobody else is near. Tests for following out of view, no move with a stranger beside, no jump to a post. 176 tests pass.
 - Not yet shown to fix the twin failures: a unit test showed the old code also turns in the simulated case, so a debug build (gate decisions logged) is running on side_step seeds 8, 10, 15, 13, 14, 11 to find the real cause first.
+
+## 2026-10-29 22:39 — side_step debug runs; full baseline started
+- Debug build of hub `5c72c4d` (gate decisions logged): `side_step` realism seeds 8, 10, 11, 13–35: 26/26 pass. The earlier failures (round 4: 2/20) did not recur, so they depend on timing or load, not on a fixed seed.
+- New `experiments/sim/scripts/run_baseline.sh`: every scenario, realism, seeds 0–4, one at a time. Running on hub `5c72c4d` (image `twin:hub`) to see what still fails.
