@@ -272,6 +272,17 @@ class LidarAssistTest(unittest.TestCase):
         self.assertAlmostEqual(node.gate.bearing, before[0], places=6)
         self.assertAlmostEqual(node.gate.range, before[1], places=6)
 
+    def test_no_assist_while_someone_was_just_near_the_target(self):
+        # twin crossing s2: the crosser lent their range to the target's box, then walked off sideways; the
+        # assist followed their cluster. After a crowd flag the camera decides alone for the window.
+        m, node = make_node()
+        t = self.lock(node, target=(0.95, 0.0))
+        node.gate.note_crowded(t)
+        before = (node.gate.bearing, node.gate.range)
+        self.scan_at(node, t + 0.1, [(0.95, -0.06)])  # a cluster the assist would otherwise take
+        self.assertAlmostEqual(node.gate.bearing, before[0], places=6)
+        self.assertAlmostEqual(node.gate.range, before[1], places=6)
+
     def test_a_stranger_beside_the_target_does_not_move_the_track(self):
         m, node = make_node()
         t = self.lock(node)
