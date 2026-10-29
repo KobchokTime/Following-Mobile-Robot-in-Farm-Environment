@@ -17,13 +17,15 @@
   .tb-note { margin: 0; font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); max-width: 80ch; }
   .tb-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 26rem), 1fr)); gap: var(--cds-gap-md); }
   .tb-controls { display: flex; flex-wrap: wrap; gap: var(--cds-gap-sm) var(--cds-gap-md); align-items: center; }
-  .tb-seg { display: inline-flex; border: 1px solid var(--color-border-line); border-radius: 999px; overflow: hidden; }
+  .tb-seg { display: inline-flex; border: 1px solid var(--color-border-line); border-radius: 6px; overflow: hidden; }
+  .tb-seg.tb-wrap { flex-wrap: wrap; gap: 4px; border: 0; border-radius: 0; overflow: visible; }
+  .tb-seg.tb-wrap button { border: 1px solid var(--color-border-line); border-radius: 6px; }
   .tb-seg button, .tb-chip, .tb-play { font: inherit; font-size: var(--cds-font-size-caption); background: transparent; color: var(--color-fg); border: 0; padding: .35rem .75rem; cursor: pointer; }
   .tb-seg button[aria-pressed="true"] { background: var(--color-fg); color: var(--color-bg); }
-  .tb-chip { border: 1px solid var(--color-border-line); border-radius: 999px; display: inline-flex; align-items: center; gap: .4rem; }
+  .tb-chip { border: 1px solid var(--color-border-line); border-radius: 6px; display: inline-flex; align-items: center; gap: .4rem; }
   .tb-chip[aria-pressed="false"] { opacity: .45; }
   .tb-chip i { width: .7rem; height: .7rem; border-radius: 50%; display: inline-block; }
-  .tb-play { border: 1px solid var(--color-border-line); border-radius: 999px; min-width: 5.5rem; }
+  .tb-play { border: 1px solid var(--color-border-line); border-radius: 6px; min-width: 5.5rem; }
   .tb-seg button:focus-visible, .tb-chip:focus-visible, .tb-play:focus-visible, .tb-time:focus-visible, .tb-select:focus-visible { outline: 2px solid var(--color-fg); outline-offset: 2px; }
   .tb-select { font: inherit; font-size: var(--cds-font-size-caption); padding: .3rem .5rem; border-radius: var(--cds-radius); border: 1px solid var(--color-border-line); background: var(--color-bg); color: var(--color-fg); }
   .tb-time { flex: 1 1 12rem; min-width: 8rem; accent-color: var(--color-fg); }
@@ -50,7 +52,7 @@
 
   .lv-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--cds-gap-sm); }
   .lv-head h2 { margin: 0; }
-  .lv-badge { font-size: var(--cds-font-size-caption); border-radius: 999px; padding: .1rem .6rem; border: 1px solid var(--color-border-line); color: var(--color-fg-muted); }
+  .lv-badge { font-size: var(--cds-font-size-caption); border-radius: 6px; padding: .1rem .6rem; border: 1px solid var(--color-border-line); color: var(--color-fg-muted); }
   .lv-badge[data-s="running"] { color: var(--color-warn); border-color: var(--color-warn); }
   .lv-badge[data-s="done"] { color: var(--color-ok); border-color: var(--color-ok); }
   .lv-now { display: grid; gap: var(--cds-gap-md); }
@@ -87,7 +89,7 @@
   .lv-design { display: grid; gap: var(--cds-gap-md); }
   .lv-flow { display: flex; flex-wrap: wrap; align-items: center; gap: var(--cds-gap-sm); }
   .lv-flow > b { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); font-weight: var(--cds-font-weight-medium); min-width: 6rem; }
-  .lv-chip { display: inline-flex; align-items: center; gap: 6px; padding: .3rem .7rem; border-radius: 999px; border: 1.5px solid currentColor; font-size: var(--cds-font-size-caption); }
+  .lv-chip { display: inline-flex; align-items: center; gap: 6px; padding: .3rem .7rem; border-radius: 6px; border: 1.5px solid currentColor; font-size: var(--cds-font-size-caption); }
   .lv-vs { font-family: var(--font-anthropic-serif); color: var(--color-fg-muted); }
   .lv-arrow { color: var(--color-fg-muted); font-size: 1.2rem; text-align: center; }
   .lv-thumbs { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 11rem), 1fr)); gap: var(--cds-gap-sm); }
@@ -119,7 +121,7 @@
   .tb-table td { padding: .35rem .5rem; border-bottom: 1px solid var(--color-border-line); vertical-align: top; }
   .tb-table td.tb-mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; word-break: break-all; }
   .tb-history { margin: 0; padding: var(--cds-pad-sm, .5rem) var(--cds-pad-md, .75rem); border-left: 3px solid var(--color-warn); background: var(--color-panel); color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); border-radius: var(--cds-radius); }
-  .tb-pill { display: inline-block; padding: .05rem .5rem; border-radius: 999px; font-size: var(--cds-font-size-caption); border: 1px solid currentColor; }
+  .tb-pill { display: inline-block; padding: .05rem .5rem; border-radius: 6px; font-size: var(--cds-font-size-caption); border: 1px solid currentColor; }
   .tb-failed { display: flex; align-items: center; justify-content: center; gap: .5rem; color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); min-height: inherit; }
   .tb-failed::before { content: ""; width: .375rem; height: .375rem; border-radius: 50%; background: var(--color-bad); }
   [data-dash-source-state=empty] { color: transparent; }
@@ -133,7 +135,7 @@
   /* v2: tabs and the readiness page */
   .tb-sub { margin: 0; font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
   .tb-tabs { display: flex; flex-wrap: wrap; gap: var(--cds-gap-xs); border-bottom: 1px solid var(--color-border-line); padding-bottom: var(--cds-pad-xs); }
-  .tb-tab { font: inherit; font-size: var(--cds-font-size-body); background: transparent; color: var(--color-fg-muted); border: 0; border-radius: 999px; padding: .4rem .9rem; cursor: pointer; }
+  .tb-tab { font: inherit; font-size: var(--cds-font-size-body); background: transparent; color: var(--color-fg-muted); border: 0; border-radius: 6px; padding: .4rem .9rem; cursor: pointer; }
   .tb-tab[aria-selected="true"] { background: var(--color-fg); color: var(--color-bg); }
   .tb-tab:focus-visible { outline: 2px solid var(--color-fg); outline-offset: 2px; }
   .tb-panel { display: grid; gap: var(--cds-gap-lg); }
@@ -430,7 +432,7 @@
     <section class="tb-card" id="col-why">
       <h2>ทีละคลิป: ภาพจริง กับค่าสีที่วัดได้</h2>
       <p class="tb-note">ภาพตัดจากเฟรมจริง ใต้ภาพ = Cb/Cr ลำตัวที่วัดได้ (128 = เทา) · กราฟขวา = Cb/Cr ทุกกรอบในคลิป แยกสีตามคน · คลิปที่มีคนเดียว: จุดเทาจาง = คนจากคลิปอื่น ไว้เทียบ · YOLO ของโปรเจกต์ 10 fps · สีลำตัววัดแบบเดียวกับ ros2_yolo_live · ติดป้ายด้วยตา</p>
-      <div class="tb-controls"><div class="tb-seg" role="group" aria-label="คลิป" id="tb-clipbtns" style="flex-wrap:wrap"></div></div>
+      <div class="tb-controls"><div class="tb-seg tb-wrap" role="group" aria-label="คลิป" id="tb-clipbtns"></div></div>
       <h3 id="tb-cliptitle" style="margin:4px 0"></h3>
       <p class="tb-note" id="tb-clipnote"></p>
       <div class="tb-grid">
@@ -447,7 +449,7 @@
       <p class="tb-note">AUC = โอกาสที่กรอบของเป้าจะ "ใกล้" โมเดลสีของ gate มากกว่ากรอบของคนอื่น · 1.0 = แยกได้ทุกครั้ง · 0.5 = เท่าเดาสุ่ม · ต่ำกว่า 0.5 = สีพาไปหาคนผิดมากกว่าคนถูก · คนอื่น = คนในคลิปเดียวกัน หรือคนจากคลิปอื่นสำหรับคลิปที่มีคนเดียว · ใช้สีอย่างเดียว ไม่ใช้มุมและระยะ · แบบผสม = histogram หนึ่งในสี่ + Cb/Cr (ที่ใช้ใน gate)</p>
       <div class="tb-chart tb-colheld dash-skeleton" id="tb-colsepall" data-source="colour_separability"></div>
       <h3 style="margin:16px 0 4px">ดูละเอียดทีละคลิป</h3>
-      <div class="tb-controls"><div class="tb-seg" role="group" aria-label="คลิป" id="tb-colsepbtns" style="flex-wrap:wrap"></div></div>
+      <div class="tb-controls"><div class="tb-seg tb-wrap" role="group" aria-label="คลิป" id="tb-colsepbtns"></div></div>
       <p class="tb-note" id="tb-colsepverdict"></p>
       <div class="tb-grid">
         <div>

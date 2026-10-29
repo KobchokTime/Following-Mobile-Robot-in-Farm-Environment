@@ -1525,3 +1525,6 @@ Earlier history: `history-2026-10-16.md`.
 ## 2026-10-29 23:04 — Dashboard: every tab dated, current code shown everywhere
 - User asked that no tab lag behind. New dataset `current_runs` (`tools/dashboard/live/gen_current.py`, from the running whole-twin baseline on hub `5c72c4d`): a "ทุกฉาก ด้วยโค้ดปัจจุบัน" card on the ready, solo, identity and colour tabs, a first KPI and a takeaway line built from it. Older cards say their date (25 Oct solo, Arena 3 24 Oct, colour 26–27 Oct); replay, filter and arena tabs carry a history banner. Ready tab open items gain E4b.
 - Published page v26 and `current_runs` v1 (45 of 100 runs so far, 43 pass); it will be refreshed when the baseline ends. Live tab, unit tests (173/173) and CI were refreshed earlier from hub `5c72c4d`.
+
+## 2026-10-29 23:09 — Dashboard: no pill shapes
+- The clip selector on the colour tab wraps to three lines inside a 999px-radius outline, so it rendered as a large oval that clipped the selected button. All controls now use a 6px radius (segments, chips, tabs, badges, status pills); the two clip selectors (`tb-wrap`) drop the shared outline and border each button. Legend dots stay round. Published page v27.
