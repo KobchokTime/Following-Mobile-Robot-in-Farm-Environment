@@ -268,6 +268,7 @@ class FollowStopNode(Node):
         self.avoid_min_speed   = float(self.get_parameter('avoid_min_speed_mps').value)
         self.avoid_horizon     = float(self.get_parameter('avoid_horizon_m').value)
         self.avoid_k           = None   # curvature of the arc being taken around an obstacle
+        self.last_clearance    = math.inf  # corridor clearance of the last command, for the [MOVE] line
         self.moving_cmd        = None   # last command sent while moving, re-checked on every scan
         self.moving_target     = None   # (x, y, time) of the target point that command was checked with
 
@@ -319,7 +320,7 @@ class FollowStopNode(Node):
             return
         tgt = self.moving_target
         target_xy = tgt[:2] if tgt is not None and self.scan_time - tgt[2] <= self.scan_max_age else None
-        capped = self.obstacle_limited(cmd.linear.x, target_xy, cmd.angular.z)
+        capped = self.obstacle_limited(cmd.linear.x, target_xy, cmd.angular.z, swerve_k=self.avoid_k)
         if abs(capped) < abs(cmd.linear.x):
             twist = Twist()
             twist.linear.x = capped
@@ -335,18 +336,28 @@ class FollowStopNode(Node):
         if target_xy is not None:
             self.moving_target = (target_xy[0], target_xy[1], now)
 
-    def obstacle_limited(self, linear_x, target_xy, angular_z=0.0):
-        """linear_x capped by the corridor clearance; a stale or missing scan stops forward and reverse motion."""
+    def obstacle_limited(self, linear_x, target_xy, angular_z=0.0, swerve_k=None):
+        """linear_x capped by the corridor clearance; a stale or missing scan stops forward and reverse motion.
+        swerve_k: the command is a swerve round an obstacle; check the swerve's own path, which turns back,
+        not a circle that keeps turning into what it is going round."""
         if not self.obstacle_stop or linear_x == 0.0:
             return linear_x
         now = self.get_clock().now().nanoseconds / 1e9
         fresh = self.scan_time is not None and 0.0 <= now - self.scan_time <= self.scan_max_age
         direction = 1.0 if linear_x > 0.0 else -1.0
-        curvature = angular_z / linear_x if abs(linear_x) > 0.05 else 0.0
-        clearance = corridor_clearance(self.scan_xy, self.obstacle_half_w, direction,
-                                       target_xy, self.obstacle_excl, curvature) if fresh else 0.0
+        # a slow start with a turn is a tight arc; past 2/m treat it as straight (a near spin, not a path)
+        curvature = angular_z / linear_x if abs(linear_x) > 0.05 and abs(angular_z / linear_x) <= 2.0 else 0.0
+        if not fresh:
+            clearance = 0.0
+        elif swerve_k is not None and direction > 0.0:
+            clearance = path_clearance(self.scan_xy, self.obstacle_half_w,
+                                       swerve_path(swerve_k, horizon_m=self.avoid_horizon), target_xy, self.obstacle_excl)
+        else:
+            clearance = corridor_clearance(self.scan_xy, self.obstacle_half_w, direction,
+                                           target_xy, self.obstacle_excl, curvature)
         cap = obstacle_speed_cap(clearance, self.obstacle_stop_m, self.max_decel, self.latency_s,
                                  abs(self.v_wheels))
+        self.last_clearance = clearance
         capped = abs(linear_x) > cap
         if capped != self.obstacle_capped:
             self.get_logger().info(f"[OBST] {'on' if capped else 'off'} clearance={clearance:.2f} m"
@@ -359,11 +370,13 @@ class FollowStopNode(Node):
         blocked within avoid_horizon_m takes the arc with the most free path that keeps the target in view."""
         now = self.get_clock().now().nanoseconds / 1e9
         fresh = self.scan_time is not None and 0.0 <= now - self.scan_time <= self.scan_max_age
-        if self.obstacle_stop and self.obstacle_avoid and fresh and linear_x > self.avoid_min_speed:
+        # also from a near stop: the speed controller ramps up from the last (capped) command, so a robot held
+        # beside an obstacle would otherwise never ask for enough speed to go round it (pass_by s4)
+        if self.obstacle_stop and self.obstacle_avoid and fresh and linear_x > 0.0:
             clear = lambda k: path_clearance(self.scan_xy, self.obstacle_half_w,
                                              swerve_path(k, horizon_m=self.avoid_horizon),
                                              target_xy, self.obstacle_excl)
-            k_want = angular_z / linear_x
+            k_want = max(-2.0, min(2.0, angular_z / max(linear_x, self.avoid_min_speed)))
             c_want = path_clearance(self.scan_xy, self.obstacle_half_w,
                                     swerve_path(k_want, swerve_m=self.avoid_horizon, horizon_m=self.avoid_horizon),
                                     target_xy, self.obstacle_excl)
@@ -373,7 +386,7 @@ class FollowStopNode(Node):
             # path is free again, so the robot does not swerve and straighten on alternate frames
             if arc is not None and arc[1] > c_want + (0.0 if self.avoid_k is not None else 0.3):
                 k = arc[0]
-                v = linear_x
+                v = max(linear_x, self.avoid_min_speed)
                 if abs(k * v) > self.angular_limit:
                     v = self.angular_limit / abs(k)
                 if v >= self.avoid_min_speed:
@@ -381,7 +394,7 @@ class FollowStopNode(Node):
                         self.get_logger().info(f"[AVOID] on k={k:+.2f}/m free={arc[1]:.2f} m "
                                                f"(wanted {c_want:.2f} m)")
                     self.avoid_k = k
-                    return self.obstacle_limited(v, target_xy, k * v), k * v
+                    return self.obstacle_limited(v, target_xy, k * v, swerve_k=k), k * v
         if self.avoid_k is not None:
             self.get_logger().info("[AVOID] off")
             self.avoid_k = None
@@ -521,6 +534,7 @@ class FollowStopNode(Node):
             f"sec_prev={self.prev_sector} sec_now={sector} "
             f"P={P_fused_smooth:.2f} edge_cnt={self.edge_counter} ff={self.speed_ff:.2f} "
             f"→ v=({linear_x:.2f}, {angular_z:.2f})"
+            + (f" clr={self.last_clearance:.2f}" if self.obstacle_stop and math.isfinite(self.last_clearance) else "")
         )
 
     # ==================================================

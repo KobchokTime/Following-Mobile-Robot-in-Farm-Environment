@@ -151,6 +151,19 @@ class AvoidTest(unittest.TestCase):
         node.cb_fused(msg)
         self.assertEqual(node.pub.messages[-1].angular.z, 0.0)
 
+    def test_a_robot_held_beside_an_obstacle_can_start_again(self):
+        # pass_by s4: the robot stood beside the worker (left) while the target walked on 11 deg left. The
+        # speed ramp from a stop asks for 0.05 m/s with a left turn, a tight arc into the worker, which the
+        # stop held at zero for 5 s. Avoid now starts from a near stop and goes straight on past them.
+        node = M.FollowStopNode()
+        tgt = (1.5 * math.cos(math.radians(11)), 1.5 * math.sin(math.radians(11)))
+        node.cb_scan(scan(person(0.07, 0.54) + person(tgt[0] + 0.2, tgt[1])))
+        v, w = node.obstacle_command(0.05, 0.2, tgt, math.radians(11))
+        self.assertGreaterEqual(v, 0.12)
+        self.assertLessEqual(w, 0.05)
+        node.obstacle_avoid = False
+        self.assertEqual(node.obstacle_command(0.05, 0.2, tgt, math.radians(11))[0], 0.05)  # nearly a spin: not held
+
 
 if __name__ == "__main__":
     unittest.main()
