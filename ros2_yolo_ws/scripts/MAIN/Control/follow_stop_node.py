@@ -369,7 +369,9 @@ class FollowStopNode(Node):
                                     target_xy, self.obstacle_excl)
             arc = avoid_arc(clear, k_want, target_bearing, self.avoid_k, self.avoid_horizon) \
                 if c_want < self.avoid_horizon else None
-            if arc is not None and arc[1] > c_want + 0.1:
+            # start only for a clearly better way round; once started, keep going round until the wanted
+            # path is free again, so the robot does not swerve and straighten on alternate frames
+            if arc is not None and arc[1] > c_want + (0.0 if self.avoid_k is not None else 0.3):
                 k = arc[0]
                 v = linear_x
                 if abs(k * v) > self.angular_limit:

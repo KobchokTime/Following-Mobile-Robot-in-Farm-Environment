@@ -181,6 +181,15 @@ OBSTACLE_SCENARIOS: Dict[str, dict] = {
                    ("bystander", False, [(0, 3.55, 0.55), (30, 3.55, 0.55)])],
         "hidden": {"bystander": [(0.0, 30.0)]},
     },
+    "pass_by": {
+        "doc": "straight: the target walks past someone the camera never detects (a worker crouched at the row), "
+               "0.42 m to the side of the target's line. A robot that keeps to the target's line touches them; "
+               "there is room on the other side to swerve (obstacle avoid).",
+        "duration_s": 22.0,
+        "people": [("target", True, [(0, 1.0, 0.0), (3, 1.0, 0.0), (15, 7.0, 0.0), (22, 7.0, 0.0)]),
+                   ("bystander", False, [(0, 4.0, 0.42), (22, 4.0, 0.42)])],
+        "hidden": {"bystander": [(0.0, 22.0)]},
+    },
 }
 
 ALL_SCENARIOS: Dict[str, dict] = {**SCENARIOS, **IDENTITY_SCENARIOS}  # frozen: the Arena 3 scorer checks runs against it
