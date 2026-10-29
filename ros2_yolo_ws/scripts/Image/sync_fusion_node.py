@@ -589,6 +589,11 @@ class SyncFusionNode(Node):
         self.assist_scan_time = self.scan_time
         if now - self.last_camera_fix > self.lidar_max:
             return None
+        if now < self.gate.ambiguous_until:
+            # someone was just near the target (two boxes, or the scan's crowd check): their cluster may have
+            # lent its range to the target's box, and following clusters would carry the track off with them
+            # (twin crossing runs). Until the window ends the camera decides alone.
+            return None
         pb, pr = self.gate._predict(now)
         found = lidar_track(self.scan_points, pb, pr, math.atan2(self.assist_dist, max(pr, 0.3)),
                             self.assist_dist, width_m=(0.05, 0.8))
