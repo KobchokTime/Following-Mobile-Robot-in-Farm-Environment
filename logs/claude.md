@@ -1535,3 +1535,7 @@ Earlier history: `history-2026-10-16.md`.
 ## 2026-10-29 23:36 — Whole-twin baseline on hub 5c72c4d: 98/100
 - Every scenario, realism, seeds 0–4: 98/100 pass, no contact. Only `zigzag` fails: seed 0 (visible 0.889, just under 0.9) and seed 1 (visible 0.472).
 - Published: `current_runs` v2 (all 100 runs), live datasets with the finished baseline.
+
+## 2026-10-29 23:45 — zigzag cause found; LiDAR assist ported (branch `claude/robot/lidar-assist2`)
+- Debug build on hub code, `zigzag` realism seeds 0–7: s2 failed (visible 0.47). Gate log: the robot was turning right at 0.5–0.7 rad/s, so the target's bearing in the image swept from −13° to +28° in 0.4 s from the robot's own rotation. The gate's prediction does not include the robot's turn, so every box cost 11–36 and was rejected. LiDAR edge tracking did not start either (last bearing −13°, prediction −17°, both inside the 27° edge). The robot kept turning away and stopped.
+- The LiDAR assist draft (`2eb6e9d`) addresses this: each scan moves the track to the target's own cluster, measured in the robot's current frame. Cherry-picked onto `claude/workspace` `e22307e`; 176 tests pass. Whole-twin run with the assist on to follow.

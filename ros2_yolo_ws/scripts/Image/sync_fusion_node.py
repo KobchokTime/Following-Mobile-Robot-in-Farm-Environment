@@ -441,6 +441,10 @@ class SyncFusionNode(Node):
         # the scan tells the gate when someone else is near the target, whatever order the boxes come in
         self.declare_parameter('crowd_from_scan', True)
         self.declare_parameter('crowd_radius_m', 0.5)  # only returns this close to the predicted target count
+        # each fresh scan moves the target track to the target's own cluster when nobody else is near it,
+        # so a fast side step does not leave the camera gate behind (side_step twin failures)
+        self.declare_parameter('lidar_assist', True)
+        self.declare_parameter('lidar_assist_dist_m', 0.35)  # the cluster must be this close to the prediction
         # TargetGate tunables, so an experiment's -p really reaches the gate (undeclared -p are ignored)
         for name, value in GATE_PARAMS.items():
             self.declare_parameter(name, value)
@@ -474,9 +478,13 @@ class SyncFusionNode(Node):
         self.crowd_from_scan = bool(self.get_parameter('crowd_from_scan').value)
         self.crowd_radius = float(self.get_parameter('crowd_radius_m').value)
         self.crowd_logged = False  # last [CROWD] state written to the log
+        self.lidar_assist = bool(self.get_parameter('lidar_assist').value)
+        self.assist_dist = float(self.get_parameter('lidar_assist_dist_m').value)
+        self.assist_scan_time = None  # the scan the last assist used, so each scan is used once
         # the effective settings, so a run's log shows what it actually ran with
         self.get_logger().info('[GATE] ' + ' '.join(f'{k}={v:g}' for k, v in sorted(
-            {**gate_args, 'crowd_from_scan': float(self.crowd_from_scan), 'crowd_radius_m': self.crowd_radius}.items())))
+            {**gate_args, 'crowd_from_scan': float(self.crowd_from_scan), 'crowd_radius_m': self.crowd_radius,
+             'lidar_assist': float(self.lidar_assist), 'lidar_assist_dist_m': self.assist_dist}.items())))
         self.last_camera_fix = None  # time of the last camera detection accepted as the target
         self.last_camera_bearing = 0.0
         self.edge_rad = math.radians(self.camera_hfov_deg / 2.0 - float(self.get_parameter('lidar_edge_deg').value))
@@ -510,7 +518,7 @@ class SyncFusionNode(Node):
 
         # ---------- timers ----------
         self.gc_timer = self.create_timer(0.5, self.gc_buffers)
-        self.track_timer = self.create_timer(0.1, self.track_with_lidar)
+        self.track_timer = self.create_timer(0.1, self.on_track_timer)
         self.sync_count = 0
 
         self.get_logger().info(
@@ -554,7 +562,42 @@ class SyncFusionNode(Node):
         self.scan_points = pts
         self.scan_time = self.now_sec()
 
-    def track_with_lidar(self):
+    def on_track_timer(self):
+        self.track_with_lidar(self.assist_with_lidar())
+
+    def assist_with_lidar(self):
+        """Move the target track to the target's own LiDAR cluster, once per fresh scan.
+
+        The camera track lags a fast side step (0.25 m at 0.7 m is 20 deg in 0.3 s), so the next box falls
+        outside the gate even though the LiDAR saw every step. Only a person-sized cluster within
+        lidar_assist_dist_m of the prediction is taken, and only when the scan shows nobody else near the
+        target (scan_crowded), so a passer-by is never taken this way; with someone close the camera
+        decides alone, as before. Not more than lidar_track_max_s after the last camera fix.
+        Returns (bearing, range) of the cluster used, or None.
+        """
+        if not (self.use_gate and self.lidar_assist and self.gate.locked and self.last_camera_fix is not None):
+            return None
+        now = self.now_sec()
+        if not scan_is_fresh(now, self.scan_time, self.scan_max_age) or self.scan_time == self.assist_scan_time:
+            return None
+        self.assist_scan_time = self.scan_time
+        if now - self.last_camera_fix > self.lidar_max:
+            return None
+        pb, pr = self.gate._predict(now)
+        found = lidar_track(self.scan_points, pb, pr, math.atan2(self.assist_dist, max(pr, 0.3)),
+                            self.assist_dist, width_m=(0.05, 0.8))
+        if found is None:
+            return None
+        bearing, rng = found
+        px, py = pr * math.cos(pb), pr * math.sin(pb)
+        if math.hypot(rng * math.cos(bearing) - px, rng * math.sin(bearing) - py) > self.assist_dist:
+            return None
+        if scan_crowded(self.scan_points, bearing, rng, pb, pr, self.crowd_radius):
+            return None
+        self.gate.accept_lidar(now, bearing, rng)
+        return found
+
+    def track_with_lidar(self, assisted=None):
         """The target stepped out of the camera's view: keep it with the LiDAR and turn towards it.
 
         Only when it was last seen near the image edge. If it vanished from the middle of the image
@@ -572,11 +615,14 @@ class SyncFusionNode(Node):
             return
         if not scan_is_fresh(now, self.scan_time, self.scan_max_age):
             return  # no recent scan: do not steer by an old one; the controller's normal stop applies
-        found = lidar_track(self.scan_points, pb, pr, math.radians(25.0), 0.5)
-        if found is None:
-            return
-        bearing, rng = found
-        self.gate.accept_lidar(now, bearing, rng)
+        if assisted is not None:
+            bearing, rng = assisted  # the assist already moved the track to the target's own cluster
+        else:
+            found = lidar_track(self.scan_points, pb, pr, math.radians(25.0), 0.5)
+            if found is None:
+                return
+            bearing, rng = found
+            self.gate.accept_lidar(now, bearing, rng)
         # the image edge on the target's side: the controller turns that way at its full turn rate
         cx = 0 if bearing > 0 else self.image_width - 1
         sector = 0 if bearing > 0 else 8
