@@ -1513,3 +1513,6 @@ Earlier history: `history-2026-10-16.md`.
 - Review against `zlac_joystick_bridge.py` and `follow_bringup.launch.py`: no e-stop claim, isolated field and spotters, operator stops the bringup, shutdown writes zero directly then `0x200E=7` (software only): correct. Change requested: "within 1 s of the last `/cmd_vel`" is exact only in `legacy`; in the default `mps` mode the target goes to zero after 1 s and the output ramps at 1.0 m/s² (about 1.6 s total at 0.5 m/s, 2.5 s at 1.4 m/s). T17 stays open (owner Claude workspace).
 - E-stop grep over `docs/` and other `.md` files: only `docs/PLAN.md` lines 13/16/18, which state the no-E-stop decision. No other contradiction.
 - `HANDOFF.md`: hub and `claude/workspace` rows, item 18 note, item 19 (T17); lock released.
+
+## 2026-10-29 22:17 — T17: E4b stop timing corrected
+- E4b now says the bridge writes zero at once on shutdown, and without `/cmd_vel` starts ramping to zero 1 s after the last command at 1 m/s² (about 1.5 s to stop at 0.5 m/s, 2.5 s at 1.4 m/s in `mps` mode; `legacy` zeroes at once). Checked in `zlac_joystick_bridge.py` `update_loop`.
