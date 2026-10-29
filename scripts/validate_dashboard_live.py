@@ -20,6 +20,7 @@ ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_REGISTRY = ROOT / "tools/dashboard/live/registry.json"
 DATASETS = ("live_experiments", "live_runs", "live_tracks", "past_tracks", "live_scenarios")
 MAX_BYTES = 8_000_000
+WARN_PAST_BYTES = 6_500_000
 ID_RE = re.compile(r"[a-z0-9_]+\Z")
 UTC_RE = re.compile(r"\d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ\Z")
 DONE = ("pass", "fail")
@@ -312,16 +313,32 @@ def _scenarios(rows, expected: set, errors: list[str]) -> None:
         errors.append(f"live_scenarios: unknown scenario {name}")
 
 
-def validate(registry_path: Path, output_dir: Path) -> list[str]:
-    """Return all detected schema and cross-file errors; no network or ROS needed."""
+def validate(registry_path: Path, output_dir: Path, warnings: list[str] | None = None) -> list[str]:
+    """Return schema errors; optionally collect non-failing publication warnings."""
     errors = []
     registry_rows = _load(registry_path, errors)
     if registry_rows is None:
         return errors
+    if warnings is not None and isinstance(registry_rows, list) and not any(
+        isinstance(exp, dict) and exp.get("live") is True for exp in registry_rows
+    ):
+        warnings.append("registry: no experiment has live: true; the live view will be empty")
     registry, expected, scenarios = _registry(registry_rows, errors)
+    if warnings is not None:
+        try:
+            past_size = (output_dir / "past_tracks.json").stat().st_size
+            if past_size > WARN_PAST_BYTES:
+                warnings.append(
+                    f"past_tracks.json: {past_size} bytes exceeds the {WARN_PAST_BYTES}-byte "
+                    f"warning threshold (hard limit {MAX_BYTES} bytes)"
+                )
+        except OSError:
+            pass  # _load reports missing or unreadable files as validation errors.
     data = {name: _load(output_dir / f"{name}.json", errors, limit=True) for name in DATASETS}
     if any(value is None for value in data.values()):
         return errors
+    if warnings is not None and isinstance(data["live_tracks"], list) and not data["live_tracks"]:
+        warnings.append("live_tracks.json: no track samples; the live replay will be empty")
     runs = _run_rows(data["live_runs"], expected, errors)
     _experiment_rows(data["live_experiments"], registry, runs, errors)
     _tracks(data["live_tracks"], "live_tracks", expected, runs, errors)
@@ -335,7 +352,10 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("output_dir", type=Path)
     parser.add_argument("--registry", type=Path, default=DEFAULT_REGISTRY)
     args = parser.parse_args(argv)
-    errors = validate(args.registry, args.output_dir)
+    warnings: list[str] = []
+    errors = validate(args.registry, args.output_dir, warnings)
+    for warning in warnings:
+        print(f"[WARN] {warning}")
     for error in errors:
         print(f"[FAIL] {error}")
     if errors:
