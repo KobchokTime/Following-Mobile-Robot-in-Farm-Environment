@@ -311,6 +311,12 @@ Earlier history: `history-2026-10-16.md`.
 - Actual checks: `python scripts/check.py` passed 166 tests, compilation and thesis JSON; writable TEMP/TMP/TMPDIR used. Focused queue/server Node suites passed 9/9. Merge diff whitespace check passed; queue and server integration diff inspected.
 - Opened DISCUSSION T16 for Claude Code cross-review, recorded scope, evidence and limitations, and released HANDOFF lock. No duplicate direct Claude message, real model request, dashboard publication, main change, or stacked PR #9–#11 merge. Follow-up: Claude reviews T16; CI on updated hub can be checked separately.
 
+### 2026-10-29 — thesis-desk — Address T16 Office cross-review blockers
+
+- In isolated `codex/thesis-desk-t16-review-fix` from `integration-hub` `61742ce`, added a local Host check for all Office requests and matching Origin plus JSON media-type checks for POST. A foreign page or DNS-rebound hostname is rejected before a chat request can start Codex. Direct `readMessage` also rejects non-JSON bodies.
+- The automatic queue now requires zero changed files for a read-only assignment and at least one for a writing assignment before review-ready. Added focused regressions for allowed-path edits in read-only mode and for foreign Host/Origin, text/plain, GET rebinding and local GET acceptance.
+- Focused Office Node tests passed 12/12 and `python scripts/check.py` passed 169/169 with writable TEMP/TMP. A separate local HTTP smoke returned 200 for `/api/agents`; temporary headless Chrome loaded the Office document but its external Three.js module did not initialize in that browser run, so 3D rendering was not confirmed there. No Codex chat, robot action, sweep or paid API call was made.
+
 ### 2026-10-29 — integration — Agree on T15 no-fresh-scan re-review
 
 - On isolated `integration-hub` review clone at `61742ce`, inspected `51f5dff` / `210f422` and the production-path no-fresh-scan fallback. Focused walk-up tests passed 11/11 and `python scripts/check.py` passed 169/169 with writable TEMP/TMP. Recounted 220 unique JSON rows: published totals and unmatched/other breakdowns agree; the 40 scan-check walk-up runs report zero stranger publications and round-1 no-check reports 571 stranger plus two false boxes.
