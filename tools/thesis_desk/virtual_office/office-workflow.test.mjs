@@ -117,3 +117,23 @@ test("a failed event append does not poison later Office actions", async () => {
     await removeTestFolder(folder);
   }
 });
+
+test("meeting rotation eventually includes idle desk agents", async () => {
+  const folder = await mkdtemp(join(tmpdir(), "office-meeting-rotation-"));
+  try {
+    const flow = createOfficeWorkflow({ eventFile: join(folder, "events.jsonl"),
+      runSeat: async () => ({ ok: true }), runMeeting: async () => ({ ok: true }),
+    });
+    const groups = [];
+    for (let round = 0; round < 4; round++) {
+      groups.push((await flow.startMeeting()).action.agents);
+      for (let attempt = 0; attempt < 50; attempt++) {
+        if ((await flow.list())[0].state === "completed") break;
+        await new Promise((resolve) => setTimeout(resolve, 10));
+      }
+    }
+    assert.deepEqual(groups[3], ["krit", "mew", "boss"]);
+  } finally {
+    await removeTestFolder(folder);
+  }
+});

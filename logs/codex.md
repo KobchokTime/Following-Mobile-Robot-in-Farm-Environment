@@ -325,3 +325,8 @@ Earlier history: `history-2026-10-16.md`.
 
 - Pushed `codex/thesis-desk-office-active-work` at `c55c182` and opened draft PR #13 against `integration-hub`. Attached the PR to this task. Its current CI head must be checked before integration; Claude cross-review remains pending.
 - The isolated preview at `127.0.0.1:8769` was restarted on the committed server code. Its saved seat and meeting results survived restart and the desks remained visible. The main checkout and dashboard artifact were not changed.
+
+### 2026-10-29 — thesis-desk — Include every idle agent in meeting rotation
+
+- Follow-up on draft PR #13: the meeting rotation now reaches Krit, Mew and Boss after the other nine agents, so a free desk agent can also join. Added an offline four-round rotation test.
+- Focused Office Node tests passed 16/16, `python scripts/check.py` passed 166/166, and `git diff --check` passed. No new model run or sweep was needed for this change.

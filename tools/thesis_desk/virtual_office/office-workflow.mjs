@@ -3,7 +3,8 @@ import { dirname } from "node:path";
 import { randomUUID } from "node:crypto";
 
 export const seatAgentIds = ["krit", "mew", "boss"];
-export const meetingAgentIds = ["natee", "fah", "dao", "min", "palm", "ploy", "tee", "june", "art"];
+export const meetingAgentIds = ["natee", "fah", "dao", "min", "palm", "ploy", "tee", "june", "art",
+  "krit", "mew", "boss"];
 
 export function selectIdle(ids, actions, limit = 3, offset = 0) {
   const busy = new Set(actions.filter((action) => action.state === "running")
