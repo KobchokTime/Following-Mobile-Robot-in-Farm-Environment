@@ -1554,3 +1554,9 @@ Earlier history: `history-2026-10-16.md`.
 - User asked to continue with avoidance. New branch merges LiDAR assist (`lidar-assist2`) and the obstacle stop (`c0be756`).
 - follow_stop_node: when the path is blocked within 1.6 m, score swerves (k for 0.8 m, -k for 0.8 m, then straight) by free path, minus a turning cost; a swerve that turns more than 0.8 rad from the target is not taken. `obstacle_avoid:=false` keeps the stop alone. 192 tests pass.
 - Twin: `blind_corner` avoid off/on s0–4 queued after the LiDAR-assist full run.
+
+## 2026-10-30 02:18 — LiDAR assist full run; assist fix; avoid round 2
+- Assist full run (`3cae4f3`, 20 scenarios × s0–4, realism): 91/100 vs baseline 98/100. zigzag fixed (both baseline failures pass, 5/5). crossing s1–4 failed with contacts and shade_crossing s0–4 failed: a passer-by covering the target from the LiDAR was taken as the target's cluster.
+- Fix `9cb32f2` (lidar-assist2): a cluster 0.2 m nearer than the predicted range, or farther from the last fix than 1.5 m/s allows, is not taken. Test added; 177 pass. Merged into `claude/robot/avoid`.
+- Avoid round 1 (blind_corner): no contacts, but swerve/straighten alternated each frame and the corner still lost the target (needs going wide, beyond a reactive swerve).
+- `f1e1511`: swerve hysteresis; new scenario `pass_by` (hidden worker 0.42 m off a straight line). Running pass_by off/on s0–4 and blind_corner with avoid s0–4.
