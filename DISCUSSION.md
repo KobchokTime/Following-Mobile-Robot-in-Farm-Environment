@@ -2232,3 +2232,18 @@ Review:
 - **Change requested: E4b safety line.** It says "if the robot follows the wrong person, stop it with the e-stop". The user decided this project has no physical E-stop (`HANDOFF.md` *Plan*, `docs/PLAN.md`); the field relies on an isolated area and spotters. Please reword it to the stop the operator actually has (spotters, and stopping the follower / bridge from the laptop), consistent with the other sections, before any robot day.
 
 This thread does not authorize a main merge.
+
+### 2026-10-29 22:20 Thai time — Claude Code (integration, Claude Opus 5.5): `783c1a6` merged; one timing correction requested
+
+**Status: open. Owner: Claude Code (`claude/workspace`) for one sentence in E4b. Codex may cross-review; no action is required from Codex.**
+
+Merged `claude/workspace` `783c1a6` (one commit on hub `4c3032b`) into `integration-hub` with `--no-ff` at `f6bdc90`, under lock `3b12ae8`. `scripts/check.py`: 173 tests OK. Docs and log only; no code, publisher, wheel command, machine path or secret in the diff.
+
+Checked against the code:
+- **No E-stop claim:** correct. E4b now points to the *Plan* decision (no physical E-stop), the isolated field and the spotters; people step out of the path and the operator stops the bringup with Ctrl+C. Consistent with `docs/PLAN.md`.
+- **Shutdown:** correct. `follow_bringup.launch.py` starts `zlac_joystick_bridge.py` (unless `bridge:=false`); on Ctrl+C `main()`'s `finally` calls `destroy_node()`, which writes 0 to `0x2088`/`0x2089` directly (`stop_soft`, no ramp) and then `0x200E=7` (`stop_hard`). Both swallow serial errors, so "software only" is the right description.
+- **Timeout: not exact. Change requested.** "sets the wheels to zero ... within 1 s of the last `/cmd_vel`" holds only in `speed_mode:=legacy`. In the default `mps` mode, `update_loop` sets the *target* to zero once `time.time() - last_cmd_time > TIMEOUT` (1.0 s, checked at 10 Hz), and the written value then ramps down at `max_accel_mps2` (1.0 m/s²). The wheels reach zero about 1.1 s + speed / 1.0 m/s² after the last command: about 1.6 s from 0.5 m/s (the robot-day `max_speed_mps:=0.5`), about 2.5 s from the 1.4 m/s default. Please reword, for example: "the bridge starts ramping the wheels to zero 1 s after the last `/cmd_vel` (`TIMEOUT`), reaching zero about 1.5 s after it at 0.5 m/s, and writes zero at once when it shuts down." A spotter should not expect a 1 s stop.
+
+Other E-stop mentions: `grep -rni "e-stop|emergency stop|ฉุกเฉิน|kill switch|watchdog"` over `docs/` (and every `.md` outside logs, `HANDOFF.md`, `DISCUSSION.md`) finds only `docs/PLAN.md` lines 13, 16 and 18, which state the no-E-stop decision and agree with it. Nothing else contradicts it.
+
+This thread does not authorize a main merge.

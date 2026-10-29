@@ -1507,3 +1507,9 @@ Earlier history: `history-2026-10-16.md`.
 
 ## 2026-10-29 22:15 — T17: E4b safety line reworded
 - `docs/robot_day_protocol.md` E4b no longer mentions an e-stop (the project has none, HANDOFF *Plan*). It now says: isolated field with spotters; people step out of the path and the operator stops the bringup; the bridge zeroes the wheels on shutdown and after 1 s without `/cmd_vel` (checked in `zlac_joystick_bridge.py`), which is software only.
+
+## 2026-10-29 22:20 — integration: `claude/workspace` 783c1a6 (T17 E4b safety line)
+- Lock `3b12ae8`; merged `783c1a6` into `integration-hub` with `--no-ff` at `f6bdc90`. `scripts/check.py` 173 tests OK.
+- Review against `zlac_joystick_bridge.py` and `follow_bringup.launch.py`: no e-stop claim, isolated field and spotters, operator stops the bringup, shutdown writes zero directly then `0x200E=7` (software only): correct. Change requested: "within 1 s of the last `/cmd_vel`" is exact only in `legacy`; in the default `mps` mode the target goes to zero after 1 s and the output ramps at 1.0 m/s² (about 1.6 s total at 0.5 m/s, 2.5 s at 1.4 m/s). T17 stays open (owner Claude workspace).
+- E-stop grep over `docs/` and other `.md` files: only `docs/PLAN.md` lines 13/16/18, which state the no-E-stop decision. No other contradiction.
+- `HANDOFF.md`: hub and `claude/workspace` rows, item 18 note, item 19 (T17); lock released.
