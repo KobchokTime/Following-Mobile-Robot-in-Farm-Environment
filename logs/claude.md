@@ -1494,3 +1494,7 @@ Earlier history: `history-2026-10-16.md`.
 ## 2026-10-29 22:10 — Dashboard refresh from hub af95e3e; past_tracks budget
 - From the hub checkout at `af95e3e`: `gen_ci.py --fetch` (60 runs, fetched 22:08 Thai, last 15: 8 success, 7 running, 0 failure) and `generate_dashboard_unit_tests.py` (169/169, clean tree). Live datasets regenerated and validated: identical to the published ones, so not re-uploaded; page unchanged. Uploaded ci_runs (v3) and unit_tests (v3), deleted the two old blobs.
 - `gen_live.py`: `fit_past_tracks` keeps `past_tracks` under 6.5 MB by thinning the oldest finished experiments from 1 Hz to 0.5 Hz, one at a time. Today's file is 5.6 MB, so the output is unchanged (byte-identical, validator PASS). New `tests/test_dashboard_past_tracks.py` (3). 172 tests pass.
+
+## 2026-10-29 22:11 — Robot-day prep for the crowd check (E4b)
+- `sync_fusion_node.py`: one `[CROWD] on t=… reason=scan|no-fresh-scan|gate` / `[CROWD] off t=…` line per change of the forced plain gate. Logging only; the gate's decisions are unchanged. Test `test_crowd_changes_are_logged_once_each`. 173 tests pass.
+- `docs/robot_day_protocol.md`: new E4b (four 30 s recordings: target alone walking and side-stepping, a pair at 0.4 m, a person joining from behind), what to read from the `[CROWD]` lines and what to change if legs read as two people.

@@ -166,6 +166,30 @@ python3 tools/robot_day/turn_check.py
   - for overlap, how far each person's mean moves.
 - **Answers:** review C1–C3, including box-crop contamination.
 
+### E4b. Does the scan tell one person from two beside the target? About 15 min
+
+- **Why:** since T15 the gate widens sideways only when the target looks alone. "Alone" comes from the
+  LiDAR: the returns within 0.5 m of where the target should be must span less than 0.55 m
+  (`scan_crowded`). The twin draws people as circles; on the robot the LiDAR plane cuts legs, which can
+  be 0.5–0.7 m apart front to back in a stride.
+- **Run:** the normal bringup with `target_gate` on. Keep the `sync_fusion_node` console log (or record
+  `/rosout`): every change prints `[CROWD] on t=… reason=scan|no-fresh-scan|gate` or `[CROWD] off t=…`.
+- **Record, 30 s each, the robot following:**
+
+  | Label | What happens | Expected |
+  |---|---|---|
+  | `e4b_alone_walk` | the target walks straight at normal pace | `[CROWD] on reason=scan` rare after the first second |
+  | `e4b_alone_sidestep` | the target walks, then steps 0.3–0.5 m sideways twice | the robot keeps them; few `on` lines |
+  | `e4b_pair_040` | a second person walks 0.4 m beside the target (shoulder to shoulder) | `on reason=scan` within about a second of them being side by side, staying on |
+  | `e4b_pair_join` | the second person walks up from behind and steps beside the target | `on` before or as they come level; the robot keeps the target |
+
+- **Output:** for each recording, the share of time `[CROWD]` is on (from the on/off times) and whether the
+  robot stayed with the target (operator note). Too much `on` when alone means legs read as two people:
+  raise the 0.55 m spread (or `crowd_radius_m` down) and say so in T15. `off` in the pair runs means
+  the check misses real pairs.
+- **Safety:** if the robot follows the wrong person, stop it with the e-stop. The plain gate is the
+  fallback in every `on` case, so a false `on` costs side steps, not a wrong pick.
+
 ### E2. Latency. No extra time
 
 The analyser computes it from every recording that has `/yolo_frame`. That topic carries the image's

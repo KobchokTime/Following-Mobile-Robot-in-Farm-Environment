@@ -44,7 +44,8 @@ class FakeNode:
         return types.SimpleNamespace(publish=lambda msg: self.published.append(list(msg.data)))
 
     def get_logger(self):
-        return types.SimpleNamespace(info=lambda *a: None, debug=lambda *a: None)
+        self.logs = getattr(self, 'logs', [])
+        return types.SimpleNamespace(info=self.logs.append, debug=lambda *a: None)
 
     def get_clock(self):
         return types.SimpleNamespace(now=lambda: types.SimpleNamespace(nanoseconds=0))
@@ -201,6 +202,19 @@ class WalkUpTest(unittest.TestCase):
         t += 1.0  # past ambiguity_window_s
         self.assertEqual(self.frame(node, t, [(0.9, 0.0)]), [True])
         self.assertEqual(self.frame(node, t + 0.1, [(0.9, -0.25)]), [True])  # the side step needs the wider gate
+
+    def test_crowd_changes_are_logged_once_each(self):
+        """Robot day E4b reads these lines: on with a reason when the plain gate is forced, off when it ends."""
+        m, node = make_node()
+        t = self.lock(node)
+        t += 1.0  # past the lock-on window
+        self.frame(node, t, [(1.0, 0.0)])
+        for k in range(3):
+            self.frame(node, t + 0.1 * (k + 1), [(1.05, -0.40), (1.0, 0.0)])
+        self.frame(node, t + 2.0, [(1.0, 0.0)])
+        crowd = [line for line in node.logs if line.startswith('[CROWD]')]
+        self.assertEqual([line.split()[1] for line in crowd], ['on', 'off', 'on', 'off'])
+        self.assertIn('reason=scan', crowd[2])
 
     def test_a_crop_row_beside_the_target_does_not_count_as_a_person(self):
         m, _ = make_node()

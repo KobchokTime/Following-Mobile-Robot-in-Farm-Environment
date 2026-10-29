@@ -473,6 +473,7 @@ class SyncFusionNode(Node):
         self.box_range_from_scan = bool(self.get_parameter('box_range_from_scan').value)
         self.crowd_from_scan = bool(self.get_parameter('crowd_from_scan').value)
         self.crowd_radius = float(self.get_parameter('crowd_radius_m').value)
+        self.crowd_logged = False  # last [CROWD] state written to the log
         # the effective settings, so a run's log shows what it actually ran with
         self.get_logger().info('[GATE] ' + ' '.join(f'{k}={v:g}' for k, v in sorted(
             {**gate_args, 'crowd_from_scan': float(self.crowd_from_scan), 'crowd_radius_m': self.crowd_radius}.items())))
@@ -623,15 +624,25 @@ class SyncFusionNode(Node):
             self.get_logger().debug(f"Skip frame: invalid LiDAR dist in sector {sector_id}")
             return
 
+        reason = 'gate'
         if self.use_gate and self.crowd_from_scan and self.gate.locked:
             if not scan_is_fresh(ty, self.scan_time, self.scan_max_age):
                 # no fresh scan (stale, missing or dated ahead): nobody can be ruled out beside the
                 # target, so keep the plain gate rather than let a stranger in (T15, Codex)
                 self.gate.note_crowded(ty)
+                reason = 'no-fresh-scan'
             else:
                 pb, pr = self.gate._predict(ty)
                 if scan_crowded(self.scan_points, bearing, dist, pb, pr, self.crowd_radius):
                     self.gate.note_crowded(ty)
+                    reason = 'scan'
+        if self.use_gate:
+            # one line each time the plain gate starts or stops being forced, for robot day (E4b)
+            crowded = self.gate.locked and ty < self.gate.ambiguous_until
+            if crowded != self.crowd_logged:
+                self.get_logger().info(f"[CROWD] {'on' if crowded else 'off'} t={ty:.2f}"
+                                       + (f" reason={reason}" if crowded else ''))
+                self.crowd_logged = crowded
 
         if self.use_gate and not self.gate.accept(ty, bearing, dist, chroma, hist):
             # another person, not the one being followed: remember them only if they are in the way
