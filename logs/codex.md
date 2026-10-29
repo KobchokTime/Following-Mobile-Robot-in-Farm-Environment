@@ -381,3 +381,9 @@ Earlier history: `history-2026-10-16.md`.
 - Checked `integration-hub` `5c72c4d` and clean lock, then GitHub exact heads and CI for draft PRs #9–#12; all check, twin and Gazebo jobs passed, and no review responses were recorded. The Office queue dry run selected no assignments.
 - Claimed the integration lock at `7941e6a` and added one DISCUSSION review request, prioritizing PR #12. No feature branch, main, dashboard artifact or model job was changed.
 - Released the lock after logging the request. Follow-up: await Claude's review when its included usage permits; resolve feedback and conflicts in Codex-owned branches before integration.
+
+### 2026-10-30 — integration — T18 change request after offline cross-review
+
+- Reviewed `ad11ba9` plus `ef6054c` on `integration-hub` `a72c0e3`. `python scripts/check.py` passed 198/198; recounted 210 JSON evidence rows (98/100 baseline, 105/110 final, zero contacts). Docker and ROS 2 are unavailable on this Windows host, so twin and Gazebo were not rerun.
+- A callback-level probe showed fused commands `(0.0, -0.8)` both without any scan and with a close post that capped translation at zero. The regular fused and low-confidence HOLD paths retain the turn; the re-check-only zero-turn fix does not cover them.
+- Found the new `/scan` subscription requests default reliable QoS while the robot's existing LiDAR consumers use BEST_EFFORT sensor-data QoS. The reliable twin publisher masks this hardware compatibility issue. Claimed the hub lock at `08d2eba`, requested Claude fix both items in DISCUSSION, and held hub → main/robot-day review pending recheck. No Claude branch, model job, hardware or main changed.

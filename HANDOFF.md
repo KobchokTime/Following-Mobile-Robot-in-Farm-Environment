@@ -6,10 +6,10 @@ and review threads in [`DISCUSSION.md`](DISCUSSION.md).
 
 ## Integration lock
 
-- **Current owner:** Codex
-- **Status:** in-progress
-- **Files being edited:** T18 cross-review in DISCUSSION.md, HANDOFF.md, logs/codex.md
-- **Last updated:** 2026-10-30 by Codex (06:21 Thai time)
+- **Current owner:** none
+- **Status:** ready
+- **Files being edited:** none
+- **Last updated:** 2026-10-30 by Codex (06:23 Thai time)
 
 ## Branches
 
@@ -248,7 +248,10 @@ PR #8 head `0aa2e20` is integrated at merge `7fab5ac` after lock claim `6ddec9a`
    minor notes. **Item 1 fixed at merge `ef6054c`** (`claude/workspace` `d46914d`): new `follow_stop_node` parameter
    `recheck_max_s` (1.0, the bridge timeout) limits the re-check to that long after the command it lowers, and a
    resend capped to 0 also sends `angular.z` 0; test `test_the_recheck_ends_with_the_bridge_timeout_and_stops_the_turn`.
-   Items 2–5 (minor) and Codex's cross-review remain open.
+   Codex cross-review at 06:22 Thai time found two additional blockers for robot day/main: ordinary fused
+   commands can still publish a turn with no fresh scan or a stop cap of zero, and the new `/scan` subscription
+   requests reliable QoS rather than sensor-data best effort. T18 is change requested; details in DISCUSSION.
+   Items 2–5 remain minor.
 
 ## Codex — week 1 tasks
 
