@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { Readable } from "node:stream";
 import { test } from "node:test";
-import { classifyModelError, codexChildEnv, loggedInWithChatGPT, readMessage, teamDelegates } from "./server.mjs";
+import { classifyModelError, codexChildEnv, handleRequest, loggedInWithChatGPT, readMessage, teamDelegates } from "./server.mjs";
 
 function response() {
   return {
@@ -11,10 +11,18 @@ function response() {
   };
 }
 
+function request(body, headers = {}) {
+  const req = Readable.from([body]);
+  req.headers = { "content-type": "application/json", ...headers };
+  req.method = "POST";
+  req.url = "/api/agents/mew/messages";
+  return req;
+}
+
 test("rejects JSON null and non-string fields without throwing", async () => {
   for (const body of ["null", "[]", "42", '{"message":{},"session":"12345678"}']) {
     const res = response();
-    assert.equal(await readMessage(Readable.from([body]), res), null);
+    assert.equal(await readMessage(request(body), res), null);
     assert.equal(res.status, 400);
     assert.ok(res.body.error);
   }
@@ -23,9 +31,52 @@ test("rejects JSON null and non-string fields without throwing", async () => {
 test("accepts a valid chat message", async () => {
   const res = response();
   const body = JSON.stringify({ message: "  hello  ", session: "session-123" });
-  assert.deepEqual(await readMessage(Readable.from([body]), res),
+  assert.deepEqual(await readMessage(request(body), res),
     { message: "hello", session: "session-123" });
   assert.equal(res.status, null);
+});
+
+test("chat parser rejects text/plain even when the body is JSON", async () => {
+  const res = response();
+  const req = request('{"message":"hello","session":"session-123"}',
+    { "content-type": "text/plain" });
+  assert.equal(await readMessage(req, res), null);
+  assert.equal(res.status, 415);
+});
+
+test("local server rejects foreign Host, foreign Origin and non-JSON POST before chat", async () => {
+  const localHost = `127.0.0.1:${process.env.PORT || 8765}`;
+  const body = '{"message":"hello","session":"session-123"}';
+  for (const [headers, status] of [
+    [{ host: `attacker.example:${process.env.PORT || 8765}` }, 403],
+    [{ host: localHost, origin: "https://evil.example" }, 403],
+    [{ host: localHost, origin: `http://localhost:${process.env.PORT || 8765}` }, 403],
+    [{ host: localHost, "content-type": "text/plain" }, 415],
+  ]) {
+    const res = response();
+    await handleRequest(request(body, headers), res);
+    assert.equal(res.status, status);
+  }
+  const res = response();
+  const valid = request(body, { host: localHost });
+  valid.method = "GET";
+  valid.url = "/api/agents";
+  await handleRequest(valid, res);
+  assert.equal(res.status, 200);
+  const rebinding = request(body, { host: `attacker.example:${process.env.PORT || 8765}` });
+  rebinding.method = "GET";
+  rebinding.url = "/api/agents";
+  const denied = response();
+  await handleRequest(rebinding, denied);
+  assert.equal(denied.status, 403);
+  const localhost = request(body, { host: `localhost:${process.env.PORT || 8765}`,
+    origin: `http://localhost:${process.env.PORT || 8765}`,
+    "content-type": "application/json; charset=utf-8" });
+  localhost.method = "GET";
+  localhost.url = "/api/agents";
+  const allowed = response();
+  await handleRequest(localhost, allowed);
+  assert.equal(allowed.status, 200);
 });
 
 test("Office chat requires ChatGPT login and strips paid API settings", () => {
