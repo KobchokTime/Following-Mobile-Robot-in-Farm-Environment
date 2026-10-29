@@ -29,18 +29,29 @@
       const response = await fetch("/api/automation", { cache: "no-store" });
       if (!response.ok) throw new Error("status unavailable");
       const data = await response.json();
+      const { formatAutomationJob } = await import("./automation-status.mjs");
       agentJobs.replaceChildren();
       if (!data.jobs.length) {
         agentJobs.textContent = "ยังไม่มีงานที่กำหนด";
         return;
       }
       for (const job of data.jobs) {
-        const row = document.createElement("p");
         const time = job.at ? new Date(job.at).toLocaleString("th-TH", {
           timeZone: "Asia/Bangkok", dateStyle: "short", timeStyle: "short",
         }) : "ยังไม่เริ่ม";
-        row.textContent = `${names[job.agent] || job.agent} · ${job.lane} · ${job.state} · ${time}` +
-          (job.branch ? ` · ${job.branch}` : "");
+        const display = formatAutomationJob(job, names[job.agent] || job.agent, time);
+        const row = document.createElement("div");
+        row.style.marginBottom = "10px";
+        const heading = document.createElement("strong");
+        heading.textContent = display.heading;
+        row.append(heading);
+        for (const line of display.details) {
+          const detail = document.createElement("div");
+          detail.className = "muted";
+          detail.style.overflowWrap = "anywhere";
+          detail.textContent = line;
+          row.append(detail);
+        }
         agentJobs.append(row);
       }
     } catch {
