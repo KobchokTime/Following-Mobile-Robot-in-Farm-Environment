@@ -1617,3 +1617,11 @@ Earlier history: `history-2026-10-16.md`.
 - Residual found (scratch probe on `1fe91f2`, test stubs): a near spin (`(0.03, −0.8)`, `(0.06, −0.8)`, `(−0.03, −0.8)`) is not checked against the spin circle and passes with a post 0.31 m beside the rear quarter; should fix before robot day (author's workspace). Notes: 0.40 m may refuse turns in narrow rows; LiDAR self-returns would refuse every turn.
 - Merged with `--no-ff` at `1fe91f2`; no conflicts; `scripts/check.py` 202 tests OK; diff scan clean (no path, secret, recording, wheel/serial command or new external URL). Twin numbers from the author (104/110, 0 contacts; `zigzag` s0–9 10/10); not re-run here.
 - `DISCUSSION.md` T18: answer with evidence and the near-spin residual; Codex asked to re-review (agree / change requested / question); thread open. `HANDOFF.md`: hub and workspace rows, item 20, robot-day note (`spin_clear_radius_m`) and checks (`/scan` best effort, spin circle), lock released. Pushed.
+
+## 2026-10-30 08:04 — T18 near-spin gap (`claude/workspace`)
+- Integration (T18, 08:02): the spin check ran only at exactly 0 m/s; a creep or an arc tighter than 2/m (treated as straight by the corridor) still turned with a post beside the rear quarter.
+- Fix: `stopped_turn` treats |v| <= 0.05 or |w/v| > 2 as a near spin; refused, the turn is dropped and the straight creep (already corridor-checked) is kept, so a robot beside someone can still edge past (pass_by s4). Test with the probe's four commands; 203 tests pass. Full twin run follows.
+
+## 2026-10-30 09:05 — full run on `f57d624`; live registry
+- 107/110, 0 contacts; baseline set 100/100; pass_by 5/5; blind_corner 2/5 (others stop, min 0.59 m). Write-up updated.
+- `tools/dashboard/live/registry.json`: experiments `lidar_avoid` (546bd57), `lidar_t18` (a4ce8a5), `lidar_spin` (f57d624, live).

@@ -60,6 +60,10 @@
   lost the target (visible 0.25) after an overshoot as the target crossed; no turn was held back at the time.
   A re-run of `zigzag` s0–9 on the same image: **10/10** (s1 passes, visible 1.0), so that failure is run-to-run
   variation, not the change. `blind_corner` 0/5 following, no contact (min 0.53 m).
+- **Near spins** (`f57d624`, integration's probe): a creep (|v| ≤ 0.05 m/s) or an arc tighter than 2/m is checked
+  against the spin circle too; refused, the turn is dropped and the corridor-checked straight creep kept. Full
+  twin run: **107/110, 0 contacts**; baseline set **100/100**; `pass_by` 5/5; `blind_corner` 2/5 (s2, s4 pass;
+  the rest stop without contact, min 0.59 m).
 - The twin publishes `/scan` reliably, so it cannot test the QoS change; check on the robot that `follow_stop`
   receives `/scan` (`[OBST]` lines appear, or `ros2 topic info /scan --verbose`).
 

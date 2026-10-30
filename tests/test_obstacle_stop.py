@@ -152,6 +152,15 @@ class StoppedTurnTest(unittest.TestCase):
         cmds = self.edge_commands(person(0.6, 0.0, r=0.06))  # a post ahead, outside the 0.40 m spin circle
         self.assertEqual(cmds[0], (0.0, -0.8))  # still standing: the turn alone is allowed
 
+    def test_a_creep_with_a_sharp_turn_is_checked_as_a_spin(self):
+        # T18 integration probe: a post beside the rear quarter, inside the spin circle but outside the corridor
+        node = M.FollowStopNode()
+        node.cb_scan(scan(person(-0.15, 0.32, r=0.03)))
+        for cmd in ((0.0, -0.8), (0.03, -0.8), (0.06, -0.8), (-0.03, -0.8)):
+            self.assertEqual(node.obstacle_command(cmd[0], cmd[1], (1.5, 0.0), 0.0), (cmd[0], 0.0), cmd)  # no turn
+        node.cb_scan(scan([]))  # the same with the circle clear: sent as asked
+        self.assertEqual(node.obstacle_command(0.06, -0.8, (1.5, 0.0), 0.0), (0.06, -0.8))
+
     def test_the_scan_is_subscribed_best_effort(self):
         seen = []
         original = M.FollowStopNode.create_subscription
@@ -222,7 +231,7 @@ class AvoidTest(unittest.TestCase):
         tgt = (1.5 * math.cos(math.radians(11)), 1.5 * math.sin(math.radians(11)))
         node.cb_scan(scan(person(0.07, 0.54) + person(tgt[0] + 0.2, tgt[1])))
         node.obstacle_avoid = False
-        self.assertEqual(node.obstacle_command(0.05, 0.2, tgt, math.radians(11))[0], 0.05)
+        self.assertEqual(node.obstacle_command(0.05, 0.2, tgt, math.radians(11)), (0.05, 0.0))  # straight past
 
 
 if __name__ == "__main__":
