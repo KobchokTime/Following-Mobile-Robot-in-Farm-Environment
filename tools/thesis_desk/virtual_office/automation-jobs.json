@@ -62,12 +62,27 @@
       "role": "thesis-desk",
       "branchPrefix": "codex/thesis-desk-office",
       "mode": "workspace-write",
-      "ready": true,
+      "ready": false,
       "maxMinutes": 15,
       "allowedPaths": ["tools/thesis_desk/virtual_office/"],
       "focusedNodeTests": ["tools/thesis_desk/virtual_office/automation-queue.test.mjs"],
       "task": "Improve diagnostics for a stale Office queue.lock left after a process crash. When a lock already exists, report its age and an actionable, safe inspection hint; do not automatically remove or override another process's lock. Add a focused regression test in automation-queue.test.mjs. Do not change robot code or generated dashboard data.",
       "acceptance": "A second lock attempt reports useful age and inspection guidance without deleting the existing lock; focused Node tests and python scripts/check.py pass."
+    },
+    {
+      "id": "office-429-full-stderr",
+      "title": "ตรวจพบโควตา 429 แม้อยู่ต้นบันทึก",
+      "lane": "office-resilience",
+      "agent": "krit",
+      "role": "thesis-desk",
+      "branchPrefix": "codex/thesis-desk-office",
+      "mode": "workspace-write",
+      "ready": true,
+      "maxMinutes": 15,
+      "allowedPaths": ["tools/thesis_desk/virtual_office/"],
+      "focusedNodeTests": ["tools/thesis_desk/virtual_office/server.test.mjs"],
+      "task": "Fix Office chat rate-limit detection when a Codex CLI 429 line appears before the last 500 characters of stderr. Preserve private error redaction and the existing no-paid-key behavior. Add a focused regression in server.test.mjs that exercises the production error path. Do not change robot code or generated dashboard data.",
+      "acceptance": "A 429 line near the beginning of long stderr pauses subsequent model turns, unrelated errors remain redacted, the focused Node test and python scripts/check.py pass."
     }
   ]
 }
