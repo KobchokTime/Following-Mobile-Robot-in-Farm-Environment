@@ -587,8 +587,15 @@ class FollowStopNode(Node):
         if self.avoid_offset != 0.0:
             self.get_logger().info("[AVOID] off")
             self.avoid_offset = 0.0
-        linear_x = self.obstacle_limited(linear_x, target_xy, angular_z)
-        return self.stopped_turn(linear_x, angular_z, target_xy)
+        capped = self.obstacle_limited(linear_x, target_xy, angular_z)
+        if linear_x > 0.0 and capped == 0.0 and angular_z != 0.0 and not at_edge:
+            # the arc towards the target brushes someone it passes; a gentler one, or straight on, may still go
+            # (blind_corner s2 on f47c6d7 stood 4 s with the target in view and the straight line clear)
+            for f in (2.0 / 3.0, 1.0 / 3.0, 0.0):
+                v = self.obstacle_limited(linear_x, target_xy, angular_z * f)
+                if v > 0.0:
+                    return self.stopped_turn(v, angular_z * f, target_xy)
+        return self.stopped_turn(capped, angular_z, target_xy)
 
     def cb_fused(self, msg: Float32MultiArray):
         if len(msg.data) < 8:

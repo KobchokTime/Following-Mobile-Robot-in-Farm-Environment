@@ -332,6 +332,18 @@ class AvoidTest(unittest.TestCase):
         self.assertLessEqual(v, node.avoid_min_speed + 1e-9)
         self.assertLessEqual(abs(w), 2.0 * v + 1e-9)
 
+    def test_an_arc_held_by_someone_beside_it_goes_gentler_or_straight(self):
+        # blind_corner s2 on f47c6d7: the arc towards the target brushed the bystander, the straight line was
+        # clear, and the robot stood 4 s while the target walked out of range
+        node = M.FollowStopNode()
+        node.obstacle_avoid = False
+        node.cb_scan(scan(person(0.3, 0.6)))  # on the arc, clear of the straight line
+        tgt = (2.0, 0.3)
+        self.assertEqual(node.obstacle_limited(0.4, tgt, 0.3), 0.0)
+        v, w = node.obstacle_command(0.4, 0.3, tgt, math.atan2(0.3, 2.0))
+        self.assertGreater(v, 0.0)
+        self.assertLess(w, 0.3)
+
     def test_a_robot_held_beside_an_obstacle_can_start_again(self):
         # pass_by s4: the robot stood beside the worker (left) while the target walked on. The speed ramp from
         # a stop asks for 0.05 m/s with a left turn, a tight arc into the worker, which the stop held at zero
