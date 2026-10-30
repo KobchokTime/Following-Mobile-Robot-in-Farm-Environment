@@ -651,14 +651,13 @@ class SyncFusionNode(Node):
         if assisted is not None:
             bearing, rng = assisted  # the assist already moved the track to the target's own cluster
         else:
-            found = lidar_track(self.scan_points, pb, pr, math.radians(25.0), 0.5)
+            # only returns no nearer than the target should be: someone the target walked behind is not it
+            # (blind_corner s4 on bddf0ba took the bystander and the gate followed them for 4 s)
+            far = [p for p in self.scan_points if p[1] >= pr - 0.2]
+            found = lidar_track(far, pb, pr, math.radians(25.0), 0.5)
             if found is None:
                 return
             bearing, rng = found
-            if rng < pr - 0.2 or scan_crowded(self.scan_points, bearing, rng, pb, pr, self.crowd_radius):
-                # nearer than the target should be, or someone beside it: a person the target walked
-                # behind (blind_corner s4 on bddf0ba took the bystander and the gate followed them)
-                return
             self.gate.accept_lidar(now, bearing, rng)
         # the image edge on the target's side: the controller turns that way at its full turn rate
         cx = 0 if bearing > 0 else self.image_width - 1

@@ -272,9 +272,13 @@ class LidarAssistTest(unittest.TestCase):
         node.scan_points = scan(person(0.9, -0.33))
         self.assertTrue(self.box(node, t, 0.9, -0.33))
         before = len(node.published)
-        for k in range(1, 9):  # the target is gone from the scan; only the nearer person is there
+        for k in range(1, 5):  # the target is hidden behind the nearer person
             self.scan_at(node, t + 0.1 * k, [(0.45, -0.25)])
-        self.assertEqual([p for p in node.published[before:] if p[2] < 0.7], [])
+        for k in range(5, 9):  # then comes out beyond them, still out of the image
+            self.scan_at(node, t + 0.1 * k, [(0.45, -0.25), (0.55, -0.85)])
+        out = node.published[before:]
+        self.assertEqual([p for p in out if p[2] < 0.7], [])
+        self.assertTrue(any(p[0] == node.image_width - 1 and p[2] > 0.7 for p in out))  # turned towards it
 
     def side_step(self, **params):
         """The traced twin failure: the last box is at 20 deg, then the target steps out of the image."""
