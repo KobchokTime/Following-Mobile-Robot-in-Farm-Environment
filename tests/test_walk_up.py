@@ -321,7 +321,21 @@ class LidarAssistTest(unittest.TestCase):
             self.scan_at(node, t + 0.1 * k, [])
         for k in range(6, 15):
             self.scan_at(node, t + 0.1 * k, [(0.7 + 0.1 * k, -1.2)])
-        self.assertTrue(any(p[0] == node.image_width - 1 and p[2] > 1.3 for p in node.published[before:]))
+        self.assertTrue(any(p[0] > node.image_width / 2 and p[2] > 1.3 for p in node.published[before:]))  # right, further out
+
+    def test_a_covered_target_inside_the_image_is_given_at_its_own_column(self):
+        # blind_corner s1 on e80a83d: found by the LiDAR at 6 deg behind the bystander and sent to the image
+        # edge, the robot spun at full rate past it
+        m, node = make_node()
+        t = self.lock(node, target=(1.0, 0.0))
+        node.scan_points = scan(person(1.0, 0.2))
+        self.assertTrue(self.box(node, t, 1.0, 0.2))
+        before = len(node.published)
+        for k in range(1, 9):
+            self.scan_at(node, t + 0.1 * k, [(0.6, 0.0), (1.0, 0.5)])
+        out = node.published[before:]
+        self.assertTrue(out)
+        self.assertTrue(all(0 < p[0] < node.image_width / 2 for p in out))  # left of centre, not at the edge
 
     def side_step(self, **params):
         """The traced twin failure: the last box is at 20 deg, then the target steps out of the image."""

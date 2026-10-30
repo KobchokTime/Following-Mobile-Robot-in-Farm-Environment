@@ -680,9 +680,15 @@ class SyncFusionNode(Node):
                 return
             bearing, rng = found
             self.gate.accept_lidar(now, bearing, rng)
-        # the image edge on the target's side: the controller turns that way at its full turn rate
-        cx = 0 if bearing > 0 else self.image_width - 1
-        sector = 0 if bearing > 0 else 8
+        # the image edge on the target's side: the controller turns that way at its full turn rate. A target
+        # covered inside the image (blind_corner) is given at its own column instead: sent to the edge at 6 deg,
+        # the robot spun at full rate past it and out of view (s1 on e80a83d)
+        if abs(bearing) < math.radians(self.camera_hfov_deg / 2.0 - 3.0):
+            cx = bearing_to_cx(bearing, self.image_width, self.camera_hfov_deg)
+            sector = min(8, int(cx * 9 / self.image_width))
+        else:
+            cx = 0 if bearing > 0 else self.image_width - 1
+            sector = 0 if bearing > 0 else 8
         _, cy, _, _ = self.last_target
         self.publish_synced(cx, cy, rng, sector, 0.0)
 
