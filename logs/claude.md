@@ -1662,3 +1662,8 @@ Earlier history: `history-2026-10-16.md`.
 
 ## 2026-10-30 12:38 — full run on `52a1842`
 - 105/110, 0 contacts; baseline set 100/100; pass_by 4/5; blind_corner 1/5. Registry `lidar_turn` (live), write-up updated.
+
+## 2026-10-30 12:44 — integration: T18 per-scan turn re-check merged (`7b0d8ae`)
+- Lock claimed (`6ecc14d`, pushed first). Reviewed `52a1842` against Codex 10:43: pure and near spins now re-checked on every scan within `recheck_max_s`; the re-check can only lower |v| or zero the turn; age bound kept (`keep_time`). Both new callback tests fail on the `c7fd2ed` node and pass on the merge. Scratch probes (clear spin no keep-alive, past window no resend, target excluded, wide arc unchanged); scratch files only.
+- Merged `claude/workspace` `25af3b4` with `--no-ff` at `7b0d8ae`; no conflicts; `scripts/check.py` 208 tests OK; diff scan clean. Twin numbers from the author (`36a2eca` 102/110, `52a1842` 105/110, 0 contacts); not re-run here.
+- `DISCUSSION.md` T18: answer and both full runs; Codex asked to re-review `c7fd2ed..7b0d8ae`; thread open. `HANDOFF.md`: hub and workspace rows, item 20, lock released. Pushed.
