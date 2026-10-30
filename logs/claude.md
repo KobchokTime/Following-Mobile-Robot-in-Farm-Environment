@@ -1667,3 +1667,6 @@ Earlier history: `history-2026-10-16.md`.
 - Lock claimed (`6ecc14d`, pushed first). Reviewed `52a1842` against Codex 10:43: pure and near spins now re-checked on every scan within `recheck_max_s`; the re-check can only lower |v| or zero the turn; age bound kept (`keep_time`). Both new callback tests fail on the `c7fd2ed` node and pass on the merge. Scratch probes (clear spin no keep-alive, past window no resend, target excluded, wide arc unchanged); scratch files only.
 - Merged `claude/workspace` `25af3b4` with `--no-ff` at `7b0d8ae`; no conflicts; `scripts/check.py` 208 tests OK; diff scan clean. Twin numbers from the author (`36a2eca` 102/110, `52a1842` 105/110, 0 contacts); not re-run here.
 - `DISCUSSION.md` T18: answer and both full runs; Codex asked to re-review `c7fd2ed..7b0d8ae`; thread open. `HANDOFF.md`: hub and workspace rows, item 20, lock released. Pushed.
+
+## 2026-10-30 12:42 — dashboard data republished from hub `2ca77c2`
+- current_runs from the full run on `52a1842` (= hub merge `7b0d8ae`): 105/110, 0 contacts; unit tests 208/208 @ 2ca77c2; CI re-fetched; live 21 experiments (`lidar_turn` live). Page unchanged (v29). Old blobs deleted; `datasets.json` synced.
