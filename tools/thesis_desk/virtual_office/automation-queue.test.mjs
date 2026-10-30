@@ -1,6 +1,9 @@
 import assert from "node:assert/strict";
+import { mkdtemp, mkdir, readFile, rm, utimes, writeFile } from "node:fs/promises";
+import { dirname, join } from "node:path";
 import { test } from "node:test";
-import { changedPathsAllowed, changesMatchMode, checksPassed, run, selectJobs } from "./automation-queue.mjs";
+import { fileURLToPath } from "node:url";
+import { changedFiles, changedPathsAllowed, changesMatchMode, checksPassed, run, selectJobs, withFileLock } from "./automation-queue.mjs";
 
 test("limits assignments to three independent lanes and active capacity", () => {
   const jobs = [
@@ -10,6 +13,8 @@ test("limits assignments to three independent lanes and active capacity", () => 
   ];
   assert.deepEqual(selectJobs(jobs, []).map((job) => job.id), ["a", "c", "d"]);
   assert.deepEqual(selectJobs(jobs, [{ jobId: "a", lane: "one", state: "assigned" }])
+    .map((job) => job.id), ["c", "d"]);
+  assert.deepEqual(selectJobs(jobs, [{ jobId: "a", lane: "one", state: "running" }])
     .map((job) => job.id), ["c", "d"]);
   assert.deepEqual(selectJobs(jobs, [{ jobId: "a", lane: "one", state: "failed" }])
     .map((job) => job.id), ["b", "c", "d"]);
@@ -22,6 +27,39 @@ test("rejects edits outside the assigned scope", () => {
   assert.equal(changedPathsAllowed(["tests/../src/controller.py"], ["tests/"]), false);
   assert.equal(changedPathsAllowed(["C:\\robot\\motor.py"], ["tests/"]), false);
   assert.equal(changedPathsAllowed(["tests_evil/example.py"], ["tests/"]), false);
+});
+
+test("ignored source files are included in scope review while Office temp is excluded", async () => {
+  const folder = await mkdtemp(join(dirname(fileURLToPath(import.meta.url)), ".office-git-test-"));
+  try {
+    const init = await run("git", ["init", "-q"], { cwd: folder });
+    assert.equal(init.code, 0, init.stderr);
+    await writeFile(join(folder, ".gitignore"), "hidden.txt\n.office-tmp/\n");
+    await writeFile(join(folder, "hidden.txt"), "unexpected edit\n");
+    await mkdir(join(folder, ".office-tmp"));
+    await writeFile(join(folder, ".office-tmp", "output.txt"), "temporary\n");
+    const changed = await changedFiles(folder);
+    assert.equal(changed.includes("hidden.txt"), true);
+    assert.equal(changed.some((path) => path.startsWith(".office-tmp/")), false);
+    assert.equal(changedPathsAllowed(changed, ["tools/thesis_desk/virtual_office/"]), false);
+  } finally { await rm(folder, { recursive: true, force: true }); }
+});
+
+test("an existing queue lock reports its age and safe inspection steps without taking over", async () => {
+  const folder = await mkdtemp(join(dirname(fileURLToPath(import.meta.url)), ".office-lock-test-"));
+  const lock = join(folder, "queue.lock");
+  try {
+    await writeFile(lock, "existing owner\n");
+    const now = Date.now();
+    await utimes(lock, new Date(now - 93_000), new Date(now - 93_000));
+    let ran = false;
+    await assert.rejects(withFileLock(lock, async () => { ran = true; }, () => now),
+      (error) => /9[2-4] seconds old/.test(error.message) &&
+        error.message.includes("check for an active Office queue process") &&
+        error.message.includes("only remove it manually"));
+    assert.equal(ran, false);
+    assert.equal(await readFile(lock, "utf8"), "existing owner\n");
+  } finally { await rm(folder, { recursive: true, force: true }); }
 });
 
 test("read-only assignments cannot become review-ready with edits in allowed paths", () => {
