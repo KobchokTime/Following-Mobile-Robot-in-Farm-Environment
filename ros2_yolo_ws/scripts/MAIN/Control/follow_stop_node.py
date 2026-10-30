@@ -388,10 +388,18 @@ class FollowStopNode(Node):
         return True
 
     def stopped_turn(self, linear_x, angular_z, target_xy):
-        """angular_z, or 0 when the command does not move forward or back and a turn in place is not allowed."""
-        if linear_x == 0.0 and angular_z != 0.0 and not self.turn_allowed(target_xy):
-            return 0.0
-        return angular_z
+        """(linear, angular) unchanged, or without the turn for a near spin the spin circle does not allow.
+
+        A near spin is no forward motion, a creep (|v| <= 0.05 m/s) or an arc tighter than 2/m: the corridor
+        check treats those as straight, so the body's corners sweeping round are checked here instead (T18
+        integration probe: (0.06, -0.8) with a post beside the rear quarter was sent). A refused near spin
+        keeps its straight creep, which the corridor did check, so a robot beside someone can still edge
+        past them instead of standing for good (pass_by s4).
+        """
+        near_spin = abs(linear_x) <= 0.05 or abs(angular_z / linear_x) > 2.0
+        if angular_z != 0.0 and near_spin and not self.turn_allowed(target_xy):
+            return linear_x, 0.0
+        return linear_x, angular_z
 
     def obstacle_command(self, linear_x, angular_z, target_xy, target_bearing, at_edge=False):
         """(linear, angular) after the obstacle stop. With obstacle_avoid, when something other than the target
@@ -424,12 +432,12 @@ class FollowStopNode(Node):
                                      self.angular_limit, self.bearing_deadband)
             linear_x = max(linear_x, self.avoid_min_speed)  # from a near stop too (pass_by s4)
             linear_x = self.obstacle_limited(linear_x, target_xy, angular_z)
-            return linear_x, self.stopped_turn(linear_x, angular_z, target_xy)
+            return self.stopped_turn(linear_x, angular_z, target_xy)
         if self.avoid_offset != 0.0:
             self.get_logger().info("[AVOID] off")
             self.avoid_offset = 0.0
         linear_x = self.obstacle_limited(linear_x, target_xy, angular_z)
-        return linear_x, self.stopped_turn(linear_x, angular_z, target_xy)
+        return self.stopped_turn(linear_x, angular_z, target_xy)
 
     def cb_fused(self, msg: Float32MultiArray):
         if len(msg.data) < 8:
@@ -469,7 +477,7 @@ class FollowStopNode(Node):
                 held = Twist()
                 held.linear.x = self.obstacle_limited(self.last_good_cmd.linear.x, None,
                                                       self.last_good_cmd.angular.z)
-                held.angular.z = self.stopped_turn(held.linear.x, self.last_good_cmd.angular.z, None)
+                held.linear.x, held.angular.z = self.stopped_turn(held.linear.x, self.last_good_cmd.angular.z, None)
                 self.send(held)
                 self.get_logger().info(f"[HOLD] Low conf {P_fused_smooth:.2f} → keep last cmd")
             else:
