@@ -414,6 +414,21 @@ class TrailTest(unittest.TestCase):
         self.assertTrue(node.trailing)
         self.assertGreater(v, 0.2)  # not the 0.12 crawl; the stop still caps it near the bystander
 
+    def test_with_no_crumb_reachable_the_trail_turns_to_where_the_target_was_seen(self):
+        # blind_corner s1 on 9935332: no crumb in a clear line, it stopped facing away and never saw the target again
+        node = M.FollowStopNode()
+        clock = {'t': 10.0}
+        now = type('Now', (), {'nanoseconds': property(lambda self_: int(clock['t'] * 1e9))})
+        node.get_clock = lambda: type('Clock', (), {'now': lambda self_: now()})()
+        sent = []
+        node.send = lambda twist, *a, **k: sent.append((twist.linear.x, twist.angular.z))
+        node.cb_scan(scan([(0.6, y / 20.0) for y in range(-30, 31)]))  # a wall ahead, outside the spin circle
+        node.crumbs = [(1.0, 0.9, 9.0)]  # beyond it, to the left
+        node.trailing, node.last_msg_time = True, 9.5
+        node.trail_tick()
+        self.assertEqual(sent, [(0.0, 0.4)])  # left, where the target was last seen
+        self.assertTrue(node.trailing)
+
     def test_dead_reckoning_and_crumbs(self):
         node = M.FollowStopNode()
         clock = {'t': 0.0}

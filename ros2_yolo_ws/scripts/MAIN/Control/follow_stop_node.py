@@ -746,6 +746,14 @@ class FollowStopNode(Node):
         )
 
     # ==================================================
+    def last_crumb_bearing(self):
+        """Bearing (robot frame) of the newest crumb, where the target was last seen; None without crumbs."""
+        if not self.crumbs:
+            return None
+        cx, cy = self.crumbs[-1][0] - self.pose[0], self.crumbs[-1][1] - self.pose[1]
+        return math.atan2(-math.sin(self.pose[2]) * cx + math.cos(self.pose[2]) * cy,
+                          math.cos(self.pose[2]) * cx + math.sin(self.pose[2]) * cy)
+
     def trail_length(self, aim):
         """The way along the target's path from the robot (aim, robot frame) to the newest crumb, in metres."""
         if not self.crumbs:
@@ -772,6 +780,19 @@ class FollowStopNode(Node):
         self.advance_pose()
         aim = trail_aim([cr[:2] for cr in self.crumbs], self.pose, self.scan_xy, self.obstacle_half_w)
         if aim is None:
+            # no crumb in a clear line: turn slowly in place towards where the target was last seen, for the rest
+            # of the hold, so the camera can find it again (blind_corner s1 on 9935332 stopped facing away and
+            # never saw it again); the spin circle still decides whether the turn is sent
+            last = self.last_crumb_bearing()
+            if last is not None and abs(last) >= 0.17 and self.turn_allowed():
+                if self.trail_since_msg != 'turn':
+                    self.get_logger().info("[TRAIL] no crumb reachable: turning to where the target was last seen")
+                    self.trail_since_msg = 'turn'  # still the trail without messages (check_stale leaves it)
+                twist = Twist()
+                twist.angular.z = 0.4 if last > 0.0 else -0.4
+                self.send(twist)
+                self.last_linear = 0.0
+                return
             self.get_logger().info("[TRAIL] off: no crumb reachable")
             self.trailing = self.trail_since_msg = False
             self.publish_stop()
@@ -785,9 +806,7 @@ class FollowStopNode(Node):
         angular_z = max(-2.0 * linear_x, min(2.0 * linear_x, angular_z))
         # where the target was last seen: the newest crumb. Do not turn away from it once it is 20 deg or more
         # the other way (blind_corner s2 on 1b5dc92 turned right to the crumbs as the target went left)
-        cx, cy = self.crumbs[-1][0] - self.pose[0], self.crumbs[-1][1] - self.pose[1]
-        last = math.atan2(-math.sin(self.pose[2]) * cx + math.cos(self.pose[2]) * cy,
-                          math.cos(self.pose[2]) * cx + math.sin(self.pose[2]) * cy)
+        last = self.last_crumb_bearing()
         if angular_z * last < 0.0 and abs(last) >= 0.35:
             angular_z = 0.0
         linear_x, angular_z = self.moving_turn(linear_x, angular_z, None)
