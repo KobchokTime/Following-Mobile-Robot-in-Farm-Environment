@@ -480,10 +480,16 @@ class FollowStopNode(Node):
         """(linear, angular) for a way round: the wanted turn, or a gentler one (2/3, 1/3, none) if the wanted
         arc is held by the stop and a gentler one still moves; a turn in place only if none does. Spinning
         hard with the robot held turned the target out of the camera's view (pass_by s0 on 4caa707)."""
-        for f in (1.0, 2.0 / 3.0, 1.0 / 3.0, 0.0):
-            v = self.obstacle_limited(linear_x, target_xy, angular_z * f)
-            if v > 0.0:
-                return self.stopped_turn(v, angular_z * f, target_xy)
+        tries = [(linear_x, angular_z)]
+        if linear_x > self.avoid_min_speed:
+            # fast, the same turn is near straight and held like straight; at a crawl it is a real arc that clears
+            # (pass_by s2 on a30c90d stood 5 s beside the worker asked for 1.3 m/s)
+            tries.append((self.avoid_min_speed, max(-2.0 * self.avoid_min_speed, min(2.0 * self.avoid_min_speed, angular_z))))
+        for v0, w0 in tries:
+            for f in (1.0, 2.0 / 3.0, 1.0 / 3.0, 0.0):
+                v = self.obstacle_limited(v0, target_xy, w0 * f)
+                if v > 0.0:
+                    return self.stopped_turn(v, w0 * f, target_xy)
         # nothing moves: turn in place towards the way round, slowly, and not so far that the target leaves the
         # camera's view (pass_by s2 on 7ac1cd1 spun at 0.8 rad/s and lost the target). With the target already
         # 20 deg or more off to one side, turn towards it instead (blind_corner s2 on bddf0ba stood still while

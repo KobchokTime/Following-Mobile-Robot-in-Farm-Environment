@@ -318,6 +318,20 @@ class AvoidTest(unittest.TestCase):
         node.cb_scan(scan(person(*by) + person(tgt[0] + 0.2, tgt[1]) + person(-0.5, 0.0)))  # someone behind
         self.assertEqual(node.obstacle_command(0.4, 0.0, tgt, tb)[0], 0.0)
 
+    def test_a_fast_request_beside_a_worker_still_goes_round_at_a_crawl(self):
+        # pass_by s2 on a30c90d: asked for 1.3 m/s, the way round was a near straight arc held like straight,
+        # and it stood 5 s beside the worker while the target walked on
+        def at(r, deg):
+            return r * math.cos(math.radians(deg)), r * math.sin(math.radians(deg))
+        node = M.FollowStopNode()
+        node.avoid_delay = 0.0
+        tgt = at(2.05, 15.0)
+        node.cb_scan(scan(person(*at(0.67, 51.0)) + person(*at(2.25, 15.0))))
+        v, w = node.obstacle_command(1.34, -0.15, tgt, math.radians(15.0))
+        self.assertGreater(v, 0.0)
+        self.assertLessEqual(v, node.avoid_min_speed + 1e-9)
+        self.assertLessEqual(abs(w), 2.0 * v + 1e-9)
+
     def test_a_robot_held_beside_an_obstacle_can_start_again(self):
         # pass_by s4: the robot stood beside the worker (left) while the target walked on. The speed ramp from
         # a stop asks for 0.05 m/s with a left turn, a tight arc into the worker, which the stop held at zero
