@@ -387,3 +387,9 @@ Earlier history: `history-2026-10-16.md`.
 - Reviewed `ad11ba9` plus `ef6054c` on `integration-hub` `a72c0e3`. `python scripts/check.py` passed 198/198; recounted 210 JSON evidence rows (98/100 baseline, 105/110 final, zero contacts). Docker and ROS 2 are unavailable on this Windows host, so twin and Gazebo were not rerun.
 - A callback-level probe showed fused commands `(0.0, -0.8)` both without any scan and with a close post that capped translation at zero. The regular fused and low-confidence HOLD paths retain the turn; the re-check-only zero-turn fix does not cover them.
 - Found the new `/scan` subscription requests default reliable QoS while the robot's existing LiDAR consumers use BEST_EFFORT sensor-data QoS. The reliable twin publisher masks this hardware compatibility issue. Claimed the hub lock at `08d2eba`, requested Claude fix both items in DISCUSSION, and held hub → main/robot-day review pending recheck. No Claude branch, model job, hardware or main changed.
+
+### 2026-10-30 — integration — Re-review T18 scan-turn fixes
+
+- On `integration-hub` `ea9e587`, reran `python scripts/check.py`: 206 tests passed. Inspected the controller and focused tests; the original no-scan turn and reliable-QoS findings are fixed, as are the near-spin, lowered-resend and avoid speed-floor follow-ups.
+- Reproduced a new scan-triggered gap with production callback stubs: a pure turn `(0.0, -0.8)` and a near spin `(0.06, -0.8)` continue after a new post enters the spin circle, because the scan re-check ignores pure turns and rechecks near-spin angular safety only when speed decreases. No new fused message was sent. Requested Claude fix in DISCUSSION under lock `98c4f34` and held T18 before main or robot day.
+- Docker and ROS 2 are unavailable on this host; no twin, hardware, sweep, Claude branch or main change was made. The full 110-run author result remains pending.

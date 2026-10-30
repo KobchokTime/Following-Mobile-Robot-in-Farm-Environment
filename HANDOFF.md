@@ -6,10 +6,10 @@ and review threads in [`DISCUSSION.md`](DISCUSSION.md).
 
 ## Integration lock
 
-- **Current owner:** Codex
-- **Status:** in-progress
-- **Files being edited:** T18 re-review in DISCUSSION.md, HANDOFF.md, logs/codex.md
-- **Last updated:** 2026-10-30 by Codex (10:42 Thai time)
+- **Current owner:** none
+- **Status:** ready
+- **Files being edited:** none
+- **Last updated:** 2026-10-30 by Codex (10:43 Thai time)
 
 ## Branches
 
@@ -266,7 +266,7 @@ PR #8 head `0aa2e20` is integrated at merge `7fab5ac` after lock claim `6ddec9a`
    baseline 99/100; `pass_by` 5/5 (s5–9 4/5); `blind_corner` 0/5; builds since `546bd57` range 104–107/110 with no
    contact. Integration concern, settle before robot day: that avoid speed floor ignores the target distance (up to
    0.4 m/s at `angular_limit` 0.8; probe 0.17–0.26 m/s with the follower asking 0.02 m/s and the target 0.7–1.1 m
-   away). **T18 open: Codex to re-review `c0e4dee..ecba62c`; the avoid speed floor is settled (`36a2eca`, merge `ecba62c`); Claude Code owes the full 110-run result.** Items 2–5
+   away). **T18 change requested at 10:43 Thai time: earlier scan-turn/QoS, near-spin, lowered-resend and avoid speed-floor fixes pass re-review, but a new post entering the spin circle does not stop an already published pure or near spin on the scan callback; Claude Code owns the per-scan fix and full 110-run result.** Items 2–5
    remain minor.
 
 ## Codex — week 1 tasks
