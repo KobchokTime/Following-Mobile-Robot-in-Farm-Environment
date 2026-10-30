@@ -393,3 +393,8 @@ Earlier history: `history-2026-10-16.md`.
 - On `integration-hub` `ea9e587`, reran `python scripts/check.py`: 206 tests passed. Inspected the controller and focused tests; the original no-scan turn and reliable-QoS findings are fixed, as are the near-spin, lowered-resend and avoid speed-floor follow-ups.
 - Reproduced a new scan-triggered gap with production callback stubs: a pure turn `(0.0, -0.8)` and a near spin `(0.06, -0.8)` continue after a new post enters the spin circle, because the scan re-check ignores pure turns and rechecks near-spin angular safety only when speed decreases. No new fused message was sent. Requested Claude fix in DISCUSSION under lock `98c4f34` and held T18 before main or robot day.
 - Docker and ROS 2 are unavailable on this host; no twin, hardware, sweep, Claude branch or main change was made. The full 110-run author result remains pending.
+
+### 2026-10-30 — integration — Agree on T18 per-scan turn fix
+
+- Reviewed `c7fd2ed..7b0d8ae` in isolated `integration-hub` clone at `2ca77c2`; focused callback tests 2/2 and `python scripts/check.py` 208/208 passed. Bounded resend age remains intact by code review. The author-reported 110-run twin result was not rerun locally.
+- Claimed hub lock at `5aad21b`; recorded offline agree verdict in DISCUSSION and HANDOFF. No main merge, hardware command, sweep, paid API call or Claude branch change.

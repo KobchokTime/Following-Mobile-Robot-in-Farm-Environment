@@ -236,7 +236,7 @@ PR #8 head `0aa2e20` is integrated at merge `7fab5ac` after lock claim `6ddec9a`
    once on shutdown; without `/cmd_vel`, a ramp to zero starting 1 s after the last command, about 1.5 s at 0.5 m/s
    (merges `f6bdc90` of `783c1a6` and `9184db7` of `ab22dd7`). Earlier: merge `3b13465` (`39444d9`); the `[CROWD]` log and
    `fit_past_tracks` were reviewed with no blocking finding (two minor notes in T17).
-20. **T18** in `DISCUSSION.md` — **open, Codex to re-review `c7fd2ed..7b0d8ae`.** LiDAR obstacle stop, avoid and LiDAR assist
+20. **T18** in `DISCUSSION.md` — **open, Codex re-reviewed `c7fd2ed..7b0d8ae`: agree on offline fix; `python scripts/check.py` 208/208, focused callback regressions 2/2 on hub `2ca77c2`. T18 cross-review resolved for offline integration; robot-side validation remains separate.** LiDAR obstacle stop, avoid and LiDAR assist
    (merge `ad11ba9` of `claude/workspace` `c2c9aa2`; feature `claude/robot/avoid` `c2899c7`). New `follow_stop_node`
    parameters: `obstacle_stop` (true), `obstacle_avoid` (true), `avoid_delay_s` (1.0), plus `obstacle_half_width_m` 0.30,
    `obstacle_stop_m` 0.45, `obstacle_target_exclude_m` 0.30, `avoid_min_speed_mps` 0.12, `avoid_hold_s` 0.5,
@@ -266,7 +266,7 @@ PR #8 head `0aa2e20` is integrated at merge `7fab5ac` after lock claim `6ddec9a`
    baseline 99/100; `pass_by` 5/5 (s5–9 4/5); `blind_corner` 0/5; builds since `546bd57` range 104–107/110 with no
    contact. Integration concern, settle before robot day: that avoid speed floor ignores the target distance (up to
    0.4 m/s at `angular_limit` 0.8; probe 0.17–0.26 m/s with the follower asking 0.02 m/s and the target 0.7–1.1 m
-   away). **T18 change requested at 10:43 Thai time: earlier scan-turn/QoS, near-spin, lowered-resend and avoid speed-floor fixes pass re-review, but a new post entering the spin circle does not stop an already published pure or near spin on the scan callback; Claude Code owns the per-scan fix and full 110-run result.** **Per-scan turn fix merged at `7b0d8ae`** (`claude/workspace` `25af3b4`, fix `52a1842`): both of Codex's sequences are callback tests (fail without the fix), the original-command age bound is kept; 208 tests. Twin (author): `36a2eca` 102/110 (baseline 98/100), `52a1842` 105/110 (baseline 100/100, `pass_by` 4/5, `blind_corner` 1/5), 0 contacts in both. Codex to re-review `c7fd2ed..7b0d8ae`. Items 2–5
+   away). **T18 change requested at 10:43 Thai time: earlier scan-turn/QoS, near-spin, lowered-resend and avoid speed-floor fixes pass re-review, but a new post entering the spin circle does not stop an already published pure or near spin on the scan callback; Claude Code owns the per-scan fix and full 110-run result.** **Per-scan turn fix merged at `7b0d8ae`** (`claude/workspace` `25af3b4`, fix `52a1842`): both of Codex's sequences are callback tests (fail without the fix), the original-command age bound is kept; 208 tests. Twin (author): `36a2eca` 102/110 (baseline 98/100), `52a1842` 105/110 (baseline 100/100, `pass_by` 4/5, `blind_corner` 1/5), 0 contacts in both. Codex re-reviewed `c7fd2ed..7b0d8ae`: agree on offline fix; `python scripts/check.py` 208/208, focused callback regressions 2/2 on hub `2ca77c2`. T18 cross-review resolved for offline integration; robot-side validation remains separate. Items 2–5
    remain minor.
 
 ## Codex — week 1 tasks
