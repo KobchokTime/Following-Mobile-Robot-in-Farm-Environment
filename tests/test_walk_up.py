@@ -289,9 +289,10 @@ class LidarAssistTest(unittest.TestCase):
         self.assertTrue(self.box(node, t, 1.0, 0.2))
         before = len(node.published)
         for k in range(1, 4):  # covered
-            self.scan_at(node, t + 0.1 * k, [(0.6, 0.12), (1.0, 0.2 + 0.1 * k)])
-        for k in range(4, 9):  # out beyond the bystander, outside the image
-            self.scan_at(node, t + 0.1 * k, [(0.6, 0.12), (0.75, 0.4 + 0.12 * k)])
+            self.scan_at(node, t + 0.1 * k, [(0.6, 0.12), (1.0, 0.2 + 0.03 * k)])
+        for k in range(4, 9):  # out beyond the bystander, outside the image; the robot creeping on, the
+            # bystander no longer covers the bearing the target was last seen at (blind_corner s3 on a30c90d)
+            self.scan_at(node, t + 0.1 * k, [(0.55, 0.12 - 0.08 * k), (0.75, 0.4 + 0.12 * k)])
         out = node.published[before:]
         self.assertTrue(any(p[0] == 0 and p[2] > 0.8 for p in out))  # turned left, at the target's range
         self.assertEqual([p for p in out if p[2] < 0.7], [])

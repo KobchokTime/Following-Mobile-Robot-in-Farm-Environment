@@ -481,6 +481,7 @@ class SyncFusionNode(Node):
         self.lidar_after = float(self.get_parameter('lidar_track_after_s').value)
         self.lidar_max = float(self.get_parameter('lidar_track_max_s').value)
         self.scan_points = []     # latest scan as (robot-frame bearing, range)
+        self.covered_fix = None   # the last camera fix after which someone nearer covered the target
         self.scan_time = None     # when it arrived
         self.scan_max_age = float(self.get_parameter('lidar_scan_max_age_s').value)
         self.box_range_from_scan = bool(self.get_parameter('box_range_from_scan').value)
@@ -648,10 +649,14 @@ class SyncFusionNode(Node):
         # last seen near the edge, or moving fast enough to be past it by now (frames arrive late), or
         # covered by someone nearer at the last bearing it was seen (blind_corner: it walked behind the
         # bystander, out of the image on the far side, and only the LiDAR could see it come out)
-        if abs(self.last_camera_bearing) < self.edge_rad and abs(pb) < self.edge_rad:
+        if abs(self.last_camera_bearing) < self.edge_rad and abs(pb) < self.edge_rad \
+                and self.covered_fix != self.last_camera_fix:
             cover = box_range(self.scan_points, self.last_camera_bearing)
             if cover is None or cover >= pr - max(self.occl_gap, 0.2):
                 return
+            # remembered until the next camera fix: once the target has come out beyond the one who covered
+            # it, they no longer cover the bearing it was last seen at (blind_corner s3 on a30c90d)
+            self.covered_fix = self.last_camera_fix
         if assisted is not None:
             bearing, rng = assisted  # the assist already moved the track to the target's own cluster
         else:
@@ -660,7 +665,9 @@ class SyncFusionNode(Node):
             # nor nearer than it was last seen by the camera: fix by fix the track can creep onto the edge of
             # someone it walked past (blind_corner s0 on f01dd98 ended on the bystander at 0.28 m)
             far = [p for p in self.scan_points if p[1] >= max(pr, self.last_target[3]) - 0.2]
-            found = lidar_track(far, pb, pr, math.radians(25.0), 0.5)
+            # out from behind someone, it can be anywhere past them: a wider window than at the image edge
+            window = math.radians(60.0 if self.covered_fix == self.last_camera_fix else 25.0)
+            found = lidar_track(far, pb, pr, window, 0.5)
             if found is None:
                 return
             bearing, rng = found
