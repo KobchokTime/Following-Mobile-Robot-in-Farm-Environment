@@ -1693,3 +1693,4 @@ Earlier history: `history-2026-10-16.md`.
 - pass_by s0: the avoid's arc was held at 0 m/s and the spin check then let it turn hard, turning the target out of view. `moving_turn`: try the wanted turn, then 2/3, 1/3, none, taking the first that still moves. 213 tests pass.
 
 - 2026-10-30 14:23 (UTC+7) — follow_stop: trail_tick keeps following crumbs for trail_hold_s 3 s with no target messages (blind_corner s2); moving_turn fallback spin is slow (<= 0.4 rad/s) and not away from a target already off to the side (pass_by s2). Tests 214 pass.
+- 2026-10-30 14:31 (UTC+7) — smoke on bddf0ba: blind_corner s2 vis 0.867 (stood still while the target left view), s4 vis 0.443 (LiDAR edge track took the bystander, gate followed them 4 s). Fixes: held moving_turn turns towards a target >= 20 deg off; sync_fusion track_with_lidar refuses a cluster nearer than predicted or crowded. Tests 215 pass (new test fails on old code).

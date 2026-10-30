@@ -655,6 +655,10 @@ class SyncFusionNode(Node):
             if found is None:
                 return
             bearing, rng = found
+            if rng < pr - 0.2 or scan_crowded(self.scan_points, bearing, rng, pb, pr, self.crowd_radius):
+                # nearer than the target should be, or someone beside it: a person the target walked
+                # behind (blind_corner s4 on bddf0ba took the bystander and the gate followed them)
+                return
             self.gate.accept_lidar(now, bearing, rng)
         # the image edge on the target's side: the controller turns that way at its full turn rate
         cx = 0 if bearing > 0 else self.image_width - 1

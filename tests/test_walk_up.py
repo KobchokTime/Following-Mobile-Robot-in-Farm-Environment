@@ -264,6 +264,18 @@ class LidarAssistTest(unittest.TestCase):
         node.try_sync_from_yolo(t, int(round(self.W / 2.0 - f * math.tan(math.atan2(y, x)))), 240, 4)
         return len(node.published) > n
 
+    def test_a_nearer_person_at_the_edge_is_not_taken_as_the_target(self):
+        # blind_corner s4 on bddf0ba: the target left the image past someone standing nearer; the LiDAR
+        # track took that person, the gate followed them and the camera's target was refused for 4 s
+        m, node = make_node()
+        t = self.lock(node, target=(0.9, 0.0))
+        node.scan_points = scan(person(0.9, -0.33))
+        self.assertTrue(self.box(node, t, 0.9, -0.33))
+        before = len(node.published)
+        for k in range(1, 9):  # the target is gone from the scan; only the nearer person is there
+            self.scan_at(node, t + 0.1 * k, [(0.45, -0.25)])
+        self.assertEqual([p for p in node.published[before:] if p[2] < 0.7], [])
+
     def side_step(self, **params):
         """The traced twin failure: the last box is at 20 deg, then the target steps out of the image."""
         m, node = make_node(**params)

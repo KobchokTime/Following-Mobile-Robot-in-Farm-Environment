@@ -291,7 +291,8 @@ class AvoidTest(unittest.TestCase):
         self.assertEqual(v, 0.0)
         self.assertGreaterEqual(w, -0.4)
         self.assertLess(w, 0.0)
-        self.assertEqual(node.moving_turn(0.4, -0.8, None, 0.5)[1], 0.0)  # the target already 29 deg left
+        self.assertEqual(node.moving_turn(0.4, -0.8, None, 0.25)[1], 0.0)  # the target 14 deg left: hold
+        self.assertEqual(node.moving_turn(0.4, -0.8, None, 0.5)[1], 0.4)  # the target 29 deg left: turn to it
 
     def test_a_robot_held_beside_an_obstacle_can_start_again(self):
         # pass_by s4: the robot stood beside the worker (left) while the target walked on. The speed ramp from

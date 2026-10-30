@@ -476,9 +476,13 @@ class FollowStopNode(Node):
             if v > 0.0:
                 return self.stopped_turn(v, angular_z * f, target_xy)
         # nothing moves: turn in place towards the way round, slowly, and not so far that the target leaves the
-        # camera's view (pass_by s2 on 7ac1cd1 spun at 0.8 rad/s and lost the target)
+        # camera's view (pass_by s2 on 7ac1cd1 spun at 0.8 rad/s and lost the target). With the target already
+        # 20 deg or more off to one side, turn towards it instead (blind_corner s2 on bddf0ba stood still while
+        # the target walked out of view round the corner).
         w = max(-0.4, min(0.4, angular_z))
-        if target_bearing is not None and ((w < 0.0 and target_bearing > 0.45) or (w > 0.0 and target_bearing < -0.45)):
+        if target_bearing is not None and abs(target_bearing) >= 0.35:
+            w = 0.4 if target_bearing > 0.0 else -0.4
+        elif target_bearing is not None and w * target_bearing < 0.0 and abs(target_bearing) >= 0.2:
             w = 0.0
         return self.stopped_turn(0.0, w, target_xy)
 
