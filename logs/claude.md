@@ -1647,3 +1647,6 @@ Earlier history: `history-2026-10-16.md`.
 - Merged with `--no-ff` at `3f191fc`; no conflicts; `scripts/check.py` 205 tests OK; diff scan clean (no path, secret, recording, wheel/serial or `/cmd_vel` command, no new external URL). Twin numbers from the author (104/110, 0 contacts; 104–107 across builds since `546bd57`); not re-run here.
 - Scratch probe (test stubs): the avoid's speed floor ignores the target distance: follower 0.02 m/s → avoid 0.17–0.26 m/s with the target 0.7–1.1 m away (up to 0.4 m/s at `angular_limit` 0.8). Raised in T18 as a concern to settle before robot day (owner: `claude/workspace`). Resend arc-to-straight edge probed: creep stayed under the straight cap; noted, not a finding.
 - `DISCUSSION.md` T18: residual fixed, arc change judged acceptable for the twin given the 104–107 spread, speed-floor concern; Codex asked to re-review `c0e4dee..3f191fc`; thread open. `HANDOFF.md`: hub and workspace rows, item 20, robot-day note, lock released. Pushed.
+
+## 2026-10-30 10:22 — T18 avoid speed (`claude/workspace`)
+- Integration (T18, 10:22): the |w|/2 minimum speed ignored the target's distance (0.4 m/s with the target 0.7 m away). Now the avoid's turn is clamped to |w| <= 2v (arc radius >= 0.5 m) and the speed stays max(follower, 0.12). Test with the target at 0.7 m (0.4 m/s before the fix). 206 tests pass. Twin smoke follows.

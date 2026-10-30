@@ -248,6 +248,17 @@ class AvoidTest(unittest.TestCase):
         self.assertLess(w, 0.0)  # away from the worker
         self.assertLessEqual(abs(w / v), 2.0 + 1e-9)
 
+    def test_avoid_never_speeds_up_toward_a_close_target(self):
+        # T18 integration review of 2e75972: |w|/2 as a minimum speed reached 0.17-0.26 m/s with the target
+        # 0.7-1.1 m away while the follower asked for 0.02 m/s
+        node = M.FollowStopNode()
+        node.avoid_delay = 0.0
+        tgt = (0.7, 0.0)
+        node.cb_scan(scan(person(0.45, 0.32, r=0.1) + person(tgt[0] + 0.2, tgt[1])))  # 0.4 m/s before the fix
+        v, w = node.obstacle_command(0.02, 0.0, tgt, 0.0)
+        self.assertLessEqual(v, node.avoid_min_speed + 1e-9)
+        self.assertLessEqual(abs(w), 2.0 * node.avoid_min_speed + 1e-9)
+
     def test_a_robot_held_beside_an_obstacle_can_start_again(self):
         # pass_by s4: the robot stood beside the worker (left) while the target walked on. The speed ramp from
         # a stop asks for 0.05 m/s with a left turn, a tight arc into the worker, which the stop held at zero
