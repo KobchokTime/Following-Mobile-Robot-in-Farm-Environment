@@ -335,8 +335,9 @@ class FollowStopNode(Node):
         capped = self.obstacle_limited(cmd.linear.x, target_xy, cmd.angular.z)
         if abs(capped) < abs(cmd.linear.x):
             twist = Twist()
-            twist.linear.x = capped
-            twist.angular.z = cmd.angular.z if capped != 0.0 else 0.0  # stopped: no turn in place left running
+            # a lowered resend is a tighter arc; it goes through the spin check like any other command (T18)
+            twist.linear.x, twist.angular.z = self.stopped_turn(capped, cmd.angular.z if capped != 0.0 else 0.0,
+                                                                target_xy)
             self.send(twist, keep_time=True)
             self.last_linear = capped
 

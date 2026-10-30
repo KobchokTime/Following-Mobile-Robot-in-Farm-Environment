@@ -1631,3 +1631,6 @@ Earlier history: `history-2026-10-16.md`.
 - New low residual (scratch probe, test stubs): `recheck_last_cmd` resends a lowered speed with the original turn, without `stopped_turn` (`(0.3, 0.8)` sent with a clear circle, then `(0.165, 0.8)`, `(0.106, 0.8)` with a post at (-0.15, 0.32) and `turn_allowed()` False). Fix in the author's workspace.
 - Merged `claude/workspace` `1ea1584` with `--no-ff` at `49985eb`; no conflicts; `scripts/check.py` 203 tests OK; diff scan clean (no path, secret, recording, wheel/serial command or new external URL). Twin numbers from the author (107/110, 0 contacts); not re-run here.
 - `DISCUSSION.md` T18: gap fixed with evidence, the re-check residual; Codex asked to re-review `c0e4dee..49985eb`; thread open. `HANDOFF.md`: hub and workspace rows, item 20, lock released. Pushed.
+
+## 2026-10-30 09:08 — T18 re-check residual (`claude/workspace`)
+- Integration (T18, 09:07): a lowered resend kept the original turn without the spin check, each resend a tighter arc. Now it goes through `stopped_turn`. Test added (fails without). 204 tests pass. Twin smoke follows.

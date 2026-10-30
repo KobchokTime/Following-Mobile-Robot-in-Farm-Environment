@@ -161,6 +161,18 @@ class StoppedTurnTest(unittest.TestCase):
         node.cb_scan(scan([]))  # the same with the circle clear: sent as asked
         self.assertEqual(node.obstacle_command(0.06, -0.8, (1.5, 0.0), 0.0), (0.06, -0.8))
 
+    def test_a_lowered_resend_goes_through_the_spin_check(self):
+        # T18 integration probe: (0.3, 0.8) sent with the circle clear; then a post beside the rear quarter and
+        # something closing ahead. The re-check lowered the speed and kept the turn, each resend a tighter arc.
+        node = M.FollowStopNode()
+        node.cb_scan(scan([]))
+        cmd = M.Twist(); cmd.linear.x = 0.3; cmd.angular.z = 0.8
+        node.send(cmd, (1.5, 0.0))
+        node.cb_scan(scan(person(-0.15, 0.32, r=0.03) + person(0.55, 0.0, r=0.06)))
+        last = node.pub.messages[-1]
+        self.assertLess(last.linear.x, 0.3)
+        self.assertEqual(last.angular.z, 0.0)
+
     def test_the_scan_is_subscribed_best_effort(self):
         seen = []
         original = M.FollowStopNode.create_subscription
