@@ -76,6 +76,19 @@
 - The twin publishes `/scan` reliably, so it cannot test the QoS change; check on the robot that `follow_stop`
   receives `/scan` (`[OBST]` lines appear, or `ros2 topic info /scan --verbose`).
 
+## Off vs on on the current code (`2026-10-30_obstacle_offon.json`)
+
+Hub `7b0d8ae` (image from `52a1842`), realism, seeds 0–4, one run at a time; only the switch differs.
+
+| Scenario, switch | Pass | Contacts | Closest to the hidden person |
+|---|---|---|---|
+| `pass_by`, `obstacle_avoid` off | 0/5 | 0 | 0.73–0.74 m (stops; the target walks away) |
+| `pass_by`, `obstacle_avoid` on | **5/5** | 0 | 0.56–0.60 m |
+| `blind_corner`, `obstacle_stop` off | 0/5 | **3** | 0.26–0.47 m |
+| `blind_corner`, `obstacle_stop` on | 1/5 | **0** | 0.54–0.61 m |
+
+The dashboard's LiDAR-map tab draws each run from above (`tools/dashboard/live/gen_obstacle.py`).
+
 ## Not shown
 
 - **`blind_corner` still loses the target.** The bystander stands 0.45 m from the target's path at the

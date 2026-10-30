@@ -57,6 +57,9 @@ class _Node:
     def create_subscription(self, *_args):
         return object()
 
+    def create_timer(self, *_args):
+        return object()
+
     def create_publisher(self, _message_type, topic, _qos):
         publisher = _Publisher()
         self.publishers[topic] = publisher

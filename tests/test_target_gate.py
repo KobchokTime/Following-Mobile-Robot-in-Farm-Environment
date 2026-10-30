@@ -112,6 +112,20 @@ class TargetGateTest(unittest.TestCase):
         self.assertFalse(g.accept(0.0, D(30), 0.8))   # close but far off-centre
         self.assertTrue(g.accept(0.1, 0.0, 0.8))
 
+    def test_boxes_ranged_off_someone_in_front_do_not_drive_the_prediction_negative(self):
+        # shade_crossing s0: while someone crossed in front, the target's boxes read their range (0.63 -> 0.34 m);
+        # the range rate drove the prediction to -0.25 m and the target's own boxes at 0.64-2 m were refused
+        g = self.Gate()
+        t = 0.0
+        for k in range(10):
+            self.assertTrue(g.accept(t, 0.0, 0.63))
+            t += 0.1
+        for r in (0.55, 0.45, 0.38, 0.34):
+            g.accept(t, 0.0, r)
+            t += 0.1
+        self.assertGreaterEqual(g._predict(t + 0.5)[1], 0.3)
+        self.assertTrue(g.accept(t + 0.5, D(-4), 0.75))  # the target itself, seen again
+
     def test_rejects_a_second_person_beside_the_target(self):
         g = self.Gate()
         g.accept(0.0, 0.0, 0.8, RED)

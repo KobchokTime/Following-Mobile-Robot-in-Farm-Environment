@@ -157,6 +157,26 @@ def aim_offset(points, half_width, target_xy, exclude_r, prefer=0.0, step_m=0.1,
     return None
 
 
+def trail_aim(crumbs, pose, points, half_width, exclude=None, exclude_r=0.0, min_dist=0.35,
+              shifts=(0.0, -0.1, 0.1, -0.2, 0.2, -0.3, 0.3)):
+    """The newest breadcrumb of the target's path the robot can reach in a clear straight line, in the robot
+    frame, or None. A crumb whose line is blocked is tried shifted sideways (smallest shift first), so the
+    robot can pass someone whose edge reaches into the lane along the target's path (blind_corner).
+    crumbs: world (x, y) oldest first; pose: the robot's dead-reckoned (x, y, heading)."""
+    c, s = math.cos(pose[2]), math.sin(pose[2])
+    for wx, wy in reversed(crumbs):
+        dx, dy = wx - pose[0], wy - pose[1]
+        lx, ly = c * dx + s * dy, -s * dx + c * dy
+        d = math.hypot(lx, ly)
+        if lx < 0.05 or d < min_dist:
+            continue  # behind the robot, or already reached
+        for o in shifts:
+            px, py = lx - o * ly / d, ly + o * lx / d
+            if not segment_blocked(points, half_width, (px, py), exclude, exclude_r):
+                return px, py
+    return None
+
+
 class FollowStopNode(Node):
     def __init__(self):
         super().__init__('follow_stop_node')
@@ -215,6 +235,18 @@ class FollowStopNode(Node):
         self.declare_parameter('avoid_min_speed_mps', 0.12)  # an arc slower than this is no better than stopping
         self.declare_parameter('avoid_hold_s', 0.5)          # keep the shift this long once the path is clear
         self.declare_parameter('avoid_delay_s', 1.0)         # go round only what blocks the path this long
+        # when nothing beside the target clears the way (a corner, the target at the image edge), follow the
+        # target's own path: breadcrumbs of where it walked, kept trail_s, in a dead-reckoned frame
+        self.declare_parameter('avoid_trail', True)
+        self.declare_parameter('trail_s', 6.0)
+        # going round on the trail can turn the target out of the camera's view (blind_corner s2): keep
+        # following the crumbs this long without target messages, then stop as before
+        self.declare_parameter('trail_hold_s', 3.0)
+        # stopped close in front of someone with no way round that keeps the target in view (blind_corner s2 on
+        # f01dd98 stood 14 s at 0.68 m from the bystander): back off slowly, the stop checking behind, to make
+        # room for a way round; at most avoid_back_s each time the path is blocked
+        self.declare_parameter('avoid_back_mps', 0.1)
+        self.declare_parameter('avoid_back_s', 3.0)
         self.declare_parameter('scan_topic', '/scan')
         self.declare_parameter('lidar_angle_offset_deg', 180.0)  # as sync_fusion_node / lidar_sectorizer_node
         self.declare_parameter('scan_max_age_s', 0.3)
@@ -268,6 +300,19 @@ class FollowStopNode(Node):
         self.avoid_hold        = float(self.get_parameter('avoid_hold_s').value)
         self.avoid_delay       = float(self.get_parameter('avoid_delay_s').value)
         self.blocked_since     = None   # when the straight path to the target was first seen blocked
+        self.avoid_trail       = bool(self.get_parameter('avoid_trail').value)
+        self.trail_s           = float(self.get_parameter('trail_s').value)
+        self.pose              = [0.0, 0.0, 0.0]  # dead reckoning from the commands sent (no odometry topic)
+        self.pose_time         = None
+        self.last_angular      = 0.0
+        self.crumbs            = []     # (x, y, time) of the target in the dead-reckoned frame, oldest first
+        self.trailing          = False  # last [TRAIL] state written to the log
+        self.trail_hold        = float(self.get_parameter('trail_hold_s').value)
+        self.avoid_back_mps    = float(self.get_parameter('avoid_back_mps').value)
+        self.avoid_back_s      = float(self.get_parameter('avoid_back_s').value)
+        self.backing           = False  # last [BACK] state written to the log
+        self.back_since        = None   # when backing off began in this blocked spell
+        self.trail_since_msg   = False  # the trail is driving on its own, without target messages
         self.avoid_offset      = 0.0    # m beside the target the robot aims at to pass an obstacle
         self.avoid_time        = 0.0    # when the current shift was last needed
         self.last_clearance    = math.inf  # corridor clearance of the last command, for the [MOVE] line
@@ -301,6 +346,8 @@ class FollowStopNode(Node):
         self.pub = self.create_publisher(Twist, '/cmd_vel', 10)
         if self.target_timeout > 0.0:
             self.stale_timer = self.create_timer(0.05, self.check_stale)
+        if self.obstacle_stop and self.obstacle_avoid and self.avoid_trail:
+            self.trail_timer = self.create_timer(0.1, self.trail_tick)
 
         self.get_logger().info(
             f"FollowStopNode ✅ started | Target={self.target_distance:.2f} m "
@@ -316,7 +363,29 @@ class FollowStopNode(Node):
                 pts.append((r * math.cos(a), r * math.sin(a)))
         self.scan_xy = pts
         self.scan_time = self.get_clock().now().nanoseconds / 1e9
+        self.advance_pose()
         self.recheck_last_cmd()
+
+    def advance_pose(self):
+        """Dead-reckon the robot from the bridge's estimated wheel speed and the last turn rate sent."""
+        now = self.get_clock().now().nanoseconds / 1e9
+        if self.pose_time is not None:
+            dt = min(0.5, max(0.0, now - self.pose_time))
+            th = self.pose[2] + 0.5 * self.last_angular * dt
+            self.pose[0] += self.v_wheels * dt * math.cos(th)
+            self.pose[1] += self.v_wheels * dt * math.sin(th)
+            self.pose[2] += self.last_angular * dt
+        self.pose_time = now
+        return now
+
+    def add_crumb(self, target_xy, now):
+        """Remember where the target is, in the dead-reckoned frame, every 0.1 m it walks."""
+        c, s = math.cos(self.pose[2]), math.sin(self.pose[2])
+        wx = self.pose[0] + c * target_xy[0] - s * target_xy[1]
+        wy = self.pose[1] + s * target_xy[0] + c * target_xy[1]
+        if not self.crumbs or math.hypot(wx - self.crumbs[-1][0], wy - self.crumbs[-1][1]) >= 0.1:
+            self.crumbs.append((wx, wy, now))
+        self.crumbs = [cr for cr in self.crumbs if now - cr[2] <= self.trail_s]
 
     def recheck_last_cmd(self):
         """Each scan re-checks the last moving command, turns in place included, against the new returns.
@@ -350,6 +419,7 @@ class FollowStopNode(Node):
         re-check's lowered resend, still dated from the command it lowers."""
         self.pub.publish(twist)
         now = self.get_clock().now().nanoseconds / 1e9
+        self.last_angular = twist.angular.z
         self.moving_cmd = twist if twist.linear.x != 0.0 or twist.angular.z != 0.0 else None
         if not keep_time:
             self.moving_time = now
@@ -406,6 +476,31 @@ class FollowStopNode(Node):
             return linear_x, 0.0
         return linear_x, angular_z
 
+    def moving_turn(self, linear_x, angular_z, target_xy, target_bearing=None):
+        """(linear, angular) for a way round: the wanted turn, or a gentler one (2/3, 1/3, none) if the wanted
+        arc is held by the stop and a gentler one still moves; a turn in place only if none does. Spinning
+        hard with the robot held turned the target out of the camera's view (pass_by s0 on 4caa707)."""
+        tries = [(linear_x, angular_z)]
+        if linear_x > self.avoid_min_speed:
+            # fast, the same turn is near straight and held like straight; at a crawl it is a real arc that clears
+            # (pass_by s2 on a30c90d stood 5 s beside the worker asked for 1.3 m/s)
+            tries.append((self.avoid_min_speed, max(-2.0 * self.avoid_min_speed, min(2.0 * self.avoid_min_speed, angular_z))))
+        for v0, w0 in tries:
+            for f in (1.0, 2.0 / 3.0, 1.0 / 3.0, 0.0):
+                v = self.obstacle_limited(v0, target_xy, w0 * f)
+                if v > 0.0:
+                    return self.stopped_turn(v, w0 * f, target_xy)
+        # nothing moves: turn in place towards the way round, slowly, and not so far that the target leaves the
+        # camera's view (pass_by s2 on 7ac1cd1 spun at 0.8 rad/s and lost the target). With the target already
+        # 20 deg or more off to one side, turn towards it instead (blind_corner s2 on bddf0ba stood still while
+        # the target walked out of view round the corner).
+        w = max(-0.4, min(0.4, angular_z))
+        if target_bearing is not None and abs(target_bearing) >= 0.35:
+            w = 0.4 if target_bearing > 0.0 else -0.4
+        elif target_bearing is not None and w * target_bearing < 0.0 and abs(target_bearing) >= 0.2:
+            w = 0.0
+        return self.stopped_turn(0.0, w, target_xy)
+
     def obstacle_command(self, linear_x, angular_z, target_xy, target_bearing, at_edge=False):
         """(linear, angular) after the obstacle stop. With obstacle_avoid, when something other than the target
         lies on the straight path to the target, aim beside the target by the smallest clear shift (aim_offset)
@@ -414,10 +509,21 @@ class FollowStopNode(Node):
         now = self.get_clock().now().nanoseconds / 1e9
         fresh = self.scan_time is not None and 0.0 <= now - self.scan_time <= self.scan_max_age
         offset = 0.0
+        found = 0.0
+        if self.obstacle_stop and self.obstacle_avoid and fresh and at_edge and (linear_x > 0.0 or angular_z != 0.0):
+            # at the image edge the target's bearing is not known well enough to aim beside it; blocked means
+            # the follower's own command would be held by the stop
+            v_try = max(linear_x, self.avoid_min_speed)
+            held = self.obstacle_limited(v_try, target_xy, max(-2.0 * v_try, min(2.0 * v_try, angular_z))) < v_try
+            found = None if held or not self.turn_allowed(target_xy) else 0.0
+            if found == 0.0:
+                self.blocked_since = self.back_since = None
+            elif self.blocked_since is None:
+                self.blocked_since = now
         if self.obstacle_stop and self.obstacle_avoid and fresh and not at_edge and linear_x > 0.0:
             found = aim_offset(self.scan_xy, self.obstacle_half_w, target_xy, self.obstacle_excl, self.avoid_offset)
             if found == 0.0:
-                self.blocked_since = None
+                self.blocked_since = self.back_since = None
             elif self.blocked_since is None:
                 self.blocked_since = now
             # someone walking across the path is gone within about a second; going round them turned the
@@ -427,6 +533,49 @@ class FollowStopNode(Node):
                 offset, self.avoid_time = found, now  # None: no shift clears it; the stop alone applies
             elif found == 0.0 and self.avoid_offset != 0.0 and now - self.avoid_time < self.avoid_hold:
                 offset = self.avoid_offset  # just past it: keep the shift a moment so the robot does not clip it
+        waited = self.blocked_since is not None and now - self.blocked_since >= self.avoid_delay
+        # the target's own path is followed at once, without the avoid delay: it goes where the target went,
+        # not round anyone, and standing still at the inside of a corner lost the target behind the bystander
+        # (blind_corner: every pass on 56a6a89 drove on to the corner, every fail stopped short of it)
+        if offset == 0.0 and found != 0.0 and self.avoid_trail and fresh and (waited or not at_edge):
+            aim = trail_aim([cr[:2] for cr in self.crumbs], self.pose, self.scan_xy, self.obstacle_half_w,
+                            None if at_edge else target_xy, self.obstacle_excl)
+            if aim is not None:
+                if not self.trailing:
+                    self.get_logger().info(f"[TRAIL] on: follow the target's path to ({aim[0]:.2f}, {aim[1]:.2f}) m")
+                    self.trailing = True
+                angular_z = bearing_turn(math.atan2(aim[1], aim[0]), 0.0, self.latency_s, self.bearing_gain,
+                                         self.angular_limit, self.bearing_deadband)
+                # speed from the way left along the path, not the straight gap: at a corner the target is close
+                # in a straight line but a corner away, and the crawl reached the corner too late to keep it in
+                # view (blind_corner s1/s3 on 47109fb, in view 0.897)
+                linear_x = max(linear_x, self.avoid_min_speed,
+                               min(0.6, 1.0 * (self.trail_length(aim) - self.target_distance)))
+                angular_z = max(-2.0 * linear_x, min(2.0 * linear_x, angular_z))
+                if not at_edge and angular_z * target_bearing < 0.0 and abs(target_bearing) >= 0.35:
+                    # the crumb is one way and the target already 20 deg or more the other: going straight
+                    # on along the trail keeps it in the image (blind_corner s0 on a30c90d turned it out)
+                    angular_z = 0.0
+                return self.moving_turn(linear_x, angular_z, None if at_edge else target_xy,
+                                        None if at_edge else target_bearing)
+        if self.trailing:
+            self.get_logger().info("[TRAIL] off")
+            self.trailing = False
+        far = target_xy is not None and math.hypot(*target_xy) > self.target_distance + 0.3
+        if offset == 0.0 and found is None and waited and fresh and not at_edge and linear_x > 0.0 and far \
+                and self.avoid_back_mps > 0.0 \
+                and (self.back_since is None or now - self.back_since <= self.avoid_back_s):
+            back = self.obstacle_limited(-self.avoid_back_mps, None, 0.0)
+            if back < 0.0:
+                if self.back_since is None:
+                    self.back_since = now  # counted from the first step back, not from the block (s2 on 3a4ac4a)
+                if not self.backing:
+                    self.get_logger().info("[BACK] on: no way round from here, backing off")
+                    self.backing = True
+                return back, 0.0
+        if self.backing:
+            self.get_logger().info("[BACK] off")
+            self.backing = False
         if offset != 0.0:
             if offset != self.avoid_offset:
                 self.get_logger().info(f"[AVOID] aim {offset:+.2f} m beside the target")
@@ -441,13 +590,19 @@ class FollowStopNode(Node):
             # the robot never closes on the target faster than the follower asks (T18 integration review).
             linear_x = max(linear_x, self.avoid_min_speed)
             angular_z = max(-2.0 * linear_x, min(2.0 * linear_x, angular_z))
-            linear_x = self.obstacle_limited(linear_x, target_xy, angular_z)
-            return self.stopped_turn(linear_x, angular_z, target_xy)
+            return self.moving_turn(linear_x, angular_z, target_xy, target_bearing)
         if self.avoid_offset != 0.0:
             self.get_logger().info("[AVOID] off")
             self.avoid_offset = 0.0
-        linear_x = self.obstacle_limited(linear_x, target_xy, angular_z)
-        return self.stopped_turn(linear_x, angular_z, target_xy)
+        capped = self.obstacle_limited(linear_x, target_xy, angular_z)
+        if linear_x > 0.0 and capped == 0.0 and angular_z != 0.0 and not at_edge:
+            # the arc towards the target brushes someone it passes; a gentler one, or straight on, may still go
+            # (blind_corner s2 on f47c6d7 stood 4 s with the target in view and the straight line clear)
+            for f in (2.0 / 3.0, 1.0 / 3.0, 0.0):
+                v = self.obstacle_limited(linear_x, target_xy, angular_z * f)
+                if v > 0.0:
+                    return self.stopped_turn(v, angular_z * f, target_xy)
+        return self.stopped_turn(capped, angular_z, target_xy)
 
     def cb_fused(self, msg: Float32MultiArray):
         if len(msg.data) < 8:
@@ -566,6 +721,9 @@ class FollowStopNode(Node):
         tb = (math.radians(self.camera_hfov_deg / 2.0) * (1.0 if cx <= 0 else -1.0)
               if cx <= 0 or cx >= self.image_width - 1 else camera_bearing(cx, self.image_width, self.camera_hfov_deg))
         target_xy = (dist * math.cos(tb), dist * math.sin(tb))
+        crumb_now = self.advance_pose()
+        if not (cx <= 0 or cx >= self.image_width - 1):
+            self.add_crumb(target_xy, crumb_now)
         linear_x, angular_z = self.obstacle_command(linear_x, angular_z, target_xy, tb,
                                                     at_edge=cx <= 0 or cx >= self.image_width - 1)
         self.last_linear = linear_x
@@ -588,8 +746,79 @@ class FollowStopNode(Node):
         )
 
     # ==================================================
+    def last_crumb_bearing(self):
+        """Bearing (robot frame) of the newest crumb, where the target was last seen; None without crumbs."""
+        if not self.crumbs:
+            return None
+        cx, cy = self.crumbs[-1][0] - self.pose[0], self.crumbs[-1][1] - self.pose[1]
+        return math.atan2(-math.sin(self.pose[2]) * cx + math.cos(self.pose[2]) * cy,
+                          math.cos(self.pose[2]) * cx + math.sin(self.pose[2]) * cy)
+
+    def trail_length(self, aim):
+        """The way along the target's path from the robot (aim, robot frame) to the newest crumb, in metres."""
+        if not self.crumbs:
+            return math.hypot(*aim)
+        dx, dy = self.crumbs[-1][0] - self.pose[0], self.crumbs[-1][1] - self.pose[1]
+        c, s = math.cos(self.pose[2]), math.sin(self.pose[2])
+        nx, ny = c * dx + s * dy, -s * dx + c * dy
+        return math.hypot(*aim) + math.hypot(nx - aim[0], ny - aim[1])
+
+    def trail_tick(self):
+        """While the trail is being followed and target messages have stopped (the way round turned the target
+        out of view), keep driving along the crumbs for trail_hold_s, every command through the stop; then
+        stop. A new target message hands control back to the follower."""
+        now = self.get_clock().now().nanoseconds / 1e9
+        quiet = self.last_msg_time is not None and now - self.last_msg_time
+        if not self.trailing or quiet is None or quiet < 0.25:
+            self.trail_since_msg = False
+            return
+        if quiet > self.trail_hold or self.scan_time is None or not 0.0 <= now - self.scan_time <= self.scan_max_age:
+            self.get_logger().info(f"[TRAIL] off: no target message for {quiet:.1f} s")
+            self.trailing = self.trail_since_msg = False
+            self.publish_stop()
+            return
+        self.advance_pose()
+        aim = trail_aim([cr[:2] for cr in self.crumbs], self.pose, self.scan_xy, self.obstacle_half_w)
+        if aim is None:
+            # no crumb in a clear line: turn slowly in place towards where the target was last seen, for the rest
+            # of the hold, so the camera can find it again (blind_corner s1 on 9935332 stopped facing away and
+            # never saw it again); the spin circle still decides whether the turn is sent
+            last = self.last_crumb_bearing()
+            if last is not None and abs(last) >= 0.17 and self.turn_allowed():
+                if self.trail_since_msg != 'turn':
+                    self.get_logger().info("[TRAIL] no crumb reachable: turning to where the target was last seen")
+                    self.trail_since_msg = 'turn'  # still the trail without messages (check_stale leaves it)
+                twist = Twist()
+                twist.angular.z = 0.4 if last > 0.0 else -0.4
+                self.send(twist)
+                self.last_linear = 0.0
+                return
+            self.get_logger().info("[TRAIL] off: no crumb reachable")
+            self.trailing = self.trail_since_msg = False
+            self.publish_stop()
+            return
+        if not self.trail_since_msg:
+            self.get_logger().info("[TRAIL] driving on the crumbs without target messages")
+            self.trail_since_msg = True
+        angular_z = bearing_turn(math.atan2(aim[1], aim[0]), 0.0, self.latency_s, self.bearing_gain,
+                                 self.angular_limit, self.bearing_deadband)
+        linear_x = self.avoid_min_speed
+        angular_z = max(-2.0 * linear_x, min(2.0 * linear_x, angular_z))
+        # where the target was last seen: the newest crumb. Do not turn away from it once it is 20 deg or more
+        # the other way (blind_corner s2 on 1b5dc92 turned right to the crumbs as the target went left)
+        last = self.last_crumb_bearing()
+        if angular_z * last < 0.0 and abs(last) >= 0.35:
+            angular_z = 0.0
+        linear_x, angular_z = self.moving_turn(linear_x, angular_z, None)
+        twist = Twist()
+        twist.linear.x, twist.angular.z = linear_x, angular_z
+        self.send(twist)
+        self.last_linear = linear_x
+
     def check_stale(self):
         """Stop once target messages have stopped; the next message resumes control."""
+        if self.trailing and self.trail_since_msg:
+            return  # the trail is driving; trail_tick stops it after trail_hold_s
         if self.stale_stopped or not target_is_stale(self.get_clock().now().nanoseconds / 1e9,
                                                      self.last_msg_time, self.target_timeout):
             return
@@ -606,6 +835,7 @@ class FollowStopNode(Node):
         twist = Twist()
         self.pub.publish(twist)
         self.moving_cmd = None
+        self.last_angular = 0.0
 
 
 def main():

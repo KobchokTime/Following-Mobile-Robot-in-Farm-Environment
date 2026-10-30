@@ -283,6 +283,67 @@ class AvoidTest(unittest.TestCase):
         self.assertLessEqual(v, node.avoid_min_speed + 1e-9)
         self.assertLessEqual(abs(w), 2.0 * node.avoid_min_speed + 1e-9)
 
+    def test_held_everywhere_it_turns_slowly_and_keeps_the_target_in_view(self):
+        # pass_by s2 on 7ac1cd1: straight and every gentler arc held; it spun at 0.8 rad/s and lost the target
+        node = M.FollowStopNode()
+        node.cb_scan(scan([(0.44, y / 20.0) for y in range(-8, 9)]))  # something across the lane, outside the circle
+        v, w = node.moving_turn(0.4, -0.8, None, 0.0)
+        self.assertEqual(v, 0.0)
+        self.assertGreaterEqual(w, -0.4)
+        self.assertLess(w, 0.0)
+        self.assertEqual(node.moving_turn(0.4, -0.8, None, 0.25)[1], 0.0)  # the target 14 deg left: hold
+        self.assertEqual(node.moving_turn(0.4, -0.8, None, 0.5)[1], 0.4)  # the target 29 deg left: turn to it
+
+    def test_with_no_way_round_it_backs_off_slowly_if_nothing_is_behind(self):
+        # blind_corner s2 on f01dd98: stopped 0.68 m from the bystander with the target 2.9 m out behind them;
+        # no aim within 0.5 rad clears, and it stood there 14 s
+        tb = math.radians(7.0)
+        tgt = (2.86 * math.cos(tb), 2.86 * math.sin(tb))
+        by = (0.68 * math.cos(math.radians(-11.0)), 0.68 * math.sin(math.radians(-11.0)))
+        node = M.FollowStopNode()
+        node.avoid_delay = 0.0
+        node.cb_scan(scan(person(*by) + person(tgt[0] + 0.2, tgt[1])))
+        v, w = node.obstacle_command(0.4, 0.0, tgt, tb)
+        self.assertLess(v, 0.0)
+        self.assertGreaterEqual(v, -node.avoid_back_mps)
+        self.assertEqual(w, 0.0)
+        # blocked long before (s2 on 3a4ac4a turned in place 4 s first): the back-off time starts with it
+        node = M.FollowStopNode()
+        node.avoid_delay = 0.0
+        node.cb_scan(scan(person(*by) + person(tgt[0] + 0.2, tgt[1])))
+        node.blocked_since = node.get_clock().now().nanoseconds / 1e9 - 10.0
+        self.assertLess(node.obstacle_command(0.4, 0.0, tgt, tb)[0], 0.0)
+        node = M.FollowStopNode()
+        node.avoid_delay = 0.0
+        node.cb_scan(scan(person(*by) + person(tgt[0] + 0.2, tgt[1]) + person(-0.5, 0.0)))  # someone behind
+        self.assertEqual(node.obstacle_command(0.4, 0.0, tgt, tb)[0], 0.0)
+
+    def test_a_fast_request_beside_a_worker_still_goes_round_at_a_crawl(self):
+        # pass_by s2 on a30c90d: asked for 1.3 m/s, the way round was a near straight arc held like straight,
+        # and it stood 5 s beside the worker while the target walked on
+        def at(r, deg):
+            return r * math.cos(math.radians(deg)), r * math.sin(math.radians(deg))
+        node = M.FollowStopNode()
+        node.avoid_delay = 0.0
+        tgt = at(2.05, 15.0)
+        node.cb_scan(scan(person(*at(0.67, 51.0)) + person(*at(2.25, 15.0))))
+        v, w = node.obstacle_command(1.34, -0.15, tgt, math.radians(15.0))
+        self.assertGreater(v, 0.0)
+        self.assertLessEqual(v, node.avoid_min_speed + 1e-9)
+        self.assertLessEqual(abs(w), 2.0 * v + 1e-9)
+
+    def test_an_arc_held_by_someone_beside_it_goes_gentler_or_straight(self):
+        # blind_corner s2 on f47c6d7: the arc towards the target brushed the bystander, the straight line was
+        # clear, and the robot stood 4 s while the target walked out of range
+        node = M.FollowStopNode()
+        node.obstacle_avoid = False
+        node.cb_scan(scan(person(0.3, 0.6)))  # on the arc, clear of the straight line
+        tgt = (2.0, 0.3)
+        self.assertEqual(node.obstacle_limited(0.4, tgt, 0.3), 0.0)
+        v, w = node.obstacle_command(0.4, 0.3, tgt, math.atan2(0.3, 2.0))
+        self.assertGreater(v, 0.0)
+        self.assertLess(w, 0.3)
+
     def test_a_robot_held_beside_an_obstacle_can_start_again(self):
         # pass_by s4: the robot stood beside the worker (left) while the target walked on. The speed ramp from
         # a stop asks for 0.05 m/s with a left turn, a tight arc into the worker, which the stop held at zero
@@ -292,6 +353,96 @@ class AvoidTest(unittest.TestCase):
         node.cb_scan(scan(person(0.07, 0.54) + person(tgt[0] + 0.2, tgt[1])))
         node.obstacle_avoid = False
         self.assertEqual(node.obstacle_command(0.05, 0.2, tgt, math.radians(11)), (0.05, 0.0))  # straight past
+
+
+class TrailTest(unittest.TestCase):
+    """blind_corner: the target turned left round someone standing at the inside of the corner; the robot
+    cut the corner, stopped and lost the target. It follows the target's own path instead."""
+    CRUMBS = [(x / 10.0, 0.0) for x in range(0, 21)] + [(2.0, y / 10.0) for y in range(1, 15)]
+
+    def test_the_newest_clear_crumb_is_the_corner_not_the_target(self):
+        pose = (0.9, 0.0, 0.0)
+        bystander = person(1.45 - 0.9, 0.55)  # robot frame: at the inside of the corner
+        aim = M.trail_aim(self.CRUMBS, pose, bystander, 0.3)
+        self.assertIsNotNone(aim)
+        self.assertGreater(aim[0], 0.9)    # on to the corner (1.1 m ahead), not stopping short of the bystander
+        self.assertLess(aim[1], 0.05)      # on the target's first leg, or just right of it, never cutting left
+        self.assertGreater(aim[1], -0.35)
+
+    def test_past_the_corner_the_trail_turns(self):
+        pose = (2.0, 0.0, math.pi / 2)  # at the corner, facing the target's second leg
+        aim = M.trail_aim(self.CRUMBS, pose, [], 0.3)
+        self.assertGreater(aim[0], 1.0)  # straight on up the second leg
+
+    def test_nothing_reachable_means_no_aim(self):
+        wall = [(0.3, y / 20.0) for y in range(-40, 41)]
+        self.assertIsNone(M.trail_aim(self.CRUMBS, (0.0, 0.0, 0.0), wall, 0.3))
+
+    def test_the_trail_does_not_turn_away_from_a_target_off_to_the_other_side(self):
+        # blind_corner s0 on a30c90d: the crumbs lay right, the target walked on 35 deg left; turning to the
+        # crumbs took it out of the image
+        tb = math.radians(35.0)
+        tgt = (1.2 * math.cos(tb), 1.2 * math.sin(tb))
+        node = M.FollowStopNode()
+        node.avoid_delay = 0.0
+        node.avoid_back_mps = 0.0
+        node.cb_scan(scan(person(0.6, 0.42) + person(tgt[0] + 0.2 * math.cos(tb), tgt[1] + 0.2 * math.sin(tb))))
+        node.crumbs = [(0.7, -0.25, 0.0), (0.9, -0.25, 0.0)]
+        self.assertIsNone(M.aim_offset(node.scan_xy, node.obstacle_half_w, tgt, node.obstacle_excl))
+        node.obstacle_command(0.4, 0.0, tgt, tb)
+        self.assertTrue(node.trailing)
+        self.assertGreaterEqual(node.obstacle_command(0.4, 0.0, tgt, tb)[1], 0.0)
+
+    def test_a_blocked_line_follows_the_trail_at_once(self):
+        # blind_corner on 56a6a89: every run that stood out the 1 s avoid delay at the inside of the corner lost
+        # the target; every run that drove on along the target's path to the corner kept it
+        node = M.FollowStopNode()
+        node.cb_scan(scan(person(0.9, 0.42)))
+        node.crumbs = [(x / 10.0, 0.0, 0.0) for x in range(0, 17)]
+        v, w = node.obstacle_command(0.4, 0.0, (1.6, 0.0), 0.0)
+        self.assertTrue(node.trailing)
+        self.assertGreater(v, 0.0)
+
+    def test_the_trail_is_driven_at_the_speed_of_the_way_left_along_it(self):
+        # blind_corner s1/s3 on 47109fb: 0.8 m from the target in a straight line, a corner away along its path,
+        # the trail crawled to the corner and the target was out of view 2.7 s (in view 0.897)
+        node = M.FollowStopNode()
+        node.crumbs = [(1.0, 0.0, 0.0), (1.0, 0.8, 0.0)]
+        self.assertAlmostEqual(node.trail_length((1.0, 0.0)), 1.8)
+        node.cb_scan(scan(person(0.55, 0.55)))
+        v, _ = node.obstacle_command(0.1, 0.0, (1.0, 0.8), math.atan2(0.8, 1.0))
+        self.assertTrue(node.trailing)
+        self.assertGreater(v, 0.2)  # not the 0.12 crawl; the stop still caps it near the bystander
+
+    def test_with_no_crumb_reachable_the_trail_turns_to_where_the_target_was_seen(self):
+        # blind_corner s1 on 9935332: no crumb in a clear line, it stopped facing away and never saw the target again
+        node = M.FollowStopNode()
+        clock = {'t': 10.0}
+        now = type('Now', (), {'nanoseconds': property(lambda self_: int(clock['t'] * 1e9))})
+        node.get_clock = lambda: type('Clock', (), {'now': lambda self_: now()})()
+        sent = []
+        node.send = lambda twist, *a, **k: sent.append((twist.linear.x, twist.angular.z))
+        node.cb_scan(scan([(0.6, y / 20.0) for y in range(-30, 31)]))  # a wall ahead, outside the spin circle
+        node.crumbs = [(1.0, 0.9, 9.0)]  # beyond it, to the left
+        node.trailing, node.last_msg_time = True, 9.5
+        node.trail_tick()
+        self.assertEqual(sent, [(0.0, 0.4)])  # left, where the target was last seen
+        self.assertTrue(node.trailing)
+
+    def test_dead_reckoning_and_crumbs(self):
+        node = M.FollowStopNode()
+        clock = {'t': 0.0}
+        now = type('Now', (), {'nanoseconds': property(lambda self_: int(clock['t'] * 1e9))})
+        node.get_clock = lambda: type('Clock', (), {'now': lambda self_: now()})()
+        node.advance_pose()
+        node.v_wheels, node.last_angular = 0.5, 0.0
+        for k in (1, 2, 3, 4, 5):
+            clock['t'] = 0.2 * k
+            node.advance_pose()
+        self.assertAlmostEqual(node.pose[0], 0.5, places=6)
+        node.add_crumb((1.0, 0.0), clock['t'])
+        node.add_crumb((1.05, 0.0), clock['t'])  # under 0.1 m from the last: not kept
+        self.assertEqual([c[:2] for c in node.crumbs], [(1.5, 0.0)])
 
 
 if __name__ == "__main__":

@@ -94,6 +94,21 @@ class WalkUpTest(unittest.TestCase):
             t += 0.1
         return t
 
+    def test_a_target_covered_from_the_lidar_keeps_its_predicted_range(self):
+        # blind_corner: someone the camera does not detect stands between the robot and the target at the
+        # target's bearing; the box range was theirs (0.3 m), and the follower stopped as if at the target
+        m, node = make_node()
+        t = self.lock(node, target=(1.0, 0.0))
+        f = (self.W / 2.0) / math.tan(math.radians(self.HFOV) / 2.0)
+        node.scan_points = scan(person(1.0, 0.0), person(0.5, 0.02))
+        node.scan_time = t
+        node.buf_lidar.clear()
+        node.buf_lidar.append((t, [1.0]))
+        n = len(node.published)
+        node.try_sync_from_yolo(t, int(round(self.W / 2.0)), 240, 4)
+        self.assertGreater(len(node.published), n)
+        self.assertGreater(node.published[-1][2], 0.7)  # the target's range, not the near person's
+
     def test_a_stranger_stepping_out_beside_the_target_is_not_taken(self):
         """Same clothes, 0.40 m to the right; the stranger's box comes first in the frame."""
         m, node = make_node()
@@ -216,6 +231,18 @@ class WalkUpTest(unittest.TestCase):
         self.assertEqual([line.split()[1] for line in crowd], ['on', 'off', 'on', 'off'])
         self.assertIn('reason=scan', crowd[2])
 
+    def test_giving_way_holds_at_the_follow_distance_instead_of_backing_off(self):
+        # pass_by s0 on 5cfb21b: a worker's box 0.57 m out in the path published the target at 0.17 m and the
+        # controller reversed at 0.5 m/s
+        m, node = make_node()
+        t = self.lock(node, target=(1.0, 0.0))
+        t += 1.0
+        for k in range(10):
+            self.frame(node, t + 0.1 * k, [(1.0 + 0.05 * k, 0.0)])
+        t += 1.0
+        self.frame(node, t, [(0.57, 0.15), (1.5, 0.0)])
+        self.assertGreaterEqual(min(p[2] for p in node.published[-2:]), 0.5)
+
     def test_a_crop_row_beside_the_target_does_not_count_as_a_person(self):
         m, _ = make_node()
         # plants 0.1 m apart, 0.45 m right: inside the 0.5 m radius, so only the 1.5 m width rule leaves it out
@@ -248,6 +275,81 @@ class LidarAssistTest(unittest.TestCase):
         n = len(node.published)
         node.try_sync_from_yolo(t, int(round(self.W / 2.0 - f * math.tan(math.atan2(y, x)))), 240, 4)
         return len(node.published) > n
+
+    def test_a_nearer_person_at_the_edge_is_not_taken_as_the_target(self):
+        # blind_corner s4 on bddf0ba: the target left the image past someone standing nearer; the LiDAR
+        # track took that person, the gate followed them and the camera's target was refused for 4 s
+        m, node = make_node()
+        t = self.lock(node, target=(0.9, 0.0))
+        node.scan_points = scan(person(0.9, -0.33))
+        self.assertTrue(self.box(node, t, 0.9, -0.33))
+        before = len(node.published)
+        for k in range(1, 5):  # the target is hidden behind the nearer person
+            self.scan_at(node, t + 0.1 * k, [(0.45, -0.25)])
+        for k in range(5, 9):  # then comes out beyond them, still out of the image
+            self.scan_at(node, t + 0.1 * k, [(0.45, -0.25), (0.55, -0.85)])
+        out = node.published[before:]
+        self.assertEqual([p for p in out if p[2] < 0.7], [])
+        self.assertTrue(any(p[0] == node.image_width - 1 and p[2] > 0.7 for p in out))  # turned towards it
+
+    def test_a_target_that_walks_behind_someone_and_out_of_view_is_followed_with_the_lidar(self):
+        # blind_corner s2 on 1ba6ff8: last seen at 11 deg, then covered by the bystander, then out on the far
+        # side beyond the image; it was never last seen near the edge, so nothing was published for 6 s
+        m, node = make_node()
+        t = self.lock(node, target=(1.0, 0.0))
+        node.scan_points = scan(person(1.0, 0.2))
+        self.assertTrue(self.box(node, t, 1.0, 0.2))
+        before = len(node.published)
+        for k in range(1, 4):  # covered
+            self.scan_at(node, t + 0.1 * k, [(0.6, 0.12), (1.0, 0.2 + 0.03 * k)])
+        for k in range(4, 9):  # out beyond the bystander, outside the image; the robot creeping on, the
+            # bystander no longer covers the bearing the target was last seen at (blind_corner s3 on a30c90d)
+            self.scan_at(node, t + 0.1 * k, [(0.55, 0.12 - 0.08 * k), (0.75, 0.4 + 0.12 * k)])
+        out = node.published[before:]
+        self.assertTrue(any(p[0] == 0 and p[2] > 0.8 for p in out))  # turned left, at the target's range
+        self.assertEqual([p for p in out if p[2] < 0.7], [])
+
+    def test_a_target_walking_away_out_of_view_is_found_again_further_out(self):
+        # blind_corner s2 on 1b5dc92: unseen 1 s, the prediction held 0.95 m while the target walked on to 1.4 m,
+        # outside the 0.5 m range window, and the LiDAR never found it
+        m, node = make_node()
+        t = self.lock(node, target=(0.9, 0.0))
+        node.scan_points = scan(person(0.9, -0.33))
+        self.assertTrue(self.box(node, t, 0.9, -0.33))
+        before = len(node.published)
+        for k in range(1, 6):  # nothing there for 0.5 s (behind something the scan does not show)
+            self.scan_at(node, t + 0.1 * k, [])
+        for k in range(6, 15):
+            self.scan_at(node, t + 0.1 * k, [(0.7 + 0.1 * k, -1.2)])
+        self.assertTrue(any(p[0] > node.image_width / 2 and p[2] > 1.3 for p in node.published[before:]))  # right, further out
+
+    def test_a_covered_target_inside_the_image_is_given_at_its_own_column(self):
+        # blind_corner s1 on e80a83d: found by the LiDAR at 6 deg behind the bystander and sent to the image
+        # edge, the robot spun at full rate past it
+        m, node = make_node()
+        t = self.lock(node, target=(1.0, 0.0))
+        node.scan_points = scan(person(1.0, 0.2))
+        self.assertTrue(self.box(node, t, 1.0, 0.2))
+        before = len(node.published)
+        for k in range(1, 9):
+            self.scan_at(node, t + 0.1 * k, [(0.6, 0.0), (1.0, 0.5)])
+        out = node.published[before:]
+        self.assertTrue(out)
+        self.assertTrue(all(0 < p[0] < node.image_width / 2 for p in out))  # left of centre, not at the edge
+
+    def test_a_box_range_shortened_by_someone_in_front_does_not_lower_the_floor(self):
+        # blind_corner s0 on 47109fb: the last box read 0.50 m off the bystander's edge (target 0.78 m), and the
+        # LiDAR track then took the bystander at 0.31 m
+        m, node = make_node()
+        t = self.lock(node, target=(0.9, 0.0))
+        node.scan_points = scan(person(0.9, -0.33))
+        self.assertTrue(self.box(node, t, 0.9, -0.33))
+        node.scan_points = scan(person(0.9, -0.33), person(0.62, -0.42))  # someone stepping in front
+        self.box(node, t + 0.05, 0.9, -0.33)
+        before = len(node.published)
+        for k in range(1, 9):
+            self.scan_at(node, t + 0.05 + 0.1 * k, [(0.45, -0.45)])
+        self.assertEqual([p for p in node.published[before:] if p[2] < 0.6], [])
 
     def side_step(self, **params):
         """The traced twin failure: the last box is at 20 deg, then the target steps out of the image."""
