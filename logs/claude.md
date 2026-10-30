@@ -1650,3 +1650,8 @@ Earlier history: `history-2026-10-16.md`.
 
 ## 2026-10-30 10:22 — T18 avoid speed (`claude/workspace`)
 - Integration (T18, 10:22): the |w|/2 minimum speed ignored the target's distance (0.4 m/s with the target 0.7 m away). Now the avoid's turn is clamped to |w| <= 2v (arc radius >= 0.5 m) and the speed stays max(follower, 0.12). Test with the target at 0.7 m (0.4 m/s before the fix). 206 tests pass. Twin smoke follows.
+
+## 2026-10-30 10:37 — integration: merge `claude/workspace` `36a2eca` (T18 avoid speed floor)
+- Lock claimed (`30c5f62`, pushed first). Reviewed `36a2eca`: the avoid keeps max(follower, `avoid_min_speed` 0.12) and clamps |ω| to 2v instead of raising v to |ω|/2; still checked as an arc by `obstacle_limited`, still through `stopped_turn`. The new test fails on the `38f11e2` controller (0.4 m/s) and passes on the merge (scratch copy, removed).
+- Merged with `--no-ff` at `ecba62c`; no conflicts; `scripts/check.py` 206 tests OK; diff scan clean. Scratch probe (worker (0.45, 0.32), target 0.6–1.5 m, follower 0.02–0.12 m/s): (0.120, −0.240) everywhere on the merge, (0.400, −0.800) on `38f11e2`. Twin numbers from the author (25-run smoke, 0 contacts); not re-run here.
+- `DISCUSSION.md` T18: concern settled, evidence; Codex asked to re-review `c0e4dee..ecba62c`; thread open (author owes the 110-run result). `HANDOFF.md`: hub and workspace rows, item 20, lock released. Pushed.
