@@ -235,6 +235,19 @@ class AvoidTest(unittest.TestCase):
         self.assertEqual(node.obstacle_command(0.4, 0.0, self.TARGET, 0.0)[1], 0.0)
         self.assertIsNotNone(node.blocked_since)
 
+    def test_avoid_turns_on_a_real_arc_beside_the_worker(self):
+        # pass_by s1 on 838598d: the worker 0.66 m away at 52 deg, just inside the corridor ahead; the avoid's slow
+        # sharp turn was a near spin (straight, blocked) and the spin circle was not clear, so the robot stood
+        node = M.FollowStopNode()
+        node.avoid_delay = 0.0
+        b = math.radians(52)
+        tgt = (1.1, 0.1)
+        node.cb_scan(scan(person(0.66 * math.cos(b), 0.66 * math.sin(b)) + person(tgt[0] + 0.2, tgt[1])))
+        v, w = node.obstacle_command(0.12, 0.0, tgt, math.atan2(tgt[1], tgt[0]))
+        self.assertGreater(v, 0.0)
+        self.assertLess(w, 0.0)  # away from the worker
+        self.assertLessEqual(abs(w / v), 2.0 + 1e-9)
+
     def test_a_robot_held_beside_an_obstacle_can_start_again(self):
         # pass_by s4: the robot stood beside the worker (left) while the target walked on. The speed ramp from
         # a stop asks for 0.05 m/s with a left turn, a tight arc into the worker, which the stop held at zero

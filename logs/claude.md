@@ -1634,3 +1634,7 @@ Earlier history: `history-2026-10-16.md`.
 
 ## 2026-10-30 09:08 — T18 re-check residual (`claude/workspace`)
 - Integration (T18, 09:07): a lowered resend kept the original turn without the spin check, each resend a tighter arc. Now it goes through `stopped_turn`. Test added (fails without). 204 tests pass. Twin smoke follows.
+
+## 2026-10-30 09:14 — dashboard published (page v29); avoid arc fix
+- Dashboard published from hub `e92a39a`: page v29 (LiDAR-map tab), current_runs (f57d624 = hub 49985eb, 107/110), unit tests 203/203 @ e92a39a, CI fetched, live (17 experiments, `lidar_spin` live). Old blobs deleted; `datasets.json` synced.
+- Smoke on `838598d` (s0–1): pass_by s1 stood beside the worker (no contact): straight blocked at the corridor edge, the avoid's slow sharp turn was a near spin, the spin circle not clear. Avoid now commands at least |w|/2 m/s so the turn is a ≥ 0.5 m-radius arc the corridor checks as such. Test added (fails without); 205 tests pass. Full run follows.
