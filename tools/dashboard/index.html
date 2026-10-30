@@ -564,8 +564,21 @@
         </div>
       </div>
       <div class="tb-sfgrid">
-        <div class="tb-sfpane"><h3><span id="tb-obsoff-h">ปิด</span> <span class="tb-pill" id="tb-obsoff-res" data-source="obstacle_runs"></span></h3><div class="tb-chart tb-sfmap dash-skeleton" id="tb-obsoff" data-source="obstacle_paths"></div></div>
-        <div class="tb-sfpane"><h3><span id="tb-obson-h">เปิด</span> <span class="tb-pill" id="tb-obson-res" data-source="obstacle_runs"></span></h3><div class="tb-chart tb-sfmap dash-skeleton" id="tb-obson" data-source="obstacle_paths"></div></div>
+        <div class="tb-sfpane"><h3><span id="tb-obsoff-h">ปิด</span> <span class="tb-pill" id="tb-obsoff-res" data-source="obstacle_runs"></span></h3><div class="tb-chart tb-sfmap dash-skeleton" id="tb-obsoff" data-source="obstacle_paths"></div><div class="tb-chart tb-sfscan dash-skeleton" id="tb-obsoff-scan" data-source="obstacle_paths"></div><p class="tb-note" id="tb-obsoff-scan-cap" data-source="obstacle_paths"></p></div>
+        <div class="tb-sfpane"><h3><span id="tb-obson-h">เปิด</span> <span class="tb-pill" id="tb-obson-res" data-source="obstacle_runs"></span></h3><div class="tb-chart tb-sfmap dash-skeleton" id="tb-obson" data-source="obstacle_paths"></div><div class="tb-chart tb-sfscan dash-skeleton" id="tb-obson-scan" data-source="obstacle_paths"></div><p class="tb-note" id="tb-obson-scan-cap" data-source="obstacle_paths"></p></div>
+      </div>
+      <div class="tb-legend">
+        <span><i style="background:#f2f2f2"></i>จุด LiDAR</span>
+        <span><i style="background:#ff5a5a"></i>จุดในช่องทางวิ่ง (±0.30 m) ที่ไม่ใช่เป้า: เหตุที่หุ่นหยุดหรือหลบ</span>
+        <span><i style="background:#ffd23f"></i>จุดของเป้า</span>
+        <span><i style="background:#5aa9ff"></i>ช่องทางวิ่งข้างหน้า 1.6 m</span>
+        <span><i style="border:1px dashed #aaaaaa;background:transparent"></i>วงหมุน 0.40 m</span>
+      </div>
+      <p class="tb-note">ภาพ LiDAR มองจากตัวหุ่น (หุ่นอยู่ที่จุด ▲ หันไปทางขวา) สร้างย้อนหลังจากตำแหน่งในแต่ละรอบด้วย geometry เดียวกับ twin (คนเป็นวงกลมรัศมี 0.20 m, ไม่ใส่สัญญาณรบกวน) · ตัวเลขใต้ภาพคือความเร็วจริงของหุ่น ณ เวลานั้น</p>
+      <div class="tb-controls">
+        <button type="button" class="tb-play" id="tb-obsplay">▶ เล่น</button>
+        <input type="range" class="tb-time" id="tb-obstime" min="0" max="22" step="0.2" value="22" aria-label="เวลา (วินาที)">
+        <span class="tb-clock" id="tb-obsclock">t = 22.0 s</span>
       </div>
       <h3 class="tb-subhead">ระยะใกล้คนที่ยืนอยู่ที่สุด ทุก seed</h3>
       <div class="tb-chart tb-close dash-skeleton" id="tb-obsdots" data-source="obstacle_runs"></div>
@@ -1964,14 +1977,75 @@ dash.calc('robust_totals', {
 
 
   // ---------- obstacle stop/avoid: off vs on ----------
-  const OB = { scen: 'pass_by', seed: 0 };
+  const OB = { scen: 'pass_by', seed: 0, t: 22, timer: null };
+  const OBDUR = { pass_by: 22, blind_corner: 30 };
+  const obTime = document.getElementById('tb-obstime'), obPlay = document.getElementById('tb-obsplay');
+  const obSetEnd = () => { OB.t = OBDUR[OB.scen]; obTime.max = String(OBDUR[OB.scen]); obTime.value = String(OB.t); };
+  obTime.addEventListener('input', () => { OB.t = Number(obTime.value); drawObst(); });
+  obPlay.addEventListener('click', () => {
+    if (OB.timer) { clearInterval(OB.timer); OB.timer = null; obPlay.textContent = '▶ เล่น'; return; }
+    if (OB.t >= OBDUR[OB.scen] - 1e-6) OB.t = 0;
+    obPlay.textContent = '❚❚ หยุด';
+    OB.timer = setInterval(() => {
+      OB.t = Math.min(OBDUR[OB.scen], OB.t + 0.2); obTime.value = String(OB.t); drawObst();
+      if (OB.t >= OBDUR[OB.scen] - 1e-6) { clearInterval(OB.timer); OB.timer = null; obPlay.textContent = '▶ เล่น'; }
+    }, 100);
+  });
   const OBSW = { pass_by: ['ปิดการหลบ (หยุดอย่างเดียว)', 'เปิดการหลบ'], blind_corner: ['ปิดการหยุด', 'เปิดการหยุด'] };
-  document.querySelectorAll('[data-obsscen]').forEach((b) => b.addEventListener('click', () => { OB.scen = b.dataset.obsscen;
+  document.querySelectorAll('[data-obsscen]').forEach((b) => b.addEventListener('click', () => { OB.scen = b.dataset.obsscen; obSetEnd();
     document.querySelectorAll('[data-obsscen]').forEach((x) => x.setAttribute('aria-pressed', String(x === b))); drawObst(); }));
   document.querySelectorAll('[data-obsseed]').forEach((b) => b.addEventListener('click', () => { OB.seed = Number(b.dataset.obsseed);
     document.querySelectorAll('[data-obsseed]').forEach((x) => x.setAttribute('aria-pressed', String(x === b))); drawObst(); }));
+  // the LiDAR view from the robot at one moment, rebuilt from the twin's geometry (people are 0.20 m circles)
+  function drawObstScan(id, now) {
+    const el = document.getElementById(id), cap = document.getElementById(`${id}-cap`);
+    const d = dash.data('obstacle_paths');
+    if (d.status === 'error' || d.status === 'connect') { failed(el); return; }
+    if (d.status !== 'ok') return;
+    ready(el);
+    const WIN = { x0: -0.8, x1: 2.6, y0: -1.1, y1: 1.1 };
+    const W = Math.max(240, el.clientWidth), pad = 6, k = (W - 2 * pad) / (WIN.x1 - WIN.x0);
+    const H = Math.round((WIN.y1 - WIN.y0) * k + 2 * pad);
+    const X = (q) => pad + (q - WIN.x0) * k, Y = (q) => H - pad - (q - WIN.y0) * k;
+    const svg = d3.create('svg').attr('width', W).attr('height', H).attr('viewBox', `0 0 ${W} ${H}`);
+    el.style.height = `${H}px`;
+    svg.append('rect').attr('x', 0.5).attr('y', 0.5).attr('width', W - 1).attr('height', H - 1).attr('rx', 6).attr('fill', '#000000').attr('stroke', '#4a4a4a');
+    for (let g = Math.ceil(WIN.x0); g <= WIN.x1; g++) svg.append('line').attr('x1', X(g)).attr('x2', X(g)).attr('y1', 1).attr('y2', H - 1).attr('stroke', '#ffffff').attr('opacity', 0.06);
+    for (let g = Math.ceil(WIN.y0); g <= WIN.y1; g++) svg.append('line').attr('y1', Y(g)).attr('y2', Y(g)).attr('x1', 1).attr('x2', W - 1).attr('stroke', '#ffffff').attr('opacity', 0.06);
+    // the driving lane (body alongside, then ±0.30 m for 1.6 m ahead) and the 0.40 m spin circle
+    svg.append('path').attr('d', `M${X(0)},${Y(0.235)} L${X(0.26)},${Y(0.235)} L${X(0.26)},${Y(0.3)} L${X(1.6)},${Y(0.3)} L${X(1.6)},${Y(-0.3)} L${X(0.26)},${Y(-0.3)} L${X(0.26)},${Y(-0.235)} L${X(0)},${Y(-0.235)} Z`)
+      .attr('fill', '#5aa9ff').attr('opacity', 0.12).attr('stroke', '#5aa9ff').attr('stroke-opacity', 0.6);
+    svg.append('circle').attr('cx', X(0)).attr('cy', Y(0)).attr('r', 0.4 * k).attr('fill', 'none').attr('stroke', '#aaaaaa').attr('stroke-dasharray', '4 4');
+    svg.append('rect').attr('x', X(-0.26)).attr('y', Y(0.235)).attr('width', 0.52 * k).attr('height', 0.47 * k).attr('fill', 'none').attr('stroke', '#5aa9ff').attr('stroke-width', 1.5);
+    if (!now) { el.replaceChildren(svg.node()); if (cap) cap.textContent = ''; return; }
+    const yaw = now.robot_yaw_deg * Math.PI / 180, cy = Math.cos(yaw), sy = Math.sin(yaw);
+    const local = (wx, wy) => { const dx = wx - now.robot_x, dy = wy - now.robot_y; return [cy * dx + sy * dy, -sy * dx + cy * dy]; };
+    const people = [{ c: local(now.target_x, now.target_y), who: 'target' }, { c: local(now.other_x, now.other_y), who: 'other' }];
+    let inLane = 0;
+    for (let i = 0; i < 360; i++) {
+      const a = (i - 180) * Math.PI / 180, ux = Math.cos(a), uy = Math.sin(a);
+      let best = null;
+      people.forEach((p) => {
+        const b = ux * p.c[0] + uy * p.c[1], q = p.c[0] * p.c[0] + p.c[1] * p.c[1] - 0.04, disc = b * b - q;
+        if (disc < 0) return;
+        const r = b - Math.sqrt(disc);
+        if (r > 0.05 && r < 6 && (!best || r < best.r)) best = { r, who: p.who };
+      });
+      if (!best) continue;
+      const x = best.r * ux, y = best.r * uy;
+      if (x < WIN.x0 || x > WIN.x1 || y < WIN.y0 || y > WIN.y1) continue;
+      const lane = best.who === 'other' && x > 0 && x <= 1.6 && Math.abs(y) <= (x <= 0.26 ? 0.235 : 0.3);
+      if (lane) inLane++;
+      svg.append('circle').attr('cx', X(x)).attr('cy', Y(y)).attr('r', lane ? 2.4 : 1.8)
+        .attr('fill', lane ? '#ff5a5a' : best.who === 'target' ? '#ffd23f' : '#f2f2f2');
+    }
+    svg.append('path').attr('d', d3.symbol(d3.symbolTriangle, 110)()).attr('fill', '#5aa9ff').attr('transform', `translate(${X(0)},${Y(0)}) rotate(90)`);
+    el.replaceChildren(svg.node());
+    if (cap) cap.textContent = `t = ${now.t.toFixed(1)} s · ความเร็ว ${f2(now.v)} m/s · เลี้ยว ${f2(now.w)} rad/s · ระยะถึงคนที่กล้องไม่เห็น ${f2(Math.hypot(now.other_x - now.robot_x, now.other_y - now.robot_y))} m` + (inLane ? ` · จุดในช่องทาง ${inLane}` : '');
+  }
   function drawObst() {
     const d = dash.data('obstacle_paths'), runs = dash.data('obstacle_runs');
+    document.getElementById('tb-obsclock').textContent = `t = ${OB.t.toFixed(1)} s`;
     [['off', 'tb-obsoff', 'var(--cds-chart-status-critical)'], ['on', 'tb-obson', dash.colors[2]]].forEach(([v, id, c], i) => {
       const el = document.getElementById(id), res = document.getElementById(`${id}-res`);
       document.getElementById(`${id}-h`).textContent = OBSW[OB.scen][i];
@@ -1979,7 +2053,8 @@ dash.calc('robust_totals', {
       if (d.status !== 'ok' || runs.status !== 'ok') return;
       ready(el);
       const run = `${OB.scen}-${v}-${OB.seed}`;
-      const rows = d.data.filter((r) => r.run_id === run);
+      const all = d.data.filter((r) => r.run_id === run);
+      const rows = all.filter((r) => r.t <= OB.t + 1e-6);
       const sum = runs.data.find((r) => r.run_id === run);
       res.textContent = sum ? `${sum.pass ? 'ผ่าน' : 'ตก'} · ${sum.contact ? 'ชน' : 'ไม่ชน'} · ใกล้สุด ${f2(sum.min_other_m)} m · เห็นเป้า ${Math.round(100 * sum.target_visible_share)}%` : 'ไม่มีข้อมูล';
       res.className = 'tb-pill ' + (sum ? (sum.contact ? 'tb-bad' : sum.pass ? 'tb-ok' : 'tb-warn') : '');
@@ -1999,30 +2074,33 @@ dash.calc('robust_totals', {
       el.style.height = `${H}px`;
       d3.range(Math.ceil(x0), Math.floor(x1) + 1).forEach((g) => svg.append('line').attr('x1', X(g)).attr('x2', X(g)).attr('y1', 0).attr('y2', H).attr('stroke', 'var(--cds-chart-grid)'));
       d3.range(Math.ceil(y0), Math.floor(y1) + 1).forEach((g) => svg.append('line').attr('y1', Y(g)).attr('y2', Y(g)).attr('x1', 0).attr('x2', W).attr('stroke', 'var(--cds-chart-grid)'));
-      if (sum) {
-        svg.append('circle').attr('cx', X(sum.other_x)).attr('cy', Y(sum.other_y)).attr('r', 0.2 * k).attr('fill', 'var(--color-fg-muted)').attr('opacity', 0.35).attr('stroke', 'var(--color-fg-muted)');
-        svg.append('text').attr('x', X(sum.other_x)).attr('y', Y(sum.other_y) - 0.2 * k - 6).attr('text-anchor', 'middle').text('คนที่กล้องไม่เห็น');
+      const now = rows[rows.length - 1];
+      const ox = now ? now.other_x : sum && sum.other_x, oy = now ? now.other_y : sum && sum.other_y;
+      if (ox !== undefined && ox !== null) {
+        svg.append('circle').attr('cx', X(ox)).attr('cy', Y(oy)).attr('r', 0.2 * k).attr('fill', 'var(--color-fg-muted)').attr('opacity', 0.35).attr('stroke', 'var(--color-fg-muted)');
+        svg.append('text').attr('x', X(ox)).attr('y', Y(oy) - 0.2 * k - 6).attr('text-anchor', 'middle').text('คนที่กล้องไม่เห็น');
       }
       const line = (fx, fy) => d3.line().x((r) => X(r[fx])).y((r) => Y(r[fy]));
       svg.append('path').attr('d', line('target_x', 'target_y')(rows) || '').attr('fill', 'none').attr('stroke', 'var(--color-fg-muted)').attr('stroke-dasharray', '4 4').attr('stroke-width', 1.5);
       svg.append('path').attr('d', line('robot_x', 'robot_y')(rows) || '').attr('fill', 'none').attr('stroke', c).attr('stroke-width', 2.5).attr('stroke-linecap', 'round').attr('stroke-linejoin', 'round');
-      if (sum) {
-        // the robot's body (52 cm long, 47 cm wide) where it came closest to the hidden person
-        svg.append('rect').attr('x', -0.26 * k).attr('y', -0.235 * k).attr('width', 0.52 * k).attr('height', 0.47 * k)
-          .attr('fill', 'none').attr('stroke', c).attr('stroke-width', 2)
-          .attr('transform', `translate(${X(sum.closest_robot_x)},${Y(sum.closest_robot_y)}) rotate(${-sum.closest_robot_yaw_deg})`);
+      if (sum && OB.t >= sum.closest_t - 1e-6) {
+        // once reached: where the robot came closest to the hidden person, and how close
         svg.append('line').attr('x1', X(sum.closest_robot_x)).attr('y1', Y(sum.closest_robot_y)).attr('x2', X(sum.other_x)).attr('y2', Y(sum.other_y))
           .attr('stroke', 'var(--cds-chart-status-critical)').attr('stroke-dasharray', '3 3').attr('stroke-width', 1.5);
         svg.append('text').attr('x', X(sum.closest_robot_x)).attr('y', Y(sum.closest_robot_y) + 0.3 * k + 16).attr('text-anchor', 'middle')
           .attr('class', 'tb-strong').text(`ใกล้สุด ${f2(sum.min_other_m)} m (วินาทีที่ ${sum.closest_t})`);
-        const end = rows[rows.length - 1];
-        if (end) {
-          svg.append('circle').attr('cx', X(end.target_x)).attr('cy', Y(end.target_y)).attr('r', 5).attr('fill', 'var(--color-fg-muted)');
-          svg.append('path').attr('d', d3.symbol(d3.symbolTriangle, 90)()).attr('fill', c)
-            .attr('transform', `translate(${X(end.robot_x)},${Y(end.robot_y)}) rotate(${90 - end.robot_yaw_deg})`);
-        }
+      }
+      if (now) {
+        // the robot's body (52 cm long, 47 cm wide) at the chosen time
+        svg.append('rect').attr('x', -0.26 * k).attr('y', -0.235 * k).attr('width', 0.52 * k).attr('height', 0.47 * k)
+          .attr('fill', 'none').attr('stroke', c).attr('stroke-width', 2)
+          .attr('transform', `translate(${X(now.robot_x)},${Y(now.robot_y)}) rotate(${-now.robot_yaw_deg})`);
+        svg.append('circle').attr('cx', X(now.target_x)).attr('cy', Y(now.target_y)).attr('r', 5).attr('fill', 'var(--color-fg-muted)');
+        svg.append('path').attr('d', d3.symbol(d3.symbolTriangle, 90)()).attr('fill', c)
+          .attr('transform', `translate(${X(now.robot_x)},${Y(now.robot_y)}) rotate(${90 - now.robot_yaw_deg})`);
       }
       el.replaceChildren(svg.node());
+      drawObstScan(`${id}-scan`, now);
     });
     drawObstDots();
   }

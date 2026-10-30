@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build obstacle_runs.json and obstacle_paths.json: the obstacle stop/avoid off-vs-on runs, for the LiDAR-map tab.
+"""Build obstacle_runs.json and obstacle_paths.json (robot, target, hidden person, speed and command every 0.2 s): the obstacle stop/avoid off-vs-on runs, for the LiDAR-map tab.
 
 Run folders are named <scenario>_<off|on>_s<seed> (sim.twin.run_scenario --out sim_runs/<tag>), as made by
 the off/on comparison: pass_by with obstacle_avoid false/true, blind_corner with obstacle_stop false/true.
@@ -53,9 +53,13 @@ def one_run(tag, run_dir, code, hz):
     paths = []
     for r in states[::step]:
         tx, ty = world(r['robot'], r['people'][target])
+        bx, by = world(r['robot'], r['people'][others[0]])
+        cmd = r.get('cmd') or {}
         paths.append(dict(run_id=run_id, t=round(r['t'], 1), robot_x=round(r['robot']['x'], 3),
                           robot_y=round(r['robot']['y'], 3), robot_yaw_deg=round(r['robot']['yaw_deg'], 1),
-                          target_x=round(tx, 3), target_y=round(ty, 3)))
+                          target_x=round(tx, 3), target_y=round(ty, 3), other_x=round(bx, 3), other_y=round(by, 3),
+                          v=round(r['robot']['v'], 2), w=round(r['robot']['w'], 2),
+                          cmd_v=round(cmd.get('linear_x') or 0.0, 2), cmd_w=round(cmd.get('angular_z') or 0.0, 2)))
     return summary, paths
 
 

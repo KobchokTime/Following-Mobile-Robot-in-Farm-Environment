@@ -307,16 +307,16 @@
   }
  },
  "obstacle_paths": {
-  "description": "Robot (world x, y, heading) and target (world x, y) every 0.2 s for each run in obstacle_runs (pass_by and blind_corner, switch off and on, seeds 0-4). Built by tools/dashboard/live/gen_obstacle.py. Simulation, not the robot.",
+  "description": "Robot (world x, y, heading, speed, turn rate, command), target and hidden person (world x, y) every 0.2 s for each run in obstacle_runs (pass_by and blind_corner, switch off and on, seeds 0-4). Built by tools/dashboard/live/gen_obstacle.py. Simulation, not the robot.",
   "fixed": true,
   "source": {
    "kind": "file",
    "name": "obstacle_paths.json",
-   "url": "/_blob/36b8f0fcdf8b248b27399e13071dba11"
+   "url": "/_blob/6cae77c5a8662b03d735c09155b8006b"
   },
   "title": "Obstacle stop/avoid: paths",
   "updated": {
-   "at": "2026-10-30T06:20:00Z",
+   "at": "2026-10-30T06:45:00Z",
    "by": "Claude Code"
   }
  },
