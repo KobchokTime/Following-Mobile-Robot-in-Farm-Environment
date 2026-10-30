@@ -1,0 +1,393 @@
+"""2D kinematic world for the offline robot twin. Standard library only.
+
+The world holds one differential-drive robot and a set of people who walk along
+scripted waypoints. It produces what the real robot's sensors would see:
+
+- a 2D LiDAR scan in the LiDAR frame (mounted with a configurable yaw, 180 deg on
+  the real robot, which `lidar_sectorizer_node.py` undoes with `angle_offset_deg`);
+- person detections in image coordinates, as `ros2_yolo_live.py` would publish them
+  (`[cx, cy, sector_id]`, one message per visible person, 9 image sectors).
+
+It also models the current ZLAC drive bridge (`MAIN/Control/zlac_joystick_bridge.py`):
+linear command only, `cmd = clamp(linear_x * 40, +-40)` RPM per wheel, and zero
+after 1 s without a new `/cmd_vel`. A `diff_drive` mode also uses `angular.z`, to
+show what the follower would do once the bridge forwards turning commands.
+
+Each detection also carries the clothing chroma `(Cb, Cr)` that the thesis's appearance model
+uses (YCbCr, 0-255, 128 = grey). It is observed with noise, and shade pulls it towards grey. It
+comes from its own random stream, so adding it does not change any other simulated value. A torso
+hue-saturation histogram (12 x 4 bins, per mille, as `ros2_yolo_live.torso_hs_hist`) is drawn from
+the clothing colour, again from its own stream. Shade lowers its saturation far less than it pulls
+Cb/Cr towards grey: Cb/Cr shrink with brightness, HSV saturation does not.
+
+Frames: x forward, y left, yaw counter-clockwise (ROS REP-103). Image x grows to
+the right, so a person on the robot's left has a small `cx`.
+"""
+
+from __future__ import annotations
+
+import colorsys
+import math
+import random
+from dataclasses import dataclass, field
+from typing import Dict, List, Optional, Sequence, Tuple
+
+PERSON_RADIUS_M = 0.2
+
+
+@dataclass
+class RobotParams:
+    wheel_radius_m: float = 0.085  # assumption: not measured on the real chassis yet
+    track_width_m: float = 0.40  # assumption: not measured on the real chassis yet
+    bridge_mode: str = "current"  # "current" (linear only), "fixed" (bridge with angular.z) or "diff_drive"
+    speed_gain: float = 40.0  # zlac_joystick_bridge.py SPEED_GAIN
+    max_cmd_rpm: float = 40.0  # zlac_joystick_bridge.py MAX_CMD
+    cmd_timeout_s: float = 1.0  # zlac_joystick_bridge.py TIMEOUT
+    max_speed_mps: float = 1.4  # zlac_joystick_bridge.py MAX_SPEED_MPS ("mps" mode)
+    max_accel_mps2: float = 1.0  # zlac_joystick_bridge.py MAX_ACCEL_MPS2 ("mps" mode)
+
+
+@dataclass
+class SensorParams:
+    lidar_rays: int = 720
+    lidar_range_min_m: float = 0.05
+    lidar_range_max_m: float = 12.0
+    lidar_mount_yaw_rad: float = math.pi
+    lidar_noise_m: float = 0.01
+    camera_hfov_deg: float = 70.0
+    image_width: int = 640
+    image_height: int = 480
+    camera_height_m: float = 0.5
+    num_sectors: int = 9
+    detect_range_m: Tuple[float, float] = (0.3, 8.0)
+    person_height_m: float = 1.7
+    person_width_m: float = 0.5
+    detect_dropout: float = 0.0
+    centroid_noise_px: float = 2.0
+    chroma_noise: float = 3.0  # per-frame noise on observed Cb/Cr (0-255 units)
+
+
+@dataclass
+class Person:
+    name: str
+    waypoints: List[Tuple[float, float, float]]  # (t_s, x_m, y_m), linear in between
+    is_target: bool = False
+    clothing: Tuple[float, float] = (128.0, 128.0)  # (Cb, Cr) of the torso in full light
+
+    def position(self, t: float) -> Tuple[float, float]:
+        pts = self.waypoints
+        if t <= pts[0][0]:
+            return pts[0][1], pts[0][2]
+        for (t0, x0, y0), (t1, x1, y1) in zip(pts, pts[1:]):
+            if t <= t1:
+                a = 0.0 if t1 == t0 else (t - t0) / (t1 - t0)
+                return x0 + a * (x1 - x0), y0 + a * (y1 - y0)
+        return pts[-1][1], pts[-1][2]
+
+
+@dataclass
+class Detection:
+    person: str
+    cx: int
+    cy: int
+    sector_id: int
+    cb: int = 128
+    cr: int = 128
+    box: Tuple[int, int, int, int] = (0, 0, 0, 0)  # x1, y1, x2, y2, clipped to the image
+    hist: Tuple[int, ...] = ()  # torso hue-saturation histogram, per mille (empty: not drawn)
+
+
+def shade_factor(x: float, shade: Sequence[Tuple[float, float, float]]) -> float:
+    """Colour saturation at world x: 1.0 in full light, lower in the shade bands (x0, x1, factor)."""
+    return min([f for x0, x1, f in shade if x0 <= x < x1], default=1.0)
+
+
+def observe_clothing(people: Sequence["Person"], world_x: Dict[str, float], shade: Sequence[Tuple[float, float, float]],
+                     noise: float, rng: random.Random) -> Dict[str, Tuple[int, int]]:
+    """Observed (Cb, Cr) per person: shade pulls the chroma towards grey (128), plus noise."""
+    out = {}
+    for p in people:
+        f = shade_factor(world_x[p.name], shade)
+        cb, cr = (128.0 + f * (c - 128.0) + rng.gauss(0.0, noise) for c in p.clothing)
+        out[p.name] = (int(round(max(0.0, min(255.0, cb)))), int(round(max(0.0, min(255.0, cr)))))
+    return out
+
+
+HS_BINS = (12, 4)
+
+
+def clothing_hist(cb: float, cr: float, rng: random.Random, shade: float = 1.0, pixels: int = 60,
+                  hue_noise: float = 4.0, sat_noise: float = 18.0) -> Tuple[int, ...]:
+    """Torso H,S histogram (OpenCV ranges, per mille) for a full-light clothing chroma.
+
+    The colour is taken at a mid brightness (Y = 120). In shade (factor < 1) hue is kept and
+    saturation scales by 0.6 + 0.4 * shade. Calibrated on the 2025-04-08 lab video: a blue top in
+    shade read grey in Cb/Cr, yet its histogram stayed about 0.57 (Hellinger) from the top in good
+    light (experiments/identity/clothing_colour_videos); here deep shade gives about 0.5.
+    """
+    y = 120.0
+    rgb = [max(0.0, min(255.0, v)) / 255.0 for v in
+           (y + 1.402 * (cr - 128.0), y - 0.344136 * (cb - 128.0) - 0.714136 * (cr - 128.0), y + 1.772 * (cb - 128.0))]
+    h, s, _ = colorsys.rgb_to_hsv(*rgb)
+    counts = [0] * (HS_BINS[0] * HS_BINS[1])
+    for _ in range(pixels):
+        hue = (h * 180.0 + rng.gauss(0.0, hue_noise)) % 180.0
+        sat = max(0.0, min(255.0, s * (0.6 + 0.4 * shade) * 255.0 + rng.gauss(0.0, sat_noise)))
+        counts[min(HS_BINS[0] - 1, int(hue * HS_BINS[0] / 180.0)) * HS_BINS[1]
+               + min(HS_BINS[1] - 1, int(sat * HS_BINS[1] / 256.0))] += 1
+    return tuple(int(round(1000.0 * c / pixels)) for c in counts)
+
+
+def bridge_rpm(r: RobotParams, cmd: Tuple[float, float], age_s: Optional[float]) -> Tuple[float, float]:
+    """Wheel RPMs (logical left, logical right) for a /cmd_vel of `age_s` seconds."""
+    if age_s is None or age_s > r.cmd_timeout_s:
+        return 0.0, 0.0
+    lin, ang = cmd
+    if r.bridge_mode == "current":
+        c = max(-r.max_cmd_rpm, min(r.max_cmd_rpm, lin * r.speed_gain))
+        return c, c  # angular.z is ignored by the current bridge
+    if r.bridge_mode == "fixed":
+        # zlac_joystick_bridge.py after angular.z support: same 40-RPM-per-unit gain as "current",
+        # differential mix, both wheels scaled together at max_cmd_rpm (turn_dir = +1).
+        turn = ang * r.track_width_m / 2.0
+        left, right = (lin - turn) * r.speed_gain, (lin + turn) * r.speed_gain
+        scale = max(1.0, abs(left) / r.max_cmd_rpm, abs(right) / r.max_cmd_rpm)
+        return left / scale, right / scale
+    if r.bridge_mode == "mps":
+        # zlac_joystick_bridge.py speed_mode "mps": m/s -> RPM with the wheel radius, capped per wheel.
+        # The acceleration ramp is applied in World.step / the Gazebo node, which keep the state.
+        to_rpm = 60.0 / (2.0 * math.pi * r.wheel_radius_m)
+        left, right = lin - ang * r.track_width_m / 2.0, lin + ang * r.track_width_m / 2.0
+        scale = max(1.0, abs(left) / r.max_speed_mps, abs(right) / r.max_speed_mps)
+        return left / scale * to_rpm, right / scale * to_rpm
+    if r.bridge_mode == "diff_drive":
+        to_rpm = 60.0 / (2.0 * math.pi * r.wheel_radius_m)
+        left = (lin - ang * r.track_width_m / 2.0) * to_rpm
+        right = (lin + ang * r.track_width_m / 2.0) * to_rpm
+        scale = max(1.0, abs(left) / r.max_cmd_rpm, abs(right) / r.max_cmd_rpm)
+        return left / scale, right / scale
+    raise ValueError(f"unknown bridge_mode {r.bridge_mode!r}")
+
+
+def ramp_rpm(r: RobotParams, current: Tuple[float, float], target: Tuple[float, float], dt: float) -> Tuple[float, float]:
+    """The bridge's acceleration ramp ("mps" mode only; other modes change speed at once)."""
+    if r.bridge_mode != "mps":
+        return target
+    step = r.max_accel_mps2 * dt * 60.0 / (2.0 * math.pi * r.wheel_radius_m)
+    dl, dr = target[0] - current[0], target[1] - current[1]  # both wheels together, as the bridge's ramp_pair
+    k = min(1.0, step / max(abs(dl), abs(dr))) if (dl or dr) else 1.0
+    return current[0] + k * dl, current[1] + k * dr
+
+
+def wheel_twist(r: RobotParams, rpm_left: float, rpm_right: float) -> Tuple[float, float]:
+    """Body (v m/s, w rad/s) for the given wheel RPMs."""
+    k = 2.0 * math.pi * r.wheel_radius_m / 60.0
+    vl, vr = rpm_left * k, rpm_right * k
+    return (vl + vr) / 2.0, (vr - vl) / r.track_width_m
+
+
+def _ray_circle(angle: float, cx: float, cy: float, r: float) -> Optional[float]:
+    dx, dy = math.cos(angle), math.sin(angle)
+    b = dx * cx + dy * cy
+    disc = b * b - (cx * cx + cy * cy - r * r)
+    if disc < 0:
+        return None
+    t = b - math.sqrt(disc)
+    return t if t > 0 else None
+
+
+def project_detections(people: Dict[str, Tuple[float, float]], s: "SensorParams",
+                       rng: random.Random, chroma: Optional[Dict[str, Tuple[int, int]]] = None) -> List["Detection"]:
+    """What ros2_yolo_live.py would publish for people at robot-frame positions."""
+    f = (s.image_width / 2.0) / math.tan(math.radians(s.camera_hfov_deg) / 2.0)
+    out = []
+    for name, (px, py) in people.items():
+        d = math.hypot(px, py)
+        if px <= 0 or not (s.detect_range_m[0] <= d <= s.detect_range_m[1]):
+            continue
+        bearing = math.atan2(py, px)
+        if abs(math.degrees(bearing)) > s.camera_hfov_deg / 2.0:
+            continue
+        occluded = False
+        for other, (ox, oy) in people.items():
+            hit = None if other == name else _ray_circle(bearing, ox, oy, PERSON_RADIUS_M)
+            if hit is not None and hit < d - PERSON_RADIUS_M:
+                occluded = True
+        if occluded or (s.detect_dropout and rng.random() < s.detect_dropout):
+            continue
+        cx = s.image_width / 2.0 - f * math.tan(bearing)
+        cy = s.image_height / 2.0 + f * (s.camera_height_m - 0.9) / px
+        cx = int(round(cx + rng.gauss(0.0, s.centroid_noise_px)))
+        cx = max(0, min(s.image_width - 1, cx))
+        sector = max(0, min(s.num_sectors - 1, (cx * s.num_sectors) // s.image_width))
+        cb, cr = (chroma or {}).get(name, (128, 128))
+        half_w = f * s.person_width_m / 2.0 / px
+        top = s.image_height / 2.0 + f * (s.camera_height_m - s.person_height_m) / px
+        bottom = s.image_height / 2.0 + f * s.camera_height_m / px
+        box = (int(max(0, cx - half_w)), int(max(0, top)),
+               int(min(s.image_width - 1, cx + half_w)), int(min(s.image_height - 1, bottom)))
+        out.append(Detection(name, cx, int(round(cy)), sector, cb, cr, box))
+    return out
+
+
+@dataclass
+class Realism:
+    """Imperfections the default twin leaves out; off unless a World is given one.
+
+    All randomness comes from its own stream, so turning it off gives bit-identical runs.
+    """
+    detect_latency_s: float = 0.15   # camera + YOLO on the UP Board, from capture to message
+    detect_dropout: float = 0.10     # chance a visible person is not detected in a frame
+    false_positive_rate: float = 0.03  # chance per frame of one spurious person box
+    lidar_noise_m: float = 0.03
+    lidar_ray_dropout: float = 0.02  # chance a ray returns nothing
+    wheel_slip: float = 0.05         # std of the relative error of each wheel's real speed
+    # static clutter in world coordinates (x, y, radius): thin posts and person-sized bushes
+    clutter: Tuple[Tuple[float, float, float], ...] = (
+        (2.0, -1.2, 0.06), (4.0, -1.2, 0.06), (6.0, -1.2, 0.06), (8.0, -1.2, 0.06), (10.0, -1.2, 0.06),
+        (3.0, 1.4, 0.06), (7.0, 1.4, 0.06), (11.0, 1.4, 0.06),
+        (5.0, -1.6, 0.25), (9.0, 1.9, 0.25), (2.5, 2.2, 0.3),
+    )
+
+
+@dataclass
+class World:
+    people: List[Person]
+    robot: RobotParams = field(default_factory=RobotParams)
+    sensors: SensorParams = field(default_factory=SensorParams)
+    blackouts: Sequence[Tuple[float, float]] = ()  # detector blind windows (t_start, t_end)
+    shade: Sequence[Tuple[float, float, float]] = ()  # (x0, x1, saturation factor) bands in world x
+    hidden: Dict[str, Sequence[Tuple[float, float]]] = field(default_factory=dict)  # per person: camera-blind windows
+    seed: int = 0
+    realism: Optional[Realism] = None
+
+    def __post_init__(self) -> None:
+        self.rng = random.Random(self.seed)
+        self.color_rng = random.Random(self.seed + 7919)  # separate stream: chroma never shifts other noise
+        self.hist_rng = random.Random(self.seed + 15485863)  # torso histograms: their own stream too
+        self.real_rng = random.Random(self.seed + 104729)  # realism only; never touched when it is off
+        self._pending: List[Tuple[float, List["Detection"]]] = []  # delayed detections (realism)
+        self.t = 0.0
+        self.x = 0.0
+        self.y = 0.0
+        self.yaw = 0.0
+        self.v = 0.0
+        self.w = 0.0
+        self.rpm_left = 0.0
+        self.rpm_right = 0.0
+        self._cmd: Tuple[float, float] = (0.0, 0.0)
+        self._cmd_t: Optional[float] = None
+
+    # ---------------------------------------------------------------- drive
+    def command(self, linear_x: float, angular_z: float) -> None:
+        """Receive a /cmd_vel at the current sim time."""
+        self._cmd = (float(linear_x), float(angular_z))
+        self._cmd_t = self.t
+
+    def _bridge(self) -> Tuple[float, float]:
+        """Wheel RPMs (logical left, logical right) the drive bridge would send."""
+        age = None if self._cmd_t is None else self.t - self._cmd_t
+        return bridge_rpm(self.robot, self._cmd, age)
+
+    def step(self, dt: float) -> None:
+        self.rpm_left, self.rpm_right = ramp_rpm(self.robot, (self.rpm_left, self.rpm_right), self._bridge(), dt)
+        if self.realism and self.realism.wheel_slip:
+            slip = self.realism.wheel_slip
+            self.v, self.w = wheel_twist(self.robot, self.rpm_left * (1.0 + self.real_rng.gauss(0.0, slip)),
+                                         self.rpm_right * (1.0 + self.real_rng.gauss(0.0, slip)))
+        else:
+            self.v, self.w = wheel_twist(self.robot, self.rpm_left, self.rpm_right)
+        self.yaw = (self.yaw + self.w * dt + math.pi) % (2.0 * math.pi) - math.pi
+        self.x += self.v * math.cos(self.yaw) * dt
+        self.y += self.v * math.sin(self.yaw) * dt
+        self.t += dt
+
+    # -------------------------------------------------------------- geometry
+    def _to_robot(self, px: float, py: float) -> Tuple[float, float]:
+        dx, dy = px - self.x, py - self.y
+        c, s = math.cos(self.yaw), math.sin(self.yaw)
+        return c * dx + s * dy, -s * dx + c * dy
+
+    def people_robot_frame(self) -> Dict[str, Tuple[float, float]]:
+        return {p.name: self._to_robot(*p.position(self.t)) for p in self.people}
+
+    def scan(self) -> List[float]:
+        """Ranges in the LiDAR frame, angle_min=-pi, increment 2*pi/rays."""
+        s = self.sensors
+        people = list(self.people_robot_frame().values())
+        clutter = [(*self._to_robot(x, y), r) for x, y, r in self.realism.clutter] if self.realism else []
+        out = []
+        for i in range(s.lidar_rays):
+            a_lidar = -math.pi + i * 2.0 * math.pi / s.lidar_rays
+            a_robot = a_lidar + s.lidar_mount_yaw_rad
+            best = math.inf
+            for px, py in people:
+                hit = _ray_circle(a_robot, px, py, PERSON_RADIUS_M)
+                if hit is not None and hit < best:
+                    best = hit
+            if self.realism:
+                for cx_, cy_, cr in clutter:
+                    hit = _ray_circle(a_robot, cx_, cy_, cr)
+                    if hit is not None and hit < best:
+                        best = hit
+                if self.real_rng.random() < self.realism.lidar_ray_dropout:
+                    best = math.inf
+            if math.isfinite(best):
+                best += self.rng.gauss(0.0, s.lidar_noise_m)
+                if self.realism:
+                    best += self.real_rng.gauss(0.0, self.realism.lidar_noise_m)
+                if not (s.lidar_range_min_m < best < s.lidar_range_max_m):
+                    best = math.inf
+            out.append(best)
+        return out
+
+    def detections(self) -> List[Detection]:
+        if any(a <= self.t < b for a, b in self.blackouts):
+            return []
+        chroma = observe_clothing(self.people, {p.name: p.position(self.t)[0] for p in self.people},
+                                  self.shade, self.sensors.chroma_noise, self.color_rng)
+        dets = project_detections(self.people_robot_frame(), self.sensors, self.rng, chroma)
+        dets = [d for d in dets if not any(a <= self.t < b for a, b in self.hidden.get(d.person, ()))]
+        people = {p.name: p for p in self.people}
+        for d in dets:
+            p = people[d.person]
+            d.hist = clothing_hist(*p.clothing, self.hist_rng, shade_factor(p.position(self.t)[0], self.shade))
+        if not self.realism:
+            return dets
+        return self._realistic(dets)
+
+    def _realistic(self, dets: List["Detection"]) -> List["Detection"]:
+        """Drop some detections, add a spurious one now and then, and deliver them late."""
+        r, s = self.realism, self.sensors
+        dets = [d for d in dets if self.real_rng.random() >= r.detect_dropout]
+        if self.real_rng.random() < r.false_positive_rate:
+            cx = self.real_rng.randrange(s.image_width)
+            sector = max(0, min(s.num_sectors - 1, (cx * s.num_sectors) // s.image_width))
+            dets.append(Detection("false_positive", cx, s.image_height // 2, sector,
+                                  self.real_rng.randrange(90, 170), self.real_rng.randrange(90, 170),
+                                  (max(0, cx - 40), 100, min(s.image_width - 1, cx + 40), 400)))
+            dets[-1].hist = clothing_hist(dets[-1].cb, dets[-1].cr, self.hist_rng)
+        self._pending.append((self.t + r.detect_latency_s, dets))
+        ready = [d for t, d in self._pending if t <= self.t + 1e-9]
+        self._pending = [(t, d) for t, d in self._pending if t > self.t + 1e-9]
+        return ready[-1] if ready else []
+
+    def state(self) -> dict:
+        people = {}
+        for p in self.people:
+            rx, ry = self._to_robot(*p.position(self.t))
+            people[p.name] = {
+                "range_m": math.hypot(rx, ry),
+                "bearing_deg": math.degrees(math.atan2(ry, rx)),
+                "is_target": p.is_target,
+            }
+        return {
+            "t": round(self.t, 3),
+            "robot": {"x": self.x, "y": self.y, "yaw_deg": math.degrees(self.yaw),
+                      "v": self.v, "w": self.w,
+                      "rpm_left": self.rpm_left, "rpm_right": self.rpm_right},
+            "cmd": {"linear_x": self._cmd[0], "angular_z": self._cmd[1],
+                    "age_s": None if self._cmd_t is None else self.t - self._cmd_t},
+            "people": people,
+            "blackout": any(a <= self.t < b for a, b in self.blackouts),
+        }

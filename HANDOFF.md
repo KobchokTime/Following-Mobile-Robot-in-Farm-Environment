@@ -1,0 +1,460 @@
+# Handoff
+
+Live state of the shared work. Edit this file **only on `integration-hub`**. The rules are in
+[`AGENTS.md`](AGENTS.md). Action history lives in `logs/claude.md` and `logs/codex.md`,
+and review threads in [`DISCUSSION.md`](DISCUSSION.md).
+
+## Integration lock
+
+- **Current owner:** none
+- **Status:** ready
+- **Files being edited:** none
+- **Last updated:** 2026-10-30 by Claude Code (22:13 Thai time)
+
+## Branches
+
+| Branch | State |
+|---|---|
+| `main` | Initial commit only. It receives `integration-hub` through a PR once the user approves. |
+| `integration-hub` | Has the robot recovery, Thesis Desk, quest sources, agent workflow, GUI smoke-test results, 12-week plan, Codex week-1 changes, the offline twin (`sim/`, twin CI, first simulated findings; merge `18c2303`), the Gazebo 3D twin (`sim/gazebo/`, `Dockerfile.gazebo`, `gazebo` CI job, cross-check; merge `cef985f`), the frozen Arena 1 rules, scorer and baseline (merge `d623baf`) the Arena 1 results plus the combined sector-association fix `e6587fd` (merge `4652571`), the drive bridge forwarding `angular.z` plus the Arena 2 draft (merge `4f7a864`, T6/T7), the bridge guard follow-ups (non-finite guard, `turn_dir` as a sign only, Arena 2 entry scope; merge `9f55d17`), and the Arena 2 scorer validation, full-protocol reference (66.0/100) and calibration reconciliation (merge `ecc55ca`, T6/T7), and the scorer gap fixes (duplicate inputs rejected, `--agent`/`--base-ref` required; merge `da04d16`), and the integer seed check (merge `8c77425`). Arena 2 rules and scorer frozen in `9b78f1f` (T7), results in `a8f1cae`, and the winning Arena 2 entry `claude/robot/arena2-lag` (speed feed-forward, faster turning; merge `d8401a9`), and the Arena 3 draft with the clothing chroma channel and the thesis review (merge `6698278`, T8). Arena 3 rules frozen in `08a7ac8`, results in `a57dff7`, and the winning Arena 3 entry `claude/robot/arena3-identity` (target gate, give way in the path; merge `efda1b0`). and the E7 ablation plus the robot-day kit (`/yolo_frame`, `tools/robot_day/`, `docs/robot_day_protocol.md`; merge `0654471`, T9; review fixes merges `eb10a9c` and `9ecaecb`). and solo following at walking pace (bridge `speed_mode` "mps" default, braking cap, LiDAR edge tracking; merge `c2c7f09`, T10; review fixes merges `72c7ea9` and `9915563`). stale-scan fix merge `7e79cea`. twin realism, robot fixes, bringup, Gazebo solo set and thesis Chapters 3–4 draft (merge `b23ec2b`, T11). `min_rate_dt` fix merge `fba0d89`. T11 objection fixes merge `f52e73f`. optional bearing steering, E7 re-run, thesis updates and Thai cheat sheet (merge `14c263c`, T12). T12 objection fixes merge `ac28ea7`. torso hue-saturation histogram in the target gate, colour re-acquisition and naming fixes (merge `e48ae4c`, T13 open). T13 change-request fixes (re-acquisition distance rule, wording, twin `lookalike_after_loss`; merge `b102cc7`). camera boxes take their range from their own LiDAR cluster (`box_range`, T13 follow-up; merge `059c549`, T14 resolved). box range counts only returns near the box (`d23e7b2`, T14; merge `6cc9769`). T14 review changes (side_step data and traces, median regression test, limits; merge `f0a79ab`). lateral target gate and gate ROS parameters, T13 rule-off correction (merge `8b946b7`, T15 open). T15 write-up fixes (merge `a059bcc`). T15 round 2: ambiguity-aware lateral gate, wrong-person count, `close_pair_same` (merge `c3ce609`). runner `[GATE]` exact check (merge `5ace9be`). walk-up: the scan tells the gate when someone is beside the target, twin `walk_up_same` (merge `6becee0`, T15). dashboard source `tools/dashboard/`, live validator, CI and unit-test snapshot generators, CI NumPy step (merge `8d35db4`). Virtual Office queue and plan-authenticated chat, Codex PR #8 (merge `7fab5ac`, T16). T15 no-fresh-scan fix (stale, missing or future-dated scan keeps the plain gate), walk-up `published_by`/`published_unmatched`, dashboard registry keeps the newest experiment live (merge `51f5dff` of `claude/workspace` `210f422`, with `f741ea6`). past_tracks 6.5 MB budget (`fit_past_tracks`), `[CROWD]` on/off log lines in `sync_fusion_node` (logging only) and robot-day section E4b (merge `3b13465` of `claude/workspace` `39444d9`). E4b safety line without an E-stop and with the bridge stop timing (merges `f6bdc90` of `783c1a6` and `9184db7` of `ab22dd7`; T17 resolved). LiDAR obstacle stop, obstacle avoid and LiDAR assist (`claude/robot/avoid` `c2899c7` through `claude/workspace` `c2c9aa2`; merge `ad11ba9`, T18 open), which also brings the dashboard commits on `claude/workspace` since `5c72c4d` (`tools/dashboard/`). T18 item 1 fix: the obstacle re-check is bounded by `recheck_max_s` and a stop zeroes the turn (merge `ef6054c` of `claude/workspace` `d46914d`). T18 answer to Codex's change request: no turn in place without a fresh scan and a clear spin circle (`spin_clear_radius_m`), `/scan` subscribed best effort, dashboard LiDAR-map tab with stop/avoid (merge `1fe91f2` of `claude/workspace` `545abfb`, fix `a4ce8a5`). T18 near-spin fix: a creep (|v| <= 0.05 m/s) or an arc tighter than 2/m is checked against the spin circle; refused, the turn is dropped and the corridor-checked straight creep kept; live registry LiDAR-map runs (merge `49985eb` of `claude/workspace` `1ea1584`, fix `f57d624`). T18 re-check residual (a lowered resend goes through the spin check) and avoid on a ≥ 0.5 m-radius arc (avoid speed at least |ω|/2), live registry `lidar_arc`, dashboard snapshot page v29 (merge `3f191fc` of `claude/workspace` `c7965de`; fixes `838598d`, `2e75972`). T18 avoid speed floor: the avoid keeps `max(follower speed, 0.12)` and eases its turn to at most 2v rad/s instead of raising the speed (merge `ecba62c` of `claude/workspace` `36a2eca`). T18 per-scan turn re-check: every scan re-checks a still-active command, turns in place included, against the spin circle within `recheck_max_s` (merge `7b0d8ae` of `claude/workspace` `25af3b4`, fix `52a1842`). T18 avoid trail (breadcrumbs, `trail_tick`, trail at once when the straight line is blocked, trail speed from the path left, turn to where the target was last seen), gentler arcs and `moving_turn`, slow back-off, fusion occlusion keeps the predicted range, LiDAR edge-track fixes, give-way floor `path_floor_m` 0.5, `TargetGate` prediction ≥ 0.3 m and range rate ±2 m/s, dashboard replay cards (page v33); twin **110/110, 0 contacts** on `bdae2c1` (merge `8b2ddf8` of `claude/workspace` `2765354`, T18 re-opened for Codex). `scripts/check.py` passes (228 tests). |
+| `claude/workspace` | Merged into `integration-hub` at `8b2ddf8` (`2765354`: T18 avoid trail, `trail_tick`, gentler arcs, `moving_turn`, slow back-off; fusion occlusion range, LiDAR edge-track fixes, `path_floor_m` 0.5, gate prediction ≥ 0.3 m and range rate ±2 m/s; 228 tests; twin 110/110 on `bdae2c1`; dashboard replay cards). Before that at `7b0d8ae` (`25af3b4`; fix `52a1842`: T18 per-scan turn re-check, a still-active turn in place or near spin is zeroed on the scan that puts something new in the spin circle; two callback tests; live registry `lidar_speed` and `lidar_turn`). Before that at `ecba62c` (`36a2eca`: T18 avoid eases the turn to at most 2v rad/s instead of raising the speed, one new test). Before that at `3f191fc` (`c7965de`; fixes `838598d`: T18 re-check residual, and `2e75972`: avoid turns on a ≥ 0.5 m-radius arc; plus live registry `lidar_arc`, dashboard snapshot page v29, write-up addendum). Before that at `49985eb` (`1ea1584`; fix `f57d624`: T18 near spin, creeps and tight arcs checked against the spin circle; plus live registry LiDAR-map runs and write-up addendum). Before that at `1fe91f2` (`545abfb`; fix `a4ce8a5`: T18 Codex findings, stopped turn and `/scan` QoS; plus dashboard LiDAR-map tab and write-up addendum). Before that at `ef6054c` (`d46914d`: T18 item 1, obstacle re-check bounded by `recheck_max_s`, a stop zeroes the turn). Before that at `ad11ba9` (`c2c9aa2`: merge of `claude/robot/avoid` `c2899c7`, which holds `claude/robot/lidar-assist2` `458d4d0` and `claude/robot/obstacle-stop` `c0be756`; plus dashboard commits up to `e22307e`). Before that at `9184db7` (`ab22dd7`: E4b bridge stop timing, T17 resolved). Before that at `f6bdc90` (`783c1a6`: E4b safety line without an E-stop). Before that at `3b13465` (`94d084b`: `past_tracks` kept under 6.5 MB by thinning the oldest finished experiments to 0.5 Hz; `39444d9`: `[CROWD]` change log and robot-day E4b). Before that at `51f5dff` (`210f422`: T15 no-fresh-scan fix and attribution counts; `f741ea6`: dashboard newest experiment stays live, crop-row test). Before that at `5ace9be` (`1b61abe`: exact `[GATE]` check, lateral-gate write-up tidy). Before that at `c3ce609` (`3cd0870`: T15 round 2, ambiguity-aware lateral gate). Before that at `a059bcc` (`c28a8a4`: T15 write-up fixes). Before that at `8b946b7` (`24e121e`: lateral gate, T15). Before that at `f0a79ab` (`1f94cf4`: T14 review changes). Before that at `a601da7` (`1fd081c`: `side_step` on vs off check, T14). Before that at `6cc9769` (`00ad52e`: box range near-box rule `d23e7b2`, T14). Before that at `059c549` (`f6035f9`: box range from the LiDAR cluster, T13 follow-up). Before that at `b102cc7` (`c750734`: T13 change-request fixes). Before that at `e48ae4c` (`fbf3e73`: hue-saturation histogram, colour re-acquisition, naming). Before that at `ac28ea7` (`c53e7b8`: T12 objection fixes). Before that at `14c263c` (`b07d679`: bearing steering, E7 re-run, thesis, cheat sheet). Before that at `f52e73f` (`15036d0`: T11 objection fixes). Before that at `fba0d89` (`5e3a90d`: T11 `min_rate_dt` fix). Before that at `b23ec2b` (`0526ab3`: realism, robot fixes, bringup, Gazebo solo, thesis draft). Before that at `7e79cea` (`42cc22e`: T10 stale-scan fix). Before that at `9915563` (`38bccba`: LiDAR cluster length fix). Before that at `72c7ea9` (`cfa81be`: T10 finding fixes). Before that at `c2c7f09` (`bd83cad`: solo following). Before that at `fc2878c` (`2402e93`: E7 per-scenario breakdown). Before that at `9ecaecb` (`b9eddf5`: T9 objection fixes). Before that at `eb10a9c` (`76416dc`: T9 finding fixes). Before that at `0654471` (`b165783`: E7 ablation, robot-day kit). Before that at `35c161c` (`11056a6`: T8 finding fixes). Before that at `6698278` (`04782cd`: Arena 3 draft, chroma channel, thesis review). Before that at `8c77425` (`abcbb9c`: integer seed check for T7). Before that at `da04d16` (`3b2cad5`: scorer gap fixes). Before that at `ecc55ca` (`16ac740`: Arena 2 scorer validation and calibration reconciliation). Before that at `9f55d17` (`0b934e3`: bridge guard follow-ups), and before that at `4f7a864` (`b36f31a`: bridge `angular.z`, Arena 2 draft), and before that at `7d400bb`, including the Arena 1 results and the combined fix `e6587fd`. The entry branch `claude/robot/arena-sector-association` (`929096d`) stays unmerged, for the record. The Arena 2 winning entry `claude/robot/arena2-lag` (`3848164`) was merged straight into `integration-hub` at `d8401a9`; `claude/workspace` picks it up at its next sync. The Arena 3 winning entry `claude/robot/arena3-identity` (`191d2c1`) was merged straight into `integration-hub` at `efda1b0` the same way. The walk-up branch `claude/robot/walk-up` (`bdf15ff`, based on `claude/workspace` `1b61abe`) was merged straight into `integration-hub` at `6becee0`; `claude/workspace` picks it up at its next sync. |
+| `claude/dashboard/source` | **Merged into `integration-hub` at `8d35db4`** (`f4f0c27`). It holds `tools/dashboard/` (page, datasets, live generator, registry, CI snapshot), Codex's PR 5 (`scripts/validate_dashboard_live.py`), PR 6 (`tools/dashboard/ci/gen_ci.py`, dated `ci_runs.json`) and PR 7 (`scripts/generate_dashboard_unit_tests.py`), each reviewed by Claude on GitHub, and Claude's `f4f0c27` (snapshot times on the page, registry synced with live flags). **The dashboard source now lives on `integration-hub`; the next publish of the Follower Test Bench artifact is generated from a hub commit that contains `f741ea6`** (hub `51f5dff` or later; before it, the registry had no live experiment, `live_tracks` came out empty and the page showed a load failure). Run the validator on that output first. The CI NumPy step came in through this branch (`a682ad9`); Codex's PR 3 (`codex/ci/install-numpy`, `272ff22`) makes the identical change and is now a no-op on the hub (one copy; PR 3 can be closed). PRs 6 and 7 are still open on GitHub, but their commits are in the hub. **2026-10-29 22:10 Thai time:** Claude republished the artifact's `ci_runs` and `unit_tests` datasets from hub `af95e3e` (CI fetched 22:08 Thai time; unit tests 169/169); the live datasets regenerated identical and were not re-uploaded. From hub `3b13465`, `gen_live.py` keeps `past_tracks` under 6.5 MB (today's output 5.6 MB, byte-identical, validator PASS). The unit-test snapshot predates the 173-test hub. |
+| `codex/workspace` | Synced through `integration-hub` `5d8e62e` (workspace merge `86a2201`, which reconciles Codex's T13 drafts; its `HANDOFF.md` matches the hub at `5d8e62e`). Also holds the unmerged web dashboard prototype (`f1eb42b`). The original Arena entry remains separate and unmerged. |
+| *To delete* | `integration/robot-thesis-desk`, `codex/robot-backup-quarantine` and `codex/thesis-desk`. They are fully merged, but the cloud session's git proxy cannot delete branches. The user deletes them on GitHub, or Codex runs `git push origin --delete ...` from Windows. |
+
+## Models on `integration-hub`
+
+- Claude Code: Claude Opus 5.5, through the `.claude/agents/integration.md` subagent (`model: opus`).
+- Codex: **GPT-6 Astra** (changed from Sol 6 on 2026-10-20, on the user's instruction to adjust as
+  appropriate; Arena WebDev/Code mid-October 2026: Astra #2, Sol #8). *Action for Codex:* set the
+  exact model ID in your own config, then confirm it in `DISCUSSION.md` thread T1.
+
+## Plan
+
+The 12-week plan is in [`docs/PLAN.md`](docs/PLAN.md) (20 Oct 2026 to about 15 Jan 2027). Key decisions:
+
+- **Scope:** the ground-motion (closed-loop) follower is in scope.
+- **Safety:** the user decided there is no physical E-stop, motor-side watchdog, safety bridge or
+  speed limit in this project. Safety relies on an isolated field and several spotters. The
+  existing "target lost / low confidence → stop" logic stays as follower behavior. The thesis
+  must state this under Limitations.
+- **Simulator:** Gazebo, not Isaac Sim (no RTX GPU). It runs headless in the cloud and in CI.
+- **Robot days:** about 2 per month, 5 in total. The dates are unknown; the user will announce them.
+
+## Virtual Office integration — 2026-10-29
+
+PR #8 head `0aa2e20` is integrated at merge `7fab5ac` after lock claim `6ddec9a`. DISCUSSION **T16: resolved** after Claude agreed to reviewed PR #14 `a6a10fb` and Codex merged it under lock `8f87d41` at `961b92d` (Office Node 12/12, `scripts/check.py` 169/169). PR #13 Office controls head `327b07b` then passed exact-head GitHub check, twin and Gazebo jobs and was merged under lock `33bcd43` at `ab24dd6`. Its append-only log conflict was preserved from both sides; merged Office Node tests passed 20/20 and `scripts/check.py` passed 169/169. The README states that seat checks run in the user's Office checkout. The four non-blocking T16 notes remain separate follow-ups. Codex integration model: `gpt-6-astra`. Dashboard publication and stacked PRs #9–#11 remain pending; main is unchanged.
+
+## Open items
+
+1. **T1** in `DISCUSSION.md`: Codex reviewed the branch restructure and role setup. Still open:
+   Codex's model on `integration-hub` is now **GPT-6 Astra** (was Sol 6). Codex reported its runtime
+   only as **GPT-6**; Codex must set GPT-6 Astra and confirm the exact model ID before T1 can close.
+2. **T2** in `DISCUSSION.md`: Codex reviewed the plan and task list. Source locations remain unknown; Windows checkout, backup and robot access are unavailable from the cloud session. User input is needed to continue those imports.
+3. Optional UI fixes for the `thesis-desk` role, found in the Xvfb smoke test:
+   - The Research Desk dialog ignores ESC and stays open after switching to Test Field.
+   - The tracker's top bar overflows a 1440 px wide screen.
+4. Not yet verified: rendering on the user's real Windows GPU, and the real robot checks
+   (ROS graph, camera, LiDAR, motor). There is no physical E-stop to check (see *Plan*).
+5. **T3** in `DISCUSSION.md`: the offline twin and first simulated findings (sector mismatch between
+   camera and LiDAR, bridge ignores `angular.z`, proportional lag, 1.0 s stop on target loss).
+   Codex re-runs the twin, checks the analysis and answers the robot questions. GitHub Actions
+   run 39385504387 (`twin.yml` on `claude/workspace`) was in progress at merge time; check its result.
+6. **T4** in `DISCUSSION.md`: the Gazebo 3D twin and its cross-check against the kinematic twin.
+   Codex builds `Dockerfile.gazebo`, runs `curve_left`/`diff_drive` (GUI via WSLg if possible),
+   judges the field layout and reviews the `sim/twin/world.py` refactor. The new `gazebo` CI job had
+   not reported at merge time; check its result.
+7. **T5 — resolved 2026-10-21** in `DISCUSSION.md`: Arena 1, sector association. Rules, scorer and baseline frozen in
+   `d623baf`. Both entries are submitted and independently scored by Codex; Codex leads by 0.03 points.
+   - **Judged 2026-10-21: Codex won on score** (mean 99.43 vs 99.41 over 3 re-runs each).
+   - The user chose to combine the entries. The combined fix (`e6587fd`, Claude's bearing matching
+     plus Codex's early turn) is merged to the hub (merge `4652571`). The entry branches stay unmerged.
+   - Codex agreed after verifying the carried-over code/test and passing 23 tests plus 3 fresh twin runs (seeds 0–2). Data: `experiments/arena/2026-10-20_sector-association.md`.
+8. **T6** in `DISCUSSION.md`: the drive bridge forwards `angular.z` (merge `4f7a864`; simulation
+   only). The non-finite guard and `turn_dir` sign-only follow-ups are merged (`9f55d17`). Codex
+   agrees with default `turn_dir=+1` under the bridge's stated forward mapping. The calibration
+   record is reconciled in merge `ecc55ca` (`config/motor_wheel_calibration.md`: the table's signs are
+   bench-pulse signs; the bridge, `Joystick.py` and the 2026-09-20 evidence agree on forward).
+   `turn_dir=+1` stays. Codex confirms the reconciliation resolves the written calibration point;
+   Codex agreed in T6 (21:32). The thread stays open only for the lifted-wheel check on robot day (see *Robot-day checklist*).
+9. **T7** in `DISCUSSION.md`: Arena 2 (following lag on the `fixed` bridge). **Frozen in `9b78f1f`**
+   on 2026-10-21 after both agents agreed (Codex at 22:00 Thai time). Entries
+   (`claude/robot/arena2-lag`, `codex/robot/arena2-lag`) branch from `9b78f1f`; each agent posts its
+   entry SHA in T7; neither reads the other's branch until both are in. The `integration` role judges
+   with `--base-ref 9b78f1f`, both entries on the same machine in alternating order.
+   **Judged 2026-10-22** (results `experiments/arena/2026-10-21_arena2-results.md`, commit `a8f1cae`):
+   the Claude entry (`3848164`) wins by the frozen score, 97.84 to 60.89 for Codex (`64dbe7f`). All
+   5 Codex `curve_left`/`fixed` runs lost the target. Claude's margins are thinner: closest person
+   range 0.455 m against 0.630 m, and final gaps below the set-point. Neither entry is merged; merging
+   the winner waits for Codex's cross-check (Codex task 14) and the user's decision.
+   **Merged 2026-10-22 on the user's decision:** `claude/robot/arena2-lag` @ `3848164` → `d8401a9`
+   (49 tests; drive bridge unchanged). Codex's cross-check (relayed to the user: scores reproduce, no
+   blocking problem) is waiting for Codex to post it in T7. The Codex entry stays unmerged. T7 is
+   resolved once Codex posts `agree`.
+   History: the draft was merged in
+   `4f7a864`. The scorer's entry scope was tightened to `entries/<agent>.md` in `9f55d17`. Codex's
+   change request (enforce minimum runs and coverage) is addressed in `ecc55ca`: `validate()` exits 2
+   without a score on an incomplete input set; 9 new tests. New reference on the full protocol:
+   66.0/100 (reproduced at merge time). Claude agrees with Codex's three answers and replied `agree`
+   to the rules as written. The two gaps found at merge time are fixed in `da04d16`: repeated inputs
+   exit 2, and `--agent`/`--base-ref` are required. Codex reproduced 66.01 and passed all 41 tests,
+   but found that `validate()` accepted a twin repeat with no seed field. Fixed in `8c77425`: every
+   twin row needs an integer seed (regression test added, 42 tests). Codex's final `agree` is in T7.
+10. `integration-hub` → `main` (draft PR KobchokTime/Following-Mobile-Robot-in-Farm-Environment#2): needs every thread resolved and the user's approval.
+11. **T8 — resolved 2026-10-24** in `DISCUSSION.md`: Arena 3 (keep following the right person).
+   **Merged on the user's decision:** `claude/robot/arena3-identity` @ `191d2c1` → `efda1b0` (72 tests;
+   the drive bridge and `follow_stop_node.py` are unchanged). Codex agreed (`3b6c5ed`). The Codex entry
+   `4d22f41` stays unmerged. **Frozen in `08a7ac8`** on
+   2026-10-22 after both agents agreed (Codex at 03:37 Thai time). Entries
+   (`claude/robot/arena3-identity`, `codex/robot/arena3-identity`) branch from `08a7ac8`; each agent posts
+   only its entry SHA in T8; neither reads the other's branch until both are in. The `integration` role
+   judges with `score_entry_v3 --base-ref 08a7ac8`, both entries on the same machine in alternating order,
+   and posts the raw summaries. T8 stays open until judging. **Both entries are in:** Claude
+   `claude/robot/arena3-identity` @ `191d2c1`, Codex `codex/robot/arena3-identity` @ `4d22f41` (both
+   unmerged).
+   **Judged 2026-10-22** (results `experiments/arena/2026-10-22_arena3-results.md`, commit `a57dff7`): the
+   Claude entry wins by the frozen score, 99.13 to 94.13. Both entries passed 21/21 identity runs; Codex
+   had contact with the crossing person on `diff_drive` in all 3 seeds. History: the draft was merged in
+   `6698278`. New identity scenarios, the clothing chroma channel `[cx, cy, sector, cb, cr]` (also
+   published by the real `ros2_yolo_live.py`), the draft scorer `sim/arena/score_entry_v3.py`, and a
+   reference score of 60.6/100. The two merge-time findings are fixed in `35c161c`. Codex requested a
+   change (the turn check ignored `diff_drive`) and answered the 4 questions; fixed in `4aba2f6` (turn check
+   on both bridges and Gazebo, metric renamed to `target_visible_share`, limits stated, 63 tests).
+   Both agents replied `agree`. The thesis review (`docs/thesis_review_2026-10-22.md`) now has C3,
+   the box-crop limitation.
+12. **T9 — resolved 2026-10-24** in `DISCUSSION.md`: the robot-day kit and the E7 ablation, merged in `0654471`. E7 (twin):
+   full 30/30, no colour 27/30, no give-way 28/30 (2 contacts), no gate 12/30 (8 contacts). The kit
+   adds `/yolo_frame` (also published by the real `ros2_yolo_live.py`), `tools/robot_day/analyze.py`
+   (E1–E4), `tools/robot_day/turn_check.py` (T6) and `docs/robot_day_protocol.md`. Codex reviews. The three
+   review points (E2 stamp check, `turn_check.py` start-up wait and final stop) are fixed in `eb10a9c`.
+   Codex objected (E7 attribution: "no gate" also disables give-way; E2 summed medians); both are
+   fixed in `9ecaecb`. **Resolved 2026-10-24**: Codex agreed (`2b8b119`).
+13. **T10 — resolved 2026-10-25** (Codex `agree`, `e97c215`) in `DISCUSSION.md`: follow one person at walking pace, merged in `c2c7f09`. These are the
+   user's decisions: lift the speed cap, and Claude builds while Codex reviews.
+   - **The drive bridge default changed to `speed_mode` "mps"** (m/s with an assumed 0.085 m wheel,
+     1.4 m/s per wheel, 1.0 m/s² ramp). `speed_mode:=legacy` keeps the old mapping and needs
+     `max_decel:=0.0` on `follow_stop_node`.
+   - Twin results: solo 30/30 and identity 15/15 on `mps`.
+   - The six review points are addressed in `72c7ea9`. The LiDAR cluster-depth limit is fixed in
+     `9915563`. Only Codex's review is open.
+14. **T11** in `DISCUSSION.md`: twin realism, robot fixes (gate `min_rate_dt` / `unlock_after_s`, give-way
+   gap, predicted-edge rule, `latency_s`), bringup launch and preflight, Gazebo solo set (27/30) and
+   thesis Chapters 3–4 draft, merged in `b23ec2b`. Integration re-run on an idle machine: clean solo 29/30,
+   realism solo 29/30 with 1 `come_back` contact, identity 15/15 both. Five review points for Codex; point 1 (`min_rate_dt`) is fixed in `fba0d89`. Codex objected (thesis accuracy, braking cap using the command): fixed in `f52e73f` (wheel-speed estimate, thesis corrections, operator notes). Waiting for Codex's re-check.
+   **Open design question for the user:** `come_back` comes to 0.39 m in Gazebo (contact limit
+   0.40 m). Should the robot back away faster, or should a person walking up be allowed close?
+15. **T12 — resolved 2026-10-25** (Codex `agree`, `c9006fc`) in `DISCUSSION.md`: optional `follow_stop` `steer_mode:=bearing` (the default stays `sector`), the
+   E7 re-run, thesis 3.3.6/4.6/4.7 and `docs/robot_day_cheatsheet_th.md`, merged in `14c263c`. Twin realism
+   solo: `sector` 27/30, `bearing` 29/30. `bearing` fails `side_step` seed 0 with realism (reproduced).
+   Three review points for Codex: the rate mixes ego motion and box jitter; the bridge holds a turn
+   for 1 s; the `side_step` regression. Codex objected (the turn held for 1 s when messages stop); fixed in `ac28ea7` with a 0.3 s stale-message stop in `bearing` mode. `side_step` now passes. Codex agreed: `bearing` may be tried on robot day after the `sector` runs at `max_speed_mps:=0.5`, as an observational trial; `sector` stays the default.
+16. **T13 — resolved 2026-10-27** (Codex `agree`, relayed by the user; recorded by Claude integration) in `DISCUSSION.md`: torso hue-saturation histogram in the target gate (weight 0.25 against Cb/Cr),
+   colour re-acquisition after >= 1 s unseen, the twin `Detection.hist` and `colour` scenario set, and naming
+   fixes in comments, merged in `e48ae4c` (`claude/workspace` `fbf3e73`). 127 tests; the open-loop twin is
+   bit-identical apart from the new histogram. Five review points for Codex (stranger at the predicted place,
+   re-acquisition at any range, synthetic twin histogram, tuning on the same videos, CPU cost). Codex posted
+   `change requested`: same-clothing re-acquisition took a stranger 5/5 times in a gate-level twin case;
+   the saved 215-run summary recount matches, but full closed-loop runs were blocked because this Windows
+   session has no ROS 2/Docker. Waiting on the re-acquisition decision/change, explicit threshold-tuning
+   wording, a full twin run and robot-PC timing; see T13 for details.
+   **Addressed in merge `b102cc7`** (`claude/workspace` `c750734`, 130 tests). Re-acquisition now only takes a detection
+   within 0.8 m + 1.5 m/s × time unseen of the last place seen, capped at 3 m (`808dc6c`); there are regression tests for
+   Codex's case. The README and docstring are corrected (`ecf573a`). Closed-loop twin with the rule on: shade sets 10/10
+   each, identity 15/15, solo 27/30 with no contact. The new `lookalike_after_loss` gives 9/10 with the rule on and 9/10
+   with it off, so it does not test the rule: the far box borrows the near target's LiDAR range (limitation and follow-up
+   in `765338a`). Robot-PC timing is still outstanding. **Resolved 2026-10-27**: Codex agreed with `808dc6c` (the
+   stranger at 18°, 7.43 m after 1.2 s is rejected: 6.489 m from the last-seen place against 2.6 m allowed). Condition:
+   the limitation stays stated, since `lookalike_after_loss` is 9/10 with the rule on and off, so there is no end-to-end
+   evidence yet that the same-clothing stranger problem is solved. Codex could not commit; its drafts of `HANDOFF.md`
+   and `logs/codex.md` stayed uncommitted in its worktree. **Codex: reconcile them against this file and push them
+   to `codex/workspace`.**
+   **Corrected 2026-10-28 (T15):** the "rule off" runs had the rule on, so "9/10 on and off" is wrong; the real
+   rule-off result on current code is 0/20 (18 contacts) against 20/20 on. T13 stays resolved.
+17. **T14 — resolved 2026-10-28, Codex agree** in `DISCUSSION.md`: camera boxes take ranges from the
+   LiDAR cluster at their bearing. Implementation `d23e7b2` is in hub merge `6cc9769`; validation and
+   wording corrections are in `f0a79ab`, response `61a1181`. Hub checks pass 135 tests.
+   - The revised production-median regression and full-histogram replay reproduce old borrowed
+     0.8 m acceptance versus correct 7.43 m rejection (6.489 m displacement, 2.600 m reach).
+   - The JSON has 43 added side-step records and 56 analyzed observations: on 15/28, off 19/28,
+     Fisher p=0.4121. Off seeds 0–2 are historical `808dc6c` T13 runs; current-code seeds 3–27 give
+     15/25 versus 18/25. No effect detected does not establish equivalence.
+   - Debug traces and logging patch are checked. The traces are separate instrumented reruns, not
+     the counted trials; the initial close-range bearing rejection occurs in both modes. Full audit:
+     Codex research commit `8c27493`, `experiments/reviews/2026-10-28_t14_rereview.md` on `codex/workspace`.
+   - Retained limits: uncalibrated 5° edge margin, wide-stance and neighbor-leg ambiguity, skipped
+     boxes lose give-way evidence, stale-scan/option-off fallback retains old borrowing, physical
+     yaw/translation/image size/FOV remain unmeasured. Robot day E1/E4 must check these; histogram
+     CPU timing still needs the robot PC. Item 18's implementation and review are tracked in T15 below.
+
+18. **T15** in `DISCUSSION.md` — **resolved: Codex agreed after re-review at hub `61742ce`.** Claude answered Codex's 2026-10-28 21:51 change
+   request on 2026-10-29 (merge `51f5dff` of `claude/workspace` `210f422`): with `crowd_from_scan` on and no fresh
+   scan (stale, missing or dated ahead), the plain gate is kept; production-path tests for the three cases (they
+   fail on `1466559`), the switch-off case and recovery; walk-up JSON gains `published_by`/`published_unmatched`
+   (recounted from all 220 `state.jsonl` files at integration); write-up wording corrected; crop-row test now
+   exercises the 1.5 m width rule. Codex reran 169 tests and 11 focused tests, recounted all 220 JSON rows, and agreed. The twin hash comparison cited here is Claude's integration evidence; Codex did not run a new sweep. Robot-day E4 remains. **Robot-day check of the scan crowd rule with real legs: section E4b** of `docs/robot_day_protocol.md` (merge `3b13465`; the node logs one `[CROWD] on t=… reason=scan|no-fresh-scan|gate` / `[CROWD] off t=…` line per change). E4b is **ready for the robot day**: its safety line has no e-stop claim and states the bridge stop timing (merge `9184db7`, T17 resolved).
+   *Earlier state:* Codex change requested after re-review of round 2 and the walk-up follow-up (21:51 Thai time, 2026-10-28).
+   **Walk-up follow-up (merge `6becee0`, `claude/robot/walk-up` `bdf15ff`, 166 tests with the dashboard merge):** the
+   integration finding below is addressed. Before each box the node checks the fresh scan: if the box is within
+   `crowd_radius_m` 0.5 m of the prediction and the returns near the prediction span ≥ 0.55 m, the plain gate is kept
+   for 1 s (`crowd_from_scan`, default true). Twin round 4: `walk_up_same` 10/10 (2/10 without, round 1),
+   `side_step` 18/20 vs 19/20 without, `close_pair_same` 5/5, no contact. Twin hash of the 19 earlier scenarios
+   unchanged. Limits: robot day E4 must check the rule with real legs (may fall back to the plain gate on one walking
+   person). The stale-scan and crop-row test gaps in this earlier review were addressed in merge `51f5dff`.
+   Codex reproduced the stale-scan gap through `try_sync_from_yolo` with fresh sector data: the stranger's first
+   box is rejected with a fresh raw scan but accepted/published when that scan is 0.5 s old. Requested a plain-gate
+   fallback (or skip association) whenever `crowd_from_scan` is on without a fresh scan, plus offline tests. Also
+   requested correction of `published_other` wording: the scorer excludes `?`, while the write-up says it includes
+   it, and committed JSON lacks `published_unmatched` and distractor-only counts. Hub check 166/166 and walk-up
+   tests 8/8 passed in Codex's earlier isolated review checkout; T15 was open at that time. No robot/default code changed in that review.
+   Round 2 (merge `c3ce609`, `claude/workspace`
+   `3cd0870`, 142 tests; Claude's answer in T15, 2026-10-28 11:58). Round 2: twin `close_pair_same` and
+   `published_other` (wrong-person publications; includes false-positive boxes) confirm Codex's objection: a plain floor
+   loses the close same-clothes pair (0.10: 3/10, 201; 0.15: 2/10, 648). Default is now **ambiguity-aware**:
+   `lateral_sigma_m` 0.15 with `ambiguity_window_s` 1, `ambiguity_radius_m` 1 (floor only when the target is alone; plain
+   gate for 1 s after lock-on). Confirmation (50 runs): `side_step` 10/10 vs 5/10, pair 15/15 both, no distractor
+   publication (from `state.jsonl`). Codex's constructor test `bc41e3f` is included verbatim. Integration finding,
+   open: a same-clothes stranger who *arrives* beside the target and whose box comes first in their first shared frame
+   is accepted (offline; the twin does not test it); follow-up owner Claude.
+   History: gate on lateral distance. Merge `8b946b7`
+   (`claude/workspace` `24e121e`, code `efa24f1`, 138 tests). The bearing sigma is max(5°, `lateral_sigma_m` 0.15 m / range);
+   unchanged beyond about 1.7 m; 0 restores the old gate exactly (checked). The `TargetGate` tunables are now declared
+   ROS parameters (`GATE_PARAMS`). Twin: `side_step` 19/20 vs 5/20 interleaved; `zigzag` 8/10 vs 6/10; identity 15/15;
+   colour set 39/40 (`shade_crossing` s7); look-alike 20/20. Limits: at 0.7 m with no colour help the gate now accepts up
+   to 0.445 m sideways (was 0.19 m); a differently dressed person 0.14 m to the side at 1 m is under the gate; the twin
+   varies between sessions. Write-up fixes for integration notes 1, 3, 5 merged at `a059bcc` (`c28a8a4`).
+   Codex reviewed tip `207ceda`: math and T13 correction accepted, but reproduced a wrong-person publication
+   through production box_range/try_sync_from_yolo for separate people 0.44 m apart, both fully visible.
+   At 0.15 the stranger costs 5.8499 and becomes last_target; 0/0.10 reject. Claude owns the targeted
+   close-person identity regression/default comparison (include wrong-person publication counts; Docker needed).
+   Codex audit/report: `23ae14b`. Constructor-wiring guard fix ready on `codex/qa/t15-parameter-wiring`
+   (`bc41e3f`, merged/pushed workspace `0436fed`, 139 tests; hub still 138), pending integration.
+   No fresh ROS/Docker or hardware run by Codex; no robot default changed. Full answers (a)–(d) in T15.
+   **T13 correction:** T13's "rule off" runs had the rule on (undeclared `-p` is ignored). The real rule-off result on
+   current code is 0/20 with 18 contacts, against 20/20 on. T13 stays resolved; Codex confirms in T15 (c).
+19. **T17** in `DISCUSSION.md` — **resolved 2026-10-29 (22:18 Thai time).** E4b's safety line has no e-stop claim (isolated
+   field, spotters, the operator stops the bringup) and gives the bridge stop as it is in code (software only): zero at
+   once on shutdown; without `/cmd_vel`, a ramp to zero starting 1 s after the last command, about 1.5 s at 0.5 m/s
+   (merges `f6bdc90` of `783c1a6` and `9184db7` of `ab22dd7`). Earlier: merge `3b13465` (`39444d9`); the `[CROWD]` log and
+   `fit_past_tracks` were reviewed with no blocking finding (two minor notes in T17).
+20. **T18** in `DISCUSSION.md` — **open again (2026-10-30 22:12 Thai time): avoid trail, gentler arcs, slow back-off and fusion fixes merged at `8b2ddf8` (`claude/workspace` `2765354`); Codex to re-review `2ca77c2..8b2ddf8` (four questions: trail speed above the follower's request, 3 s `trail_hold_s` without target messages, fusion leaning on the obstacle stop, `trail_tick` test gaps). Twin 110/110, 0 contacts on `bdae2c1`; `scripts/check.py` 228/228. Still to do: the robot-day LiDAR checks, and the thin `blind_corner` in-view margin (0.904–0.934 against 0.9).** Before that, Codex re-reviewed `c7fd2ed..7b0d8ae`: agree on offline fix; `python scripts/check.py` 208/208, focused callback regressions 2/2 on hub `2ca77c2`. LiDAR obstacle stop, avoid and LiDAR assist
+   (merge `ad11ba9` of `claude/workspace` `c2c9aa2`; feature `claude/robot/avoid` `c2899c7`). New `follow_stop_node`
+   parameters: `obstacle_stop` (true), `obstacle_avoid` (true), `avoid_delay_s` (1.0), plus `obstacle_half_width_m` 0.30,
+   `obstacle_stop_m` 0.45, `obstacle_target_exclude_m` 0.30, `avoid_min_speed_mps` 0.12, `avoid_hold_s` 0.5,
+   `scan_topic` `/scan`, `lidar_angle_offset_deg` 180, `scan_max_age_s` 0.3. New `sync_fusion_node` parameters:
+   `lidar_assist` (true), `lidar_assist_speed_mps` (1.5), `lidar_assist_dist_m` 0.35. Twin
+   (`experiments/sim/2026-10-29_lidar_avoid.md`): 100/100 on the 20 baseline scenarios × seeds 0–4 (hub `5c72c4d`:
+   98/100), `pass_by` 5/5, `blind_corner` 0/5 following with no contact, 0 contacts in 110 runs. Integration review
+   found one should-fix before robot day (the per-scan re-check has no age limit and keeps the turn; see T18) and
+   minor notes. **Item 1 fixed at merge `ef6054c`** (`claude/workspace` `d46914d`): new `follow_stop_node` parameter
+   `recheck_max_s` (1.0, the bridge timeout) limits the re-check to that long after the command it lowers, and a
+   resend capped to 0 also sends `angular.z` 0; test `test_the_recheck_ends_with_the_bridge_timeout_and_stops_the_turn`.
+   Codex cross-review at 06:22 Thai time found two additional blockers for robot day/main: ordinary fused
+   commands can still publish a turn with no fresh scan or a stop cap of zero, and the new `/scan` subscription
+   requests reliable QoS rather than sensor-data best effort. **Both answered at merge `1fe91f2`** (`claude/workspace`
+   `545abfb`, fix `a4ce8a5`): a command with `linear.x` 0 keeps its turn only with a fresh scan and nothing but the
+   target within the new `follow_stop_node` parameter `spin_clear_radius_m` (0.40 m; fused, avoid and `[HOLD]` paths),
+   and `/scan` uses `qos_profile_sensor_data`; `StoppedTurnTest`; 202 tests. Twin (author): 104/110, 0 contacts.
+   Integration review residual, should fix before robot day: a near spin (`|v| ≤ 0.05` or `|ω/v| > 2` with a turn)
+   is not checked against the spin circle (probe: `(0.03, −0.8)` passes with a post 0.31 m beside the rear quarter).
+   **Near spin fixed at merge `49985eb`** (`claude/workspace` `1ea1584`, fix `f57d624`): a creep or an arc tighter
+   than 2/m is checked against the spin circle; refused, the turn is dropped and the corridor-checked straight creep
+   kept (no `pass_by` s4 deadlock); 203 tests. Twin (author): 107/110, 0 contacts; baseline 100/100; `pass_by` 5/5;
+   `blind_corner` 2/5. New low residual: the per-scan re-check resends a lowered speed with the original turn
+   without the spin check (author's workspace). **Re-check residual fixed at merge `3f191fc`** (`claude/workspace`
+   `c7965de`, fix `838598d`); the same merge has the avoid command at least |ω|/2 m/s so its turn is a ≥ 0.5 m-radius
+   arc the corridor checks as such (`2e75972`, `pass_by` s1 fix); 205 tests. Twin (author): 104/110, 0 contacts;
+   baseline 99/100; `pass_by` 5/5 (s5–9 4/5); `blind_corner` 0/5; builds since `546bd57` range 104–107/110 with no
+   contact. Integration concern, settle before robot day: that avoid speed floor ignores the target distance (up to
+   0.4 m/s at `angular_limit` 0.8; probe 0.17–0.26 m/s with the follower asking 0.02 m/s and the target 0.7–1.1 m
+   away). **T18 change requested at 10:43 Thai time: earlier scan-turn/QoS, near-spin, lowered-resend and avoid speed-floor fixes pass re-review, but a new post entering the spin circle does not stop an already published pure or near spin on the scan callback; Claude Code owns the per-scan fix and full 110-run result.** **Per-scan turn fix merged at `7b0d8ae`** (`claude/workspace` `25af3b4`, fix `52a1842`): both of Codex's sequences are callback tests (fail without the fix), the original-command age bound is kept; 208 tests. Twin (author): `36a2eca` 102/110 (baseline 98/100), `52a1842` 105/110 (baseline 100/100, `pass_by` 4/5, `blind_corner` 1/5), 0 contacts in both. Codex re-reviewed `c7fd2ed..7b0d8ae`: agree on offline fix; `python scripts/check.py` 208/208, focused callback regressions 2/2 on hub `2ca77c2`. T18 cross-review resolved for offline integration; robot-side validation remains separate. Items 2–5
+   remain minor.
+
+## Codex — week 1 tasks
+
+Sync `codex/workspace` with `integration-hub` first. Read `docs/PLAN.md` and reply in T2.
+
+1. On the user's Windows machine, find the code the docs reference but the repo lacks: the Robot
+   Console (`dashboard/`, including `dashboard/bridge/server.mjs`), `src/following_robot/motion_safety.py`
+   and the other `src/following_robot/*` modules, and the 121 automated tests plus 32 ROS-stub
+   tests from `docs/EXECUTION_WORKFLOW.md`. If something exists only on the robot, pull it over SSH.
+2. Bring the robot's Python code and tests into this repo as role `robot` / `qa` feature branches
+   (`codex/robot/import-code`, `codex/qa/import-tests`) via `codex/workspace`.
+   - Robot Console default: import it into `tools/robot_console/` (Claude's recommendation; the
+     user has not objected, but confirm with the user before merging if unsure).
+   - Strip secrets, private IPs, SSH keys and machine paths.
+   - Make `scripts/check.py` run the full suite (extend `PY_DIRS` and test discovery as needed).
+3. List the videos and ROS bags in the local backup (path, size, sha256, what each contains) in a
+   new `experiments/raw_data_index.md`. Do not commit the binaries. Propose where to store them
+   (GitHub Releases or other object storage).
+4. Write a robot-side rosbag2 (MCAP) recording script for robot days, recording all topics plus
+   the config, commit SHA and scenario label (role `robot`).
+5. Update the quests in `tools/thesis_desk/thesis_data.json` (role `thesis-desk`): drop quests
+   11–12 from the plan and move 13 back to Main Quest, per `docs/PLAN.md`.
+6. Log everything in `logs/codex.md`. Integrate through `integration-hub` with a `DISCUSSION.md`
+   thread for Claude to cross-check.
+7. **Arena 1** (T5): review `experiments/arena/2026-10-20_sector-association.md` and
+   `sim/arena/score_entry.py` for fairness, then fix the sector mismatch on
+   `codex/robot/arena-sector-association`, branched from `integration-hub` at `d623baf`. Post the
+   commit SHA in T5. Do not read `claude/robot/arena-sector-association` until both entries are in.
+8. **Arena 1 combined fix** (T5): cross-check `e6587fd` on `integration-hub`.
+   - Re-run `curve_left`/`diff_drive` a few times if disk space allows.
+   - Confirm that your `follow_stop_node.py` change and early-turn test were carried over faithfully.
+   - Then reply `agree`, or contest the verdict, in T5.
+
+9. **T6 review**: review the drive bridge `angular.z` change (`4f7a864`). Check the sign derivation
+   against `config/motor_wheel_calibration.md` and `ros2_yolo_ws/scripts/control/Joystick.py`,
+   re-run `tests/test_drive_bridge_mixing.py`, and say whether the default `turn_dir` should be +1
+   or -1.
+10. **T7 review**: review the Arena 2 draft rules and `sim/arena/score_entry_v2.py`. Object or reply
+    `agree`, and answer the draft's 3 open questions. No entry starts before the freeze. *(Done: change
+    requested, answers given.)*
+11. **T7 re-review**: review `sim/arena/score_entry_v2.py` as it stands after `da04d16`: `validate()`,
+    rejection of repeated inputs, required `--agent`/`--base-ref`, `tests/test_arena2_scorer.py`, and
+    the 66.0 reference. *(Reviewed: objected to missing-seed acceptance; fixed in `8c77425`.)*
+    **Now:** final T7 review of the integer seed check in `8c77425` (`validate()` and
+    `test_missing_or_non_integer_seed`). *(Done: `agree`; reproducer now exits 2; 66.01 reference passes.)*
+12. **T6 calibration**: read the reconciliation section in `config/motor_wheel_calibration.md`
+    (`ecc55ca`) and confirm in T6 whether it resolves your calibration point. *(Done, apart from robot day:
+    Codex agreed the written calibration point is resolved; the lifted-wheel check remains.)*
+13. **Arena 2 entry** (T7): build the Codex Arena 2 entry on `codex/robot/arena2-lag`, branched from the
+    freeze commit `9b78f1f`. Stay within the allowed paths in
+    `experiments/arena/2026-10-21_arena2-draft.md`, do not read `claude/robot/arena2-lag` until both
+    entries are in, and post the entry commit SHA in T7. *(Done: pushed `64dbe7f4a823d3662a4a5c36ea160b2b049bdea9`; full self-score unavailable because Docker storage is full, so judging is pending.)* *(Judged 2026-10-22: 60.89.)*
+14. **Arena 2 cross-check** (T7): cross-check `experiments/arena/2026-10-21_arena2-results.md`, the raw
+    data in `experiments/arena/arena2_judging/`, and the Claude entry `claude/robot/arena2-lag` @
+    `3848164` (you may read it now). *(Done 2026-10-22: re-scored the committed summaries: Claude
+    97.84, Codex 60.89, both with empty `out_of_scope`; `scripts/check.py` passed 49 tests on
+    `3848164`; reviewed the controller change and tests, found no merge blocker, replied `agree`, and
+    marked T7 resolved after confirming the Claude entry merge at `d8401a9`.)*
+15. **T8 review**: review the Arena 3 draft rules
+    (`experiments/arena/2026-10-22_arena3-draft.md`), the twin chroma model (`sim/twin/world.py`,
+    `sim/twin/scenarios.py`) and `sim/arena/score_entry_v3.py` with its tests. *(Done 2026-10-22:
+    final `agree` posted in T8 after the diff_drive turn-check fix and regression reproducer passed;
+    v3 baseline 60.64, `scripts/check.py` 63 tests. Answered all 4 questions and commented on the
+    thesis review's box-crop chroma limitation. Both agents agree; the integration role still needs to
+    name the freeze commit. No entry started.)* Also read `docs/thesis_review_2026-10-22.md` and
+    comment in T8 or a new thread.
+16. **Arena 3 entry** (T8): build the Codex Arena 3 entry on `codex/robot/arena3-identity`, branched
+    from the freeze commit `08a7ac8`.
+    - Stay within the allowed paths in `experiments/arena/2026-10-22_arena3-draft.md`.
+    - Target selection must live in `sync_fusion_node.py`, `fusion_prob_node.py` or
+      `follow_stop_node.py`; the twin bypasses `ros2_yolo_live.py`.
+    - Detections carry `[cx, cy, sector, cb, cr]` (clothing chroma). Code that reads `cb, cr` must
+      accept old 3-value messages.
+    - The full protocol needs about 30 minutes of twin time plus the Gazebo runs. If your disk cannot run
+      it, say so in your entry note.
+    - Do not read `claude/robot/arena3-identity` until both entries are in. Post only the entry commit
+      SHA in T8.
+    *(Entry pushed: `4d22f4157bb61843d749f0089d07fd29f218c208`; `scripts/check.py` passes 69 tests.
+    Full twin/Gazebo protocol unavailable because the root overlay is full and `rclpy` is absent; see
+    the entry note. Leave full scoring to the judge.)* *(Judged 2026-10-22: 94.13.)*
+17. **Arena 3 cross-check** (T8): *(Done 2026-10-24: re-scored the committed raw summaries: Claude
+    `191d2c1` 99.13 and Codex `4d22f41` 94.13, both with empty `out_of_scope`; `scripts/check.py`
+    passed 72 tests on a read-only snapshot of Claude's entry; reviewed TargetGate, corridor give-way
+    and tests, found no merge blocker, and replied `agree` in T8. Did not merge either entry.)*
+18. **T9 review**: review the E7 ablation (`experiments/sim/2026-10-24_e7_ablation.md` and its raw data)
+    and the robot-day kit. *(Reviewed 2026-10-24: E7 counts match frozen v3, but objected that the
+    `no_gate` parameter also disables corridor give-way, so it does not isolate data association.
+    Reviewed `/yolo_frame`, twin output, analyzer, turn check and protocol. The earlier 3 findings are
+    fixed. Reproduced that the analyzer's extra capture-to-cmd median is the sum of component medians,
+    not the paired end-to-end median. This does not block E1/E3/E4; remove or correct the aggregate
+    before citing it for E2. No ROS 2 installation or twin bag was available. Check passed 84 tests.)*
+    **Resolved 2026-10-24:** reviewed fixes in `9ecaecb` and `fc2878c`; the E7 write-up isolates
+    the gate effect, and E2 calculates the per-frame end-to-end latency (110 ms on the reproducer).
+    `scripts/check.py` passed 85 tests. Codex replied `agree` and marked T9 resolved.
+19. **T10 review**: review the solo-following change (`experiments/sim/2026-10-24_solo_following.md`).
+    - Check the bridge `mps` mode and its new default, `follow_stop_node.py` `max_decel`, the
+      `sync_fusion_node.py` LiDAR edge tracking, the `SOLO_SCENARIOS` and `mps` twin mode,
+      `record_robot_day.sh --countdown/--duration`, `tools/robot_day/speed_check.py`, E6 in
+      `analyze.py`, and the working-alone plan in `docs/robot_day_protocol.md`.
+    - Say which of the 6 review points in T10 must be fixed before the first robot drive.
+    - Reply `agree` or object in T10.
+    *(Resolved 2026-10-25: Codex reviewed the stale-scan fix `2eaba0b`, reran the old/missing/fresh
+    scan reproducer, and replied `agree`. `scripts/check.py` passes 103 tests. The first-drive plan
+    remains the wheel and direction checks followed by `max_speed_mps:=0.5`.)*
+20. **T11 review**: review the robot fixes (`sync_fusion_node.py` gate and give-way, `follow_stop_node.py`
+    `latency_s`) and the bringup (`ros2_yolo_ws/launch/follow_bringup.launch.py`,
+    `tools/robot_day/preflight.py`, the bridge `port` and YOLO `model_path` parameters). Say which of the
+    5 review points in T11 must change before robot day. Check `docs/thesis_draft_ch3_ch4.md` against
+    the code. Reply `agree` or object in T11.
+    *(Codex re-reviewed 2026-10-25 and agreed with fix merge `f52e73f`: the wheel-speed estimate
+    makes the braking reproducer's forward cap zero; thesis and operator notes are corrected.
+    `scripts/check.py` passes 117 tests. Gazebo `come_back` remains an author design decision.)*
+21. **T12 review**: review `steer_mode:=bearing` in `follow_stop_node.py` and the launch file. Say whether it
+    may be tried on robot day (cheat-sheet slot, after `sector`, at `max_speed_mps:=0.5`). Check thesis
+    3.3.6/4.6/4.7 against the code and the raw data. Reply `agree` or object in T12.
+    *(Resolved 2026-10-25: Codex reviewed the bearing-only 0.3 s stale-message stop and the
+    document corrections, reran the reproducer, and replied `agree`. Bearing may be tried after
+    sector runs at 0.5 m/s; sector remains default. Check: 120 tests.)*
+
+## Robot-day checklist
+
+- **Note (Arena 3 merge `efda1b0`):** the real robot now follows only the person it locks on to at the
+  start, and gives way to a nearer person in its driving corridor. `target_gate:=false` (a
+  `sync_fusion_node.py` parameter) restores the old behaviour. All gate values were tuned in simulation
+  and are checked on the robot in E5.
+
+- **Note (T10 merge `c2c7f09`): the drive bridge now defaults to `speed_mode` "mps"** (m/s, assumed
+  0.085 m wheel, 1.4 m/s cap, 1.0 m/s² ramp). Make the **first drive at `max_speed_mps:=0.5`**. Run
+  `tools/robot_day/speed_check.py` to measure the real speed (wheel radius) before going above
+  0.5 m/s. `speed_mode:=legacy` needs `max_decel:=0.0` on `follow_stop_node`.
+- **Note (T18 merge `ad11ba9`): `follow_stop_node` now reads `/scan` itself** (`obstacle_stop`, default on). Without
+  a fresh scan (0.3 s) it does not drive forward or back, and logs `[OBST] on clearance=0.00 m (no fresh scan)`:
+  start the LiDAR driver before driving. Anything in a ±0.30 m corridor other than the target caps the speed so the
+  robot stops 0.45 m short of it; `obstacle_avoid` aims beside the target after the path stays blocked
+  `avoid_delay_s` (1.0 s). The per-scan re-check only lowers a command within `recheck_max_s` (1.0 s) of when it was
+  sent, and a stop it sends also zeroes the turn (merge `ef6054c`). A command with no forward or reverse speed
+  turns in place only with a fresh scan and nothing but the target within `spin_clear_radius_m` (0.40 m), otherwise
+  it sends `(0, 0)` (merge `1fe91f2`); in narrow rows the robot may therefore not turn in place. While avoiding,
+  the robot drives at least |ω|/2 m/s (up to 0.4 m/s at `angular_limit` 0.8) so the turn is a ≥ 0.5 m-radius arc
+  (merge `3f191fc`); watch the speed of `[AVOID]` commands when the target is close. From merge `8b2ddf8` the avoid instead keeps `max(asked, 0.12)` with |ω| ≤ 2v; when blocked it follows the target's own path (`[TRAIL]`, up to 0.6 m/s from the path left, and for up to `trail_hold_s` 3 s with no target message, turning in place at ≤ 0.4 rad/s only with a clear spin circle), and with no way round backs off at 0.1 m/s for at most 3 s (`[BACK]`), the stop checking behind; `sync_fusion_node` logs `[OCCL]` when it keeps the predicted range of a covered target. `avoid_trail:=false` and `avoid_back_mps:=0.0` turn the trail and the back-off off, `occluded_gap_m:=0.0` the occlusion range. `sync_fusion_node` `lidar_assist` (default on) moves the target track to the target's
+  LiDAR cluster. `obstacle_stop:=false`, `obstacle_avoid:=false` and `lidar_assist:=false` turn each off. The
+  stop's braking uses `max_decel` in m/s², so it is meant for `speed_mode` "mps".
+- [ ] T18 LiDAR checks, with a post and with a crouched person in the path (all twin-only so far):
+  - `[TRAIL]` and `[BACK]` lines at a corner with someone standing at its inside (twin `blind_corner`); the robot stops within about 3 s of the last target message.
+  - `[OBST] on`/`off` in the `follow_stop` log when the post enters/leaves the corridor, and `clr=` on each
+    `[MOVE]` line falling as the robot closes in; the robot stops about 0.45 m (LiDAR to obstacle) short.
+  - `[AVOID] aim ±x.xx m beside the target` only after about 1 s blocked, then `[AVOID] off` once past it;
+    nobody walking across the path should trigger `[AVOID]`.
+  - The `[GATE]` line at start-up lists `lidar_assist=1 lidar_assist_dist_m=0.35 lidar_assist_speed_mps=1.5`.
+  - Check the LiDAR angle offset (`lidar_angle_offset_deg` 180 in both nodes): a post straight ahead must give
+    `clr=` about its distance, not stop the robot for something behind.
+  - **Before driving: `follow_stop` must receive `/scan` best effort** (merge `1fe91f2`; the twin publishes
+    reliably, so this is untested). `ros2 topic info /scan --verbose` lists the `follow_stop` subscription with
+    reliability BEST_EFFORT and the LiDAR publisher; with the LiDAR running and nothing near, no
+    `[OBST] on clearance=0.00 m (no fresh scan)` line appears while the target is followed.
+  - Spin circle (`spin_clear_radius_m` 0.40 m): with the robot standing and the target stepping to the image
+    edge, it turns in place when nothing is within 0.40 m of the LiDAR, and sends `v=(0.00, 0.00)` with a post
+    0.3 m beside it. If it never turns in place with the area clear, check whether the LiDAR sees the robot's
+    own frame within 0.40 m.
+- **Working alone:** use the working-alone plan in `docs/robot_day_protocol.md`. It uses
+  `record_robot_day.sh --countdown/--duration`, so one person can start a run and walk to the mark.
+- **Procedure:** follow [`docs/robot_day_protocol.md`](docs/robot_day_protocol.md).
+  - Step 0 is the T6 turn check with `tools/robot_day/turn_check.py`.
+  - Record each experiment with `ros2_yolo_ws/scripts/record_robot_day.sh --scenario <label>`.
+  - Analyse the recordings with `tools/robot_day/analyze.py` (E1–E4).
+- [ ] Lifted-wheel turn-direction check for `zlac_joystick_bridge.py` (T6), run with
+  `tools/robot_day/turn_check.py`:
+  - With the wheels off the ground, publish a small positive `angular.z` (counter-clockwise) and no
+    `linear.x`.
+  - The right wheel should turn forward and the left wheel backward. If not, set `turn_dir:=-1`.
+  - Also confirm that forward `linear.x` still drives both wheels forward.
+- [ ] Revised experiments E1–E7 from the thesis review
+  ([`docs/thesis_review_2026-10-22.md`](docs/thesis_review_2026-10-22.md), section E):
+  - **Robot day 1:** E1 (camera vs LiDAR bearing against tape marks), E3 (detection rate against
+    distance) and E4 (clothing colour, 2 people × same/different clothes × sun/shade). Add E2
+    (latency) from `/yolo_frame`, which now carries the image stamps.
+  - **Robot day 2:** E5 (keep the right person, with the Arena 3 winner) and E6 (following quality).
+  - E7 (ablation) runs in the twin.
+
+## Claude — in parallel
+
+- [x] Replay harness for recorded rosbags (`sim/replay/replay_bag.py`, role `robot` / `qa`).
+- [x] Docker image (Ubuntu 22.04, ROS 2 Humble) with fake camera/YOLO, LiDAR and ZLAC drivers
+  (`sim/`, see `sim/README.md`). It runs the unmodified perception → fusion → controller chain.
+- [x] CI that runs `scripts/check.py`, the twin and the replay smoke check (`.github/workflows/twin.yml`).
+- [x] Gazebo world: differential-drive robot with 2D LiDAR (`gpu_lidar`) in a farm scene with crop
+  beds, a headland and walking people (`sim/gazebo/`). **Done** with Ignition Gazebo Fortress from
+  the Docker Hub image `osrf/ros:humble-desktop-full`, because `packages.ros.org` is blocked in
+  Claude's cloud session. The camera is emulated, not rendered. Review in T4.
+- [ ] Robot-day #1 checklist (role `research`).
