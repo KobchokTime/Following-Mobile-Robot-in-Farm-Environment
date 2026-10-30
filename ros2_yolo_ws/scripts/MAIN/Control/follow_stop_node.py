@@ -550,7 +550,7 @@ class FollowStopNode(Node):
                 # in a straight line but a corner away, and the crawl reached the corner too late to keep it in
                 # view (blind_corner s1/s3 on 47109fb, in view 0.897)
                 linear_x = max(linear_x, self.avoid_min_speed,
-                               min(0.5, 0.6 * (self.trail_length(aim) - self.target_distance)))
+                               min(0.6, 1.0 * (self.trail_length(aim) - self.target_distance)))
                 angular_z = max(-2.0 * linear_x, min(2.0 * linear_x, angular_z))
                 if not at_edge and angular_z * target_bearing < 0.0 and abs(target_bearing) >= 0.35:
                     # the crumb is one way and the target already 20 deg or more the other: going straight
