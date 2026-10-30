@@ -428,6 +428,10 @@ class SyncFusionNode(Node):
         # only someone at least this much nearer than the target is in the way; a spurious box over the
         # target itself reads the target's own LiDAR range and must not make the robot back off
         self.declare_parameter('path_min_gap_m', 0.2)
+        # giving way stops the robot short of them; it never reads nearer than this (the controller's follow
+        # distance), so the controller holds rather than reverses (pass_by s0/s1 on 5cfb21b backed off at 0.5-0.7
+        # m/s from a worker 0.5 m away and fell 2.8 m behind). The LiDAR obstacle stop guards the corridor.
+        self.declare_parameter('path_floor_m', 0.5)
         # LiDAR keeps the target when it leaves the camera's view (a side step, a sharp turn)
         self.declare_parameter('lidar_track', True)
         self.declare_parameter('scan_topic', '/scan')
@@ -474,6 +478,7 @@ class SyncFusionNode(Node):
         self.path_hold = float(self.get_parameter('path_hold_s').value)
         self.path_margin = float(self.get_parameter('path_margin_m').value)
         self.path_min_gap = float(self.get_parameter('path_min_gap_m').value)
+        self.path_floor = float(self.get_parameter('path_floor_m').value)
         self.path_block = None  # (time, range) of the latest other person in the corridor
         self.last_target = None  # (cx, cy, sector_id, range) last published for the target
         self.use_lidar_track = bool(self.get_parameter('lidar_track').value)
@@ -760,13 +765,13 @@ class SyncFusionNode(Node):
                 self.path_block = (ty, dist)
                 # They may hide the target, so give way now instead of waiting to see the target again
                 cx_t, cy_t, sector_t, _ = self.last_target
-                self.publish_synced(cx_t, cy_t, max(0.0, dist - self.path_margin), sector_t, best_dt)
+                self.publish_synced(cx_t, cy_t, max(self.path_floor, dist - self.path_margin), sector_t, best_dt)
             return
         self.last_target = (cx, cy, sector_id, dist)  # the target's own range, before any give-way
         self.last_camera_fix = ty
         self.last_camera_bearing = bearing
         if self.path_block is not None and ty - self.path_block[0] <= self.path_hold:
-            dist = min(dist, max(0.0, self.path_block[1] - self.path_margin))  # give way to whoever is in it
+            dist = min(dist, max(self.path_floor, self.path_block[1] - self.path_margin))  # give way to whoever is in it
         self.publish_synced(cx, cy, dist, sector_id, best_dt)
 
         self.sync_count += 1

@@ -231,6 +231,18 @@ class WalkUpTest(unittest.TestCase):
         self.assertEqual([line.split()[1] for line in crowd], ['on', 'off', 'on', 'off'])
         self.assertIn('reason=scan', crowd[2])
 
+    def test_giving_way_holds_at_the_follow_distance_instead_of_backing_off(self):
+        # pass_by s0 on 5cfb21b: a worker's box 0.57 m out in the path published the target at 0.17 m and the
+        # controller reversed at 0.5 m/s
+        m, node = make_node()
+        t = self.lock(node, target=(1.0, 0.0))
+        t += 1.0
+        for k in range(10):
+            self.frame(node, t + 0.1 * k, [(1.0 + 0.05 * k, 0.0)])
+        t += 1.0
+        self.frame(node, t, [(0.57, 0.15), (1.5, 0.0)])
+        self.assertGreaterEqual(min(p[2] for p in node.published[-2:]), 0.5)
+
     def test_a_crop_row_beside_the_target_does_not_count_as_a_person(self):
         m, _ = make_node()
         # plants 0.1 m apart, 0.45 m right: inside the 0.5 m radius, so only the 1.5 m width rule leaves it out
