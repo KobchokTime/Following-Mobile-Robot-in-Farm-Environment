@@ -431,10 +431,12 @@ class FollowStopNode(Node):
             aim = (target_xy[0] - offset * target_xy[1] / d, target_xy[1] + offset * target_xy[0] / d)
             angular_z = bearing_turn(math.atan2(aim[1], aim[0]), 0.0, self.latency_s, self.bearing_gain,
                                      self.angular_limit, self.bearing_deadband)
-            # from a near stop too (pass_by s4), and fast enough for the turn to be an arc of at least 0.5 m
-            # radius, which the corridor checks as the arc it is; slower, it is a near spin checked as straight,
-            # and beside the worker both were refused (pass_by s1 on 838598d)
-            linear_x = max(linear_x, self.avoid_min_speed, abs(angular_z) / 2.0)
+            # from a near stop too (pass_by s4); the turn is limited to an arc of at least 0.5 m radius, which the
+            # corridor checks as the arc it is (slower and sharper, it is a near spin checked as straight; beside
+            # the worker both were refused, pass_by s1 on 838598d). The turn is eased, not the speed raised, so
+            # the robot never closes on the target faster than the follower asks (T18 integration review).
+            linear_x = max(linear_x, self.avoid_min_speed)
+            angular_z = max(-2.0 * linear_x, min(2.0 * linear_x, angular_z))
             linear_x = self.obstacle_limited(linear_x, target_xy, angular_z)
             return self.stopped_turn(linear_x, angular_z, target_xy)
         if self.avoid_offset != 0.0:
