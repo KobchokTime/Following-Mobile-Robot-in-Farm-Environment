@@ -1638,3 +1638,6 @@ Earlier history: `history-2026-10-16.md`.
 ## 2026-10-30 09:14 — dashboard published (page v29); avoid arc fix
 - Dashboard published from hub `e92a39a`: page v29 (LiDAR-map tab), current_runs (f57d624 = hub 49985eb, 107/110), unit tests 203/203 @ e92a39a, CI fetched, live (17 experiments, `lidar_spin` live). Old blobs deleted; `datasets.json` synced.
 - Smoke on `838598d` (s0–1): pass_by s1 stood beside the worker (no contact): straight blocked at the corridor edge, the avoid's slow sharp turn was a near spin, the spin circle not clear. Avoid now commands at least |w|/2 m/s so the turn is a ≥ 0.5 m-radius arc the corridor checks as such. Test added (fails without); 205 tests pass. Full run follows.
+
+## 2026-10-30 10:18 — full run on `2e75972`
+- 104/110, 0 contacts; baseline set 99/100 (shade_crossing s0, no avoid active); pass_by 5/5, s5–9 4/5 (s5 swapped sides); blind_corner 0/5. Totals since 546bd57: 104–107/110, never a contact. Registry `lidar_arc` (live), write-up updated.

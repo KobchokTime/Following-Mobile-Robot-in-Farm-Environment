@@ -64,6 +64,11 @@
   against the spin circle too; refused, the turn is dropped and the corridor-checked straight creep kept. Full
   twin run: **107/110, 0 contacts**; baseline set **100/100**; `pass_by` 5/5; `blind_corner` 2/5 (s2, s4 pass;
   the rest stop without contact, min 0.59 m).
+- **Re-check and avoid arcs** (`838598d`, `2e75972`): a re-check's lowered resend goes through the spin check;
+  avoid commands at least |w|/2 m/s so its turn is a ≥ 0.5 m-radius arc. Full run: **104/110, 0 contacts**;
+  baseline set 99/100 (`shade_crossing` s0, no avoid in that run); `pass_by` 5/5 and s5–9 4/5;
+  `blind_corner` 0/5. Across the builds since `546bd57` the totals moved between 104 and 107 of 110 with no
+  contact in any run: following past a hidden obstacle varies from run to run; the stop does not.
 - The twin publishes `/scan` reliably, so it cannot test the QoS change; check on the robot that `follow_stop`
   receives `/scan` (`[OBST]` lines appear, or `ros2 topic info /scan --verbose`).
 
