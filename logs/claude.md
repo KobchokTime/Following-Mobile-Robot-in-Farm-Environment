@@ -1641,3 +1641,9 @@ Earlier history: `history-2026-10-16.md`.
 
 ## 2026-10-30 10:18 — full run on `2e75972`
 - 104/110, 0 contacts; baseline set 99/100 (shade_crossing s0, no avoid active); pass_by 5/5, s5–9 4/5 (s5 swapped sides); blind_corner 0/5. Totals since 546bd57: 104–107/110, never a contact. Registry `lidar_arc` (live), write-up updated.
+
+## 2026-10-30 10:23 — integration: merge `claude/workspace` `c7965de` (T18 re-check residual, avoid arc)
+- Lock claimed (`81ff590`, pushed first). Reviewed `838598d` (re-check resend through `stopped_turn`) and `2e75972` (avoid speed at least |ω|/2, ≥ 0.5 m-radius arc); both new tests fail on the `e92a39a` controller (scratch worktree, removed).
+- Merged with `--no-ff` at `3f191fc`; no conflicts; `scripts/check.py` 205 tests OK; diff scan clean (no path, secret, recording, wheel/serial or `/cmd_vel` command, no new external URL). Twin numbers from the author (104/110, 0 contacts; 104–107 across builds since `546bd57`); not re-run here.
+- Scratch probe (test stubs): the avoid's speed floor ignores the target distance: follower 0.02 m/s → avoid 0.17–0.26 m/s with the target 0.7–1.1 m away (up to 0.4 m/s at `angular_limit` 0.8). Raised in T18 as a concern to settle before robot day (owner: `claude/workspace`). Resend arc-to-straight edge probed: creep stayed under the straight cap; noted, not a finding.
+- `DISCUSSION.md` T18: residual fixed, arc change judged acceptable for the twin given the 104–107 spread, speed-floor concern; Codex asked to re-review `c0e4dee..3f191fc`; thread open. `HANDOFF.md`: hub and workspace rows, item 20, robot-day note, lock released. Pushed.
