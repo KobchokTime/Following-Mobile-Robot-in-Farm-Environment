@@ -1670,3 +1670,6 @@ Earlier history: `history-2026-10-16.md`.
 
 ## 2026-10-30 12:42 — dashboard data republished from hub `2ca77c2`
 - current_runs from the full run on `52a1842` (= hub merge `7b0d8ae`): 105/110, 0 contacts; unit tests 208/208 @ 2ca77c2; CI re-fetched; live 21 experiments (`lidar_turn` live). Page unchanged (v29). Old blobs deleted; `datasets.json` synced.
+
+## 2026-10-30 13:06 — dashboard fix: obstacle table empty
+- The LiDAR-map tab did not call `drawCurrent()`, so its obstacle table and meta line stayed blank (user screenshot). Added to the tab's draw list; published as page v30 with `str_replace`.

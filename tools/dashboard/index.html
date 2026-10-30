@@ -2281,7 +2281,7 @@ dash.calc('robust_totals', {
     solo: () => { drawCurrent(); drawSolo(); },
     identity: () => { drawCurrent(); drawA3Runs(); drawArena3(); drawE7(); },
     replay: () => { document.getElementById('tb-fixednote').hidden = S.bridge !== 'fixed'; drawMap(); drawGap(); drawSpeed(); drawMatrix(); drawLidar(); },
-    filter: () => { drawSFBar(); drawICPBar(); drawSFPaths(); },
+    filter: () => { drawCurrent(); drawSFBar(); drawICPBar(); drawSFPaths(); },
     colour: () => { drawCurrent(); drawColScatter(); drawColSepAll(); drawColMethods(); drawColHeld(); drawColVtest(); drawColWeights(); drawColTwin(); },
     arenas: () => { drawArena2(); drawA2Runs(); drawArena(); drawRobust(); },
     tests: () => { drawTests(); drawCI(); },
