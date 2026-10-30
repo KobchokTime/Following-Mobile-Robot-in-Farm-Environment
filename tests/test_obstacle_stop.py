@@ -393,6 +393,16 @@ class TrailTest(unittest.TestCase):
         self.assertTrue(node.trailing)
         self.assertGreaterEqual(node.obstacle_command(0.4, 0.0, tgt, tb)[1], 0.0)
 
+    def test_a_blocked_line_follows_the_trail_at_once(self):
+        # blind_corner on 56a6a89: every run that stood out the 1 s avoid delay at the inside of the corner lost
+        # the target; every run that drove on along the target's path to the corner kept it
+        node = M.FollowStopNode()
+        node.cb_scan(scan(person(0.9, 0.42)))
+        node.crumbs = [(x / 10.0, 0.0, 0.0) for x in range(0, 17)]
+        v, w = node.obstacle_command(0.4, 0.0, (1.6, 0.0), 0.0)
+        self.assertTrue(node.trailing)
+        self.assertGreater(v, 0.0)
+
     def test_dead_reckoning_and_crumbs(self):
         node = M.FollowStopNode()
         clock = {'t': 0.0}

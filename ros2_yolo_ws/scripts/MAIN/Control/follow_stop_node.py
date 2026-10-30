@@ -534,7 +534,10 @@ class FollowStopNode(Node):
             elif found == 0.0 and self.avoid_offset != 0.0 and now - self.avoid_time < self.avoid_hold:
                 offset = self.avoid_offset  # just past it: keep the shift a moment so the robot does not clip it
         waited = self.blocked_since is not None and now - self.blocked_since >= self.avoid_delay
-        if offset == 0.0 and found is None and waited and self.avoid_trail and fresh:
+        # the target's own path is followed at once, without the avoid delay: it goes where the target went,
+        # not round anyone, and standing still at the inside of a corner lost the target behind the bystander
+        # (blind_corner: every pass on 56a6a89 drove on to the corner, every fail stopped short of it)
+        if offset == 0.0 and found != 0.0 and self.avoid_trail and fresh and (waited or not at_edge):
             aim = trail_aim([cr[:2] for cr in self.crumbs], self.pose, self.scan_xy, self.obstacle_half_w,
                             None if at_edge else target_xy, self.obstacle_excl)
             if aim is not None:
