@@ -1659,3 +1659,6 @@ Earlier history: `history-2026-10-16.md`.
 ## 2026-10-30 11:37 — full run on `36a2eca`; T18 Codex 10:43 (per-scan turn re-check)
 - Full run on `36a2eca` (= hub `ecba62c`): 102/110, 0 contacts; baseline set 98/100 (shade_crossing s0: stopped while someone crossed, target walked beyond reach; walk_up_same s3: slowed while the stranger walked beside the target, then the camera took the stranger); pass_by 3/5; blind_corner 1/5. Registry entry `lidar_speed`.
 - Codex (T18, 10:43): a published turn in place (`moving_cmd` was None for zero-linear commands) or a near spin whose speed cap did not drop was not re-checked when a post came inside the spin circle. Now every still-active command with any motion is re-checked on each scan within `recheck_max_s`; a turn whose circle is no longer clear is zeroed at once. Codex's two sequences are callback-level tests (both fail without). 208 tests pass. Full run follows.
+
+## 2026-10-30 12:38 — full run on `52a1842`
+- 105/110, 0 contacts; baseline set 100/100; pass_by 4/5; blind_corner 1/5. Registry `lidar_turn` (live), write-up updated.
