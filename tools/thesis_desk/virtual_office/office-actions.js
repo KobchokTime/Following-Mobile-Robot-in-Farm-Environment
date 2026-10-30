@@ -7,7 +7,7 @@
   panel.className = "card";
   panel.setAttribute("aria-label", "งานจริงและการประชุมของ agent");
   panel.innerHTML = `<h2>งานจริงและการประชุม</h2>
-    <p class="muted">พักผ่อนให้เฉพาะ agent ที่ว่างเดินวน งานที่โต๊ะและการประชุมจะอยู่ที่เดิมจนจบ ปุ่มนั่งเริ่มตรวจโปรเจกต์ ส่วนปุ่มประชุมให้ agent ว่างสูงสุด 3 คนถกแผนผ่าน Codex บัญชี ChatGPT</p>
+    <p class="muted">พักผ่อนให้เฉพาะ agent ที่ว่างเดินวน ปุ่มนั่งให้ agent เริ่มแก้โค้ดงานที่พร้อมในคิวใน clone แยกและรันเช็กก่อนรีวิว ส่วนปุ่มประชุมให้ agent ว่างสูงสุด 3 คนถกแผนผ่าน Codex บัญชี ChatGPT</p>
     <div id="officeActions" aria-live="polite">กำลังอ่านสถานะ…</div>`;
   side.append(panel);
   const output = panel.querySelector("#officeActions");
@@ -74,6 +74,25 @@
       text(card, "summary", `${action.kind === "seat" ? "งานที่โต๊ะ" : "ประชุม"} · ${labels[action.state] || action.state}`);
       text(card, "p", `${action.agents.map((id) => names[id] || id).join(", ")} · ${time}`, "muted");
       text(card, "p", action.summary || "", "muted");
+      if (action.codeJob) {
+        const job = action.codeJob;
+        text(card, "p", `งาน ${job.id} · ${job.state} · branch ${job.branch}`);
+        text(card, "p", `ไฟล์ที่เปลี่ยน: ${job.changed?.join(", ") || "ไม่มี"} · Python exit ${job.checkExit ?? "ไม่ทราบ"}`, "muted");
+        if (/^[0-9a-f-]{36}-code\.txt$/i.test(job.logName || "")) {
+          const link = text(card, "a", "อ่านบันทึก agent ↗");
+          link.href = `/api/office/logs/${job.logName}`;
+          link.target = "_blank";
+          link.rel = "noopener noreferrer";
+        }
+        if (/^[a-z0-9][a-z0-9-]{2,50}-\d{13}-check\.txt$/.test(job.checkLogName || "")) {
+          const link = text(card, "a", "อ่านผล Python check ↗");
+          link.href = `/api/office/logs/${job.checkLogName}`;
+          link.target = "_blank";
+          link.rel = "noopener noreferrer";
+        }
+        for (const check of job.focusedChecks || [])
+          text(card, "p", `Node ${check.path}: exit ${check.code ?? "ไม่ทราบ"}`, "muted");
+      }
       for (const result of action.results || []) {
         const status = result.checkExit === 0 && !result.timedOut ? "ผ่าน" : "ไม่ผ่าน";
         text(card, "p", `${names[result.agent] || result.agent}: ${result.label} · ${status}`);
@@ -131,7 +150,7 @@
         if (kind === "seat") window.officeSeat?.(data.action.agents);
         else window.officeMeeting?.(data.action.agents);
         for (const id of data.action.agents) sceneState.set(id, kind);
-        const message = kind === "seat" ? "เริ่มตรวจโปรเจกต์จริง" : "agent ที่ว่างเริ่มประชุม";
+        const message = kind === "seat" ? "agent เริ่มแก้โค้ดใน clone แยก" : "agent ที่ว่างเริ่มประชุม";
         window.showToast?.(message);
         window.addOfficeLog?.(`${message}: ${data.action.agents.map((id) => names[id] || id).join(", ")}`);
       }

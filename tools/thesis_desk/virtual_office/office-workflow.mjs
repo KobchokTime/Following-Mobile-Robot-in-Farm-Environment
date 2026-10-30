@@ -97,14 +97,16 @@ export function createOfficeWorkflow({ eventFile, runSeat, runMeeting, getExtern
     }
   }
 
-  async function start(kind) {
+  async function start(kind, job = null) {
     const started = startTail.then(async () => {
       await init();
       const current = [...actions.values()];
       const active = current.find((action) => action.kind === kind && action.state === "running");
       if (active) return { action: active, alreadyRunning: true };
       const priorMeetings = current.filter((action) => action.kind === "meeting").length;
-      const ids = kind === "seat" ? seatAgentIds : meetingAgentIds;
+      if (kind === "seat" && job && (!seatAgentIds.includes(job.agent) || !job.id))
+        return { error: "งานนี้ไม่มี agent ที่โต๊ะรับผิดชอบ" };
+      const ids = kind === "seat" ? (job ? [job.agent] : seatAgentIds) : meetingAgentIds;
       const offset = kind === "meeting" ? (priorMeetings * 3) % ids.length : 0;
       const externalBusy = getExternalBusy();
       if (kind === "meeting" && externalBusy.includes("team"))
@@ -118,8 +120,10 @@ export function createOfficeWorkflow({ eventFile, runSeat, runMeeting, getExtern
       let action;
       try {
         action = await record({ id: randomUUID(), kind, agents, state: "running",
+          ...(job ? { jobId: job.id } : {}),
           createdAt: new Date().toISOString(), summary: kind === "seat" ?
-            "เริ่มตรวจโปรเจกต์จริงในเครื่อง" : "เริ่มประชุม agent ที่ว่าง" });
+            job ? "เริ่มให้ agent แก้โค้ดใน clone แยก" : "เริ่มตรวจโปรเจกต์จริงในเครื่อง" :
+            "เริ่มประชุม agent ที่ว่าง" });
       } finally { agents.forEach((id) => reservations.delete(id)); }
       queueMicrotask(() => { void perform(action, kind === "seat" ? runSeat : runMeeting)
         .catch((error) => console.error("Office action failed:", error)); });
@@ -129,5 +133,6 @@ export function createOfficeWorkflow({ eventFile, runSeat, runMeeting, getExtern
     return started;
   }
 
-  return { list, busyAgents, startSeat: () => start("seat"), startMeeting: () => start("meeting") };
+  return { list, busyAgents, startSeat: (job) => start("seat", job),
+    startMeeting: () => start("meeting") };
 }

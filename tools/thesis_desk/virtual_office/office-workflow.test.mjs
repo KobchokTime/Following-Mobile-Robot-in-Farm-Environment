@@ -45,6 +45,30 @@ test("an active seat round leaves only idle agents for a real meeting", async ()
   }
 });
 
+test("a coding seat round reserves only its assigned agent", async () => {
+  const folder = await mkdtemp(join(tmpdir(), "office-code-seat-"));
+  let release;
+  const gate = new Promise((resolve) => { release = resolve; });
+  let flow;
+  try {
+    flow = createOfficeWorkflow({ eventFile: join(folder, "events.jsonl"),
+      runSeat: async () => { await gate; return { ok: true }; },
+      runMeeting: async () => ({ ok: true }) });
+    const started = await flow.startSeat({ id: "office-ignored-scope-guard", agent: "mew" });
+    assert.deepEqual(started.action.agents, ["mew"]);
+    assert.equal(started.action.jobId, "office-ignored-scope-guard");
+    const meeting = await flow.startMeeting();
+    assert.equal(meeting.action.agents.includes("mew"), false);
+  } finally {
+    release?.();
+    if (flow) for (let i = 0; i < 30; i++) {
+      if ((await flow.list()).every((action) => action.state !== "running")) break;
+      await new Promise((resolve) => setTimeout(resolve, 10));
+    }
+    await rm(folder, { recursive: true, force: true });
+  }
+});
+
 test("running work is marked interrupted after a server restart", async () => {
   const folder = await mkdtemp(join(tmpdir(), "office-restart-"));
   const eventFile = join(folder, "events.jsonl");

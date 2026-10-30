@@ -11,7 +11,7 @@
   <p class="muted" id="queueNext" style="margin-top:12px"></p>
   <div class="project-block" style="margin-top:12px">
     <h3>งานอัตโนมัติของตัวละคร</h3>
-    <p class="muted">ตัวปลุกงานตรวจโควตาแล้วเริ่มงานที่พร้อมใน checkout แยก; ผลรอรีวิวก่อนรวม</p>
+    <p class="muted">ปุ่มจัดเข้าที่นั่งเริ่มงานแก้โค้ดที่พร้อมใน clone แยกทันที ส่วนตัวปลุกงานตรวจโควตาก่อนเริ่มงานอัตโนมัติ ผลทั้งสองแบบรอรีวิวก่อนรวม</p>
     <div id="queueAgents" aria-live="polite" style="margin-top:9px">กำลังอ่านสถานะ…</div>
   </div>`;
   document.querySelector(".shell").append(panel);
@@ -39,7 +39,7 @@
         const time = job.at ? new Date(job.at).toLocaleString("th-TH", {
           timeZone: "Asia/Bangkok", dateStyle: "short", timeStyle: "short",
         }) : "ยังไม่เริ่ม";
-        row.textContent = `${names[job.agent] || job.agent} · ${job.lane} · ${job.state} · ${time}` +
+        row.textContent = `${names[job.agent] || job.agent} · ${job.title || job.lane} · ${job.state} · ${time}` +
           (job.branch ? ` · ${job.branch}` : "");
         agentJobs.append(row);
       }

@@ -4,8 +4,9 @@ import { fileURLToPath } from "node:url";
 import { dirname, join, resolve } from "node:path";
 import { spawn, spawnSync } from "node:child_process";
 import { randomUUID } from "node:crypto";
-import { run as runCheck } from "./automation-queue.mjs";
-import { createModelGate, createOfficeWorkflow } from "./office-workflow.mjs";
+import { main as queueMain, run as runCheck } from "./automation-queue.mjs";
+import { launchCodeJob, runEditingAgent } from "./office-code.mjs";
+import { createModelGate, createOfficeWorkflow, seatAgentIds } from "./office-workflow.mjs";
 
 const root = dirname(fileURLToPath(import.meta.url));
 const repoRoot = resolve(root, "../../..");
@@ -97,10 +98,25 @@ async function runCodex(instructions, input, previous) {
   return { id, answer };
 }
 
-const runModel = createModelGate({ run: runCodex, isLimited: () => modelRateLimited,
+const runModelTurn = createModelGate({ run: (turn) => turn(), isLimited: () => modelRateLimited,
   classify: classifyModelError, markLimited: () => { modelRateLimited = true; } });
+const runModel = (...args) => runModelTurn(() => runCodex(...args));
 
 async function runSeatAction(action) {
+  if (action.jobId) {
+    return launchCodeJob({ jobId: action.jobId, actionId: action.id, stateDir: officeStateDir,
+      runAgent: (assignment) => runModelTurn(async () => {
+        const result = await runEditingAgent(assignment, codexChildEnv(process.env));
+        if (result.code === 0 && !result.timedOut) return result;
+        const error = new Error(`${result.stderr}\n${result.stdout}`);
+        error.agentResult = result;
+        throw error;
+      }).catch((error) => {
+        if (error.agentResult) return { ...error.agentResult, status: error.status };
+        throw error;
+      }),
+    });
+  }
   await mkdir(officeStateDir, { recursive: true });
   const tempDir = await mkdtemp(join(officeStateDir, "seat-check-"));
   const env = { ...codexChildEnv(process.env), TEMP: tempDir, TMP: tempDir, TMPDIR: tempDir };
@@ -204,7 +220,13 @@ const officeWorkflow = createOfficeWorkflow({
 });
 
 export function officeLogName(value) {
-  return /^[0-9a-f-]{36}-(?:krit|mew|boss)\.txt$/i.test(value);
+  return /^[0-9a-f-]{36}-(?:krit|mew|boss|code)\.txt$/i.test(value) ||
+    /^[a-z0-9][a-z0-9-]{2,50}-\d{13}-check\.txt$/.test(value);
+}
+
+export function pickReadySeatJob(jobs, selected) {
+  return jobs.find((item) => selected.includes(item.id) &&
+    seatAgentIds.includes(item.agent) && item.mode === "workspace-write") || null;
 }
 
 export async function readMessage(req, res) {
@@ -352,12 +374,24 @@ export async function handleRequest(req, res) {
     return reply(res, 200, { actions, busyAgents: [...busyAgents] });
   }
   if (req.method === "POST" && ["/api/office/seat", "/api/office/meeting"].includes(url.pathname)) {
-    if (url.pathname.endsWith("/meeting") && !codexReady)
+    if (!codexReady)
       return reply(res, 503, { error: "Codex CLI ยังไม่ได้ล็อกอินด้วย ChatGPT" });
-    if (url.pathname.endsWith("/meeting") && modelRateLimited)
+    if (modelRateLimited)
       return reply(res, 429, { error: quotaMessage });
-    const started = url.pathname.endsWith("/seat") ? await officeWorkflow.startSeat() :
-      await officeWorkflow.startMeeting();
+    let started;
+    if (url.pathname.endsWith("/seat")) {
+      try {
+        const { selected } = await queueMain(["--dry-run"]);
+        const queue = JSON.parse(await readFile(join(root, "automation-jobs.json"), "utf8"));
+        const job = pickReadySeatJob(queue.jobs, selected);
+        if (!job) return reply(res, 409, { error: "ยังไม่มีงานแก้โค้ดที่พร้อมในคิว" });
+        const source = await runCheck("git", ["status", "--porcelain"],
+          { cwd: repoRoot, timeoutMs: 30_000 });
+        if (source.code !== 0 || source.stdout.trim())
+          return reply(res, 409, { error: "checkout ที่รัน Office มีไฟล์ค้างหรืออ่าน Git ไม่ได้" });
+        started = await officeWorkflow.startSeat(job);
+      } catch { return reply(res, 500, { error: "อ่านคิวงานแก้โค้ดไม่ได้" }); }
+    } else started = await officeWorkflow.startMeeting();
     return started.error ? reply(res, 409, { error: started.error }) :
       reply(res, 202, { action: started.action, alreadyRunning: started.alreadyRunning });
   }
@@ -378,6 +412,7 @@ export async function handleRequest(req, res) {
           const event = latest.get(job.id);
           return {
             id: job.id, lane: job.lane, agent: job.agent,
+            title: job.title || job.id,
             state: event?.state || (job.ready ? "ready" : "paused"),
             at: event?.at || null, branch: event?.branch || null,
             summary: event?.summary || null,

@@ -399,3 +399,8 @@ Earlier history: `history-2026-10-16.md`.
 - Reviewed `c7fd2ed..7b0d8ae` in isolated `integration-hub` clone at `2ca77c2`; focused callback tests 2/2 and `python scripts/check.py` 208/208 passed. Bounded resend age remains intact by code review. The author-reported 110-run twin result was not rerun locally.
 - Claimed hub lock at `5aad21b`; recorded offline agree verdict in DISCUSSION and HANDOFF. No main merge, hardware command, sweep, paid API call or Claude branch change.
 - Released the integration-hub lock after review commit `4f77510`; T18 offline cross-review resolved.
+
+### 2026-10-30 — thesis-desk — Launch scoped code editing from Office seat
+
+- On `codex/thesis-desk/office-code-launch` based on `codex/workspace` plus `integration-hub` `32b5f5e`, changed the seat action to start one ready writing job in an isolated clone through signed-in Codex CLI `workspace-write`, then verify the diff, unchanged HEAD, Python and focused Node checks. Added a first safe Office queue diagnostic task, visible branch/files/logs in the page, and included ignored files in scope review.
+- Office Node tests passed 27/27; `python scripts/check.py` passed 208/208 with writable TEMP/TMP; `git diff --check` passed. No actual model edit, PR, main merge, dashboard publish, paid API call or hardware command was made at this stage. Follow-up: browser and real button smoke, then independent review.

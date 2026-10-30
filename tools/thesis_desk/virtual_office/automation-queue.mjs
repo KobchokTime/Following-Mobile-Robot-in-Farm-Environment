@@ -41,6 +41,10 @@ export function changesMatchMode(mode, changed) {
   return mode === "read-only" ? changed.length === 0 : changed.length > 0;
 }
 
+export function agentOutcomePassed(outcome) {
+  return outcome === null || (outcome.code === 0 && !outcome.timedOut && !outcome.spawnError);
+}
+
 function validateJob(job) {
   if (!/^[a-z0-9][a-z0-9-]{2,50}$/.test(job.id) ||
       !/^[a-z0-9][a-z0-9-]{2,50}$/.test(job.lane) ||
@@ -128,13 +132,14 @@ function safeCheckout(id, stamp) {
   return path;
 }
 
-async function prepare() {
-  checkedUsage();
+async function prepare(requestedJobId = null, manual = false) {
+  if (!manual) checkedUsage();
   return withLock(async () => {
     const queue = await loadQueue();
     if (await git(["status", "--porcelain"])) throw new Error("Office source checkout is dirty");
     const baseCommit = await git(["rev-parse", "HEAD"]);
-    const selected = selectJobs(queue.jobs, await events(), queue.maxConcurrent);
+    const selected = selectJobs(requestedJobId ? queue.jobs.filter((job) => job.id === requestedJobId) :
+      queue.jobs, await events(), queue.maxConcurrent);
     const assignments = [];
     for (const job of selected) {
       const stamp = new Date().toISOString().replace(/[-:.TZ]/g, "").slice(0, 14);
@@ -164,16 +169,28 @@ async function prepare() {
   });
 }
 
-async function changedFiles(checkout) {
+// Only the local Office's explicit seat action uses this entry point. Scheduled jobs still
+// require a recent account-usage check through --prepare; a manual click is bounded by the
+// signed-in plan's own limit and never falls back to paid API credentials.
+export async function prepareManual(jobId) {
+  if (typeof jobId !== "string" || !/^[a-z0-9][a-z0-9-]{2,50}$/.test(jobId))
+    throw new Error("Invalid job ID");
+  return prepare(jobId, true);
+}
+
+export async function changedFiles(checkout) {
   const outputs = await Promise.all([
     git(["diff", "--name-only", "-z"], checkout),
     git(["diff", "--cached", "--name-only", "-z"], checkout),
     git(["ls-files", "--others", "--exclude-standard", "-z"], checkout),
+    git(["ls-files", "--others", "--ignored", "--exclude-standard", "-z"], checkout),
   ]);
-  return [...new Set(outputs.flatMap((output) => output.split("\0").filter(Boolean)))];
+  return [...new Set(outputs.flatMap((output) => output.split("\0").filter(Boolean))
+    .filter((path) => !path.startsWith(".office-tmp/") &&
+      !path.split("/").some((part) => part === "__pycache__" || part === ".pytest_cache")))];
 }
 
-async function finish(jobId) {
+async function finish(jobId, agentOutcome = null) {
   return withLock(async () => {
     const queue = await loadQueue();
     const job = queue.jobs.find((item) => item.id === jobId);
@@ -205,16 +222,20 @@ async function finish(jobId) {
       focusedChecks.push({ path, code: result.code, timedOut: result.timedOut,
         spawnError: result.spawnError, log });
     }
-    const ok = scopeValid && headUnchanged && modeValid && check.code === 0 && !check.timedOut &&
+    const agentValid = agentOutcomePassed(agentOutcome);
+    const ok = agentValid && scopeValid && headUnchanged && modeValid && check.code === 0 && !check.timedOut &&
       checksPassed(focusedChecks);
     const focusedFailure = focusedChecks.find((item) => item.code !== 0 || item.timedOut);
     const result = {
       jobId, lane: job.lane, agent: job.agent, state: ok ? "review-ready" : "failed",
       branch: assignment.branch, baseCommit: assignment.baseCommit, headCommit, checkout, changed,
-      scopeValid, headUnchanged, modeValid, checkExit: check.code, checkTimedOut: check.timedOut,
+      scopeValid, headUnchanged, modeValid, agentExit: agentOutcome?.code ?? null,
+      agentTimedOut: agentOutcome?.timedOut ?? false,
+      checkExit: check.code, checkTimedOut: check.timedOut,
       checkSpawnError: check.spawnError, checkLog,
       focusedChecks,
       summary: ok ? "มีงานและเช็กออฟไลน์ผ่าน รอคนรีวิว" :
+        !agentValid ? "agent แก้โค้ดไม่สำเร็จหรือถูกจำกัดการใช้งาน" :
         !scopeValid ? "ไฟล์ที่แก้อยู่นอกขอบเขตงาน" :
         !headUnchanged ? "HEAD ของ clone เปลี่ยนจากฐานที่มอบหมาย" :
         !modeValid ? (job.mode === "read-only" ? "งานอ่านอย่างเดียวมีไฟล์เปลี่ยน" :
@@ -227,6 +248,12 @@ async function finish(jobId) {
     await record(result);
     return result;
   });
+}
+
+export async function finishManual(jobId, agentOutcome) {
+  if (!agentOutcome || !Number.isInteger(agentOutcome.code) && agentOutcome.code !== null ||
+      typeof agentOutcome.timedOut !== "boolean") throw new Error("Invalid agent outcome");
+  return finish(jobId, agentOutcome);
 }
 
 export async function main(args = process.argv.slice(2)) {

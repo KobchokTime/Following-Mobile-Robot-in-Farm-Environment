@@ -53,6 +53,21 @@
       "allowedPaths": ["docs/"],
       "task": "Write a concise documentation page under docs/ explaining how dashboard ci_runs, unit_tests and live simulation datasets are generated, what branch/time/source fields mean, and which values are merely dated snapshots. Verify every file path and command against the current repository source. Do not invent fresh experiment results or modify generated data, robot code, or the artifact.",
       "acceptance": "Every referenced generator and validator path exists, the page distinguishes source evidence from published artifact state, and python scripts/check.py exits 0."
+    },
+    {
+      "id": "office-stale-lock-diagnostic",
+      "title": "อธิบายคิว Office ที่ lock ค้าง",
+      "lane": "office-queue-diagnostic",
+      "agent": "mew",
+      "role": "thesis-desk",
+      "branchPrefix": "codex/thesis-desk-office",
+      "mode": "workspace-write",
+      "ready": true,
+      "maxMinutes": 15,
+      "allowedPaths": ["tools/thesis_desk/virtual_office/"],
+      "focusedNodeTests": ["tools/thesis_desk/virtual_office/automation-queue.test.mjs"],
+      "task": "Improve diagnostics for a stale Office queue.lock left after a process crash. When a lock already exists, report its age and an actionable, safe inspection hint; do not automatically remove or override another process's lock. Add a focused regression test in automation-queue.test.mjs. Do not change robot code or generated dashboard data.",
+      "acceptance": "A second lock attempt reports useful age and inspection guidance without deleting the existing lock; focused Node tests and python scripts/check.py pass."
     }
   ]
 }
