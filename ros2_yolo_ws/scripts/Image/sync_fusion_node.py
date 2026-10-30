@@ -244,6 +244,8 @@ class TargetGate:
         # After this long with no fix the widened gates would take almost anything (a false box in
         # front of a post); start over from the lock-on window instead, like the controller does.
         self.unlock_after_s = unlock_after_s
+        self.min_range = 0.3          # m: nobody is followed from nearer than this
+        self.max_range_rate = 2.0     # m/s: faster than anyone walks towards or away from the robot
         self.reset()
 
     def reset(self):
@@ -269,8 +271,14 @@ class TargetGate:
             self.hists = (self.hists + [hist])[-self.hist_window:]
 
     def _predict(self, t):
+        # never nearer than min_range_m: boxes ranged off someone crossing in front drove the range rate so far
+        # down that the prediction went negative and the target's own boxes were refused until the lock was
+        # dropped (shade_crossing s0, predicted -0.25 m)
         dt = max(0.0, min(t - self.t, 1.0))
-        return self.bearing + self.bearing_rate * dt, self.range + self.range_rate * dt
+        return self.bearing + self.bearing_rate * dt, max(self.min_range, self.range + self.range_rate * dt)
+
+    def _clamp_rates(self):
+        self.range_rate = max(-self.max_range_rate, min(self.max_range_rate, self.range_rate))
 
     def cost(self, t, bearing, rng, chroma=None, hist=None):
         """Normalised squared distance of a detection from the target (inf before lock-on)."""
@@ -335,6 +343,7 @@ class TargetGate:
         if self.min_rate_dt <= dt < 1.0:
             self.bearing_rate += self.beta * eb / dt
             self.range_rate += self.beta * er / dt
+            self._clamp_rates()
         self.t = t
 
     def _note_box(self, t, bearing, rng):
@@ -382,6 +391,7 @@ class TargetGate:
         elif dt >= self.min_rate_dt:
             self.bearing_rate += self.beta * eb / dt
             self.range_rate += self.beta * er / dt
+            self._clamp_rates()
         self.t = t
         self._learn_colour(chroma, hist)
         return True
