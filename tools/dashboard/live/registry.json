@@ -11129,7 +11129,7 @@
   "dir": "full_ws10",
   "started_utc": "2026-10-30T01:04:36Z",
   "order": 18,
-  "live": true,
+  "live": false,
   "purpose": "เช็กว่าการห้ามเลี้ยวเมื่อคืบช้าหรือโค้งแคบใกล้สิ่งกีดขวาง (คงการคืบตรงไว้) ไม่ทำให้ฉากไหนตก",
   "compare": "เทียบกับรอบ a4ce8a5 · realism · seed 0–4 · ทุกฉาก",
   "result": "107/110 ไม่มีชน · ฉากเดิม 100/100 · pass_by 5/5 · blind_corner 2/5 (ที่เหลือหยุดได้ไม่ชน)",
@@ -11902,6 +11902,790 @@
     "scenario": "zigzag",
     "seed": 4,
     "variant": "spin",
+    "light": "สมจริง"
+   }
+  ]
+ },
+ {
+  "id": "lidar_arc",
+  "title": "ทุกฉาก: re-check ผ่านการเช็กวงหมุน และหลบด้วยโค้งรัศมี ≥ 0.5 m",
+  "code": "2e75972",
+  "dir": "full_ws12",
+  "started_utc": "2026-10-30T02:14:53Z",
+  "order": 19,
+  "live": true,
+  "purpose": "เช็กสองจุดจากรีวิว T18: คำสั่งที่ re-check ลดความเร็วต้องผ่านการเช็กวงหมุน และการหลบต้องเป็นโค้งจริงที่ช่องทางวิ่งตรวจได้",
+  "compare": "เทียบกับรอบ f57d624 (107/110) · realism · seed 0–4 · ทุกฉาก",
+  "result": "104/110 ไม่มีชน · ฉากเดิม 99/100 (shade_crossing s0 หลุด ไม่ได้หลบในรอบนั้น) · pass_by 5/5 (+ s5–9 ผ่าน 4/5) · blind_corner 0/5 ไม่ชน",
+  "runs": [
+   {
+    "tag": "blind_corner_s0",
+    "scenario": "blind_corner",
+    "seed": 0,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "blind_corner_s1",
+    "scenario": "blind_corner",
+    "seed": 1,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "blind_corner_s2",
+    "scenario": "blind_corner",
+    "seed": 2,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "blind_corner_s3",
+    "scenario": "blind_corner",
+    "seed": 3,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "blind_corner_s4",
+    "scenario": "blind_corner",
+    "seed": 4,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "close_pair_same_s0",
+    "scenario": "close_pair_same",
+    "seed": 0,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "close_pair_same_s1",
+    "scenario": "close_pair_same",
+    "seed": 1,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "close_pair_same_s2",
+    "scenario": "close_pair_same",
+    "seed": 2,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "close_pair_same_s3",
+    "scenario": "close_pair_same",
+    "seed": 3,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "close_pair_same_s4",
+    "scenario": "close_pair_same",
+    "seed": 4,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "come_back_s0",
+    "scenario": "come_back",
+    "seed": 0,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "come_back_s1",
+    "scenario": "come_back",
+    "seed": 1,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "come_back_s2",
+    "scenario": "come_back",
+    "seed": 2,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "come_back_s3",
+    "scenario": "come_back",
+    "seed": 3,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "come_back_s4",
+    "scenario": "come_back",
+    "seed": 4,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "crossing_s0",
+    "scenario": "crossing",
+    "seed": 0,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "crossing_s1",
+    "scenario": "crossing",
+    "seed": 1,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "crossing_s2",
+    "scenario": "crossing",
+    "seed": 2,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "crossing_s3",
+    "scenario": "crossing",
+    "seed": 3,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "crossing_s4",
+    "scenario": "crossing",
+    "seed": 4,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "curve_left_s0",
+    "scenario": "curve_left",
+    "seed": 0,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "curve_left_s1",
+    "scenario": "curve_left",
+    "seed": 1,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "curve_left_s2",
+    "scenario": "curve_left",
+    "seed": 2,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "curve_left_s3",
+    "scenario": "curve_left",
+    "seed": 3,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "curve_left_s4",
+    "scenario": "curve_left",
+    "seed": 4,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "head_on_s0",
+    "scenario": "head_on",
+    "seed": 0,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "head_on_s1",
+    "scenario": "head_on",
+    "seed": 1,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "head_on_s2",
+    "scenario": "head_on",
+    "seed": 2,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "head_on_s3",
+    "scenario": "head_on",
+    "seed": 3,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "head_on_s4",
+    "scenario": "head_on",
+    "seed": 4,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "lookalike_after_loss_s0",
+    "scenario": "lookalike_after_loss",
+    "seed": 0,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "lookalike_after_loss_s1",
+    "scenario": "lookalike_after_loss",
+    "seed": 1,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "lookalike_after_loss_s2",
+    "scenario": "lookalike_after_loss",
+    "seed": 2,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "lookalike_after_loss_s3",
+    "scenario": "lookalike_after_loss",
+    "seed": 3,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "lookalike_after_loss_s4",
+    "scenario": "lookalike_after_loss",
+    "seed": 4,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "pass_by_s0",
+    "scenario": "pass_by",
+    "seed": 0,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "pass_by_s1",
+    "scenario": "pass_by",
+    "seed": 1,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "pass_by_s2",
+    "scenario": "pass_by",
+    "seed": 2,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "pass_by_s3",
+    "scenario": "pass_by",
+    "seed": 3,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "pass_by_s4",
+    "scenario": "pass_by",
+    "seed": 4,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "shade_crossing_s0",
+    "scenario": "shade_crossing",
+    "seed": 0,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "shade_crossing_s1",
+    "scenario": "shade_crossing",
+    "seed": 1,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "shade_crossing_s2",
+    "scenario": "shade_crossing",
+    "seed": 2,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "shade_crossing_s3",
+    "scenario": "shade_crossing",
+    "seed": 3,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "shade_crossing_s4",
+    "scenario": "shade_crossing",
+    "seed": 4,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "shade_side_by_side_s0",
+    "scenario": "shade_side_by_side",
+    "seed": 0,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "shade_side_by_side_s1",
+    "scenario": "shade_side_by_side",
+    "seed": 1,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "shade_side_by_side_s2",
+    "scenario": "shade_side_by_side",
+    "seed": 2,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "shade_side_by_side_s3",
+    "scenario": "shade_side_by_side",
+    "seed": 3,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "shade_side_by_side_s4",
+    "scenario": "shade_side_by_side",
+    "seed": 4,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "side_by_side_s0",
+    "scenario": "side_by_side",
+    "seed": 0,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "side_by_side_s1",
+    "scenario": "side_by_side",
+    "seed": 1,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "side_by_side_s2",
+    "scenario": "side_by_side",
+    "seed": 2,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "side_by_side_s3",
+    "scenario": "side_by_side",
+    "seed": 3,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "side_by_side_s4",
+    "scenario": "side_by_side",
+    "seed": 4,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "side_by_side_same_s0",
+    "scenario": "side_by_side_same",
+    "seed": 0,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "side_by_side_same_s1",
+    "scenario": "side_by_side_same",
+    "seed": 1,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "side_by_side_same_s2",
+    "scenario": "side_by_side_same",
+    "seed": 2,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "side_by_side_same_s3",
+    "scenario": "side_by_side_same",
+    "seed": 3,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "side_by_side_same_s4",
+    "scenario": "side_by_side_same",
+    "seed": 4,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "side_step_s0",
+    "scenario": "side_step",
+    "seed": 0,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "side_step_s1",
+    "scenario": "side_step",
+    "seed": 1,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "side_step_s2",
+    "scenario": "side_step",
+    "seed": 2,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "side_step_s3",
+    "scenario": "side_step",
+    "seed": 3,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "side_step_s4",
+    "scenario": "side_step",
+    "seed": 4,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "stand_aside_s0",
+    "scenario": "stand_aside",
+    "seed": 0,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "stand_aside_s1",
+    "scenario": "stand_aside",
+    "seed": 1,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "stand_aside_s2",
+    "scenario": "stand_aside",
+    "seed": 2,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "stand_aside_s3",
+    "scenario": "stand_aside",
+    "seed": 3,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "stand_aside_s4",
+    "scenario": "stand_aside",
+    "seed": 4,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "stop_and_go_s0",
+    "scenario": "stop_and_go",
+    "seed": 0,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "stop_and_go_s1",
+    "scenario": "stop_and_go",
+    "seed": 1,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "stop_and_go_s2",
+    "scenario": "stop_and_go",
+    "seed": 2,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "stop_and_go_s3",
+    "scenario": "stop_and_go",
+    "seed": 3,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "stop_and_go_s4",
+    "scenario": "stop_and_go",
+    "seed": 4,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "straight_s0",
+    "scenario": "straight",
+    "seed": 0,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "straight_s1",
+    "scenario": "straight",
+    "seed": 1,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "straight_s2",
+    "scenario": "straight",
+    "seed": 2,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "straight_s3",
+    "scenario": "straight",
+    "seed": 3,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "straight_s4",
+    "scenario": "straight",
+    "seed": 4,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "target_loss_s0",
+    "scenario": "target_loss",
+    "seed": 0,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "target_loss_s1",
+    "scenario": "target_loss",
+    "seed": 1,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "target_loss_s2",
+    "scenario": "target_loss",
+    "seed": 2,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "target_loss_s3",
+    "scenario": "target_loss",
+    "seed": 3,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "target_loss_s4",
+    "scenario": "target_loss",
+    "seed": 4,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "turn_90_s0",
+    "scenario": "turn_90",
+    "seed": 0,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "turn_90_s1",
+    "scenario": "turn_90",
+    "seed": 1,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "turn_90_s2",
+    "scenario": "turn_90",
+    "seed": 2,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "turn_90_s3",
+    "scenario": "turn_90",
+    "seed": 3,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "turn_90_s4",
+    "scenario": "turn_90",
+    "seed": 4,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "walk_0p6_s0",
+    "scenario": "walk_0p6",
+    "seed": 0,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "walk_0p6_s1",
+    "scenario": "walk_0p6",
+    "seed": 1,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "walk_0p6_s2",
+    "scenario": "walk_0p6",
+    "seed": 2,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "walk_0p6_s3",
+    "scenario": "walk_0p6",
+    "seed": 3,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "walk_0p6_s4",
+    "scenario": "walk_0p6",
+    "seed": 4,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "walk_1p0_s0",
+    "scenario": "walk_1p0",
+    "seed": 0,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "walk_1p0_s1",
+    "scenario": "walk_1p0",
+    "seed": 1,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "walk_1p0_s2",
+    "scenario": "walk_1p0",
+    "seed": 2,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "walk_1p0_s3",
+    "scenario": "walk_1p0",
+    "seed": 3,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "walk_1p0_s4",
+    "scenario": "walk_1p0",
+    "seed": 4,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "walk_up_same_s0",
+    "scenario": "walk_up_same",
+    "seed": 0,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "walk_up_same_s1",
+    "scenario": "walk_up_same",
+    "seed": 1,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "walk_up_same_s2",
+    "scenario": "walk_up_same",
+    "seed": 2,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "walk_up_same_s3",
+    "scenario": "walk_up_same",
+    "seed": 3,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "walk_up_same_s4",
+    "scenario": "walk_up_same",
+    "seed": 4,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "zigzag_s0",
+    "scenario": "zigzag",
+    "seed": 0,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "zigzag_s1",
+    "scenario": "zigzag",
+    "seed": 1,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "zigzag_s2",
+    "scenario": "zigzag",
+    "seed": 2,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "zigzag_s3",
+    "scenario": "zigzag",
+    "seed": 3,
+    "variant": "arc",
+    "light": "สมจริง"
+   },
+   {
+    "tag": "zigzag_s4",
+    "scenario": "zigzag",
+    "seed": 4,
+    "variant": "arc",
     "light": "สมจริง"
    }
   ]

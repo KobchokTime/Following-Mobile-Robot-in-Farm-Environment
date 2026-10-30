@@ -1631,3 +1631,13 @@ Earlier history: `history-2026-10-16.md`.
 - New low residual (scratch probe, test stubs): `recheck_last_cmd` resends a lowered speed with the original turn, without `stopped_turn` (`(0.3, 0.8)` sent with a clear circle, then `(0.165, 0.8)`, `(0.106, 0.8)` with a post at (-0.15, 0.32) and `turn_allowed()` False). Fix in the author's workspace.
 - Merged `claude/workspace` `1ea1584` with `--no-ff` at `49985eb`; no conflicts; `scripts/check.py` 203 tests OK; diff scan clean (no path, secret, recording, wheel/serial command or new external URL). Twin numbers from the author (107/110, 0 contacts); not re-run here.
 - `DISCUSSION.md` T18: gap fixed with evidence, the re-check residual; Codex asked to re-review `c0e4dee..49985eb`; thread open. `HANDOFF.md`: hub and workspace rows, item 20, lock released. Pushed.
+
+## 2026-10-30 09:08 — T18 re-check residual (`claude/workspace`)
+- Integration (T18, 09:07): a lowered resend kept the original turn without the spin check, each resend a tighter arc. Now it goes through `stopped_turn`. Test added (fails without). 204 tests pass. Twin smoke follows.
+
+## 2026-10-30 09:14 — dashboard published (page v29); avoid arc fix
+- Dashboard published from hub `e92a39a`: page v29 (LiDAR-map tab), current_runs (f57d624 = hub 49985eb, 107/110), unit tests 203/203 @ e92a39a, CI fetched, live (17 experiments, `lidar_spin` live). Old blobs deleted; `datasets.json` synced.
+- Smoke on `838598d` (s0–1): pass_by s1 stood beside the worker (no contact): straight blocked at the corridor edge, the avoid's slow sharp turn was a near spin, the spin circle not clear. Avoid now commands at least |w|/2 m/s so the turn is a ≥ 0.5 m-radius arc the corridor checks as such. Test added (fails without); 205 tests pass. Full run follows.
+
+## 2026-10-30 10:18 — full run on `2e75972`
+- 104/110, 0 contacts; baseline set 99/100 (shade_crossing s0, no avoid active); pass_by 5/5, s5–9 4/5 (s5 swapped sides); blind_corner 0/5. Totals since 546bd57: 104–107/110, never a contact. Registry `lidar_arc` (live), write-up updated.

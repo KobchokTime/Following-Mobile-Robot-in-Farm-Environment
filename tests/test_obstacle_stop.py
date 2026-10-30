@@ -161,6 +161,18 @@ class StoppedTurnTest(unittest.TestCase):
         node.cb_scan(scan([]))  # the same with the circle clear: sent as asked
         self.assertEqual(node.obstacle_command(0.06, -0.8, (1.5, 0.0), 0.0), (0.06, -0.8))
 
+    def test_a_lowered_resend_goes_through_the_spin_check(self):
+        # T18 integration probe: (0.3, 0.8) sent with the circle clear; then a post beside the rear quarter and
+        # something closing ahead. The re-check lowered the speed and kept the turn, each resend a tighter arc.
+        node = M.FollowStopNode()
+        node.cb_scan(scan([]))
+        cmd = M.Twist(); cmd.linear.x = 0.3; cmd.angular.z = 0.8
+        node.send(cmd, (1.5, 0.0))
+        node.cb_scan(scan(person(-0.15, 0.32, r=0.03) + person(0.55, 0.0, r=0.06)))
+        last = node.pub.messages[-1]
+        self.assertLess(last.linear.x, 0.3)
+        self.assertEqual(last.angular.z, 0.0)
+
     def test_the_scan_is_subscribed_best_effort(self):
         seen = []
         original = M.FollowStopNode.create_subscription
@@ -222,6 +234,19 @@ class AvoidTest(unittest.TestCase):
         node.cb_scan(scan(person(1.8, 0.0) + person(0.9, 0.42)))
         self.assertEqual(node.obstacle_command(0.4, 0.0, self.TARGET, 0.0)[1], 0.0)
         self.assertIsNotNone(node.blocked_since)
+
+    def test_avoid_turns_on_a_real_arc_beside_the_worker(self):
+        # pass_by s1 on 838598d: the worker 0.66 m away at 52 deg, just inside the corridor ahead; the avoid's slow
+        # sharp turn was a near spin (straight, blocked) and the spin circle was not clear, so the robot stood
+        node = M.FollowStopNode()
+        node.avoid_delay = 0.0
+        b = math.radians(52)
+        tgt = (1.1, 0.1)
+        node.cb_scan(scan(person(0.66 * math.cos(b), 0.66 * math.sin(b)) + person(tgt[0] + 0.2, tgt[1])))
+        v, w = node.obstacle_command(0.12, 0.0, tgt, math.atan2(tgt[1], tgt[0]))
+        self.assertGreater(v, 0.0)
+        self.assertLess(w, 0.0)  # away from the worker
+        self.assertLessEqual(abs(w / v), 2.0 + 1e-9)
 
     def test_a_robot_held_beside_an_obstacle_can_start_again(self):
         # pass_by s4: the robot stood beside the worker (left) while the target walked on. The speed ramp from

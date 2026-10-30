@@ -70,15 +70,15 @@
   }
  },
  "ci_runs": {
-  "description": "Snapshot of the offline-twin workflow runs (twin.yml) on GitHub, fetched 2026-10-29 22:47 Thai time (fetched_utc in each row) with tools/dashboard/ci/gen_ci.py at integration-hub 5c72c4d: run number, branch, commit, trigger, times (UTC) and result. Queued or running runs are marked running. Not live status.",
+  "description": "Snapshot of the offline-twin workflow runs (twin.yml) on GitHub, fetched 2026-10-30 09:09 Thai time (fetched_utc in each row) with tools/dashboard/ci/gen_ci.py --fetch. Not live status.",
   "source": {
    "kind": "file",
    "name": "ci_runs.json",
-   "url": "/_blob/54586428dac0ab8edd3b072fd66eaa7a"
+   "url": "/_blob/224afcd85077bf6bb9f20a66fe30e3a7"
   },
   "title": "GitHub Actions runs",
   "updated": {
-   "at": "2026-10-29T16:40:00Z",
+   "at": "2026-10-30T02:10:00Z",
    "by": "Claude Code"
   }
  },
@@ -196,15 +196,15 @@
  },
  "current_runs": {
   "title": "Current code, every twin scenario",
-  "description": "One row per finished run of the whole-twin baseline (experiments/sim/scripts/run_baseline.sh): every scenario (solo, identity, colour), realism profile, seeds 0-4, with the code on integration-hub (code column). Built by tools/dashboard/live/gen_current.py. Refreshed while the baseline runs; the live tab shows its progress. Simulation, not the robot.",
+  "description": "One row per finished run of the whole-twin baseline (experiments/sim/scripts/run_baseline.sh): every scenario (solo, identity, colour, obstacle), realism profile, seeds 0-4, with the code on integration-hub (code column: f57d624, merged as hub 49985eb). Built by tools/dashboard/live/gen_current.py. Simulation, not the robot.",
   "source": {
    "kind": "file",
    "name": "current_runs.json",
-   "url": "/_blob/85b0eb24f47b424c4de9b573d04f51ac"
+   "url": "/_blob/5a904791077716424b11e936166c74a8"
   },
   "staleAfterHours": 2,
   "updated": {
-   "at": "2026-10-29T16:40:00Z",
+   "at": "2026-10-30T02:10:00Z",
    "by": "Claude Code"
   }
  },
@@ -255,12 +255,12 @@
   "source": {
    "kind": "file",
    "name": "live_experiments.json",
-   "url": "/_blob/e840bd0e320ab5c13dc8c80e5dde75e0"
+   "url": "/_blob/64cf3dbc041a76e2d444976b4696006c"
   },
   "staleAfterHours": 1,
   "title": "Twin experiments, live",
   "updated": {
-   "at": "2026-10-29T16:40:00Z",
+   "at": "2026-10-30T02:10:00Z",
    "by": "Claude Code"
   }
  },
@@ -269,12 +269,12 @@
   "source": {
    "kind": "file",
    "name": "live_runs.json",
-   "url": "/_blob/cc475d696a19bb0eaa946ce8e89bf9dc"
+   "url": "/_blob/4fe9ff829afce44da5123af988b341f9"
   },
   "staleAfterHours": 1,
   "title": "Twin runs, live",
   "updated": {
-   "at": "2026-10-29T16:40:00Z",
+   "at": "2026-10-30T02:10:00Z",
    "by": "Claude Code"
   }
  },
@@ -284,11 +284,11 @@
   "source": {
    "kind": "file",
    "name": "live_scenarios.json",
-   "url": "/_blob/76657e06cf1924669856d6354d86bd19"
+   "url": "/_blob/1a301e0e96d1fe2694f16e01315374c3"
   },
   "title": "Twin scenario layouts",
   "updated": {
-   "at": "2026-10-28T08:24:48Z",
+   "at": "2026-10-30T02:10:00Z",
    "by": "Claude Code"
   }
  },
@@ -297,12 +297,12 @@
   "source": {
    "kind": "file",
    "name": "live_tracks.json",
-   "url": "/_blob/a33a461cef979f043ebe72a6ebfccf1c"
+   "url": "/_blob/0462f3bf345b35cc4e0c7ee12654e598"
   },
   "staleAfterHours": 1,
   "title": "Twin tracks, running experiment",
   "updated": {
-   "at": "2026-10-29T16:40:00Z",
+   "at": "2026-10-30T02:10:00Z",
    "by": "Claude Code"
   }
  },
@@ -312,11 +312,11 @@
   "source": {
    "kind": "file",
    "name": "past_tracks.json",
-   "url": "/_blob/e61b9d8684cb8cc87889a8c5b970e485"
+   "url": "/_blob/078a525de9d605654a5d0b5d769cbfb8"
   },
   "title": "Twin tracks, finished experiments",
   "updated": {
-   "at": "2026-10-29T16:40:00Z",
+   "at": "2026-10-30T02:10:00Z",
    "by": "Claude Code"
   }
  },
@@ -419,16 +419,16 @@
   }
  },
  "unit_tests": {
-  "description": "Every offline unit test in tests/ run with scripts/generate_dashboard_unit_tests.py on integration-hub @ 5c72c4d (clean tree), 2026-10-29 22:47 Thai time; 173/173 pass. Each row carries branch, commit and run_utc. Not live status.",
+  "description": "Every offline unit test in tests/ run with scripts/generate_dashboard_unit_tests.py on integration-hub @ e92a39a (clean tree), 2026-10-30 09:09 Thai time; 203/203 pass. Each row carries branch, commit and run_utc. Not live status.",
   "fixed": true,
   "source": {
    "kind": "file",
    "name": "unit_tests.json",
-   "url": "/_blob/02185b06906409c0c2c333a87442b0c2"
+   "url": "/_blob/f9a759746de2784f5fd83f4288b5ba8d"
   },
   "title": "Unit test results",
   "updated": {
-   "at": "2026-10-29T16:40:00Z",
+   "at": "2026-10-30T02:10:00Z",
    "by": "Claude Code"
   }
  }
