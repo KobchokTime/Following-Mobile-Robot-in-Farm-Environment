@@ -643,11 +643,15 @@ class SyncFusionNode(Node):
                 or now - self.last_camera_fix > self.lidar_max:
             return
         pb, pr = self.gate._predict(now)
-        # last seen near the edge, or moving fast enough to be past it by now (frames arrive late)
-        if abs(self.last_camera_bearing) < self.edge_rad and abs(pb) < self.edge_rad:
-            return
         if not scan_is_fresh(now, self.scan_time, self.scan_max_age):
             return  # no recent scan: do not steer by an old one; the controller's normal stop applies
+        # last seen near the edge, or moving fast enough to be past it by now (frames arrive late), or
+        # covered by someone nearer at the last bearing it was seen (blind_corner: it walked behind the
+        # bystander, out of the image on the far side, and only the LiDAR could see it come out)
+        if abs(self.last_camera_bearing) < self.edge_rad and abs(pb) < self.edge_rad:
+            cover = box_range(self.scan_points, self.last_camera_bearing)
+            if cover is None or cover >= pr - max(self.occl_gap, 0.2):
+                return
         if assisted is not None:
             bearing, rng = assisted  # the assist already moved the track to the target's own cluster
         else:
