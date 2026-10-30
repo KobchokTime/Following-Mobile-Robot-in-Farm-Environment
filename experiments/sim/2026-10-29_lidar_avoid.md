@@ -69,6 +69,10 @@
   baseline set 99/100 (`shade_crossing` s0, no avoid in that run); `pass_by` 5/5 and s5–9 4/5;
   `blind_corner` 0/5. Across the builds since `546bd57` the totals moved between 104 and 107 of 110 with no
   contact in any run: following past a hidden obstacle varies from run to run; the stop does not.
+- **Avoid speed and per-scan turns** (`36a2eca`, `52a1842`): the avoid eases its turn to |w| ≤ 2v instead of raising
+  the speed (integration review); every scan re-checks a still-active turn, turns in place included, against
+  the spin circle (Codex review). Full runs: `36a2eca` 102/110 (baseline set 98/100), `52a1842` **105/110,
+  baseline set 100/100**, `pass_by` 4/5, `blind_corner` 1/5; **0 contacts** in both.
 - The twin publishes `/scan` reliably, so it cannot test the QoS change; check on the robot that `follow_stop`
   receives `/scan` (`[OBST]` lines appear, or `ros2 topic info /scan --verbose`).
 

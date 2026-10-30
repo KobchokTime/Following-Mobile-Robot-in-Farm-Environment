@@ -319,11 +319,12 @@ class FollowStopNode(Node):
         self.recheck_last_cmd()
 
     def recheck_last_cmd(self):
-        """Each scan re-checks the last moving command against the new returns. Target messages can stop
-        (a lost target, a single false box), and the bridge keeps the last command until the stale stop and
-        its own ramp; whoever walks into the corridor meanwhile still slows the robot (blind_corner run)."""
+        """Each scan re-checks the last moving command, turns in place included, against the new returns.
+        Target messages can stop (a lost target, a single false box), and the bridge keeps the last command
+        until the stale stop and its own ramp; whoever walks into the corridor meanwhile still slows the robot
+        (blind_corner run), and whoever comes inside the spin circle stops a turn (T18, Codex 10:43)."""
         cmd = self.moving_cmd
-        if cmd is None or cmd.linear.x == 0.0:
+        if cmd is None or (cmd.linear.x == 0.0 and cmd.angular.z == 0.0):
             return
         if self.scan_time - self.moving_time > self.recheck_max:
             # only the window the bridge would still run it (its 1 s timeout): each resend restarts that
@@ -333,20 +334,23 @@ class FollowStopNode(Node):
         tgt = self.moving_target
         target_xy = tgt[:2] if tgt is not None and self.scan_time - tgt[2] <= self.scan_max_age else None
         capped = self.obstacle_limited(cmd.linear.x, target_xy, cmd.angular.z)
-        if abs(capped) < abs(cmd.linear.x):
+        # a moving command stopped by the cap stops turning too; a turn in place keeps its turn for the spin check
+        turn = cmd.angular.z if capped != 0.0 or cmd.linear.x == 0.0 else 0.0
+        # a lowered resend is a tighter arc, and a turn may have someone new in its circle: both go through the
+        # spin check like any other command (T18)
+        linear, angular = self.stopped_turn(capped, turn, target_xy)
+        if abs(linear) < abs(cmd.linear.x) or angular != cmd.angular.z:
             twist = Twist()
-            # a lowered resend is a tighter arc; it goes through the spin check like any other command (T18)
-            twist.linear.x, twist.angular.z = self.stopped_turn(capped, cmd.angular.z if capped != 0.0 else 0.0,
-                                                                target_xy)
+            twist.linear.x, twist.angular.z = linear, angular
             self.send(twist, keep_time=True)
-            self.last_linear = capped
+            self.last_linear = linear
 
     def send(self, twist, target_xy=None, keep_time=False):
         """Publish a command and keep it for the per-scan re-check while it moves the robot. keep_time: a
         re-check's lowered resend, still dated from the command it lowers."""
         self.pub.publish(twist)
         now = self.get_clock().now().nanoseconds / 1e9
-        self.moving_cmd = twist if twist.linear.x != 0.0 else None
+        self.moving_cmd = twist if twist.linear.x != 0.0 or twist.angular.z != 0.0 else None
         if not keep_time:
             self.moving_time = now
         if target_xy is not None:

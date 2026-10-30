@@ -173,6 +173,30 @@ class StoppedTurnTest(unittest.TestCase):
         self.assertLess(last.linear.x, 0.3)
         self.assertEqual(last.angular.z, 0.0)
 
+    def test_a_new_obstacle_in_the_spin_circle_stops_a_published_turn(self):
+        # T18 (Codex 10:43): a turn in place, then a scan with a post inside the spin circle and no new target
+        # message; the turn kept running until the next fused message or the bridge timeout
+        node = M.FollowStopNode()
+        node.obstacle_avoid = False
+        node.cb_scan(scan(person(0.6, 0.0, r=0.06)))
+        msg = _Float32MultiArray()
+        msg.data = [0.0, 240.0, 0.8, 8.0, 0.9, 0.9, 0.9, 10.0]
+        node.cb_fused(msg)
+        node.cb_fused(msg)
+        self.assertEqual((node.pub.messages[-1].linear.x, node.pub.messages[-1].angular.z), (0.0, -0.8))
+        node.cb_scan(scan(person(0.6, 0.0, r=0.06) + person(-0.15, 0.32, r=0.03)))
+        self.assertEqual((node.pub.messages[-1].linear.x, node.pub.messages[-1].angular.z), (0.0, 0.0))
+
+    def test_a_new_obstacle_in_the_spin_circle_stops_a_near_spin(self):
+        node = M.FollowStopNode()
+        node.cb_scan(scan([]))
+        cmd = M.Twist(); cmd.linear.x = 0.06; cmd.angular.z = -0.8
+        node.send(cmd, (1.5, 0.0))
+        node.cb_scan(scan(person(-0.15, 0.32, r=0.03)))  # the creep's cap does not drop; the turn must
+        last = node.pub.messages[-1]
+        self.assertEqual(last.angular.z, 0.0)
+        self.assertLessEqual(abs(last.linear.x), 0.06)
+
     def test_the_scan_is_subscribed_best_effort(self):
         seen = []
         original = M.FollowStopNode.create_subscription
