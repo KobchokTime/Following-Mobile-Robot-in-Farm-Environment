@@ -1621,3 +1621,7 @@ Earlier history: `history-2026-10-16.md`.
 ## 2026-10-30 08:04 — T18 near-spin gap (`claude/workspace`)
 - Integration (T18, 08:02): the spin check ran only at exactly 0 m/s; a creep or an arc tighter than 2/m (treated as straight by the corridor) still turned with a post beside the rear quarter.
 - Fix: `stopped_turn` treats |v| <= 0.05 or |w/v| > 2 as a near spin; refused, the turn is dropped and the straight creep (already corridor-checked) is kept, so a robot beside someone can still edge past (pass_by s4). Test with the probe's four commands; 203 tests pass. Full twin run follows.
+
+## 2026-10-30 09:05 — full run on `f57d624`; live registry
+- 107/110, 0 contacts; baseline set 100/100; pass_by 5/5; blind_corner 2/5 (others stop, min 0.59 m). Write-up updated.
+- `tools/dashboard/live/registry.json`: experiments `lidar_avoid` (546bd57), `lidar_t18` (a4ce8a5), `lidar_spin` (f57d624, live).
