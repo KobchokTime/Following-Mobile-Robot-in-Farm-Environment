@@ -11,7 +11,7 @@
   <p class="muted" id="queueNext" style="margin-top:12px"></p>
   <div class="project-block" style="margin-top:12px">
     <h3>งานอัตโนมัติของตัวละคร</h3>
-    <p class="muted">ปุ่มจัดเข้าที่นั่งเริ่มงานแก้โค้ดที่พร้อมใน clone แยกทันที ส่วนตัวปลุกงานตรวจโควตาก่อนเริ่มงานอัตโนมัติ ผลทั้งสองแบบรอรีวิวก่อนรวม</p>
+    <p class="muted">ปุ่มจัดเข้าที่นั่งเตรียมงานใน clone แยก ตัวปลุกงานตรวจโควตาแล้วให้ Codex agent รับไปแก้โค้ด ผลรอรีวิวก่อนรวม</p>
     <div id="queueAgents" aria-live="polite" style="margin-top:9px">กำลังอ่านสถานะ…</div>
   </div>`;
   document.querySelector(".shell").append(panel);

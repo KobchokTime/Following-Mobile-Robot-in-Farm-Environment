@@ -404,3 +404,8 @@ Earlier history: `history-2026-10-16.md`.
 
 - On `codex/thesis-desk/office-code-launch` based on `codex/workspace` plus `integration-hub` `32b5f5e`, changed the seat action to start one ready writing job in an isolated clone through signed-in Codex CLI `workspace-write`, then verify the diff, unchanged HEAD, Python and focused Node checks. Added a first safe Office queue diagnostic task, visible branch/files/logs in the page, and included ignored files in scope review.
 - Office Node tests passed 27/27; `python scripts/check.py` passed 208/208 with writable TEMP/TMP; `git diff --check` passed. No actual model edit, PR, main merge, dashboard publish, paid API call or hardware command was made at this stage. Follow-up: browser and real button smoke, then independent review.
+
+### 2026-10-30 — thesis-desk — Use native agent handoff for Office code edits
+
+- In an isolated Office preview on port 8770, two explicit seat actions prepared clones. Nested Codex CLI reported `sandbox: read-only` despite `--sandbox workspace-write`, made no diff, and the verifier correctly marked both jobs failed; no API key or credit was used. The first selected an already completed catalog job, so those old jobs were retired from readiness.
+- Changed the seat button to prepare one isolated assignment and wait for append-only queue evidence. The heartbeat can read `automation-queue.mjs --pending`, dispatch a native Codex agent, and call `--finish --job ID`; the page only claims completion after a verified nonempty diff. This follows the host's sandbox boundary without using a bypass flag. Focused Office Node tests passed 26/26; full Python check passed 208/208 on the earlier feature commit. Follow-up: fresh preview smoke, native assignment, cross-review and integration.

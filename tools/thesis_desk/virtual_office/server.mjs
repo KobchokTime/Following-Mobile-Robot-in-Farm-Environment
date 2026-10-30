@@ -5,7 +5,7 @@ import { dirname, join, resolve } from "node:path";
 import { spawn, spawnSync } from "node:child_process";
 import { randomUUID } from "node:crypto";
 import { main as queueMain, run as runCheck } from "./automation-queue.mjs";
-import { launchCodeJob, runEditingAgent } from "./office-code.mjs";
+import { launchCodeJob } from "./office-code.mjs";
 import { createModelGate, createOfficeWorkflow, seatAgentIds } from "./office-workflow.mjs";
 
 const root = dirname(fileURLToPath(import.meta.url));
@@ -98,24 +98,12 @@ async function runCodex(instructions, input, previous) {
   return { id, answer };
 }
 
-const runModelTurn = createModelGate({ run: (turn) => turn(), isLimited: () => modelRateLimited,
+const runModel = createModelGate({ run: runCodex, isLimited: () => modelRateLimited,
   classify: classifyModelError, markLimited: () => { modelRateLimited = true; } });
-const runModel = (...args) => runModelTurn(() => runCodex(...args));
 
 async function runSeatAction(action) {
   if (action.jobId) {
-    return launchCodeJob({ jobId: action.jobId, actionId: action.id, stateDir: officeStateDir,
-      runAgent: (assignment) => runModelTurn(async () => {
-        const result = await runEditingAgent(assignment, codexChildEnv(process.env));
-        if (result.code === 0 && !result.timedOut) return result;
-        const error = new Error(`${result.stderr}\n${result.stdout}`);
-        error.agentResult = result;
-        throw error;
-      }).catch((error) => {
-        if (error.agentResult) return { ...error.agentResult, status: error.status };
-        throw error;
-      }),
-    });
+    return launchCodeJob({ jobId: action.jobId, stateDir: officeStateDir });
   }
   await mkdir(officeStateDir, { recursive: true });
   const tempDir = await mkdtemp(join(officeStateDir, "seat-check-"));
@@ -220,7 +208,7 @@ const officeWorkflow = createOfficeWorkflow({
 });
 
 export function officeLogName(value) {
-  return /^[0-9a-f-]{36}-(?:krit|mew|boss|code)\.txt$/i.test(value) ||
+  return /^[0-9a-f-]{36}-(?:krit|mew|boss)\.txt$/i.test(value) ||
     /^[a-z0-9][a-z0-9-]{2,50}-\d{13}-check\.txt$/.test(value);
 }
 

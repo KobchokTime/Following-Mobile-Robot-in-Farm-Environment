@@ -1,71 +1,56 @@
 import assert from "node:assert/strict";
-import { EventEmitter } from "node:events";
-import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
-import { editPrompt, launchCodeJob, runEditingAgent } from "./office-code.mjs";
+import { latestJobEvent, launchCodeJob } from "./office-code.mjs";
 
-const assignment = { jobId: "office-ignored-scope-guard", agent: "mew", role: "thesis-desk",
-  branch: "codex/thesis-desk-office/office-ignored-scope-guard-20261030120000",
-  checkout: "C:\\isolated-clone", tempDir: "C:\\isolated-clone\\.office-tmp",
-  maxMinutes: 15, allowedPaths: ["tools/thesis_desk/virtual_office/"],
-  task: "Fix ignored path scope validation", acceptance: "A regression and offline checks pass" };
+const assignment = { jobId: "office-stale-lock-diagnostic", agent: "mew",
+  branch: "codex/thesis-desk-office/office-stale-lock-diagnostic-20261030120000",
+  checkout: "C:\\isolated-clone" };
 
-test("editing agent receives a scoped prompt and ordinary workspace-write sandbox", async () => {
-  let invocation;
-  function fakeSpawn(command, args, options) {
-    invocation = { command, args, options };
-    const child = new EventEmitter();
-    child.stdout = new EventEmitter(); child.stderr = new EventEmitter();
-    child.stdin = { end(prompt) { invocation.prompt = prompt; queueMicrotask(() => child.emit("close", 0)); } };
-    child.kill = () => {};
-    return child;
-  }
-  const result = await runEditingAgent(assignment, { PATH: "safe" }, fakeSpawn);
-  assert.equal(result.code, 0);
-  assert.equal(invocation.command, "codex");
-  assert.deepEqual(invocation.args.slice(0, 4), ["exec", "--sandbox", "workspace-write", "--ephemeral"]);
-  assert.equal(invocation.options.cwd, assignment.checkout);
-  assert.equal(invocation.options.env.TEMP, assignment.tempDir);
-  assert.match(invocation.prompt, /Do not commit, push, merge/);
-  assert.match(editPrompt(assignment), /tools\/thesis_desk\/virtual_office\//);
-  assert.equal(invocation.args.some((arg) => arg.includes("dangerously")), false);
-});
-
-test("seat coding reports review-ready only after a real edit and verifier success", async () => {
-  const folder = await mkdtemp(join(tmpdir(), "office-code-test-"));
-  const id = "11111111-1111-4111-8111-111111111111";
-  const calls = [];
+test("a seat click prepares an isolated job and waits for actual verifier evidence", async () => {
+  const folder = await mkdtemp(join(tmpdir(), "office-native-job-"));
+  let reads = 0;
   try {
-    const result = await launchCodeJob({ jobId: assignment.jobId, actionId: id, stateDir: folder,
-      prepare: async (jobId) => { calls.push(["prepare", jobId]); return { assignments: [assignment] }; },
-      runAgent: async () => { calls.push(["edit"]); return { code: 0, stdout: "changed", stderr: "", timedOut: false }; },
-      finish: async (jobId, outcome) => { calls.push(["verify", jobId]); assert.equal(outcome.code, 0);
-        return { state: "review-ready",
-        changed: ["tools/thesis_desk/virtual_office/automation-queue.mjs"], checkExit: 0,
-        scopeValid: true, headUnchanged: true }; },
+    const result = await launchCodeJob({ jobId: assignment.jobId, stateDir: folder,
+      prepare: async (id) => { assert.equal(id, assignment.jobId);
+        return { assignments: [assignment] }; },
+      latest: async () => ++reads === 1 ? { state: "assigned" } :
+        { state: "review-ready", changed: ["tools/thesis_desk/virtual_office/automation-queue.mjs"],
+          checkExit: 0, branch: assignment.branch, checkLog: join(folder, "office-stale-lock-diagnostic-1793200000000-check.txt") },
+      wait: async () => {},
     });
-    assert.deepEqual(calls, [["prepare", assignment.jobId], ["edit"], ["verify", assignment.jobId]]);
+    assert.equal(reads, 2);
     assert.equal(result.state, "completed");
-    assert.equal(result.codeJob.changed.length, 1);
-    assert.match(await readFile(join(folder, `${id}-code.txt`), "utf8"), /Codex exit: 0/);
+    assert.deepEqual(result.codeJob.changed, ["tools/thesis_desk/virtual_office/automation-queue.mjs"]);
+    assert.equal(result.codeJob.checkLogName, "office-stale-lock-diagnostic-1793200000000-check.txt");
   } finally { await rm(folder, { recursive: true, force: true }); }
 });
 
-test("a failing or rate-limited edit never claims review-ready even if offline checks pass", async () => {
-  const folder = await mkdtemp(join(tmpdir(), "office-code-fail-"));
+test("assigned without a verified diff never appears complete", async () => {
+  const folder = await mkdtemp(join(tmpdir(), "office-native-fail-"));
   try {
-    const result = await launchCodeJob({ jobId: assignment.jobId,
-      actionId: "22222222-2222-4222-8222-222222222222", stateDir: folder,
+    const result = await launchCodeJob({ jobId: assignment.jobId, stateDir: folder,
       prepare: async () => ({ assignments: [assignment] }),
-      runAgent: async () => ({ code: 1, stdout: "", stderr: "last status: 429 Too Many Requests", timedOut: false }),
-      finish: async (_id, outcome) => { assert.equal(outcome.code, 1);
-        return { state: "failed", changed: ["tools/thesis_desk/virtual_office/x"],
-          checkExit: 0, scopeValid: true, headUnchanged: true }; },
+      latest: async () => ({ state: "failed", changed: [], checkExit: 0,
+        summary: "งานเขียนไม่มีไฟล์เปลี่ยน" }),
     });
-    assert.equal(result.state, "paused");
     assert.equal(result.ok, false);
-    assert.equal(result.codeJob.state, "failed");
+    assert.equal(result.state, "failed");
+  } finally { await rm(folder, { recursive: true, force: true }); }
+});
+
+test("latest append-only queue event controls the displayed result", async () => {
+  const folder = await mkdtemp(join(tmpdir(), "office-native-events-"));
+  try {
+    const path = join(folder, "events.jsonl");
+    await writeFile(path, [
+      { jobId: assignment.jobId, state: "assigned" },
+      { jobId: "other", state: "failed" },
+      { jobId: assignment.jobId, state: "review-ready", changed: ["tools/thesis_desk/virtual_office/x"] },
+    ].map(JSON.stringify).join("\n") + "\n");
+    assert.equal((await latestJobEvent(path, assignment.jobId)).state, "review-ready");
+    assert.equal((await readFile(path, "utf8")).split("\n").filter(Boolean).length, 3);
   } finally { await rm(folder, { recursive: true, force: true }); }
 });

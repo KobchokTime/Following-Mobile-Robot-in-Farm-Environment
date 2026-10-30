@@ -3,7 +3,7 @@ import { mkdtemp, mkdir, rm, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { test } from "node:test";
 import { fileURLToPath } from "node:url";
-import { agentOutcomePassed, changedFiles, changedPathsAllowed, changesMatchMode, checksPassed, run, selectJobs } from "./automation-queue.mjs";
+import { changedFiles, changedPathsAllowed, changesMatchMode, checksPassed, run, selectJobs } from "./automation-queue.mjs";
 
 test("limits assignments to three independent lanes and active capacity", () => {
   const jobs = [
@@ -50,13 +50,6 @@ test("read-only assignments cannot become review-ready with edits in allowed pat
   assert.equal(changesMatchMode("read-only", []), true);
   assert.equal(changesMatchMode("workspace-write", changed), true);
   assert.equal(changesMatchMode("workspace-write", []), false);
-});
-
-test("manual code jobs require a successful agent exit before review-ready", () => {
-  assert.equal(agentOutcomePassed({ code: 0, timedOut: false }), true);
-  assert.equal(agentOutcomePassed({ code: 1, timedOut: false }), false);
-  assert.equal(agentOutcomePassed({ code: 0, timedOut: true }), false);
-  assert.equal(agentOutcomePassed({ code: null, timedOut: false, spawnError: "ENOENT" }), false);
 });
 
 test("a required focused check failure blocks review-ready", () => {

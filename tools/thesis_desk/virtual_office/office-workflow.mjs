@@ -122,7 +122,7 @@ export function createOfficeWorkflow({ eventFile, runSeat, runMeeting, getExtern
         action = await record({ id: randomUUID(), kind, agents, state: "running",
           ...(job ? { jobId: job.id } : {}),
           createdAt: new Date().toISOString(), summary: kind === "seat" ?
-            job ? "เริ่มให้ agent แก้โค้ดใน clone แยก" : "เริ่มตรวจโปรเจกต์จริงในเครื่อง" :
+            job ? "เตรียม clone แยก รอ Codex agent รับงานแก้โค้ด" : "เริ่มตรวจโปรเจกต์จริงในเครื่อง" :
             "เริ่มประชุม agent ที่ว่าง" });
       } finally { agents.forEach((id) => reservations.delete(id)); }
       queueMicrotask(() => { void perform(action, kind === "seat" ? runSeat : runMeeting)

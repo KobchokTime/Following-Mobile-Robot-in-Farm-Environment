@@ -114,7 +114,6 @@ test("Team Lead stops before summary when any specialist hits 429", () => {
 
 test("raw Office log links cannot escape their recorded file names", () => {
   assert.equal(officeLogName("4ef21a55-ea50-4e11-90e7-42b0248aea41-krit.txt"), true);
-  assert.equal(officeLogName("4ef21a55-ea50-4e11-90e7-42b0248aea41-code.txt"), true);
   assert.equal(officeLogName("office-ignored-scope-guard-1793200000000-check.txt"), true);
   for (const name of ["../secret", "..\\secret", "meeting.txt", "4ef21a55-ea50-4e11-90e7-42b0248aea41-krit.txt/../secret"])
     assert.equal(officeLogName(name), false);
