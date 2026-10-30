@@ -348,6 +348,34 @@
    "by": "Claude Code"
   }
  },
+ "replay_paths": {
+  "description": "Robot (world x, y, heading, speed, turn rate), target and other person (world x, y) and whose box the camera published, every 0.4 s, for each run in replay_runs. Built by tools/dashboard/live/gen_replay.py. Simulation, not the robot.",
+  "fixed": true,
+  "source": {
+   "kind": "file",
+   "name": "replay_paths.json",
+   "url": "/_blob/64b7e89abcded1c1ef420fbba1f671e8"
+  },
+  "title": "Replay: before vs now, paths",
+  "updated": {
+   "at": "2026-10-30T07:20:00Z",
+   "by": "Claude Code"
+  }
+ },
+ "replay_runs": {
+  "description": "One row per twin run of two whole-twin baselines on the follow, target-gate and colour scenarios, realism, seeds 0-4: before = hub 5c72c4d (before the LiDAR stop/avoid/assist work), now = hub 7b0d8ae. Pass, contact, final gap, share of time in view, closest person. Built by tools/dashboard/live/gen_replay.py. Simulation, not the robot.",
+  "fixed": true,
+  "source": {
+   "kind": "file",
+   "name": "replay_runs.json",
+   "url": "/_blob/b734b80b99ad256cb8b011556e28ccc5"
+  },
+  "title": "Replay: before vs now, per run",
+  "updated": {
+   "at": "2026-10-30T07:20:00Z",
+   "by": "Claude Code"
+  }
+ },
  "robustness": {
   "description": "Repeated curve_left / diff_drive runs across seeds in the kinematic twin and in Gazebo, counting runs where the robot lost the target (final gap about 3.1 m). Counted by Claude Code from its judging runs; not part of the Arena score.",
   "fixed": true,

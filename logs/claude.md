@@ -1680,3 +1680,6 @@ Earlier history: `history-2026-10-16.md`.
 
 ## 2026-10-30 13:28 — dashboard: playback and LiDAR view for the obstacle evidence (page v32)
 - User asked for a play control like the static-filter card. The obstacle card now has ▶/slider (0.2 s steps), paths drawn up to t, the robot body at t, and a robot-frame LiDAR view per side rebuilt from the twin geometry: lane (±0.30 m, 1.6 m), spin circle 0.40 m, lane points from the hidden person in red, target points yellow, speed/turn/distance under it. `gen_obstacle.py` adds the hidden person, speed and command per sample. Preview: no JS errors, playback advances. Published page v32 + obstacle_paths v2; old blob deleted.
+
+## 2026-10-30 14:09 — dashboard: replay cards on the follow, target-gate and colour tabs (page v33)
+- User asked for the same playback on the other tabs. New `tools/dashboard/live/gen_replay.py` (before = hub 5c72c4d baseline, now = hub 7b0d8ae full run; 200 runs, 2.5 Hz) → datasets `replay_runs`, `replay_paths`. A shared replay card (scenario, seed, ▶/slider, overhead map with everyone, robot-frame LiDAR view, whose box the camera published) on the three tabs; it opens on a scenario the old code failed. The LiDAR view is now a shared `lidarView()`. Preview: no JS errors (fixed a name clash with the live tab's `drawReplay`). Published page v33.

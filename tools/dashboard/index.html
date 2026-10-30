@@ -325,6 +325,11 @@
       <p class="tb-note cur-meta"></p>
       <div class="tb-tablewrap"><table class="tb-table cur-table dash-skeleton" data-source="current_runs" data-row-key="scenario" data-group="solo"><thead><tr><th>กลุ่ม</th><th>ฉาก</th><th>ผ่าน</th><th>ชน</th><th>ใกล้คนสุด (m)</th><th>เห็นเป้าต่ำสุด</th></tr></thead><tbody></tbody></table></div>
     </section>
+
+    <section class="tb-card rp-card" id="rp-solo" data-rp="solo">
+      <h2>เล่นซ้ำ: ก่อนกับตอนนี้ (ตามคนเดียว)</h2>
+      <p class="tb-note">เล่นทีละรอบ เทียบโค้ดก่อนงาน LiDAR (ซ้าย) กับโค้ดปัจจุบัน (ขวา) ฉากและ seed เดียวกัน · twin สมจริง · เส้นสี = หุ่น · เส้นประ = เป้า · เส้นจุด = คนอื่น · กรอบ = ตัวหุ่น 47 × 52 cm · ภาพดำด้านล่างคือ LiDAR มองจากหุ่น (สร้างย้อนหลังด้วย geometry เดียวกับ twin)</p>
+    </section>
     <section class="tb-card" id="solo">
     <h2>ตามคนเดียว: ทุกท่าเดิน</h2>
     <p class="tb-note">ผลวันที่ 25 ต.ค. (โค้ดก่อน box_range, lateral gate และเช็กคนข้างเป้า) · bridge แบบ m/s · 10 ท่าเดิน × 3 seed ต่อเงื่อนไข · "เลี้ยวตามมุม" = โหมดเลี้ยวใหม่ steer_mode:=bearing (ยังไม่ใช่ค่าเริ่มต้น) · "สมจริง" = มีหน่วงภาพ 0.15 s, YOLO พลาด 10%, กล่องหลอก 3%, ล้อลื่น, เสาและพุ่มไม้ข้างทาง · ผ่าน = เป้าอยู่ในภาพตอนจบ ห่าง ≤ 1.5 m ไม่ชน และอยู่ในภาพ ≥ 90% ของเวลา</p>
@@ -336,6 +341,11 @@
       <h2>ฉากที่มีคนที่สอง ด้วยโค้ดปัจจุบัน</h2>
       <p class="tb-note cur-meta"></p>
       <div class="tb-tablewrap"><table class="tb-table cur-table dash-skeleton" data-source="current_runs" data-row-key="scenario" data-group="identity"><thead><tr><th>กลุ่ม</th><th>ฉาก</th><th>ผ่าน</th><th>ชน</th><th>ใกล้คนสุด (m)</th><th>เห็นเป้าต่ำสุด</th></tr></thead><tbody></tbody></table></div>
+    </section>
+
+    <section class="tb-card rp-card" id="rp-identity" data-rp="identity">
+      <h2>เล่นซ้ำ: ก่อนกับตอนนี้ (มีคนที่สอง)</h2>
+      <p class="tb-note">เล่นทีละรอบ เทียบโค้ดก่อนงาน LiDAR (ซ้าย) กับโค้ดปัจจุบัน (ขวา) ฉากและ seed เดียวกัน · twin สมจริง · เส้นสี = หุ่น · เส้นประ = เป้า · เส้นจุด = คนอื่น · กรอบ = ตัวหุ่น 47 × 52 cm · ภาพดำด้านล่างคือ LiDAR มองจากหุ่น (สร้างย้อนหลังด้วย geometry เดียวกับ twin)</p>
     </section>
     <p class="tb-history">การ์ดด้านล่างเป็นผลตัดสิน Arena 3 (24 ต.ค.) และการปิดทีละส่วน E7 (25 ต.ค.) ของโค้ดรุ่นนั้น ไม่ใช่สถานะของโค้ดปัจจุบัน</p>
     <div class="tb-grid">
@@ -429,6 +439,11 @@
       <h2>ฉากสีเสื้อ ด้วยโค้ดปัจจุบัน</h2>
       <p class="tb-note cur-meta"></p>
       <div class="tb-tablewrap"><table class="tb-table cur-table dash-skeleton" data-source="current_runs" data-row-key="scenario" data-group="colour"><thead><tr><th>กลุ่ม</th><th>ฉาก</th><th>ผ่าน</th><th>ชน</th><th>ใกล้คนสุด (m)</th><th>เห็นเป้าต่ำสุด</th></tr></thead><tbody></tbody></table></div>
+    </section>
+
+    <section class="tb-card rp-card" id="rp-colour" data-rp="colour">
+      <h2>เล่นซ้ำ: ก่อนกับตอนนี้ (สีเสื้อ)</h2>
+      <p class="tb-note">เล่นทีละรอบ เทียบโค้ดก่อนงาน LiDAR (ซ้าย) กับโค้ดปัจจุบัน (ขวา) ฉากและ seed เดียวกัน · twin สมจริง · เส้นสี = หุ่น · เส้นประ = เป้า · เส้นจุด = คนอื่น · กรอบ = ตัวหุ่น 47 × 52 cm · ภาพดำด้านล่างคือ LiDAR มองจากหุ่น (สร้างย้อนหลังด้วย geometry เดียวกับ twin)</p>
     </section>
     <p class="tb-history">การ์ดด้านล่างวัดจากคลิปจริงและการทดลอง twin วันที่ 26–27 ต.ค. (branch hs-colour <code>47553e5</code>) ใช้ดูว่าทำไมเลือกวิธีสีนี้ ผลของโค้ดปัจจุบันอยู่ในการ์ดด้านบน</p>
     <section class="tb-card" id="col-why">
@@ -2003,6 +2018,11 @@ dash.calc('robust_totals', {
     if (d.status === 'error' || d.status === 'connect') { failed(el); return; }
     if (d.status !== 'ok') return;
     ready(el);
+    lidarView(el, cap, now && { t: now.t, x: now.robot_x, y: now.robot_y, yaw: now.robot_yaw_deg, v: now.v, w: now.w,
+      target: [now.target_x, now.target_y], others: [[now.other_x, now.other_y]], otherName: 'คนที่กล้องไม่เห็น' });
+  }
+  // pose: {t, x, y, yaw (deg), v, w, target: [x, y], others: [[x, y], ...], otherName, extra}
+  function lidarView(el, cap, pose) {
     const WIN = { x0: -0.8, x1: 2.6, y0: -1.1, y1: 1.1 };
     const W = Math.max(240, el.clientWidth), pad = 6, k = (W - 2 * pad) / (WIN.x1 - WIN.x0);
     const H = Math.round((WIN.y1 - WIN.y0) * k + 2 * pad);
@@ -2017,10 +2037,11 @@ dash.calc('robust_totals', {
       .attr('fill', '#5aa9ff').attr('opacity', 0.12).attr('stroke', '#5aa9ff').attr('stroke-opacity', 0.6);
     svg.append('circle').attr('cx', X(0)).attr('cy', Y(0)).attr('r', 0.4 * k).attr('fill', 'none').attr('stroke', '#aaaaaa').attr('stroke-dasharray', '4 4');
     svg.append('rect').attr('x', X(-0.26)).attr('y', Y(0.235)).attr('width', 0.52 * k).attr('height', 0.47 * k).attr('fill', 'none').attr('stroke', '#5aa9ff').attr('stroke-width', 1.5);
-    if (!now) { el.replaceChildren(svg.node()); if (cap) cap.textContent = ''; return; }
-    const yaw = now.robot_yaw_deg * Math.PI / 180, cy = Math.cos(yaw), sy = Math.sin(yaw);
-    const local = (wx, wy) => { const dx = wx - now.robot_x, dy = wy - now.robot_y; return [cy * dx + sy * dy, -sy * dx + cy * dy]; };
-    const people = [{ c: local(now.target_x, now.target_y), who: 'target' }, { c: local(now.other_x, now.other_y), who: 'other' }];
+    if (!pose) { el.replaceChildren(svg.node()); if (cap) cap.textContent = ''; return; }
+    const yaw = pose.yaw * Math.PI / 180, cy = Math.cos(yaw), sy = Math.sin(yaw);
+    const local = (wx, wy) => { const dx = wx - pose.x, dy = wy - pose.y; return [cy * dx + sy * dy, -sy * dx + cy * dy]; };
+    const people = [{ c: local(pose.target[0], pose.target[1]), who: 'target' },
+      ...pose.others.filter((o) => o[0] !== undefined && o[0] !== null).map((o) => ({ c: local(o[0], o[1]), who: 'other' }))];
     let inLane = 0;
     for (let i = 0; i < 360; i++) {
       const a = (i - 180) * Math.PI / 180, ux = Math.cos(a), uy = Math.sin(a);
@@ -2041,8 +2062,115 @@ dash.calc('robust_totals', {
     }
     svg.append('path').attr('d', d3.symbol(d3.symbolTriangle, 110)()).attr('fill', '#5aa9ff').attr('transform', `translate(${X(0)},${Y(0)}) rotate(90)`);
     el.replaceChildren(svg.node());
-    if (cap) cap.textContent = `t = ${now.t.toFixed(1)} s · ความเร็ว ${f2(now.v)} m/s · เลี้ยว ${f2(now.w)} rad/s · ระยะถึงคนที่กล้องไม่เห็น ${f2(Math.hypot(now.other_x - now.robot_x, now.other_y - now.robot_y))} m` + (inLane ? ` · จุดในช่องทาง ${inLane}` : '');
+    const near = d3.min(pose.others.filter((o) => o[0] !== undefined && o[0] !== null), (o) => Math.hypot(o[0] - pose.x, o[1] - pose.y));
+    if (cap) cap.textContent = `t = ${pose.t.toFixed(1)} s · ความเร็ว ${f2(pose.v)} m/s · เลี้ยว ${f2(pose.w)} rad/s` +
+      (near !== undefined ? ` · ระยะถึง${pose.otherName || 'คนอื่น'} ${f2(near)} m` : '') + (inLane ? ` · จุดในช่องทาง ${inLane}` : '') + (pose.extra || '');
   }
+  // ---------- replay cards (before vs now) on the follow, target-gate and colour tabs ----------
+  const RP = {};
+  const RPV = [['before', 'var(--cds-chart-muted)'], ['now', null]];
+  const RPPUB = { target: 'เป้า', '?': 'ไม่มีกล่อง (LiDAR)', '': '—' };
+  document.querySelectorAll('.rp-card').forEach((card) => {
+    const g = card.dataset.rp, st = RP[g] = { g, scen: null, seed: 0, t: 0, dur: 30, timer: null };
+    const ctl = document.createElement('div'); ctl.className = 'tb-controls';
+    const sel = document.createElement('select'); sel.className = 'tb-select'; sel.setAttribute('aria-label', 'ฉาก'); st.sel = sel;
+    sel.addEventListener('change', () => { st.scen = sel.value; st.t = rpDur(st); drawRpCard(g); });
+    const seg = document.createElement('div'); seg.className = 'tb-seg'; seg.setAttribute('role', 'group'); seg.setAttribute('aria-label', 'seed');
+    [0, 1, 2, 3, 4].forEach((n) => { const b = document.createElement('button'); b.type = 'button'; b.textContent = `seed ${n}`; b.setAttribute('aria-pressed', String(n === 0));
+      b.addEventListener('click', () => { st.seed = n; seg.querySelectorAll('button').forEach((x) => x.setAttribute('aria-pressed', String(x === b))); drawRpCard(g); }); seg.append(b); });
+    ctl.append(sel, seg);
+    const grid = document.createElement('div'); grid.className = 'tb-sfgrid';
+    RPV.forEach(([v]) => {
+      const pane = document.createElement('div'); pane.className = 'tb-sfpane';
+      pane.innerHTML = `<h3><span class="rp-h"></span> <span class="tb-pill rp-res"></span></h3><div class="tb-chart tb-sfmap dash-skeleton rp-map" data-source="replay_paths"></div><div class="tb-chart tb-sfscan dash-skeleton rp-scan" data-source="replay_paths"></div><p class="tb-note rp-cap"></p>`;
+      pane.dataset.v = v; grid.append(pane);
+    });
+    const leg = document.createElement('div'); leg.className = 'tb-legend';
+    leg.innerHTML = '<span><i style="background:#f2f2f2"></i>จุด LiDAR</span><span><i style="background:#ff5a5a"></i>จุดของคนอื่นในช่องทางวิ่ง</span><span><i style="background:#ffd23f"></i>จุดของเป้า</span><span><i style="background:#5aa9ff"></i>ช่องทางวิ่ง 1.6 m</span><span><i style="border:1px dashed #aaaaaa;background:transparent"></i>วงหมุน 0.40 m</span>';
+    const bar = document.createElement('div'); bar.className = 'tb-controls';
+    const play = document.createElement('button'); play.type = 'button'; play.className = 'tb-play'; play.textContent = '▶ เล่น';
+    const time = document.createElement('input'); time.type = 'range'; time.className = 'tb-time'; time.min = '0'; time.step = '0.4'; time.setAttribute('aria-label', 'เวลา (วินาที)');
+    const clock = document.createElement('span'); clock.className = 'tb-clock';
+    bar.append(play, time, clock); st.time = time; st.clock = clock; st.play = play;
+    time.addEventListener('input', () => { st.t = Number(time.value); drawRpCard(g); });
+    play.addEventListener('click', () => {
+      if (st.timer) { clearInterval(st.timer); st.timer = null; play.textContent = '▶ เล่น'; return; }
+      if (st.t >= st.dur - 1e-6) st.t = 0;
+      play.textContent = '❚❚ หยุด';
+      st.timer = setInterval(() => {
+        st.t = Math.min(st.dur, st.t + 0.4); drawRpCard(g);
+        if (st.t >= st.dur - 1e-6) { clearInterval(st.timer); st.timer = null; play.textContent = '▶ เล่น'; }
+      }, 100);
+    });
+    card.append(ctl, grid, leg, bar);
+  });
+  const rpDur = (st) => {
+    const r = dash.data('replay_runs');
+    const v = r.status === 'ok' ? r.data.filter((x) => x.scenario === st.scen) : [];
+    st.dur = v.length ? d3.max(v, (x) => x.duration_s) : 30;
+    return st.dur;
+  };
+  function drawRpCard(g) {
+    const st = RP[g], card = document.getElementById(`rp-${g}`);
+    if (!st || !card) return;
+    const d = dash.data('replay_paths'), runs = dash.data('replay_runs');
+    const panes = card.querySelectorAll('.tb-sfpane');
+    if (d.status === 'error' || d.status === 'connect' || runs.status === 'error') { panes.forEach((p) => failed(p.querySelector('.rp-map'))); return; }
+    if (d.status !== 'ok' || runs.status !== 'ok') return;
+    const scen = [...new Set(runs.data.filter((r) => r.group === g).map((r) => r.scenario))].sort();
+    if (!scen.length) return;
+    if (st.sel.options.length !== scen.length) {
+      st.sel.replaceChildren(...scen.map((s) => { const o = document.createElement('option'); o.value = s; o.textContent = s; return o; }));
+      // open on a scenario the old code failed, if any, else the first
+      const bad = runs.data.find((r) => r.group === g && r.variant === 'before' && !r.pass);
+      st.scen = bad ? bad.scenario : scen[0]; st.seed = bad ? bad.seed : 0; st.sel.value = st.scen; st.t = rpDur(st);
+      card.querySelectorAll('.tb-seg button').forEach((b, i) => b.setAttribute('aria-pressed', String(i === st.seed)));
+    }
+    st.time.max = String(st.dur); st.time.value = String(st.t); st.clock.textContent = `t = ${st.t.toFixed(1)} s`;
+    const ids = RPV.map(([v]) => `${st.scen}-${v}-${st.seed}`);
+    const both = d.data.filter((r) => ids.includes(r.run_id));
+    const ox = (r) => [r.o0x, r.o1x].filter((q) => q !== undefined), oy = (r) => [r.o0y, r.o1y].filter((q) => q !== undefined);
+    const xs = [...both.map((r) => r.rx), ...both.map((r) => r.tx), ...both.flatMap(ox)], ys = [...both.map((r) => r.ry), ...both.map((r) => r.ty), ...both.flatMap(oy)];
+    panes.forEach((pane, i) => {
+      const [v, col] = RPV[i], c = col || dash.colors[2];
+      const el = pane.querySelector('.rp-map'), res = pane.querySelector('.rp-res');
+      ready(el); ready(pane.querySelector('.rp-scan'));
+      const sum = runs.data.find((r) => r.run_id === ids[i]);
+      pane.querySelector('.rp-h').textContent = v === 'before' ? `ก่อน (hub ${sum ? sum.code : ''})` : `ตอนนี้ (hub ${sum ? sum.code : ''})`;
+      res.textContent = sum ? `${sum.pass ? 'ผ่าน' : 'ตก'} · ${sum.contact ? 'ชน' : 'ไม่ชน'} · ห่างตอนจบ ${f2(sum.final_gap_m)} m · เห็นเป้า ${Math.round(100 * sum.visible_share)}%` : 'ไม่มีข้อมูล';
+      res.className = 'tb-pill rp-res ' + (sum ? (sum.contact ? 'tb-bad' : sum.pass ? 'tb-ok' : 'tb-warn') : '');
+      const rows = d.data.filter((r) => r.run_id === ids[i] && r.t <= st.t + 1e-6);
+      if (!xs.length) { el.replaceChildren(); return; }
+      const [x0, x1] = d3.extent(xs), [y0, y1] = d3.extent(ys);
+      const W = Math.max(240, el.clientWidth), pad = 16, span = 0.8;
+      const k0 = (W - 2 * pad) / ((x1 - x0) + span);
+      const H = Math.round(Math.min(360, Math.max(180, ((y1 - y0) + span) * k0 + 2 * pad)));
+      const k = Math.min(k0, (H - 2 * pad) / ((y1 - y0) + span));
+      const X = (q) => pad + (q - x0 + span / 2) * k, Y = (q) => H - pad - (q - y0 + span / 2) * k;
+      const svg = d3.create('svg').attr('width', W).attr('height', H).attr('viewBox', `0 0 ${W} ${H}`);
+      el.style.height = `${H}px`;
+      d3.range(Math.ceil(x0), Math.floor(x1) + 1).forEach((q) => svg.append('line').attr('x1', X(q)).attr('x2', X(q)).attr('y1', 0).attr('y2', H).attr('stroke', 'var(--cds-chart-grid)'));
+      d3.range(Math.ceil(y0), Math.floor(y1) + 1).forEach((q) => svg.append('line').attr('y1', Y(q)).attr('y2', Y(q)).attr('x1', 0).attr('x2', W).attr('stroke', 'var(--cds-chart-grid)'));
+      const line = (fx, fy) => d3.line().defined((r) => r[fx] !== undefined).x((r) => X(r[fx])).y((r) => Y(r[fy]));
+      ['o0', 'o1'].forEach((o) => svg.append('path').attr('d', line(`${o}x`, `${o}y`)(rows) || '').attr('fill', 'none').attr('stroke', 'var(--color-fg-muted)').attr('stroke-dasharray', '1 4').attr('stroke-width', 2));
+      svg.append('path').attr('d', line('tx', 'ty')(rows) || '').attr('fill', 'none').attr('stroke', 'var(--color-fg-muted)').attr('stroke-dasharray', '4 4').attr('stroke-width', 1.5);
+      svg.append('path').attr('d', line('rx', 'ry')(rows) || '').attr('fill', 'none').attr('stroke', c).attr('stroke-width', 2.5).attr('stroke-linecap', 'round').attr('stroke-linejoin', 'round');
+      const now = rows[rows.length - 1];
+      if (now) {
+        ['o0', 'o1'].forEach((o) => { if (now[`${o}x`] === undefined) return;
+          svg.append('circle').attr('cx', X(now[`${o}x`])).attr('cy', Y(now[`${o}y`])).attr('r', 0.2 * k).attr('fill', 'var(--color-fg-muted)').attr('opacity', 0.35).attr('stroke', 'var(--color-fg-muted)'); });
+        svg.append('circle').attr('cx', X(now.tx)).attr('cy', Y(now.ty)).attr('r', 0.2 * k).attr('fill', 'none').attr('stroke', '#ffd23f').attr('stroke-width', 2);
+        svg.append('rect').attr('x', -0.26 * k).attr('y', -0.235 * k).attr('width', 0.52 * k).attr('height', 0.47 * k).attr('fill', 'none').attr('stroke', c).attr('stroke-width', 2)
+          .attr('transform', `translate(${X(now.rx)},${Y(now.ry)}) rotate(${-now.yaw})`);
+        svg.append('path').attr('d', d3.symbol(d3.symbolTriangle, 90)()).attr('fill', c).attr('transform', `translate(${X(now.rx)},${Y(now.ry)}) rotate(${90 - now.yaw})`);
+      }
+      el.replaceChildren(svg.node());
+      lidarView(pane.querySelector('.rp-scan'), pane.querySelector('.rp-cap'), now && { t: now.t, x: now.rx, y: now.ry, yaw: now.yaw, v: now.v, w: now.w,
+        target: [now.tx, now.ty], others: [[now.o0x, now.o0y], [now.o1x, now.o1y]], otherName: 'คนอื่น',
+        extra: ` · กล้องส่ง: ${RPPUB[now.pub] !== undefined ? RPPUB[now.pub] : now.pub}` });
+    });
+  }
+
   function drawObst() {
     const d = dash.data('obstacle_paths'), runs = dash.data('obstacle_runs');
     document.getElementById('tb-obsclock').textContent = `t = ${OB.t.toFixed(1)} s`;
@@ -2473,11 +2601,11 @@ dash.calc('robust_totals', {
   const PANELS = {
     live: () => drawLive(),
     ready: () => { drawCurrent(); drawCond(); drawClose(); },
-    solo: () => { drawCurrent(); drawSolo(); },
-    identity: () => { drawCurrent(); drawA3Runs(); drawArena3(); drawE7(); },
+    solo: () => { drawCurrent(); drawRpCard('solo'); drawSolo(); },
+    identity: () => { drawCurrent(); drawRpCard('identity'); drawA3Runs(); drawArena3(); drawE7(); },
     replay: () => { document.getElementById('tb-fixednote').hidden = S.bridge !== 'fixed'; drawMap(); drawGap(); drawSpeed(); drawMatrix(); drawLidar(); },
     filter: () => { drawCurrent(); drawObst(); drawSFBar(); drawICPBar(); drawSFPaths(); },
-    colour: () => { drawCurrent(); drawColScatter(); drawColSepAll(); drawColMethods(); drawColHeld(); drawColVtest(); drawColWeights(); drawColTwin(); },
+    colour: () => { drawCurrent(); drawRpCard('colour'); drawColScatter(); drawColSepAll(); drawColMethods(); drawColHeld(); drawColVtest(); drawColWeights(); drawColTwin(); },
     arenas: () => { drawArena2(); drawA2Runs(); drawArena(); drawRobust(); },
     tests: () => { drawTests(); drawCI(); },
   };
