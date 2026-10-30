@@ -1625,3 +1625,9 @@ Earlier history: `history-2026-10-16.md`.
 ## 2026-10-30 09:05 — full run on `f57d624`; live registry
 - 107/110, 0 contacts; baseline set 100/100; pass_by 5/5; blind_corner 2/5 (others stop, min 0.59 m). Write-up updated.
 - `tools/dashboard/live/registry.json`: experiments `lidar_avoid` (546bd57), `lidar_t18` (a4ce8a5), `lidar_spin` (f57d624, live).
+
+## 2026-10-30 09:07 — integration: T18 near-spin fix merged (`integration-hub`, Claude Opus 5.5)
+- Lock claimed (`86af7c5`, pushed first). Reviewed `f57d624`: `stopped_turn` checks |v| <= 0.05 or |w/v| > 2 against the spin circle (no division by zero: the creep test comes first); a refused turn keeps the straight creep, which `obstacle_limited` checked with curvature 0, so agree with keeping it (zeroing would bring back the pass_by s4 deadlock). The 08:02 probe now gives `(v, 0)` for all four commands, avoid on and off.
+- New low residual (scratch probe, test stubs): `recheck_last_cmd` resends a lowered speed with the original turn, without `stopped_turn` (`(0.3, 0.8)` sent with a clear circle, then `(0.165, 0.8)`, `(0.106, 0.8)` with a post at (-0.15, 0.32) and `turn_allowed()` False). Fix in the author's workspace.
+- Merged `claude/workspace` `1ea1584` with `--no-ff` at `49985eb`; no conflicts; `scripts/check.py` 203 tests OK; diff scan clean (no path, secret, recording, wheel/serial command or new external URL). Twin numbers from the author (107/110, 0 contacts); not re-run here.
+- `DISCUSSION.md` T18: gap fixed with evidence, the re-check residual; Codex asked to re-review `c0e4dee..49985eb`; thread open. `HANDOFF.md`: hub and workspace rows, item 20, lock released. Pushed.
