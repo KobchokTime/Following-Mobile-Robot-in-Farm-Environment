@@ -203,7 +203,10 @@
    "url": "/_blob/ab336237bb560360b9ab1c4e4701c349"
   },
   "staleAfterHours": 2,
-  "updated": "2026-10-30T15:26:08Z"
+  "updated": {
+   "at": "2026-10-30T15:26:08Z",
+   "by": "Claude Code"
+  }
  },
  "e7_ablation": {
   "description": "Identity runs with each part switched off by a ROS parameter (full, no colour, no give-way, no gate), 5 scenarios × fixed/diff_drive × seeds 0-2, for the first run (2026-10-24) and the current code (2026-10-25); column round says which.",
@@ -312,7 +315,10 @@
    "url": "/_blob/e70306d7743bce47d791c4b58c50e8ca"
   },
   "title": "Obstacle stop/avoid: paths",
-  "updated": "2026-10-30T15:26:08Z"
+  "updated": {
+   "at": "2026-10-30T15:26:08Z",
+   "by": "Claude Code"
+  }
  },
  "obstacle_runs": {
   "description": "One row per twin run comparing the obstacle switches on the current hub code (8b2ddf8, image from claude/workspace bdae2c1): pass_by with obstacle_avoid off/on and blind_corner with obstacle_stop off/on, realism, seeds 0-4, one run at a time. Pass, contact, closest distance to the hidden person and the robot pose at that moment. Built by tools/dashboard/live/gen_obstacle.py. Simulation, not the robot.",
@@ -323,7 +329,10 @@
    "url": "/_blob/2a98fa9511a30fa69d80990923d1cd83"
   },
   "title": "Obstacle stop/avoid: off vs on",
-  "updated": "2026-10-30T15:26:08Z"
+  "updated": {
+   "at": "2026-10-30T15:26:08Z",
+   "by": "Claude Code"
+  }
  },
  "past_tracks": {
   "description": "Robot, target and other person positions (world frame, 1 Hz) and target gap for every run of finished twin experiments, for the replay.",
@@ -348,7 +357,10 @@
    "url": "/_blob/ba030fbbd3f4633e95688d6dd6d597ee"
   },
   "title": "Replay: before vs now, paths",
-  "updated": "2026-10-30T15:26:08Z"
+  "updated": {
+   "at": "2026-10-30T15:26:08Z",
+   "by": "Claude Code"
+  }
  },
  "replay_runs": {
   "description": "One row per twin run of two whole-twin baselines on the follow, target-gate and colour scenarios, realism, seeds 0-4: before = hub 5c72c4d (before the LiDAR stop/avoid/assist work), now = hub 8b2ddf8. Pass, contact, final gap, share of time in view, closest person. Built by tools/dashboard/live/gen_replay.py. Simulation, not the robot.",
@@ -359,7 +371,10 @@
    "url": "/_blob/c142da2f73db7ec98daa11a85c4da1ca"
   },
   "title": "Replay: before vs now, per run",
-  "updated": "2026-10-30T15:26:08Z"
+  "updated": {
+   "at": "2026-10-30T15:26:08Z",
+   "by": "Claude Code"
+  }
  },
  "robustness": {
   "description": "Repeated curve_left / diff_drive runs across seeds in the kinematic twin and in Gazebo, counting runs where the robot lost the target (final gap about 3.1 m). Counted by Claude Code from its judging runs; not part of the Arena score.",
