@@ -403,6 +403,17 @@ class TrailTest(unittest.TestCase):
         self.assertTrue(node.trailing)
         self.assertGreater(v, 0.0)
 
+    def test_the_trail_is_driven_at_the_speed_of_the_way_left_along_it(self):
+        # blind_corner s1/s3 on 47109fb: 0.8 m from the target in a straight line, a corner away along its path,
+        # the trail crawled to the corner and the target was out of view 2.7 s (in view 0.897)
+        node = M.FollowStopNode()
+        node.crumbs = [(1.0, 0.0, 0.0), (1.0, 0.8, 0.0)]
+        self.assertAlmostEqual(node.trail_length((1.0, 0.0)), 1.8)
+        node.cb_scan(scan(person(0.55, 0.55)))
+        v, _ = node.obstacle_command(0.1, 0.0, (1.0, 0.8), math.atan2(0.8, 1.0))
+        self.assertTrue(node.trailing)
+        self.assertGreater(v, 0.2)  # not the 0.12 crawl; the stop still caps it near the bystander
+
     def test_dead_reckoning_and_crumbs(self):
         node = M.FollowStopNode()
         clock = {'t': 0.0}

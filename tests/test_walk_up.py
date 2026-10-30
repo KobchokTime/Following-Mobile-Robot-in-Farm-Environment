@@ -337,6 +337,20 @@ class LidarAssistTest(unittest.TestCase):
         self.assertTrue(out)
         self.assertTrue(all(0 < p[0] < node.image_width / 2 for p in out))  # left of centre, not at the edge
 
+    def test_a_box_range_shortened_by_someone_in_front_does_not_lower_the_floor(self):
+        # blind_corner s0 on 47109fb: the last box read 0.50 m off the bystander's edge (target 0.78 m), and the
+        # LiDAR track then took the bystander at 0.31 m
+        m, node = make_node()
+        t = self.lock(node, target=(0.9, 0.0))
+        node.scan_points = scan(person(0.9, -0.33))
+        self.assertTrue(self.box(node, t, 0.9, -0.33))
+        node.scan_points = scan(person(0.9, -0.33), person(0.62, -0.42))  # someone stepping in front
+        self.box(node, t + 0.05, 0.9, -0.33)
+        before = len(node.published)
+        for k in range(1, 9):
+            self.scan_at(node, t + 0.05 + 0.1 * k, [(0.45, -0.45)])
+        self.assertEqual([p for p in node.published[before:] if p[2] < 0.6], [])
+
     def side_step(self, **params):
         """The traced twin failure: the last box is at 20 deg, then the target steps out of the image."""
         m, node = make_node(**params)

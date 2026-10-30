@@ -487,6 +487,7 @@ class SyncFusionNode(Node):
         self.lidar_max = float(self.get_parameter('lidar_track_max_s').value)
         self.scan_points = []     # latest scan as (robot-frame bearing, range)
         self.covered_fix = None   # the last camera fix after which someone nearer covered the target
+        self.recent_ranges = []   # (time, range) of the camera fixes in the last second
         self.scan_time = None     # when it arrived
         self.scan_max_age = float(self.get_parameter('lidar_scan_max_age_s').value)
         self.box_range_from_scan = bool(self.get_parameter('box_range_from_scan').value)
@@ -669,7 +670,10 @@ class SyncFusionNode(Node):
             # (blind_corner s4 on bddf0ba took the bystander and the gate followed them for 4 s)
             # nor nearer than it was last seen by the camera: fix by fix the track can creep onto the edge of
             # someone it walked past (blind_corner s0 on f01dd98 ended on the bystander at 0.28 m)
-            far = [p for p in self.scan_points if p[1] >= max(pr, self.last_target[3]) - 0.2]
+            # the farthest of the last second's camera ranges: as the target goes behind someone its box range
+            # drops to theirs (0.50 m for a target 0.78 m out, blind_corner s0 on 47109fb, which then took them)
+            seen = max([r0 for _, r0 in self.recent_ranges] + [self.last_target[3]])
+            far = [p for p in self.scan_points if p[1] >= max(pr, seen) - 0.2]
             # out from behind someone, it can be anywhere past them: a wider window than at the image edge
             window = math.radians(40.0 if self.covered_fix == self.last_camera_fix else 25.0)
             # the prediction holds still after a second unseen while the target walks on: allow walking pace
@@ -774,6 +778,7 @@ class SyncFusionNode(Node):
                 self.publish_synced(cx_t, cy_t, max(self.path_floor, dist - self.path_margin), sector_t, best_dt)
             return
         self.last_target = (cx, cy, sector_id, dist)  # the target's own range, before any give-way
+        self.recent_ranges = [(t0, r0) for t0, r0 in self.recent_ranges if ty - t0 <= 1.0] + [(ty, dist)]
         self.last_camera_fix = ty
         self.last_camera_bearing = bearing
         if self.path_block is not None and ty - self.path_block[0] <= self.path_hold:

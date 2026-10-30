@@ -546,7 +546,11 @@ class FollowStopNode(Node):
                     self.trailing = True
                 angular_z = bearing_turn(math.atan2(aim[1], aim[0]), 0.0, self.latency_s, self.bearing_gain,
                                          self.angular_limit, self.bearing_deadband)
-                linear_x = max(linear_x, self.avoid_min_speed)
+                # speed from the way left along the path, not the straight gap: at a corner the target is close
+                # in a straight line but a corner away, and the crawl reached the corner too late to keep it in
+                # view (blind_corner s1/s3 on 47109fb, in view 0.897)
+                linear_x = max(linear_x, self.avoid_min_speed,
+                               min(0.5, 0.6 * (self.trail_length(aim) - self.target_distance)))
                 angular_z = max(-2.0 * linear_x, min(2.0 * linear_x, angular_z))
                 if not at_edge and angular_z * target_bearing < 0.0 and abs(target_bearing) >= 0.35:
                     # the crumb is one way and the target already 20 deg or more the other: going straight
@@ -742,6 +746,15 @@ class FollowStopNode(Node):
         )
 
     # ==================================================
+    def trail_length(self, aim):
+        """The way along the target's path from the robot (aim, robot frame) to the newest crumb, in metres."""
+        if not self.crumbs:
+            return math.hypot(*aim)
+        dx, dy = self.crumbs[-1][0] - self.pose[0], self.crumbs[-1][1] - self.pose[1]
+        c, s = math.cos(self.pose[2]), math.sin(self.pose[2])
+        nx, ny = c * dx + s * dy, -s * dx + c * dy
+        return math.hypot(*aim) + math.hypot(nx - aim[0], ny - aim[1])
+
     def trail_tick(self):
         """While the trail is being followed and target messages have stopped (the way round turned the target
         out of view), keep driving along the crumbs for trail_hold_s, every command through the stop; then
