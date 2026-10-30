@@ -94,6 +94,21 @@ class WalkUpTest(unittest.TestCase):
             t += 0.1
         return t
 
+    def test_a_target_covered_from_the_lidar_keeps_its_predicted_range(self):
+        # blind_corner: someone the camera does not detect stands between the robot and the target at the
+        # target's bearing; the box range was theirs (0.3 m), and the follower stopped as if at the target
+        m, node = make_node()
+        t = self.lock(node, target=(1.0, 0.0))
+        f = (self.W / 2.0) / math.tan(math.radians(self.HFOV) / 2.0)
+        node.scan_points = scan(person(1.0, 0.0), person(0.5, 0.02))
+        node.scan_time = t
+        node.buf_lidar.clear()
+        node.buf_lidar.append((t, [1.0]))
+        n = len(node.published)
+        node.try_sync_from_yolo(t, int(round(self.W / 2.0)), 240, 4)
+        self.assertGreater(len(node.published), n)
+        self.assertGreater(node.published[-1][2], 0.7)  # the target's range, not the near person's
+
     def test_a_stranger_stepping_out_beside_the_target_is_not_taken(self):
         """Same clothes, 0.40 m to the right; the stranger's box comes first in the frame."""
         m, node = make_node()

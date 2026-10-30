@@ -460,6 +460,16 @@ class FollowStopNode(Node):
             return linear_x, 0.0
         return linear_x, angular_z
 
+    def moving_turn(self, linear_x, angular_z, target_xy):
+        """(linear, angular) for a way round: the wanted turn, or a gentler one (2/3, 1/3, none) if the wanted
+        arc is held by the stop and a gentler one still moves; a turn in place only if none does. Spinning
+        hard with the robot held turned the target out of the camera's view (pass_by s0 on 4caa707)."""
+        for f in (1.0, 2.0 / 3.0, 1.0 / 3.0, 0.0):
+            v = self.obstacle_limited(linear_x, target_xy, angular_z * f)
+            if v > 0.0:
+                return self.stopped_turn(v, angular_z * f, target_xy)
+        return self.stopped_turn(0.0, angular_z, target_xy)
+
     def obstacle_command(self, linear_x, angular_z, target_xy, target_bearing, at_edge=False):
         """(linear, angular) after the obstacle stop. With obstacle_avoid, when something other than the target
         lies on the straight path to the target, aim beside the target by the smallest clear shift (aim_offset)
@@ -504,8 +514,7 @@ class FollowStopNode(Node):
                                          self.angular_limit, self.bearing_deadband)
                 linear_x = max(linear_x, self.avoid_min_speed)
                 angular_z = max(-2.0 * linear_x, min(2.0 * linear_x, angular_z))
-                linear_x = self.obstacle_limited(linear_x, None if at_edge else target_xy, angular_z)
-                return self.stopped_turn(linear_x, angular_z, None if at_edge else target_xy)
+                return self.moving_turn(linear_x, angular_z, None if at_edge else target_xy)
         if self.trailing:
             self.get_logger().info("[TRAIL] off")
             self.trailing = False
@@ -523,8 +532,7 @@ class FollowStopNode(Node):
             # the robot never closes on the target faster than the follower asks (T18 integration review).
             linear_x = max(linear_x, self.avoid_min_speed)
             angular_z = max(-2.0 * linear_x, min(2.0 * linear_x, angular_z))
-            linear_x = self.obstacle_limited(linear_x, target_xy, angular_z)
-            return self.stopped_turn(linear_x, angular_z, target_xy)
+            return self.moving_turn(linear_x, angular_z, target_xy)
         if self.avoid_offset != 0.0:
             self.get_logger().info("[AVOID] off")
             self.avoid_offset = 0.0

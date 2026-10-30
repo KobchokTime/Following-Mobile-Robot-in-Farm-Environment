@@ -448,6 +448,12 @@ class SyncFusionNode(Node):
         # nobody walks faster than this: a cluster farther from the target's last fix is someone else
         # (a passer-by covering the target from the LiDAR, twin crossing run)
         self.declare_parameter('lidar_assist_speed_mps', 1.5)
+        # the target's box where the gate predicts it, but the LiDAR range there is someone nearer covering it
+        # (blind_corner: the bystander at the corner). Use the predicted range rather than the near one, which
+        # made the follower stop as if the target were 0.5 m away; the obstacle stop in follow_stop deals with
+        # whoever is in front. 0 turns it off.
+        self.declare_parameter('occluded_gap_m', 0.4)
+        self.declare_parameter('occluded_bearing_deg', 6.0)
         # TargetGate tunables, so an experiment's -p really reaches the gate (undeclared -p are ignored)
         for name, value in GATE_PARAMS.items():
             self.declare_parameter(name, value)
@@ -486,11 +492,14 @@ class SyncFusionNode(Node):
         self.assist_scan_time = None  # the scan the last assist used, so each scan is used once
         self.assist_speed = float(self.get_parameter('lidar_assist_speed_mps').value)
         self.assist_last = None       # (time, bearing, range) of the last assist
+        self.occl_gap = float(self.get_parameter('occluded_gap_m').value)
+        self.occl_bearing = math.radians(float(self.get_parameter('occluded_bearing_deg').value))
+        self.occl_logged = False
         # the effective settings, so a run's log shows what it actually ran with
         self.get_logger().info('[GATE] ' + ' '.join(f'{k}={v:g}' for k, v in sorted(
             {**gate_args, 'crowd_from_scan': float(self.crowd_from_scan), 'crowd_radius_m': self.crowd_radius,
              'lidar_assist': float(self.lidar_assist), 'lidar_assist_dist_m': self.assist_dist,
-             'lidar_assist_speed_mps': self.assist_speed}.items())))
+             'lidar_assist_speed_mps': self.assist_speed, 'occluded_gap_m': self.occl_gap}.items())))
         self.last_camera_fix = None  # time of the last camera detection accepted as the target
         self.last_camera_bearing = 0.0
         self.edge_rad = math.radians(self.camera_hfov_deg / 2.0 - float(self.get_parameter('lidar_edge_deg').value))
@@ -714,6 +723,16 @@ class SyncFusionNode(Node):
                                        + (f" reason={reason}" if crowded else ''))
                 self.crowd_logged = crowded
 
+        occluded = False
+        if self.use_gate and self.gate.locked and self.occl_gap > 0.0:
+            pb, pr = self.gate._predict(ty)
+            occluded = abs(bearing - pb) <= self.occl_bearing and dist < pr - self.occl_gap
+            if occluded:
+                dist = pr  # the target's own range, as predicted; someone nearer covers it from the LiDAR
+            if occluded != self.occl_logged:
+                self.get_logger().info(f"[OCCL] {'on' if occluded else 'off'} t={ty:.2f}"
+                                       + (f" predicted range {pr:.2f} m" if occluded else ''))
+                self.occl_logged = occluded
         if self.use_gate and not self.gate.accept(ty, bearing, dist, chroma, hist):
             # another person, not the one being followed: remember them only if they are in the way
             # Only someone in the corridor and clearly nearer than the target is in the way
