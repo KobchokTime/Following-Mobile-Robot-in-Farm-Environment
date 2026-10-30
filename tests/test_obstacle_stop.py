@@ -294,5 +294,44 @@ class AvoidTest(unittest.TestCase):
         self.assertEqual(node.obstacle_command(0.05, 0.2, tgt, math.radians(11)), (0.05, 0.0))  # straight past
 
 
+class TrailTest(unittest.TestCase):
+    """blind_corner: the target turned left round someone standing at the inside of the corner; the robot
+    cut the corner, stopped and lost the target. It follows the target's own path instead."""
+    CRUMBS = [(x / 10.0, 0.0) for x in range(0, 21)] + [(2.0, y / 10.0) for y in range(1, 15)]
+
+    def test_the_newest_clear_crumb_is_the_corner_not_the_target(self):
+        pose = (0.9, 0.0, 0.0)
+        bystander = person(1.45 - 0.9, 0.55)  # robot frame: at the inside of the corner
+        aim = M.trail_aim(self.CRUMBS, pose, bystander, 0.3)
+        self.assertIsNotNone(aim)
+        self.assertGreater(aim[0], 0.9)    # on to the corner (1.1 m ahead), not stopping short of the bystander
+        self.assertLess(aim[1], 0.05)      # on the target's first leg, or just right of it, never cutting left
+        self.assertGreater(aim[1], -0.35)
+
+    def test_past_the_corner_the_trail_turns(self):
+        pose = (2.0, 0.0, math.pi / 2)  # at the corner, facing the target's second leg
+        aim = M.trail_aim(self.CRUMBS, pose, [], 0.3)
+        self.assertGreater(aim[0], 1.0)  # straight on up the second leg
+
+    def test_nothing_reachable_means_no_aim(self):
+        wall = [(0.3, y / 20.0) for y in range(-40, 41)]
+        self.assertIsNone(M.trail_aim(self.CRUMBS, (0.0, 0.0, 0.0), wall, 0.3))
+
+    def test_dead_reckoning_and_crumbs(self):
+        node = M.FollowStopNode()
+        clock = {'t': 0.0}
+        now = type('Now', (), {'nanoseconds': property(lambda self_: int(clock['t'] * 1e9))})
+        node.get_clock = lambda: type('Clock', (), {'now': lambda self_: now()})()
+        node.advance_pose()
+        node.v_wheels, node.last_angular = 0.5, 0.0
+        for k in (1, 2, 3, 4, 5):
+            clock['t'] = 0.2 * k
+            node.advance_pose()
+        self.assertAlmostEqual(node.pose[0], 0.5, places=6)
+        node.add_crumb((1.0, 0.0), clock['t'])
+        node.add_crumb((1.05, 0.0), clock['t'])  # under 0.1 m from the last: not kept
+        self.assertEqual([c[:2] for c in node.crumbs], [(1.5, 0.0)])
+
+
 if __name__ == "__main__":
     unittest.main()
