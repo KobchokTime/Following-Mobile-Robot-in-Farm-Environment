@@ -242,6 +242,11 @@ class FollowStopNode(Node):
         # going round on the trail can turn the target out of the camera's view (blind_corner s2): keep
         # following the crumbs this long without target messages, then stop as before
         self.declare_parameter('trail_hold_s', 3.0)
+        # stopped close in front of someone with no way round that keeps the target in view (blind_corner s2 on
+        # f01dd98 stood 14 s at 0.68 m from the bystander): back off slowly, the stop checking behind, to make
+        # room for a way round; at most avoid_back_s each time the path is blocked
+        self.declare_parameter('avoid_back_mps', 0.1)
+        self.declare_parameter('avoid_back_s', 3.0)
         self.declare_parameter('scan_topic', '/scan')
         self.declare_parameter('lidar_angle_offset_deg', 180.0)  # as sync_fusion_node / lidar_sectorizer_node
         self.declare_parameter('scan_max_age_s', 0.3)
@@ -303,6 +308,9 @@ class FollowStopNode(Node):
         self.crumbs            = []     # (x, y, time) of the target in the dead-reckoned frame, oldest first
         self.trailing          = False  # last [TRAIL] state written to the log
         self.trail_hold        = float(self.get_parameter('trail_hold_s').value)
+        self.avoid_back_mps    = float(self.get_parameter('avoid_back_mps').value)
+        self.avoid_back_s      = float(self.get_parameter('avoid_back_s').value)
+        self.backing           = False  # last [BACK] state written to the log
         self.trail_since_msg   = False  # the trail is driving on its own, without target messages
         self.avoid_offset      = 0.0    # m beside the target the robot aims at to pass an obstacle
         self.avoid_time        = 0.0    # when the current shift was last needed
@@ -535,6 +543,18 @@ class FollowStopNode(Node):
         if self.trailing:
             self.get_logger().info("[TRAIL] off")
             self.trailing = False
+        far = target_xy is not None and math.hypot(*target_xy) > self.target_distance + 0.3
+        if offset == 0.0 and found is None and waited and fresh and not at_edge and linear_x > 0.0 and far \
+                and self.avoid_back_mps > 0.0 and now - self.blocked_since <= self.avoid_delay + self.avoid_back_s:
+            back = self.obstacle_limited(-self.avoid_back_mps, None, 0.0)
+            if back < 0.0:
+                if not self.backing:
+                    self.get_logger().info("[BACK] on: no way round from here, backing off")
+                    self.backing = True
+                return back, 0.0
+        if self.backing:
+            self.get_logger().info("[BACK] off")
+            self.backing = False
         if offset != 0.0:
             if offset != self.avoid_offset:
                 self.get_logger().info(f"[AVOID] aim {offset:+.2f} m beside the target")

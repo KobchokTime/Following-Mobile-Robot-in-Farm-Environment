@@ -294,6 +294,24 @@ class AvoidTest(unittest.TestCase):
         self.assertEqual(node.moving_turn(0.4, -0.8, None, 0.25)[1], 0.0)  # the target 14 deg left: hold
         self.assertEqual(node.moving_turn(0.4, -0.8, None, 0.5)[1], 0.4)  # the target 29 deg left: turn to it
 
+    def test_with_no_way_round_it_backs_off_slowly_if_nothing_is_behind(self):
+        # blind_corner s2 on f01dd98: stopped 0.68 m from the bystander with the target 2.9 m out behind them;
+        # no aim within 0.5 rad clears, and it stood there 14 s
+        tb = math.radians(7.0)
+        tgt = (2.86 * math.cos(tb), 2.86 * math.sin(tb))
+        by = (0.68 * math.cos(math.radians(-11.0)), 0.68 * math.sin(math.radians(-11.0)))
+        node = M.FollowStopNode()
+        node.avoid_delay = 0.0
+        node.cb_scan(scan(person(*by) + person(tgt[0] + 0.2, tgt[1])))
+        v, w = node.obstacle_command(0.4, 0.0, tgt, tb)
+        self.assertLess(v, 0.0)
+        self.assertGreaterEqual(v, -node.avoid_back_mps)
+        self.assertEqual(w, 0.0)
+        node = M.FollowStopNode()
+        node.avoid_delay = 0.0
+        node.cb_scan(scan(person(*by) + person(tgt[0] + 0.2, tgt[1]) + person(-0.5, 0.0)))  # someone behind
+        self.assertEqual(node.obstacle_command(0.4, 0.0, tgt, tb)[0], 0.0)
+
     def test_a_robot_held_beside_an_obstacle_can_start_again(self):
         # pass_by s4: the robot stood beside the worker (left) while the target walked on. The speed ramp from
         # a stop asks for 0.05 m/s with a left turn, a tight arc into the worker, which the stop held at zero

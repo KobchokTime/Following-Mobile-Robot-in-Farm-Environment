@@ -657,7 +657,9 @@ class SyncFusionNode(Node):
         else:
             # only returns no nearer than the target should be: someone the target walked behind is not it
             # (blind_corner s4 on bddf0ba took the bystander and the gate followed them for 4 s)
-            far = [p for p in self.scan_points if p[1] >= pr - 0.2]
+            # nor nearer than it was last seen by the camera: fix by fix the track can creep onto the edge of
+            # someone it walked past (blind_corner s0 on f01dd98 ended on the bystander at 0.28 m)
+            far = [p for p in self.scan_points if p[1] >= max(pr, self.last_target[3]) - 0.2]
             found = lidar_track(far, pb, pr, math.radians(25.0), 0.5)
             if found is None:
                 return
