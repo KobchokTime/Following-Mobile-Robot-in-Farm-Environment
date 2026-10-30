@@ -120,6 +120,7 @@
   .tb-table th { position: sticky; top: 0; background: var(--color-panel); text-align: left; font-weight: var(--cds-font-weight-medium); color: var(--color-fg-muted); padding: .4rem .5rem; border-bottom: 1px solid var(--color-border-line); }
   .tb-table td { padding: .35rem .5rem; border-bottom: 1px solid var(--color-border-line); vertical-align: top; }
   .tb-table td.tb-mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; word-break: break-all; }
+  .tb-list { margin: 0; padding-left: 1.2em; display: grid; gap: .35rem; }
   .tb-history { margin: 0; padding: var(--cds-pad-sm, .5rem) var(--cds-pad-md, .75rem); border-left: 3px solid var(--color-warn); background: var(--color-panel); color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); border-radius: var(--cds-radius); }
   .tb-pill { display: inline-block; padding: .05rem .5rem; border-radius: 6px; font-size: var(--cds-font-size-caption); border: 1px solid currentColor; }
   .tb-failed { display: flex; align-items: center; justify-content: center; gap: .5rem; color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); min-height: inherit; }
@@ -178,7 +179,7 @@
     <button type="button" class="tb-tab" role="tab" id="tab-solo" data-tab="solo" aria-selected="false" aria-controls="panel-solo">ตามคน (ตัวควบคุม)</button>
     <button type="button" class="tb-tab" role="tab" id="tab-identity" data-tab="identity" aria-selected="false" aria-controls="panel-identity">เลือกเป้า (target gate)</button>
     <button type="button" class="tb-tab" role="tab" id="tab-colour" data-tab="colour" aria-selected="false" aria-controls="panel-colour">แยกคนด้วยสีเสื้อ</button>
-    <button type="button" class="tb-tab" role="tab" id="tab-filter" data-tab="filter" aria-selected="false" aria-controls="panel-filter">กรองจุดนิ่ง (ทดลอง)</button>
+    <button type="button" class="tb-tab" role="tab" id="tab-filter" data-tab="filter" aria-selected="false" aria-controls="panel-filter">แผนที่ LiDAR (จุดนิ่ง · หยุด/หลบ)</button>
     <button type="button" class="tb-tab" role="tab" id="tab-live" data-tab="live" aria-selected="false" aria-controls="panel-live">การทดลองที่กำลังรัน</button>
     <button type="button" class="tb-tab" role="tab" id="tab-tests" data-tab="tests" aria-selected="false" aria-controls="panel-tests">เทสต์และ CI</button>
     <button type="button" class="tb-tab" role="tab" id="tab-replay" data-tab="replay" aria-selected="false" aria-controls="panel-replay">เส้นทางโค้ดรุ่นก่อน</button>
@@ -528,7 +529,24 @@
     </section>
   </div>
   <div class="tb-panel" role="tabpanel" id="panel-filter" aria-labelledby="tab-filter" hidden>
-    <p class="tb-history">ข้อมูลประวัติ: ตัวกรองของนิ่งเป็นการทดลองบน branch แยก (26 ต.ค.) ยังไม่ได้รวมเข้าโค้ดหลักและปิดเป็นค่าเริ่มต้น</p>
+    <section class="tb-card" id="obst-what">
+      <h2>หยุดและหลบสิ่งกีดขวางจาก LiDAR (อยู่ในโค้ดหลักแล้ว เปิดเป็นค่าเริ่มต้น)</h2>
+      <p class="tb-note">ไม่มีปุ่มหยุดฉุกเฉินบนตัวหุ่น จึงให้ LiDAR เป็นตัวกันชน · ใช้ขนาดหุ่นจากสไลด์วิทยานิพนธ์ กว้าง 47 × ยาว 52 cm · ผลเต็มอยู่ใน <code>experiments/sim/2026-10-29_lidar_avoid.md</code></p>
+      <ul class="tb-list">
+        <li><b>หยุด</b> (<code>obstacle_stop</code>): อะไรก็ตามที่ไม่ใช่คนเป้าหมายในช่องทางวิ่ง ±0.30 m (โค้งตามทิศเลี้ยว) ทำให้หุ่นจำกัดความเร็วจนหยุดห่าง 0.45 m · ข้างตัวหุ่นนับแค่ความกว้างตัวจริง ±0.235 m · ไม่มี scan ใหม่ = ไม่ขยับ · หมุนอยู่กับที่ได้เฉพาะเมื่อในวง 0.40 m รอบตัวว่าง</li>
+        <li><b>หลบ</b> (<code>obstacle_avoid</code>): ถ้าทางไปหาเป้าถูกขวางนานเกิน 1 วินาที หุ่นจะเล็งข้าง ๆ เป้าแทน (ขยับทีละ 0.1 m ด้านเดิม และยังเห็นเป้าในกล้อง) · คนที่เดินตัดหน้าผ่านไปก่อน 1 วินาที หุ่นจึงรอแทนการหลบ</li>
+        <li><b>LiDAR ช่วยตามเป้า</b> (<code>lidar_assist</code>): ย้ายแทร็กเป้าไปตามกลุ่มจุดของเป้าเองทุก scan (แก้ zigzag) · ไม่เอากลุ่มที่อยู่หน้าตำแหน่งเป้า เร็วกว่าคนเดิน หรือช่วงที่มีคนอื่นเพิ่งอยู่ใกล้เป้า</li>
+      </ul>
+      <p class="tb-note">ยังไม่ได้: มุมที่มีคนยืนชิดทางเลี้ยว (<code>blind_corner</code>) หุ่นหยุดได้ไม่ชน แต่ต้องวางเส้นทางอ้อมจึงจะตามต่อได้ · คนใน twin เป็นวงกลมและคนที่ยืนขวางกล้องมองไม่เห็น ต้องเช็กขาคน แถวพืช และเสาจริงในวันทดสอบหุ่น (บรรทัด <code>[OBST]</code> <code>[AVOID]</code> และ <code>clr=</code> ใน log)</p>
+    </section>
+
+    <section class="tb-card" id="cur-obstacle">
+      <h2>ฉากสิ่งกีดขวาง ด้วยโค้ดปัจจุบัน</h2>
+      <p class="tb-note"><code>pass_by</code> = เป้าเดินผ่านคนนั่งยองที่กล้องมองไม่เห็น ห่างแนวเดิน 0.42 m (ต้องหลบ) · <code>blind_corner</code> = คนยืนชิดมุมเลี้ยว 0.45 m จากทางเดินของเป้า (ต้องไม่ชน) · <span class="cur-meta"></span></p>
+      <div class="tb-tablewrap"><table class="tb-table cur-table dash-skeleton" data-source="current_runs" data-row-key="scenario" data-group="obstacle"><thead><tr><th>กลุ่ม</th><th>ฉาก</th><th>ผ่าน</th><th>ชน</th><th>ใกล้คนสุด (m)</th><th>เห็นเป้าต่ำสุด</th></tr></thead><tbody></tbody></table></div>
+    </section>
+
+    <p class="tb-history">ส่วนด้านล่าง: กรองจุดนิ่ง (ทดลอง) · ข้อมูลประวัติ: ตัวกรองของนิ่งเป็นการทดลองบน branch แยก (26 ต.ค.) ยังไม่ได้รวมเข้าโค้ดหลักและปิดเป็นค่าเริ่มต้น</p>
 
     <section class="tb-card" id="sf-why">
       <h2>ลองหลักการจากเปเปอร์: กรองของนิ่งออกจาก LiDAR</h2>
@@ -689,7 +707,8 @@ dash.calc('current_all', {
   title: 'Current code totals',
   description: 'Runs passed and contacts over every scenario of the latest whole-twin baseline (current_runs).',
   inputs: ['current_runs'],
-  fn: (rows) => [{ passed: rows.filter((r) => r.pass).length, runs: rows.length, contacts: rows.filter((r) => r.contact).length }],
+  fn: (rows) => [{ passed: rows.filter((r) => r.pass).length, runs: rows.length, contacts: rows.filter((r) => r.contact).length,
+    failing: [...new Set(rows.filter((r) => !r.pass).map((r) => r.scenario))].sort().join(', ') }],
 });
 dash.calc('arena3_totals', {
   title: 'Arena 3 identity totals',
@@ -1563,7 +1582,7 @@ dash.calc('robust_totals', {
   }
 
   // ---------- current code, every scenario ----------
-  const CUR_G = { solo: 'ตามคนเดียว', identity: 'เลือกคน', colour: 'สีเสื้อ', other: 'อื่น ๆ' };
+  const CUR_G = { solo: 'ตามคนเดียว', identity: 'เลือกคน', colour: 'สีเสื้อ', obstacle: 'สิ่งกีดขวาง', other: 'อื่น ๆ' };
   function drawCurrent() {
     const d = dash.data('current_runs');
     if (d.status !== 'ok') return;
@@ -1968,8 +1987,8 @@ dash.calc('robust_totals', {
     const g = (c) => st.data.find((r) => r.condition === c);
     const z = g('gazebo_after'), t = tt.data[0], c = ca.status === 'ok' ? ca.data[0] : null;
     const n = (r) => (r ? `${r.passed}/${r.runs}` : '—');
-    el.textContent = `โค้ดปัจจุบันใน twin สมจริง ทุกฉาก (ตามคนเดียว เลือกคน สีเสื้อ) ผ่าน ${n(c)} รอบ` +
-      (c ? ` ชน ${c.contacts} รอบ` : '') + ` · unit tests ผ่าน ${t.passed}/${t.total} · Gazebo ตามคนเดียว (25 ต.ค.) ผ่าน ${n(z)} · ทั้งหมดเป็น simulation ยังไม่ได้ทดสอบบนหุ่นจริง`;
+    el.textContent = `โค้ดปัจจุบันใน twin สมจริง ทุกฉาก (ตามคนเดียว เลือกคน สีเสื้อ สิ่งกีดขวาง) ผ่าน ${n(c)} รอบ` +
+      (c ? ` ชน ${c.contacts} รอบ` : '') + (c && c.failing ? ` (ฉากที่ยังไม่ผ่าน: ${c.failing})` : '') + ` · unit tests ผ่าน ${t.passed}/${t.total} · Gazebo ตามคนเดียว (25 ต.ค.) ผ่าน ${n(z)} · ทั้งหมดเป็น simulation ยังไม่ได้ทดสอบบนหุ่นจริง`;
   }
 
 

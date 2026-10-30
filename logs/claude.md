@@ -1607,3 +1607,7 @@ Earlier history: `history-2026-10-16.md`.
 - Codex (T18, 06:22): (1) a zero speed cap still sent the requested turn, also with no fresh scan; (2) the new `/scan` subscription asked for reliable QoS, which a best-effort LiDAR driver never connects to.
 - Fix: a command that does not move forward or back may turn in place only with a fresh scan and nothing but the target within `spin_clear_radius_m` (0.40 m: corners sweep 0.35 m); otherwise both components are 0 (fused, avoid and `[HOLD]` paths). `/scan` uses `qos_profile_sensor_data`.
 - Tests: `StoppedTurnTest` (no scan, post inside the spin circle, post outside it, QoS) — 3 fail and 1 errors without the fix. Two older tests given a fresh scan / qos stub. 202 tests pass. Full twin run follows.
+
+## 2026-10-30 08:00 — full run after the T18 fixes; dashboard source for the LiDAR-map tab
+- Full twin run on `a4ce8a5`: 104/110, 0 contacts; baseline set 99/100 (`zigzag` s1). `zigzag` s0–9 re-run on the same image: 10/10, so s1 was run-to-run variation. Added to the write-up.
+- Dashboard source: tab renamed "แผนที่ LiDAR (จุดนิ่ง · หยุด/หลบ)"; stop/avoid/assist card and an obstacle current-code table first, static filter (experimental) below; `gen_current.py` group `obstacle`; overview takeaway lists failing scenarios.

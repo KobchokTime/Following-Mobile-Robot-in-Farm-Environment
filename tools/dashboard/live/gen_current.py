@@ -17,11 +17,12 @@ SOLO = ['straight', 'stop_and_go', 'curve_left', 'target_loss', 'walk_0p6', 'wal
         'come_back', 'zigzag']
 IDENTITY = ['crossing', 'side_by_side', 'side_by_side_same', 'head_on', 'stand_aside']
 COLOUR = ['shade_crossing', 'shade_side_by_side', 'lookalike_after_loss', 'close_pair_same', 'walk_up_same']
+OBSTACLE = ['pass_by', 'blind_corner']
 
 
 def group_of(scenario):
     return 'solo' if scenario in SOLO else 'identity' if scenario in IDENTITY else \
-        'colour' if scenario in COLOUR else 'other'
+        'colour' if scenario in COLOUR else 'obstacle' if scenario in OBSTACLE else 'other'
 
 
 def passed(s):
