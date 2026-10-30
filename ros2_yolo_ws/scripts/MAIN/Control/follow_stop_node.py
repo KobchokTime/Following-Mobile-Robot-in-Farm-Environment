@@ -539,6 +539,10 @@ class FollowStopNode(Node):
                                          self.angular_limit, self.bearing_deadband)
                 linear_x = max(linear_x, self.avoid_min_speed)
                 angular_z = max(-2.0 * linear_x, min(2.0 * linear_x, angular_z))
+                if not at_edge and angular_z * target_bearing < 0.0 and abs(target_bearing) >= 0.35:
+                    # the crumb is one way and the target already 20 deg or more the other: going straight
+                    # on along the trail keeps it in the image (blind_corner s0 on a30c90d turned it out)
+                    angular_z = 0.0
                 return self.moving_turn(linear_x, angular_z, None if at_edge else target_xy,
                                         None if at_edge else target_bearing)
         if self.trailing:

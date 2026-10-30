@@ -352,6 +352,21 @@ class TrailTest(unittest.TestCase):
         wall = [(0.3, y / 20.0) for y in range(-40, 41)]
         self.assertIsNone(M.trail_aim(self.CRUMBS, (0.0, 0.0, 0.0), wall, 0.3))
 
+    def test_the_trail_does_not_turn_away_from_a_target_off_to_the_other_side(self):
+        # blind_corner s0 on a30c90d: the crumbs lay right, the target walked on 35 deg left; turning to the
+        # crumbs took it out of the image
+        tb = math.radians(35.0)
+        tgt = (1.2 * math.cos(tb), 1.2 * math.sin(tb))
+        node = M.FollowStopNode()
+        node.avoid_delay = 0.0
+        node.avoid_back_mps = 0.0
+        node.cb_scan(scan(person(0.6, 0.42) + person(tgt[0] + 0.2 * math.cos(tb), tgt[1] + 0.2 * math.sin(tb))))
+        node.crumbs = [(0.7, -0.25, 0.0), (0.9, -0.25, 0.0)]
+        self.assertIsNone(M.aim_offset(node.scan_xy, node.obstacle_half_w, tgt, node.obstacle_excl))
+        node.obstacle_command(0.4, 0.0, tgt, tb)
+        self.assertTrue(node.trailing)
+        self.assertGreaterEqual(node.obstacle_command(0.4, 0.0, tgt, tb)[1], 0.0)
+
     def test_dead_reckoning_and_crumbs(self):
         node = M.FollowStopNode()
         clock = {'t': 0.0}
