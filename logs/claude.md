@@ -1691,3 +1691,5 @@ Earlier history: `history-2026-10-16.md`.
 ## 2026-10-30 14:15 — smoke on 4caa707: two causes; fixes
 - blind_corner s0: no [TRAIL]/[AVOID] at all. The bystander covered the target from the LiDAR at nearly the same bearing; the box range was theirs (0.48 m), the gate rejected the box and give-way shortened the distance, so the follower stopped as if at the target. `sync_fusion_node`: a box within `occluded_bearing_deg` (6°) of the prediction whose range is `occluded_gap_m` (0.4 m) nearer than predicted takes the predicted range; `[OCCL] on/off`. Test (fails without).
 - pass_by s0: the avoid's arc was held at 0 m/s and the spin check then let it turn hard, turning the target out of view. `moving_turn`: try the wanted turn, then 2/3, 1/3, none, taking the first that still moves. 213 tests pass.
+
+- 2026-10-30 14:23 (UTC+7) — follow_stop: trail_tick keeps following crumbs for trail_hold_s 3 s with no target messages (blind_corner s2); moving_turn fallback spin is slow (<= 0.4 rad/s) and not away from a target already off to the side (pass_by s2). Tests 214 pass.

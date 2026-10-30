@@ -239,6 +239,9 @@ class FollowStopNode(Node):
         # target's own path: breadcrumbs of where it walked, kept trail_s, in a dead-reckoned frame
         self.declare_parameter('avoid_trail', True)
         self.declare_parameter('trail_s', 6.0)
+        # going round on the trail can turn the target out of the camera's view (blind_corner s2): keep
+        # following the crumbs this long without target messages, then stop as before
+        self.declare_parameter('trail_hold_s', 3.0)
         self.declare_parameter('scan_topic', '/scan')
         self.declare_parameter('lidar_angle_offset_deg', 180.0)  # as sync_fusion_node / lidar_sectorizer_node
         self.declare_parameter('scan_max_age_s', 0.3)
@@ -299,6 +302,8 @@ class FollowStopNode(Node):
         self.last_angular      = 0.0
         self.crumbs            = []     # (x, y, time) of the target in the dead-reckoned frame, oldest first
         self.trailing          = False  # last [TRAIL] state written to the log
+        self.trail_hold        = float(self.get_parameter('trail_hold_s').value)
+        self.trail_since_msg   = False  # the trail is driving on its own, without target messages
         self.avoid_offset      = 0.0    # m beside the target the robot aims at to pass an obstacle
         self.avoid_time        = 0.0    # when the current shift was last needed
         self.last_clearance    = math.inf  # corridor clearance of the last command, for the [MOVE] line
@@ -332,6 +337,8 @@ class FollowStopNode(Node):
         self.pub = self.create_publisher(Twist, '/cmd_vel', 10)
         if self.target_timeout > 0.0:
             self.stale_timer = self.create_timer(0.05, self.check_stale)
+        if self.obstacle_stop and self.obstacle_avoid and self.avoid_trail:
+            self.trail_timer = self.create_timer(0.1, self.trail_tick)
 
         self.get_logger().info(
             f"FollowStopNode ✅ started | Target={self.target_distance:.2f} m "
@@ -460,7 +467,7 @@ class FollowStopNode(Node):
             return linear_x, 0.0
         return linear_x, angular_z
 
-    def moving_turn(self, linear_x, angular_z, target_xy):
+    def moving_turn(self, linear_x, angular_z, target_xy, target_bearing=None):
         """(linear, angular) for a way round: the wanted turn, or a gentler one (2/3, 1/3, none) if the wanted
         arc is held by the stop and a gentler one still moves; a turn in place only if none does. Spinning
         hard with the robot held turned the target out of the camera's view (pass_by s0 on 4caa707)."""
@@ -468,7 +475,12 @@ class FollowStopNode(Node):
             v = self.obstacle_limited(linear_x, target_xy, angular_z * f)
             if v > 0.0:
                 return self.stopped_turn(v, angular_z * f, target_xy)
-        return self.stopped_turn(0.0, angular_z, target_xy)
+        # nothing moves: turn in place towards the way round, slowly, and not so far that the target leaves the
+        # camera's view (pass_by s2 on 7ac1cd1 spun at 0.8 rad/s and lost the target)
+        w = max(-0.4, min(0.4, angular_z))
+        if target_bearing is not None and ((w < 0.0 and target_bearing > 0.45) or (w > 0.0 and target_bearing < -0.45)):
+            w = 0.0
+        return self.stopped_turn(0.0, w, target_xy)
 
     def obstacle_command(self, linear_x, angular_z, target_xy, target_bearing, at_edge=False):
         """(linear, angular) after the obstacle stop. With obstacle_avoid, when something other than the target
@@ -514,7 +526,8 @@ class FollowStopNode(Node):
                                          self.angular_limit, self.bearing_deadband)
                 linear_x = max(linear_x, self.avoid_min_speed)
                 angular_z = max(-2.0 * linear_x, min(2.0 * linear_x, angular_z))
-                return self.moving_turn(linear_x, angular_z, None if at_edge else target_xy)
+                return self.moving_turn(linear_x, angular_z, None if at_edge else target_xy,
+                                        None if at_edge else target_bearing)
         if self.trailing:
             self.get_logger().info("[TRAIL] off")
             self.trailing = False
@@ -532,7 +545,7 @@ class FollowStopNode(Node):
             # the robot never closes on the target faster than the follower asks (T18 integration review).
             linear_x = max(linear_x, self.avoid_min_speed)
             angular_z = max(-2.0 * linear_x, min(2.0 * linear_x, angular_z))
-            return self.moving_turn(linear_x, angular_z, target_xy)
+            return self.moving_turn(linear_x, angular_z, target_xy, target_bearing)
         if self.avoid_offset != 0.0:
             self.get_logger().info("[AVOID] off")
             self.avoid_offset = 0.0
@@ -681,8 +694,44 @@ class FollowStopNode(Node):
         )
 
     # ==================================================
+    def trail_tick(self):
+        """While the trail is being followed and target messages have stopped (the way round turned the target
+        out of view), keep driving along the crumbs for trail_hold_s, every command through the stop; then
+        stop. A new target message hands control back to the follower."""
+        now = self.get_clock().now().nanoseconds / 1e9
+        quiet = self.last_msg_time is not None and now - self.last_msg_time
+        if not self.trailing or quiet is None or quiet < 0.25:
+            self.trail_since_msg = False
+            return
+        if quiet > self.trail_hold or self.scan_time is None or not 0.0 <= now - self.scan_time <= self.scan_max_age:
+            self.get_logger().info(f"[TRAIL] off: no target message for {quiet:.1f} s")
+            self.trailing = self.trail_since_msg = False
+            self.publish_stop()
+            return
+        self.advance_pose()
+        aim = trail_aim([cr[:2] for cr in self.crumbs], self.pose, self.scan_xy, self.obstacle_half_w)
+        if aim is None:
+            self.get_logger().info("[TRAIL] off: no crumb reachable")
+            self.trailing = self.trail_since_msg = False
+            self.publish_stop()
+            return
+        if not self.trail_since_msg:
+            self.get_logger().info("[TRAIL] driving on the crumbs without target messages")
+            self.trail_since_msg = True
+        angular_z = bearing_turn(math.atan2(aim[1], aim[0]), 0.0, self.latency_s, self.bearing_gain,
+                                 self.angular_limit, self.bearing_deadband)
+        linear_x = self.avoid_min_speed
+        angular_z = max(-2.0 * linear_x, min(2.0 * linear_x, angular_z))
+        linear_x, angular_z = self.moving_turn(linear_x, angular_z, None)
+        twist = Twist()
+        twist.linear.x, twist.angular.z = linear_x, angular_z
+        self.send(twist)
+        self.last_linear = linear_x
+
     def check_stale(self):
         """Stop once target messages have stopped; the next message resumes control."""
+        if self.trailing and self.trail_since_msg:
+            return  # the trail is driving; trail_tick stops it after trail_hold_s
         if self.stale_stopped or not target_is_stale(self.get_clock().now().nanoseconds / 1e9,
                                                      self.last_msg_time, self.target_timeout):
             return

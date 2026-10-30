@@ -283,6 +283,16 @@ class AvoidTest(unittest.TestCase):
         self.assertLessEqual(v, node.avoid_min_speed + 1e-9)
         self.assertLessEqual(abs(w), 2.0 * node.avoid_min_speed + 1e-9)
 
+    def test_held_everywhere_it_turns_slowly_and_keeps_the_target_in_view(self):
+        # pass_by s2 on 7ac1cd1: straight and every gentler arc held; it spun at 0.8 rad/s and lost the target
+        node = M.FollowStopNode()
+        node.cb_scan(scan([(0.44, y / 20.0) for y in range(-8, 9)]))  # something across the lane, outside the circle
+        v, w = node.moving_turn(0.4, -0.8, None, 0.0)
+        self.assertEqual(v, 0.0)
+        self.assertGreaterEqual(w, -0.4)
+        self.assertLess(w, 0.0)
+        self.assertEqual(node.moving_turn(0.4, -0.8, None, 0.5)[1], 0.0)  # the target already 29 deg left
+
     def test_a_robot_held_beside_an_obstacle_can_start_again(self):
         # pass_by s4: the robot stood beside the worker (left) while the target walked on. The speed ramp from
         # a stop asks for 0.05 m/s with a left turn, a tight arc into the worker, which the stop held at zero
