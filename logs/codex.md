@@ -398,3 +398,4 @@ Earlier history: `history-2026-10-16.md`.
 
 - Reviewed `c7fd2ed..7b0d8ae` in isolated `integration-hub` clone at `2ca77c2`; focused callback tests 2/2 and `python scripts/check.py` 208/208 passed. Bounded resend age remains intact by code review. The author-reported 110-run twin result was not rerun locally.
 - Claimed hub lock at `5aad21b`; recorded offline agree verdict in DISCUSSION and HANDOFF. No main merge, hardware command, sweep, paid API call or Claude branch change.
+- Released the integration-hub lock after review commit `4f77510`; T18 offline cross-review resolved.
