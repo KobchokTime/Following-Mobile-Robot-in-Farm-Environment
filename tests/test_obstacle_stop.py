@@ -128,6 +128,42 @@ class NodeTest(unittest.TestCase):
         self.assertEqual(len(node.pub.messages), sent)
 
 
+class StoppedTurnTest(unittest.TestCase):
+    """T18 (Codex): a zero speed cap must not leave a turn in place running."""
+
+    def edge_commands(self, scan_points):
+        node = M.FollowStopNode()
+        node.obstacle_avoid = False
+        msg = _Float32MultiArray()
+        for d in (0.8, 1.6):  # the target at the image edge: the controller asks for a full-rate turn
+            if scan_points is not None:
+                node.cb_scan(scan(scan_points))
+            msg.data = [0.0, 240.0, d, 8.0, 0.9, 0.9, 0.9, 10.0]
+            node.cb_fused(msg)
+        return [(m.linear.x, m.angular.z) for m in node.pub.messages]
+
+    def test_no_scan_sends_no_turn(self):
+        self.assertTrue(all(c == (0.0, 0.0) for c in self.edge_commands(None)))
+
+    def test_something_inside_the_spin_circle_stops_the_turn_too(self):
+        self.assertTrue(all(c == (0.0, 0.0) for c in self.edge_commands(person(0.45, 0.0, r=0.06))))
+
+    def test_with_the_spin_circle_clear_the_robot_may_turn_in_place(self):
+        cmds = self.edge_commands(person(0.6, 0.0, r=0.06))  # a post ahead, outside the 0.40 m spin circle
+        self.assertEqual(cmds[0], (0.0, -0.8))  # still standing: the turn alone is allowed
+
+    def test_the_scan_is_subscribed_best_effort(self):
+        seen = []
+        original = M.FollowStopNode.create_subscription
+        M.FollowStopNode.create_subscription = lambda self_, *args: seen.append(args) or object()
+        try:
+            M.FollowStopNode()
+        finally:
+            M.FollowStopNode.create_subscription = original
+        qos = [a[3] for a in seen if a[0] is M.LaserScan]
+        self.assertEqual(qos, [M.qos_profile_sensor_data])
+
+
 class AvoidTest(unittest.TestCase):
     TARGET = (1.6, 0.0)
 

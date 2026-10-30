@@ -50,6 +50,19 @@
 | Avoid v4 | Level with the worker the robot stopped for good. | Body-length flank rule (`f6373c4`): `pass_by` 10/10. |
 | Full run | 94/100: avoid went round people crossing; assist still followed a crosser. | 1 s avoid delay (`b618b40`); attribution runs showed the assist (assist off 3/3, assist alone 1/3); assist waits out the ambiguity window (`458d4d0`). |
 
+## After the T18 reviews (`claude/workspace` `a4ce8a5`)
+
+- **Changes:** the per-scan re-check acts only within `recheck_max_s` (1.0 s) of the command it lowers, and a
+  stop zeroes the turn (integration review). A command that does not move forward or back turns in place
+  only with a fresh scan and nothing but the target within `spin_clear_radius_m` (0.40 m). `/scan` is
+  subscribed best effort (`qos_profile_sensor_data`) (Codex review).
+- **Full twin run** on `a4ce8a5` (22 scenarios × s0–4): 104/110, **0 contacts**. Baseline set 99/100: `zigzag` s1
+  lost the target (visible 0.25) after an overshoot as the target crossed; no turn was held back at the time.
+  A re-run of `zigzag` s0–9 on the same image: **10/10** (s1 passes, visible 1.0), so that failure is run-to-run
+  variation, not the change. `blind_corner` 0/5 following, no contact (min 0.53 m).
+- The twin publishes `/scan` reliably, so it cannot test the QoS change; check on the robot that `follow_stop`
+  receives `/scan` (`[OBST]` lines appear, or `ros2 topic info /scan --verbose`).
+
 ## Not shown
 
 - **`blind_corner` still loses the target.** The bystander stands 0.45 m from the target's path at the
