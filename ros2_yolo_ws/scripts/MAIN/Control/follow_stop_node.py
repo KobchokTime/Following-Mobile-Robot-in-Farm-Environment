@@ -246,10 +246,6 @@ class FollowStopNode(Node):
         # f01dd98 stood 14 s at 0.68 m from the bystander): back off slowly, the stop checking behind, to make
         # room for a way round; at most avoid_back_s each time the path is blocked
         self.declare_parameter('avoid_back_mps', 0.1)
-        # something within this much more than the corridor of the straight line to the target: follow the
-        # target's own path already, before the stop holds the robot beside it at the inside of a corner,
-        # where it can neither turn nor go round (blind_corner s1 on f5269c1)
-        self.declare_parameter('trail_early_m', 0.15)
         self.declare_parameter('avoid_back_s', 3.0)
         self.declare_parameter('scan_topic', '/scan')
         self.declare_parameter('lidar_angle_offset_deg', 180.0)  # as sync_fusion_node / lidar_sectorizer_node
@@ -313,7 +309,6 @@ class FollowStopNode(Node):
         self.trailing          = False  # last [TRAIL] state written to the log
         self.trail_hold        = float(self.get_parameter('trail_hold_s').value)
         self.avoid_back_mps    = float(self.get_parameter('avoid_back_mps').value)
-        self.trail_early       = float(self.get_parameter('trail_early_m').value)
         self.avoid_back_s      = float(self.get_parameter('avoid_back_s').value)
         self.backing           = False  # last [BACK] state written to the log
         self.back_since        = None   # when backing off began in this blocked spell
@@ -539,16 +534,9 @@ class FollowStopNode(Node):
             elif found == 0.0 and self.avoid_offset != 0.0 and now - self.avoid_time < self.avoid_hold:
                 offset = self.avoid_offset  # just past it: keep the shift a moment so the robot does not clip it
         waited = self.blocked_since is not None and now - self.blocked_since >= self.avoid_delay
-        early = offset == 0.0 and found == 0.0 and self.avoid_trail and self.trail_early > 0.0 and fresh \
-            and not at_edge and linear_x > 0.0 and segment_blocked(
-                self.scan_xy, self.obstacle_half_w + self.trail_early, target_xy, target_xy, self.obstacle_excl)
-        if (offset == 0.0 and found is None and waited and self.avoid_trail and fresh) or early:
-            # early, a crumb counts as reachable only with the same wider margin that started it
-            aim = trail_aim([cr[:2] for cr in self.crumbs], self.pose, self.scan_xy,
-                            self.obstacle_half_w + (self.trail_early if early else 0.0),
+        if offset == 0.0 and found is None and waited and self.avoid_trail and fresh:
+            aim = trail_aim([cr[:2] for cr in self.crumbs], self.pose, self.scan_xy, self.obstacle_half_w,
                             None if at_edge else target_xy, self.obstacle_excl)
-            if early and aim is not None and abs(math.atan2(aim[1], aim[0]) - target_bearing) < 0.1:
-                aim = None  # the path and the straight line agree: nothing to follow it for
             if aim is not None:
                 if not self.trailing:
                     self.get_logger().info(f"[TRAIL] on: follow the target's path to ({aim[0]:.2f}, {aim[1]:.2f}) m")

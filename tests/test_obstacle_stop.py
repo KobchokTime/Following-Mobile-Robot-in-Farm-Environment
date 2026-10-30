@@ -381,18 +381,6 @@ class TrailTest(unittest.TestCase):
         self.assertTrue(node.trailing)
         self.assertGreaterEqual(node.obstacle_command(0.4, 0.0, tgt, tb)[1], 0.0)
 
-    def test_someone_near_the_corner_line_starts_the_trail_before_the_stop(self):
-        # blind_corner s1 on f5269c1: the robot cut the corner towards the target, the stop held it beside the
-        # bystander, and from there it could neither turn nor go round
-        node = M.FollowStopNode()
-        tgt = (1.5, 1.0)
-        node.cb_scan(scan(person(1.3, 0.15)))
-        node.crumbs = [(x / 10.0, 0.0, 0.0) for x in range(0, 16)] + [(1.5, y / 10.0, 0.0) for y in range(1, 10)]
-        self.assertEqual(M.aim_offset(node.scan_xy, node.obstacle_half_w, tgt, node.obstacle_excl), 0.0)
-        v, w = node.obstacle_command(0.4, 0.5, tgt, math.atan2(tgt[1], tgt[0]))
-        self.assertTrue(node.trailing)  # on a line that keeps the wider margin from them (here: wide of them)
-        self.assertGreater(v, 0.0)
-
     def test_dead_reckoning_and_crumbs(self):
         node = M.FollowStopNode()
         clock = {'t': 0.0}
