@@ -297,6 +297,20 @@ class LidarAssistTest(unittest.TestCase):
         self.assertTrue(any(p[0] == 0 and p[2] > 0.8 for p in out))  # turned left, at the target's range
         self.assertEqual([p for p in out if p[2] < 0.7], [])
 
+    def test_a_target_walking_away_out_of_view_is_found_again_further_out(self):
+        # blind_corner s2 on 1b5dc92: unseen 1 s, the prediction held 0.95 m while the target walked on to 1.4 m,
+        # outside the 0.5 m range window, and the LiDAR never found it
+        m, node = make_node()
+        t = self.lock(node, target=(0.9, 0.0))
+        node.scan_points = scan(person(0.9, -0.33))
+        self.assertTrue(self.box(node, t, 0.9, -0.33))
+        before = len(node.published)
+        for k in range(1, 6):  # nothing there for 0.5 s (behind something the scan does not show)
+            self.scan_at(node, t + 0.1 * k, [])
+        for k in range(6, 15):
+            self.scan_at(node, t + 0.1 * k, [(0.7 + 0.1 * k, -1.2)])
+        self.assertTrue(any(p[0] == node.image_width - 1 and p[2] > 1.3 for p in node.published[before:]))
+
     def side_step(self, **params):
         """The traced twin failure: the last box is at 20 deg, then the target steps out of the image."""
         m, node = make_node(**params)

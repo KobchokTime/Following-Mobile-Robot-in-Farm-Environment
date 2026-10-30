@@ -667,7 +667,10 @@ class SyncFusionNode(Node):
             far = [p for p in self.scan_points if p[1] >= max(pr, self.last_target[3]) - 0.2]
             # out from behind someone, it can be anywhere past them: a wider window than at the image edge
             window = math.radians(60.0 if self.covered_fix == self.last_camera_fix else 25.0)
-            found = lidar_track(far, pb, pr, window, 0.5)
+            # the prediction holds still after a second unseen while the target walks on: allow walking pace
+            # in range for the time it has been unseen (blind_corner s2 on 1b5dc92 lost it 1.3 m out at 0.5 m)
+            tol = min(2.0, 0.5 + 1.0 * max(0.0, now - self.gate.t - 0.5))  # since the last fix of any kind
+            found = lidar_track(far, pb, pr, window, tol)
             if found is None:
                 return
             bearing, rng = found
