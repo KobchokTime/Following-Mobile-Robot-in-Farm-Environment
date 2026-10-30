@@ -8,9 +8,10 @@
 
 | Path | What it is |
 |---|---|
-| `index.html` | The page (store document `files/index.html`, version 30 when copied, 2026-10-30). One file holds every tab. |
+| `index.html` | The page (store document `files/index.html`, version 31 when copied, 2026-10-30). One file holds every tab. |
 | `datasets.json` | A snapshot of the store's `datasets/<id>` records: title, description, source (blob URL), `updated`. |
 | `live/gen_live.py` | Builds the five live-monitor datasets from twin run folders. |
+| `live/gen_obstacle.py` | Builds `obstacle_runs` and `obstacle_paths` (the LiDAR-map tab's off/on evidence) from run folders named `<scenario>_<off|on>_s<seed>`. |
 | `live/registry.json` | The experiments the live tab shows, and the runs each one expects. |
 
 ## Who can change what

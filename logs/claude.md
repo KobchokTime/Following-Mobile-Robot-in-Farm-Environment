@@ -1673,3 +1673,7 @@ Earlier history: `history-2026-10-16.md`.
 
 ## 2026-10-30 13:06 — dashboard fix: obstacle table empty
 - The LiDAR-map tab did not call `drawCurrent()`, so its obstacle table and meta line stayed blank (user screenshot). Added to the tab's draw list; published as page v30 with `str_replace`.
+
+## 2026-10-30 13:18 — dashboard: graphical off/on evidence for stop and avoid (page v31)
+- User: no graphical evidence. Ran pass_by (avoid off/on) and blind_corner (stop off/on), s0–4, on the hub code image (52a1842): pass_by off 0/5 (stops, target lost), on 5/5; blind_corner off 0/5 with 3 contacts (min 0.26 m), on 1/5 with 0 contacts (min ≥ 0.54 m).
+- New `tools/dashboard/live/gen_obstacle.py` → datasets `obstacle_runs`, `obstacle_paths`; new card on the LiDAR-map tab: top-down paths off vs on with the robot's body at closest approach, and closest distance per seed against the 0.40 m line. Previewed with a local harness (no JS errors). Published page v31 + two datasets; evidence JSON `experiments/sim/2026-10-30_obstacle_offon.json`, write-up table.

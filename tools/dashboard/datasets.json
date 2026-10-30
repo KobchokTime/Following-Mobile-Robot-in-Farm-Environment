@@ -306,6 +306,34 @@
    "by": "Claude Code"
   }
  },
+ "obstacle_paths": {
+  "description": "Robot (world x, y, heading) and target (world x, y) every 0.2 s for each run in obstacle_runs (pass_by and blind_corner, switch off and on, seeds 0-4). Built by tools/dashboard/live/gen_obstacle.py. Simulation, not the robot.",
+  "fixed": true,
+  "source": {
+   "kind": "file",
+   "name": "obstacle_paths.json",
+   "url": "/_blob/36b8f0fcdf8b248b27399e13071dba11"
+  },
+  "title": "Obstacle stop/avoid: paths",
+  "updated": {
+   "at": "2026-10-30T06:20:00Z",
+   "by": "Claude Code"
+  }
+ },
+ "obstacle_runs": {
+  "description": "One row per twin run comparing the obstacle switches on the current hub code (7b0d8ae, image from claude/workspace 52a1842): pass_by with obstacle_avoid off/on and blind_corner with obstacle_stop off/on, realism, seeds 0-4, one run at a time. Pass, contact, closest distance to the hidden person and the robot pose at that moment. Built by tools/dashboard/live/gen_obstacle.py. Simulation, not the robot.",
+  "fixed": true,
+  "source": {
+   "kind": "file",
+   "name": "obstacle_runs.json",
+   "url": "/_blob/fc837b4f81c7d99e3cf07ccb0ff66954"
+  },
+  "title": "Obstacle stop/avoid: off vs on",
+  "updated": {
+   "at": "2026-10-30T06:20:00Z",
+   "by": "Claude Code"
+  }
+ },
  "past_tracks": {
   "description": "Robot, target and other person positions (world frame, 1 Hz) and target gap for every run of finished twin experiments, for the replay.",
   "fixed": true,
