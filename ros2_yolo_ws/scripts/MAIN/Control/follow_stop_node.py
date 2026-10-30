@@ -311,6 +311,7 @@ class FollowStopNode(Node):
         self.avoid_back_mps    = float(self.get_parameter('avoid_back_mps').value)
         self.avoid_back_s      = float(self.get_parameter('avoid_back_s').value)
         self.backing           = False  # last [BACK] state written to the log
+        self.back_since        = None   # when backing off began in this blocked spell
         self.trail_since_msg   = False  # the trail is driving on its own, without target messages
         self.avoid_offset      = 0.0    # m beside the target the robot aims at to pass an obstacle
         self.avoid_time        = 0.0    # when the current shift was last needed
@@ -510,13 +511,13 @@ class FollowStopNode(Node):
             held = self.obstacle_limited(v_try, target_xy, max(-2.0 * v_try, min(2.0 * v_try, angular_z))) < v_try
             found = None if held or not self.turn_allowed(target_xy) else 0.0
             if found == 0.0:
-                self.blocked_since = None
+                self.blocked_since = self.back_since = None
             elif self.blocked_since is None:
                 self.blocked_since = now
         if self.obstacle_stop and self.obstacle_avoid and fresh and not at_edge and linear_x > 0.0:
             found = aim_offset(self.scan_xy, self.obstacle_half_w, target_xy, self.obstacle_excl, self.avoid_offset)
             if found == 0.0:
-                self.blocked_since = None
+                self.blocked_since = self.back_since = None
             elif self.blocked_since is None:
                 self.blocked_since = now
             # someone walking across the path is gone within about a second; going round them turned the
@@ -545,9 +546,12 @@ class FollowStopNode(Node):
             self.trailing = False
         far = target_xy is not None and math.hypot(*target_xy) > self.target_distance + 0.3
         if offset == 0.0 and found is None and waited and fresh and not at_edge and linear_x > 0.0 and far \
-                and self.avoid_back_mps > 0.0 and now - self.blocked_since <= self.avoid_delay + self.avoid_back_s:
+                and self.avoid_back_mps > 0.0 \
+                and (self.back_since is None or now - self.back_since <= self.avoid_back_s):
             back = self.obstacle_limited(-self.avoid_back_mps, None, 0.0)
             if back < 0.0:
+                if self.back_since is None:
+                    self.back_since = now  # counted from the first step back, not from the block (s2 on 3a4ac4a)
                 if not self.backing:
                     self.get_logger().info("[BACK] on: no way round from here, backing off")
                     self.backing = True

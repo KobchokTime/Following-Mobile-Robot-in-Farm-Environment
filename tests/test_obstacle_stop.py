@@ -307,6 +307,12 @@ class AvoidTest(unittest.TestCase):
         self.assertLess(v, 0.0)
         self.assertGreaterEqual(v, -node.avoid_back_mps)
         self.assertEqual(w, 0.0)
+        # blocked long before (s2 on 3a4ac4a turned in place 4 s first): the back-off time starts with it
+        node = M.FollowStopNode()
+        node.avoid_delay = 0.0
+        node.cb_scan(scan(person(*by) + person(tgt[0] + 0.2, tgt[1])))
+        node.blocked_since = node.get_clock().now().nanoseconds / 1e9 - 10.0
+        self.assertLess(node.obstacle_command(0.4, 0.0, tgt, tb)[0], 0.0)
         node = M.FollowStopNode()
         node.avoid_delay = 0.0
         node.cb_scan(scan(person(*by) + person(tgt[0] + 0.2, tgt[1]) + person(-0.5, 0.0)))  # someone behind
