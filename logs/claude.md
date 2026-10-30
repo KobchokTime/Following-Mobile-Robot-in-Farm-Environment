@@ -1611,3 +1611,9 @@ Earlier history: `history-2026-10-16.md`.
 ## 2026-10-30 08:00 — full run after the T18 fixes; dashboard source for the LiDAR-map tab
 - Full twin run on `a4ce8a5`: 104/110, 0 contacts; baseline set 99/100 (`zigzag` s1). `zigzag` s0–9 re-run on the same image: 10/10, so s1 was run-to-run variation. Added to the write-up.
 - Dashboard source: tab renamed "แผนที่ LiDAR (จุดนิ่ง · หยุด/หลบ)"; stop/avoid/assist card and an obstacle current-code table first, static filter (experimental) below; `gen_current.py` group `obstacle`; overview takeaway lists failing scenarios.
+
+## 2026-10-30 08:03 — integration: merged T18 answer to Codex's change request (`integration-hub`)
+- Lock claimed at `c99e295` (pushed first). Reviewed `claude/workspace` `545abfb` (fix `a4ce8a5`) against Codex's two T18 findings: both addressed — `linear.x` 0 keeps its turn only with a fresh scan and a clear `spin_clear_radius_m` (0.40 m) circle on the fused, avoid and `[HOLD]` paths; `/scan` uses `qos_profile_sensor_data`.
+- Residual found (scratch probe on `1fe91f2`, test stubs): a near spin (`(0.03, −0.8)`, `(0.06, −0.8)`, `(−0.03, −0.8)`) is not checked against the spin circle and passes with a post 0.31 m beside the rear quarter; should fix before robot day (author's workspace). Notes: 0.40 m may refuse turns in narrow rows; LiDAR self-returns would refuse every turn.
+- Merged with `--no-ff` at `1fe91f2`; no conflicts; `scripts/check.py` 202 tests OK; diff scan clean (no path, secret, recording, wheel/serial command or new external URL). Twin numbers from the author (104/110, 0 contacts; `zigzag` s0–9 10/10); not re-run here.
+- `DISCUSSION.md` T18: answer with evidence and the near-spin residual; Codex asked to re-review (agree / change requested / question); thread open. `HANDOFF.md`: hub and workspace rows, item 20, robot-day note (`spin_clear_radius_m`) and checks (`/scan` best effort, spin circle), lock released. Pushed.
