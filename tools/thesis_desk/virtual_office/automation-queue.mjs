@@ -1,5 +1,5 @@
 import { spawn } from "node:child_process";
-import { appendFile, mkdir, open, readFile, unlink, writeFile } from "node:fs/promises";
+import { appendFile, mkdir, open, readFile, stat, unlink, writeFile } from "node:fs/promises";
 import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -13,7 +13,7 @@ const lockFile = join(stateDir, "queue.lock");
 
 export function selectJobs(jobs, events, limit = 3) {
   const latest = new Map(events.map((event) => [event.jobId, event]));
-  const active = [...latest.values()].filter((event) => event.state === "assigned");
+  const active = [...latest.values()].filter((event) => ["assigned", "running"].includes(event.state));
   const lanes = new Set(active.map((event) => event.lane));
   const cap = Math.max(0, Math.min(Number(limit) || 0, 3) - active.length);
   const selected = [];
@@ -109,11 +109,23 @@ async function git(args, cwd = repo) {
   return result.stdout.trim();
 }
 
-async function withLock(action) {
-  await mkdir(stateDir, { recursive: true });
-  const lock = await open(lockFile, "wx");
+export async function withFileLock(path, action, now = Date.now) {
+  await mkdir(dirname(path), { recursive: true });
+  let lock;
+  try { lock = await open(path, "wx"); }
+  catch (error) {
+    if (error.code !== "EEXIST") throw error;
+    let age = "unknown age";
+    try { age = `${Math.max(0, Math.floor((now() - (await stat(path)).mtimeMs) / 1000))} seconds old`; }
+    catch { /* The lock may have disappeared while reading it; do not take it over. */ }
+    throw new Error(`Office queue lock exists (${age}): ${path}. Inspect the lock and check for an active Office queue process; only remove it manually after confirming that process has stopped.`);
+  }
   try { return await action(); }
-  finally { await lock.close(); await unlink(lockFile); }
+  finally { await lock.close(); await unlink(path); }
+}
+
+async function withLock(action) {
+  return withFileLock(lockFile, action);
 }
 
 function checkedUsage() {
@@ -128,13 +140,14 @@ function safeCheckout(id, stamp) {
   return path;
 }
 
-async function prepare() {
-  checkedUsage();
+async function prepare(requestedJobId = null, manual = false) {
+  if (!manual) checkedUsage();
   return withLock(async () => {
     const queue = await loadQueue();
     if (await git(["status", "--porcelain"])) throw new Error("Office source checkout is dirty");
     const baseCommit = await git(["rev-parse", "HEAD"]);
-    const selected = selectJobs(queue.jobs, await events(), queue.maxConcurrent);
+    const selected = selectJobs(requestedJobId ? queue.jobs.filter((job) => job.id === requestedJobId) :
+      queue.jobs, await events(), queue.maxConcurrent);
     const assignments = [];
     for (const job of selected) {
       const stamp = new Date().toISOString().replace(/[-:.TZ]/g, "").slice(0, 14);
@@ -164,13 +177,25 @@ async function prepare() {
   });
 }
 
-async function changedFiles(checkout) {
+// Only the local Office's explicit seat action uses this entry point. Scheduled jobs still
+// require a recent account-usage check through --prepare; a manual click is bounded by the
+// signed-in plan's own limit and never falls back to paid API credentials.
+export async function prepareManual(jobId) {
+  if (typeof jobId !== "string" || !/^[a-z0-9][a-z0-9-]{2,50}$/.test(jobId))
+    throw new Error("Invalid job ID");
+  return prepare(jobId, true);
+}
+
+export async function changedFiles(checkout) {
   const outputs = await Promise.all([
     git(["diff", "--name-only", "-z"], checkout),
     git(["diff", "--cached", "--name-only", "-z"], checkout),
     git(["ls-files", "--others", "--exclude-standard", "-z"], checkout),
+    git(["ls-files", "--others", "--ignored", "--exclude-standard", "-z"], checkout),
   ]);
-  return [...new Set(outputs.flatMap((output) => output.split("\0").filter(Boolean)))];
+  return [...new Set(outputs.flatMap((output) => output.split("\0").filter(Boolean))
+    .filter((path) => !path.startsWith(".office-tmp/") &&
+      !path.split("/").some((part) => part === "__pycache__" || part === ".pytest_cache")))];
 }
 
 async function finish(jobId) {
@@ -181,7 +206,7 @@ async function finish(jobId) {
     const history = (await events()).filter((event) => event.jobId === jobId);
     const latest = history.at(-1);
     const assignment = history.findLast((event) => event.state === "assigned");
-    if (!["assigned", "failed"].includes(latest?.state) || !assignment?.checkout ||
+    if (!["assigned", "running", "failed"].includes(latest?.state) || !assignment?.checkout ||
         !assignment.branch || !assignment.baseCommit) throw new Error("Job has no checkout to verify");
     const checkout = resolve(assignment.checkout);
     if (!checkout.startsWith(checkoutRoot + sep)) throw new Error("Unsafe checkout path");
@@ -229,19 +254,57 @@ async function finish(jobId) {
   });
 }
 
+async function begin(jobId) {
+  return withLock(async () => {
+    const history = (await events()).filter((event) => event.jobId === jobId);
+    const latest = history.at(-1);
+    if (latest?.state !== "assigned" || !latest.checkout || !latest.branch)
+      throw new Error("Job is not assigned");
+    const event = { jobId, lane: latest.lane, agent: latest.agent, state: "running",
+      branch: latest.branch, baseCommit: latest.baseCommit, checkout: latest.checkout,
+      summary: "native Codex agent กำลังแก้โค้ด" };
+    await record(event);
+    return event;
+  });
+}
+
+export async function pendingAssignments() {
+  const queue = await loadQueue();
+  const latest = new Map((await events()).map((event) => [event.jobId, event]));
+  return queue.jobs.flatMap((job) => {
+    const event = latest.get(job.id);
+    if (!["assigned", "running"].includes(event?.state) || !event.checkout || !event.branch ||
+        !event.baseCommit)
+      return [];
+    const checkout = resolve(event.checkout);
+    if (!checkout.startsWith(checkoutRoot + sep)) return [];
+    return [{ jobId: job.id, lane: job.lane, agent: job.agent, role: job.role,
+      branch: event.branch, baseCommit: event.baseCommit, checkout,
+      tempDir: join(checkout, ".office-tmp"), mode: job.mode,
+      allowedPaths: job.allowedPaths, task: job.task, acceptance: job.acceptance,
+      maxMinutes: Math.min(Math.max(Number(job.maxMinutes) || 15, 1), 30) }];
+  });
+}
+
 export async function main(args = process.argv.slice(2)) {
+  if (args.includes("--pending")) return { assignments: await pendingAssignments() };
   if (args.includes("--dry-run")) {
     const queue = await loadQueue();
     return { selected: selectJobs(queue.jobs, await events(), queue.maxConcurrent).map((job) => job.id),
       checkoutRoot };
   }
   if (args.includes("--prepare")) return prepare();
+  if (args.includes("--begin")) {
+    const index = args.indexOf("--job");
+    if (index < 0 || !args[index + 1]) throw new Error("Missing --job ID");
+    return begin(args[index + 1]);
+  }
   if (args.includes("--finish")) {
     const index = args.indexOf("--job");
     if (index < 0 || !args[index + 1]) throw new Error("Missing --job ID");
     return finish(args[index + 1]);
   }
-  throw new Error("Use --dry-run, --prepare or --finish --job ID");
+  throw new Error("Use --dry-run, --pending, --prepare, --begin --job ID or --finish --job ID");
 }
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === resolve(process.argv[1])) {

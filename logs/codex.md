@@ -399,3 +399,23 @@ Earlier history: `history-2026-10-16.md`.
 - Reviewed `c7fd2ed..7b0d8ae` in isolated `integration-hub` clone at `2ca77c2`; focused callback tests 2/2 and `python scripts/check.py` 208/208 passed. Bounded resend age remains intact by code review. The author-reported 110-run twin result was not rerun locally.
 - Claimed hub lock at `5aad21b`; recorded offline agree verdict in DISCUSSION and HANDOFF. No main merge, hardware command, sweep, paid API call or Claude branch change.
 - Released the integration-hub lock after review commit `4f77510`; T18 offline cross-review resolved.
+
+### 2026-10-30 — thesis-desk — Launch scoped code editing from Office seat
+
+- On `codex/thesis-desk/office-code-launch` based on `codex/workspace` plus `integration-hub` `32b5f5e`, changed the seat action to start one ready writing job in an isolated clone through signed-in Codex CLI `workspace-write`, then verify the diff, unchanged HEAD, Python and focused Node checks. Added a first safe Office queue diagnostic task, visible branch/files/logs in the page, and included ignored files in scope review.
+- Office Node tests passed 27/27; `python scripts/check.py` passed 208/208 with writable TEMP/TMP; `git diff --check` passed. No actual model edit, PR, main merge, dashboard publish, paid API call or hardware command was made at this stage. Follow-up: browser and real button smoke, then independent review.
+
+### 2026-10-30 — thesis-desk — Use native agent handoff for Office code edits
+
+- In an isolated Office preview on port 8770, two explicit seat actions prepared clones. Nested Codex CLI reported `sandbox: read-only` despite `--sandbox workspace-write`, made no diff, and the verifier correctly marked both jobs failed; no API key or credit was used. The first selected an already completed catalog job, so those old jobs were retired from readiness.
+- Changed the seat button to prepare one isolated assignment and wait for append-only queue evidence. The heartbeat can read `automation-queue.mjs --pending`, dispatch a native Codex agent, and call `--finish --job ID`; the page only claims completion after a verified nonempty diff. This follows the host's sandbox boundary without using a bypass flag. Focused Office Node tests passed 26/26; full Python check passed 208/208 on the earlier feature commit. Follow-up: fresh preview smoke, native assignment, cross-review and integration.
+
+### 2026-10-30 — thesis-desk — Verify the Office seat to native agent loop
+
+- From clean feature commit `7ec4d54`, started an isolated Office preview at `127.0.0.1:8771` with its own state root. The seat POST assigned Mew to `office-stale-lock-diagnostic` in clone `office-native-preview-state/office-stale-lock-diagnostic-20261030101015`; the page API kept Mew busy. Native Codex agent edited only the two allowed Office queue files, without committing. Parent ran `--finish`: review-ready, nonempty diff (2 files), unchanged HEAD, scope valid, Python check 0, focused Node check 0. Office actions then showed completed with branch, changed files and check result.
+- Reviewed that diff and applied its stale-lock diagnostic to the feature branch; no automatic merge. Added `--pending` and `--begin` for future heartbeat dispatch. Retired completed catalog jobs and left a distinct 429 regression task ready for the next click. Focused Office Node tests passed 27/27; `python scripts/check.py` passed 208/208 with writable TEMP/TMP. Computer Use browser inspection stopped because it could not confidently identify the browser URL; localhost API smoke supplied the button-path evidence. No main merge, dashboard publication, hardware command or paid API call.
+
+### 2026-10-30 — thesis-desk — Draft PR for Office native code launch
+
+- Pushed isolated branch `codex/thesis-desk-office-code-launch` (`6a5cd60`) containing only `tools/thesis_desk/virtual_office/` and append-only Codex log changes relative to `integration-hub` `32b5f5e`; opened draft PR #15 to `integration-hub` for Claude cross-review. The branch was formed by replaying the feature commits onto hub to avoid unrelated Codex workspace files.
+- On the PR branch, Office Node tests passed 27/27 and `python scripts/check.py` passed 208/208 with writable TEMP/TMP; diff check clean. No main merge or dashboard publication. Follow-up: wait for exact-head CI and cross-review before hub integration.
