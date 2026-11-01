@@ -35,6 +35,23 @@ class PreflightTest(unittest.TestCase):
         self.assertEqual(P.check_obstacle_params(True, False, 3.0)[0], "FAIL")
         self.assertEqual(P.check_obstacle_params(True, True, 0.0)[0], "WARN")
 
+    def test_live_params(self):
+        # T18 (Codex 2026-11-01 12:49): --live reads the running nodes' values, not the operator's flags
+        self.assertEqual(P.param_value("Boolean value is: True"), True)
+        self.assertEqual(P.param_value("Double value is: 0.0"), 0.0)
+        self.assertIsNone(P.param_value("Node not found"))
+        good = {("/follow_stop_node", "obstacle_stop"): True, ("/sync_fusion_node", "obstacle_stop"): True,
+                ("/follow_stop_node", "avoid_trail"): False, ("/follow_stop_node", "trail_hold_s"): 0.0}
+
+        def get(changes):
+            vals = {**good, **changes}
+            return lambda node, name: vals.get((node, name))
+        self.assertEqual(P.check_live_params(get({}))[0], "PASS")
+        self.assertEqual(P.check_live_params(get({("/sync_fusion_node", "obstacle_stop"): False}))[0], "FAIL")
+        self.assertEqual(P.check_live_params(get({("/sync_fusion_node", "obstacle_stop"): None}))[0], "FAIL")
+        self.assertEqual(P.check_live_params(get({("/follow_stop_node", "trail_hold_s"): 3.0}))[0], "FAIL")
+        self.assertEqual(P.check_live_params(get({("/follow_stop_node", "avoid_trail"): True}))[0], "WARN")
+
     def test_launch_passes_one_obstacle_stop_to_both_nodes(self):
         # the launch file, with stand-ins for the launch package: follow_stop and sync_fusion get the same value,
         # and avoid_trail is off by default on the robot

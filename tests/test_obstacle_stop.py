@@ -384,6 +384,7 @@ class TrailTest(unittest.TestCase):
         tb = math.radians(35.0)
         tgt = (1.2 * math.cos(tb), 1.2 * math.sin(tb))
         node = M.FollowStopNode()
+        node.avoid_trail = True  # the twin experiment setting; off by default on the robot
         node.avoid_delay = 0.0
         node.avoid_back_mps = 0.0
         node.cb_scan(scan(person(0.6, 0.42) + person(tgt[0] + 0.2 * math.cos(tb), tgt[1] + 0.2 * math.sin(tb))))
@@ -397,6 +398,7 @@ class TrailTest(unittest.TestCase):
         # blind_corner on 56a6a89: every run that stood out the 1 s avoid delay at the inside of the corner lost
         # the target; every run that drove on along the target's path to the corner kept it
         node = M.FollowStopNode()
+        node.avoid_trail = True  # the twin experiment setting; off by default on the robot
         node.cb_scan(scan(person(0.9, 0.42)))
         node.crumbs = [(x / 10.0, 0.0, 0.0) for x in range(0, 17)]
         v, w = node.obstacle_command(0.4, 0.0, (1.6, 0.0), 0.0)
@@ -407,6 +409,7 @@ class TrailTest(unittest.TestCase):
         # T18 re-review (Codex 2026-11-01 09:52, item 2): the path length used to raise the speed (0.1 asked, more
         # than 0.2 sent); now it can only lower it, and a zero request stays zero
         node = M.FollowStopNode()
+        node.avoid_trail = True  # the twin experiment setting; off by default on the robot
         node.crumbs = [(1.0, 0.0, 0.0), (1.0, 0.8, 0.0)]
         self.assertAlmostEqual(node.trail_length((1.0, 0.0)), 1.8)
         node.cb_scan(scan(person(0.55, 0.55)))
@@ -433,6 +436,7 @@ class TrailTest(unittest.TestCase):
     def test_with_no_crumb_reachable_the_trail_turns_to_where_the_target_was_seen(self):
         # blind_corner s1 on 9935332: no crumb in a clear line, it stopped facing away and never saw the target again
         node = M.FollowStopNode()
+        node.avoid_trail = True  # the twin experiment setting; off by default on the robot
         clock = {'t': 10.0}
         now = type('Now', (), {'nanoseconds': property(lambda self_: int(clock['t'] * 1e9))})
         node.get_clock = lambda: type('Clock', (), {'now': lambda self_: now()})()
@@ -448,6 +452,7 @@ class TrailTest(unittest.TestCase):
     def clocked(self, t=10.0):
         """A node on a settable clock that records what it sends and what it publishes as a stop."""
         node = M.FollowStopNode()
+        node.avoid_trail = True  # the twin experiment setting; off by default on the robot
         clock = {'t': t}
         stamp = type('Stamp', (), {})
 
@@ -522,8 +527,13 @@ class TrailTest(unittest.TestCase):
         node.cb_scan(scan([(0.6, y / 20.0) for y in range(-30, 31)] + person(-0.1, 0.3, r=0.05)))
         self.assertEqual(stops[-1], (0.0, 0.0))  # someone now beside the rear corner: the turn is stopped
 
+    def test_the_trail_is_off_by_default_as_in_the_robot_launch(self):
+        # T18 (Codex 2026-11-01 12:49): the node default matches follow_bringup.launch.py
+        self.assertFalse(M.FollowStopNode().avoid_trail)
+
     def test_dead_reckoning_and_crumbs(self):
         node = M.FollowStopNode()
+        node.avoid_trail = True  # the twin experiment setting; off by default on the robot
         clock = {'t': 0.0}
         now = type('Now', (), {'nanoseconds': property(lambda self_: int(clock['t'] * 1e9))})
         node.get_clock = lambda: type('Clock', (), {'now': lambda self_: now()})()

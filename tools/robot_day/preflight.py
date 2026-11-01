@@ -2,7 +2,8 @@
 """Check the robot is ready before a run: files, ports, disk, and (with --live) every topic's rate.
 
     python3 tools/robot_day/preflight.py                  # static checks only, no ROS needed
-    python3 tools/robot_day/preflight.py --live           # also listen to the running pipeline for 5 s
+    python3 tools/robot_day/preflight.py --live           # also listen to the running pipeline for 5 s and
+                                                          # read back the running obstacle parameters
 
 Start the pipeline first for --live (ros2 launch ros2_yolo_ws/launch/follow_bringup.launch.py).
 Each line is PASS, WARN or FAIL; the exit code is 1 if anything failed.
@@ -91,6 +92,50 @@ def check_obstacle_params(obstacle_stop, avoid_trail, trail_hold_s):
     if avoid_trail:
         return result("WARN", "obstacle parameters", "avoid_trail on: only after the trail is checked on the wheels")
     return result("PASS", "obstacle parameters", "obstacle_stop on, avoid_trail off, no target-free driving")
+
+
+# the running nodes' parameters --live reads back (T18, Codex 2026-11-01 12:49): the flags above describe what the
+# operator meant; these are what the nodes actually run with
+LIVE_PARAMS = (("/follow_stop_node", "obstacle_stop"), ("/sync_fusion_node", "obstacle_stop"),
+               ("/follow_stop_node", "avoid_trail"), ("/follow_stop_node", "trail_hold_s"))
+PARAM_VALUE_RE = re.compile(r"value is:\s*(\S+)")
+
+
+def param_value(text):
+    """The value from `ros2 param get` output ("Boolean value is: True"), as bool, float or str; None if absent."""
+    m = PARAM_VALUE_RE.search(text or "")
+    if not m:
+        return None
+    v = m.group(1)
+    if v in ("True", "False"):
+        return v == "True"
+    try:
+        return float(v)
+    except ValueError:
+        return v
+
+
+def check_live_params(get):
+    """FAIL unless every running node reports the robot-day obstacle settings. get(node, name) -> value or None."""
+    vals = {(n, k): get(n, k) for n, k in LIVE_PARAMS}
+    missing = [f"{n} {k}" for (n, k), v in vals.items() if v is None]
+    if missing:
+        return result("FAIL", "running parameters", "not readable: " + ", ".join(missing))
+    if vals[("/follow_stop_node", "obstacle_stop")] is not True or vals[("/sync_fusion_node", "obstacle_stop")] is not True:
+        return result("FAIL", "running parameters", "obstacle_stop must be true on follow_stop_node and sync_fusion_node")
+    if float(vals[("/follow_stop_node", "trail_hold_s")]) > 0.0:
+        return result("FAIL", "running parameters", "trail_hold_s > 0 drives without target messages")
+    if vals[("/follow_stop_node", "avoid_trail")] is not False:
+        return result("WARN", "running parameters", "avoid_trail on: only after the trail is checked on the wheels")
+    return result("PASS", "running parameters", "obstacle_stop on (both nodes), avoid_trail off, trail_hold_s 0")
+
+
+def ros2_param_get(node, name, timeout=10.0):
+    try:
+        out = subprocess.run(["ros2", "param", "get", node, name], capture_output=True, text=True, timeout=timeout)
+    except (OSError, subprocess.TimeoutExpired):
+        return None
+    return param_value(out.stdout) if out.returncode == 0 else None
 
 
 def check_calibration(path=ROOT / "config" / "motor_wheel_calibration.md"):
@@ -202,6 +247,7 @@ def main(argv=None):
               check_calibration()]
     if args.live:
         checks += live_checks(args.seconds)
+        checks.append(check_live_params(ros2_param_get))
     for level, what, detail in checks:
         print(f"[{level}] {what}: {detail}")
     failed = sum(1 for c in checks if c[0] == "FAIL")
