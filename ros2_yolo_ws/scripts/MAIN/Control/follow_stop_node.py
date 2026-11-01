@@ -538,12 +538,7 @@ class FollowStopNode(Node):
         # not round anyone, and standing still at the inside of a corner lost the target behind the bystander
         # (blind_corner: every pass on 56a6a89 drove on to the corner, every fail stopped short of it)
         if offset == 0.0 and found != 0.0 and self.avoid_trail and fresh and (waited or not at_edge):
-            # crumbs are reached on lines that keep the spin circle clear of everyone, not just the corridor: the
-            # trail along the target's path passed the bystander 0.31 m off, inside the 0.40 m circle, so at the
-            # corner the robot could not turn and stood while the target walked out of view (blind_corner on
-            # 1d35064, in view 0.863)
-            aim = trail_aim([cr[:2] for cr in self.crumbs], self.pose, self.scan_xy,
-                            max(self.obstacle_half_w, self.spin_clear_r),
+            aim = trail_aim([cr[:2] for cr in self.crumbs], self.pose, self.scan_xy, self.obstacle_half_w,
                             None if at_edge else target_xy, self.obstacle_excl)
             if aim is not None:
                 if not self.trailing:
@@ -783,8 +778,7 @@ class FollowStopNode(Node):
             self.publish_stop()
             return
         self.advance_pose()
-        aim = trail_aim([cr[:2] for cr in self.crumbs], self.pose, self.scan_xy,
-                        max(self.obstacle_half_w, self.spin_clear_r))
+        aim = trail_aim([cr[:2] for cr in self.crumbs], self.pose, self.scan_xy, self.obstacle_half_w)
         if aim is None:
             # no crumb in a clear line: turn slowly in place towards where the target was last seen, for the rest
             # of the hold, so the camera can find it again (blind_corner s1 on 9935332 stopped facing away and

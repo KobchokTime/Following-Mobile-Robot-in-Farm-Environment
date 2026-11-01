@@ -429,23 +429,6 @@ class TrailTest(unittest.TestCase):
         self.assertEqual(sent, [(0.0, 0.4)])  # left, where the target was last seen
         self.assertTrue(node.trailing)
 
-    def test_the_trail_passes_people_with_the_spin_circle_clear(self):
-        # blind_corner on 1d35064: the trail passed the bystander 0.31 m off, inside the 0.40 m spin circle, and at
-        # the corner the robot could not turn. Crumbs are reached on lines that keep the circle clear.
-        node = M.FollowStopNode()
-        clock = {'t': 10.0}
-        now = type('Now', (), {'nanoseconds': property(lambda self_: int(clock['t'] * 1e9))})
-        node.get_clock = lambda: type('Clock', (), {'now': lambda self_: now()})()
-        sent = []
-        node.send = lambda twist, *a, **k: sent.append((twist.linear.x, twist.angular.z))
-        node.cb_scan(scan(person(0.8, 0.6)))  # 0.40 m off the target's line: outside the corridor, inside the circle
-        node.crumbs = [(x / 10.0, 0.0, 9.0) for x in range(0, 16)]
-        node.trailing, node.last_msg_time = True, 9.5
-        node.trail_tick()
-        self.assertEqual(len(sent), 1)
-        self.assertGreater(sent[0][0], 0.0)
-        self.assertLess(sent[0][1], 0.0)  # aimed to the right of the line, away from them
-
     def test_dead_reckoning_and_crumbs(self):
         node = M.FollowStopNode()
         clock = {'t': 0.0}
