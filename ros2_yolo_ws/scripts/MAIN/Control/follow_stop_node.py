@@ -236,8 +236,10 @@ class FollowStopNode(Node):
         self.declare_parameter('avoid_hold_s', 0.5)          # keep the shift this long once the path is clear
         self.declare_parameter('avoid_delay_s', 1.0)         # go round only what blocks the path this long
         # when nothing beside the target clears the way (a corner, the target at the image edge), follow the
-        # target's own path: breadcrumbs of where it walked, kept trail_s, in a dead-reckoned frame
-        self.declare_parameter('avoid_trail', True)
+        # target's own path: breadcrumbs of where it walked, kept trail_s, in a dead-reckoned frame. Off by default,
+        # the same as the robot launch: the trail steers by dead reckoning from commanded speed until it is checked
+        # against the wheels (T18, Codex 2026-11-01 12:49); twin experiments turn it on with -p avoid_trail:=true
+        self.declare_parameter('avoid_trail', False)
         self.declare_parameter('trail_s', 6.0)
         # going round on the trail can turn the target out of the camera's view (blind_corner s2): keep
         # following the crumbs this long without target messages, then stop as before
