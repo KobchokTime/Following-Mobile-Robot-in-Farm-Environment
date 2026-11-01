@@ -477,14 +477,21 @@ class TrailTest(unittest.TestCase):
         self.assertGreater(node.pose[0], 0.02)
 
     def test_the_trail_without_target_messages_never_turns_with_someone_in_the_spin_circle(self):
-        node, clock, sent, stops = self.clocked()
-        node.cb_scan(scan([(0.6, y / 20.0) for y in range(-30, 31)] + person(-0.1, 0.3, r=0.05)))  # wall; post beside
-        node.crumbs = [(1.0, 0.9, 9.0)]
-        node.trailing, node.last_msg_time = True, 9.5
-        node.trail_tick()
-        self.assertEqual([c for c in sent if c[1] != 0.0], [])
-        self.assertFalse(node.trailing)
-        self.assertEqual(stops, [(0.0, 0.0)])
+        # the offline hold, so the trail reaches its turn: with the circle clear it turns (control); with a post
+        # beside the rear corner it stops instead (the default hold 0 would stop either way and prove nothing)
+        wall = [(0.6, y / 20.0) for y in range(-30, 31)]
+        for post, expect_turn in (([], True), (person(-0.1, 0.3, r=0.05), False)):
+            node, clock, sent, stops = self.clocked()
+            node.cb_scan(scan(wall + post))
+            node.crumbs = [(1.0, 0.9, 9.0)]
+            node.trailing, node.last_msg_time, node.trail_hold = True, 9.5, 3.0
+            node.trail_tick()
+            if expect_turn:
+                self.assertEqual(sent, [(0.0, 0.4)])
+            else:
+                self.assertEqual([c for c in sent if c[1] != 0.0], [])
+                self.assertFalse(node.trailing)
+                self.assertEqual(stops, [(0.0, 0.0)])
 
     def test_the_trail_without_target_messages_stops_on_a_stale_scan_and_after_the_hold(self):
         node, clock, sent, stops = self.clocked()
