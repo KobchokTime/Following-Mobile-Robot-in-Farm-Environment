@@ -538,7 +538,12 @@ class FollowStopNode(Node):
         # not round anyone, and standing still at the inside of a corner lost the target behind the bystander
         # (blind_corner: every pass on 56a6a89 drove on to the corner, every fail stopped short of it)
         if offset == 0.0 and found != 0.0 and self.avoid_trail and fresh and (waited or not at_edge):
-            aim = trail_aim([cr[:2] for cr in self.crumbs], self.pose, self.scan_xy, self.obstacle_half_w,
+            # crumbs are reached on lines that keep the spin circle clear of everyone, not just the corridor: the
+            # trail along the target's path passed the bystander 0.31 m off, inside the 0.40 m circle, so at the
+            # corner the robot could not turn and stood while the target walked out of view (blind_corner on
+            # 1d35064, in view 0.863)
+            aim = trail_aim([cr[:2] for cr in self.crumbs], self.pose, self.scan_xy,
+                            max(self.obstacle_half_w, self.spin_clear_r),
                             None if at_edge else target_xy, self.obstacle_excl)
             if aim is not None:
                 if not self.trailing:
@@ -552,15 +557,10 @@ class FollowStopNode(Node):
                 linear_x = max(linear_x, self.avoid_min_speed,
                                min(0.6, 1.0 * (self.trail_length(aim) - self.target_distance)))
                 angular_z = max(-2.0 * linear_x, min(2.0 * linear_x, angular_z))
-                if abs(target_bearing) >= 0.35:
-                    # the target already 20 deg or more to one side (at the image edge: past it): turn towards it
-                    # as hard as an arc allows, never away; moving_turn eases the turn to whatever arc the stop
-                    # lets through, down to straight on. Turning away to the crumbs took it out of the image
-                    # (blind_corner s0 on a30c90d); holding the heading to the corner left 2.5 s with the target
-                    # past the image edge, in view only 0.904-0.934 (twin run on bdae2c1)
-                    toward = math.copysign(min(2.0 * linear_x, self.angular_limit), target_bearing)
-                    if angular_z * math.copysign(1.0, target_bearing) < abs(toward):
-                        angular_z = toward
+                if not at_edge and angular_z * target_bearing < 0.0 and abs(target_bearing) >= 0.35:
+                    # the crumb is one way and the target already 20 deg or more the other: going straight
+                    # on along the trail keeps it in the image (blind_corner s0 on a30c90d turned it out)
+                    angular_z = 0.0
                 return self.moving_turn(linear_x, angular_z, None if at_edge else target_xy,
                                         None if at_edge else target_bearing)
         if self.trailing:
@@ -783,7 +783,8 @@ class FollowStopNode(Node):
             self.publish_stop()
             return
         self.advance_pose()
-        aim = trail_aim([cr[:2] for cr in self.crumbs], self.pose, self.scan_xy, self.obstacle_half_w)
+        aim = trail_aim([cr[:2] for cr in self.crumbs], self.pose, self.scan_xy,
+                        max(self.obstacle_half_w, self.spin_clear_r))
         if aim is None:
             # no crumb in a clear line: turn slowly in place towards where the target was last seen, for the rest
             # of the hold, so the camera can find it again (blind_corner s1 on 9935332 stopped facing away and

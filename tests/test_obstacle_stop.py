@@ -429,19 +429,22 @@ class TrailTest(unittest.TestCase):
         self.assertEqual(sent, [(0.0, 0.4)])  # left, where the target was last seen
         self.assertTrue(node.trailing)
 
-    def test_on_the_trail_it_turns_towards_a_target_well_off_to_one_side_as_far_as_the_stop_allows(self):
-        # bdae2c1 twin run: blind_corner held its heading to the corner while the target was past the image edge
-        # for 2.5 s (in view 0.904-0.934 against the 0.9 rule)
-        tb = math.radians(40.0)
-        tgt = (1.0 * math.cos(tb), 1.0 * math.sin(tb))
+    def test_the_trail_passes_people_with_the_spin_circle_clear(self):
+        # blind_corner on 1d35064: the trail passed the bystander 0.31 m off, inside the 0.40 m spin circle, and at
+        # the corner the robot could not turn. Crumbs are reached on lines that keep the circle clear.
         node = M.FollowStopNode()
-        node.cb_scan(scan(person(0.5, 0.45)))  # at the inside of the corner, across the line to the target
-        node.crumbs = [(x / 10.0, 0.0, 0.0) for x in range(0, 13)]
-        v, w = node.obstacle_command(0.3, 0.0, tgt, tb)
-        self.assertTrue(node.trailing)
-        self.assertGreater(v, 0.0)
-        self.assertGreater(w, 0.0)  # towards the target, as far as the corridor lets the arc go
-        self.assertTrue(node.turn_allowed(tgt))  # a tight arc is a near spin: the spin circle is clear here
+        clock = {'t': 10.0}
+        now = type('Now', (), {'nanoseconds': property(lambda self_: int(clock['t'] * 1e9))})
+        node.get_clock = lambda: type('Clock', (), {'now': lambda self_: now()})()
+        sent = []
+        node.send = lambda twist, *a, **k: sent.append((twist.linear.x, twist.angular.z))
+        node.cb_scan(scan(person(0.8, 0.6)))  # 0.40 m off the target's line: outside the corridor, inside the circle
+        node.crumbs = [(x / 10.0, 0.0, 9.0) for x in range(0, 16)]
+        node.trailing, node.last_msg_time = True, 9.5
+        node.trail_tick()
+        self.assertEqual(len(sent), 1)
+        self.assertGreater(sent[0][0], 0.0)
+        self.assertLess(sent[0][1], 0.0)  # aimed to the right of the line, away from them
 
     def test_dead_reckoning_and_crumbs(self):
         node = M.FollowStopNode()
