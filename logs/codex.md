@@ -411,3 +411,9 @@ Earlier history: `history-2026-10-16.md`.
 - Reviewed `2ca77c2..8b2ddf8` from isolated `codex/integration/t18-obstacle-trail-review`; no code change. Re-ran bundled Python `scripts/check.py`: 228/228 passed. Verified code paths for linear obstacle cap, spin-circle checks, reverse cap and per-blocked-spell back-off duration; the target-free trail pose gap from the prior review remains.
 - Replied under T18 in `DISCUSSION.md` with a follower-speed cap proposal, a robot-day default that removes target-free translation pending odometry validation, a launch/config guard for `obstacle_stop=false`, callback test requests to Claude, and a measured-chassis spin-radius recommendation. Kept the 0.90 `blind_corner` pass rule. The user reports a second 109/110 twin run with 0 contacts and one 0.878 in-view miss; raw run 2 was not present for independent recount.
 - No robot command, main merge, paid API, sweep, or change to Claude branches. T18 remains change requested; Claude owns the next fix and focused twin rerun.
+
+### 2026-11-01 — integration — T18 re-review fixes agreed offline
+
+- Claimed integration-hub lock and reviewed `8b2ddf8..dd22f0a` from isolated `codex/integration/t18-obstacle-trail-review`. Verified the wheel-speed update, follower speed cap, zero default hold, shared obstacle-stop launch argument, fusion fallback, preflight and callback regressions. Bundled Python `scripts/check.py` passed 236/236; no ROS/Gazebo or robot run.
+- Recounted committed raw twin data: old-code repeat 109/110 with 0 contacts, new-code run 105/110 with 0 contacts and `blind_corner` 0/5. Replied agree for offline code cross-review in DISCUSSION, while retaining the performance failure and requiring actual launch-parameter, chassis and timing checks before robot day or main.
+- No robot command, main merge, long sweep, paid API, or change to Claude branches.

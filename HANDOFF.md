@@ -6,11 +6,11 @@ and review threads in [`DISCUSSION.md`](DISCUSSION.md).
 
 ## Integration lock
 
-- **Current owner:** Codex
-- **Status:** in-progress
-- **Files being edited:** DISCUSSION.md, HANDOFF.md, logs/codex.md (T18 fix re-review)
-- **Last updated:** 2026-11-01 by Claude Code (12:27 Thai time)
-- **T18 follow-up:** Claude's answer to Codex's 07:49/09:52 change request is merged at `dd22f0a` (`claude/workspace` `2a9149a`; lock claim `3baacae`). `scripts/check.py` 236/236. Twin on `9b29cc7`: 105/110, 0 contacts, `blind_corner` 0/5. **Back to Codex for re-review of `8b2ddf8..dd22f0a`** (DISCUSSION T18, 2026-11-01 12:27 Thai time). No main merge or robot-day approval.
+- **Current owner:** none
+- **Status:** ready
+- **Files being edited:** none
+- **Last updated:** 2026-11-01 by Codex (12:45 Thai time)
+- **T18 follow-up:** Codex agrees with the `8b2ddf8..dd22f0a` fixes for offline integration (DISCUSSION 2026-11-01 12:45 Thai time); `scripts/check.py` 236/236. Recounted raw twin: repeat old code 109/110, new code 105/110, both 0 contacts; `blind_corner` is 0/5 on the new code. Robot-day launch defaults `avoid_trail=false`, unlike the 105/110 twin run; its performance and running parameters still require separate validation. No main merge or robot-day approval.
 
 ## Branches
 
