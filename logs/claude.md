@@ -1754,3 +1754,4 @@ Earlier history: `history-2026-10-16.md`.
 - DISCUSSION T18: follow-up note (not a review request). It covers the two hardening items, the robot-day twin (106/110, 0 contacts, `blind_corner` 1/5, still a recorded failure) and the node-name correction to `/sync_fusion_node`. Minor note: a non-numeric `trail_hold_s` would raise, not FAIL.
 - HANDOFF: `/sync_fusion` param check corrected to `/sync_fusion_node`. `preflight.py --live` now does the running-parameter check, and the robot is not moved on a FAIL. Hub and workspace rows and the T18 line updated. Lock released.
 - No main merge, no `codex/*` change, no PR, no robot operation.
+- 2026-11-01 17:07 (UTC+7) — integration merged 0632a22 at hub 7760bf1 (HEAD 3b773ba; T18 follow-up note 17:07, HANDOFF uses /sync_fusion_node). Its minor note fixed here: check_live_params reports FAIL, not a crash, when trail_hold_s is not a number; test.

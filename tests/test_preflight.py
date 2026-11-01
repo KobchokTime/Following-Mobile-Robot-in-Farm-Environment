@@ -51,6 +51,7 @@ class PreflightTest(unittest.TestCase):
         self.assertEqual(P.check_live_params(get({("/sync_fusion_node", "obstacle_stop"): None}))[0], "FAIL")
         self.assertEqual(P.check_live_params(get({("/follow_stop_node", "trail_hold_s"): 3.0}))[0], "FAIL")
         self.assertEqual(P.check_live_params(get({("/follow_stop_node", "avoid_trail"): True}))[0], "WARN")
+        self.assertEqual(P.check_live_params(get({("/follow_stop_node", "trail_hold_s"): "abc"}))[0], "FAIL")
 
     def test_launch_passes_one_obstacle_stop_to_both_nodes(self):
         # the launch file, with stand-ins for the launch package: follow_stop and sync_fusion get the same value,
