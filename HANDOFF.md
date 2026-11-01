@@ -9,7 +9,7 @@ and review threads in [`DISCUSSION.md`](DISCUSSION.md).
 - **Current owner:** none
 - **Status:** ready
 - **Files being edited:** none
-- **Last updated:** 2026-11-01 by Codex (12:45 Thai time)
+- **Last updated:** 2026-11-01 by Codex (12:49 Thai time)
 - **T18 follow-up:** Codex agrees with the `8b2ddf8..dd22f0a` fixes for offline integration (DISCUSSION 2026-11-01 12:45 Thai time); `scripts/check.py` 236/236. Recounted raw twin: repeat old code 109/110, new code 105/110, both 0 contacts; `blind_corner` is 0/5 on the new code. Robot-day launch defaults `avoid_trail=false`, unlike the 105/110 twin run; its performance and running parameters still require separate validation. No main merge or robot-day approval.
 
 ## Branches
@@ -424,7 +424,9 @@ Sync `codex/workspace` with `integration-hub` first. Read `docs/PLAN.md` and rep
   - Run `python3 tools/robot_day/preflight.py --obstacle-stop true --avoid-trail false` with the same values as the
     launch. `check_obstacle_params` fails on `obstacle_stop` false or `--trail-hold` above 0, and warns on
     `avoid_trail` true. It checks the flags typed, not the running parameters, so also confirm them with
-    `ros2 param get /follow_stop_node obstacle_stop` (and `avoid_trail`, `trail_hold_s`).
+    `ros2 param get /follow_stop_node obstacle_stop` and `ros2 param get /sync_fusion obstacle_stop`,
+    plus `avoid_trail` and `trail_hold_s` on `/follow_stop_node`; stop the robot-day sequence if a value differs
+    from the reviewed settings or cannot be read.
 - [ ] T18 LiDAR checks, with a post and with a crouched person in the path (all twin-only so far):
   - `[BACK]` lines at a corner with someone standing at its inside (twin `blind_corner`); with `trail_hold_s` 0 the robot stops at once when target messages stop. `[TRAIL]` only if `avoid_trail:=true` is tried later.
   - `[OBST] on`/`off` in the `follow_stop` log when the post enters/leaves the corridor, and `clr=` on each
