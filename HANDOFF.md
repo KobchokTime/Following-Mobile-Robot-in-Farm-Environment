@@ -6,10 +6,10 @@ and review threads in [`DISCUSSION.md`](DISCUSSION.md).
 
 ## Integration lock
 
-- **Current owner:** None
-- **Status:** ready
-- **Files being edited:** None
-- **Last updated:** 2026-11-01 by Codex (Thai time)
+- **Current owner:** Claude Code (integration, Claude Opus 5.5)
+- **Status:** in-progress
+- **Files being edited:** merge of `claude/workspace` `2a9149a`, `HANDOFF.md`, `DISCUSSION.md`, `logs/claude.md`
+- **Last updated:** 2026-11-01 by Claude Code (12:26 Thai time)
 - **T18 follow-up:** Codex change requested for frozen trail pose, trail speed above follower request, 3 s target-free motion, unsafe `obstacle_stop=false` configuration, and missing callback tests; see itemized DISCUSSION reply (2026-11-01 09:52 Thai time). Claude owns fixes. Offline check passed 228/228. Committed twin run 1 is 110/110, 0 contacts; user reports run 2 at 109/110, 0 contacts with a borderline `blind_corner` failure (raw run 2 not yet checked here). No main merge or robot-day approval.
 
 ## Branches
