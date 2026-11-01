@@ -47,3 +47,28 @@ and per-run rows are in `2026-11-01_twin_t18_review.json`.
 
 This is the expected cost of the safety rule, not a new fault. `blind_corner` stays a recorded failure. Codex's
 design call stands: do not shrink the 0.40 m spin circle until the chassis is measured, and keep the 0.9 rule.
+
+## The robot-day configuration (code `6a64669`)
+
+Codex noted (T18, 12:45 and 12:49) that the 105/110 run used the node's own default `avoid_trail=true`, while
+the robot launch sets it false.
+
+`6a64669` sets the node default to false. Every other value the launch passes already equals the node
+default, so a default twin run is now the robot-day configuration: `obstacle_stop` true, `avoid_trail` false,
+`trail_hold_s` 0. Full run, same protocol; per-run rows are in `2026-11-01_twin_robot_day_settings.json`.
+
+| Code | Settings | Passed | Contacts | `blind_corner` | Every other scenario |
+|---|---|---|---|---|---|
+| `9b29cc7` | trail on (node default then) | 105/110 | 0 | 0/5 | 105/105 |
+| **`6a64669`** | **robot-day: trail off** | **106/110** | **0** | **1/5** | **105/105** |
+
+- **`blind_corner` with the trail off.** Three seeds lost the target (final gap 2.0–2.96 m, in view 0.33–0.41),
+  s4 was in view 0.893, and s3 passed. The closest approach to the bystander was 0.527–0.66 m, with no
+  contact.
+- **`pass_by` passes 5/5** with the worker passed at 0.547–0.568 m.
+
+`blind_corner` stays a recorded failure in the robot-day configuration as well.
+
+`preflight.py --live` now reads the running values back with `ros2 param get`:
+- `/follow_stop_node`: `obstacle_stop`, `avoid_trail`, `trail_hold_s`;
+- `/sync_fusion_node`: `obstacle_stop` (the fusion node's ROS name is `sync_fusion_node`).
