@@ -243,6 +243,21 @@ class WalkUpTest(unittest.TestCase):
         self.frame(node, t, [(0.57, 0.15), (1.5, 0.0)])
         self.assertGreaterEqual(min(p[2] for p in node.published[-2:]), 0.5)
 
+    def test_without_the_obstacle_stop_the_near_range_holds_the_robot_off(self):
+        # T18 re-review (Codex 2026-11-01 07:49, item 2): the occlusion range and the give-way floor rely on the
+        # LiDAR stop; with obstacle_stop false they are off and the near person's range is published again
+        m, node = make_node(obstacle_stop=False)
+        self.assertEqual((node.occl_gap, node.path_floor), (0.0, 0.0))
+        t = self.lock(node, target=(1.0, 0.0))
+        node.scan_points = scan(person(1.0, 0.0), person(0.5, 0.02))
+        node.scan_time = t
+        node.buf_lidar.clear()
+        node.buf_lidar.append((t, [1.0]))
+        node.try_sync_from_yolo(t, int(round(self.W / 2.0)), 240, 4)
+        self.assertLess(node.published[-1][2], 0.5)  # the covering person's range, as before the LiDAR stop
+        m, node = make_node()
+        self.assertEqual((node.occl_gap, node.path_floor), (0.4, 0.5))
+
     def test_a_crop_row_beside_the_target_does_not_count_as_a_person(self):
         m, _ = make_node()
         # plants 0.1 m apart, 0.45 m right: inside the 0.5 m radius, so only the 1.5 m width rule leaves it out

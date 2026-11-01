@@ -429,6 +429,62 @@ class TrailTest(unittest.TestCase):
         self.assertEqual(sent, [(0.0, 0.4)])  # left, where the target was last seen
         self.assertTrue(node.trailing)
 
+    def clocked(self, t=10.0):
+        """A node on a settable clock that records what it sends and what it publishes as a stop."""
+        node = M.FollowStopNode()
+        clock = {'t': t}
+        stamp = type('Stamp', (), {})
+
+        def now():  # a fixed stamp, like rclpy's Time: it does not follow the clock after it is taken
+            st = stamp()
+            st.nanoseconds = int(clock['t'] * 1e9)
+            return st
+        node.get_clock = lambda: type('Clock', (), {'now': lambda self_: now()})()
+        sent, stops = [], []
+        node.send = lambda twist, *a, **k: (sent.append((twist.linear.x, twist.angular.z)),
+                                            setattr(node, 'last_linear', twist.linear.x))
+        node.pub = type('Pub', (), {'publish': lambda self_, twist: stops.append((twist.linear.x, twist.angular.z))})()
+        return node, clock, sent, stops
+
+    def test_the_trail_without_target_messages_moves_the_dead_reckoned_pose(self):
+        # T18 re-review (Codex 2026-11-01 07:49, item 1): with no fused messages the wheel speed was never stepped,
+        # so the pose stayed put while the trail drove the robot on
+        node, clock, sent, _ = self.clocked()
+        node.crumbs = [(x / 10.0, 0.0, 9.0) for x in range(0, 21)]
+        node.trailing, node.last_msg_time = True, 9.9
+        for k in range(8):
+            clock['t'] = 10.0 + 0.1 * k
+            node.cb_scan(scan([]))
+            node.trail_tick()
+        self.assertTrue(all(v > 0.0 for v, _ in sent))
+        self.assertGreater(node.v_wheels, 0.0)
+        self.assertGreater(node.pose[0], 0.02)
+
+    def test_the_trail_without_target_messages_never_turns_with_someone_in_the_spin_circle(self):
+        node, clock, sent, stops = self.clocked()
+        node.cb_scan(scan([(0.6, y / 20.0) for y in range(-30, 31)] + person(-0.1, 0.3, r=0.05)))  # wall; post beside
+        node.crumbs = [(1.0, 0.9, 9.0)]
+        node.trailing, node.last_msg_time = True, 9.5
+        node.trail_tick()
+        self.assertEqual([c for c in sent if c[1] != 0.0], [])
+        self.assertFalse(node.trailing)
+        self.assertEqual(stops, [(0.0, 0.0)])
+
+    def test_the_trail_without_target_messages_stops_on_a_stale_scan_and_after_the_hold(self):
+        node, clock, sent, stops = self.clocked()
+        node.crumbs = [(x / 10.0, 0.0, 9.0) for x in range(0, 21)]
+        node.cb_scan(scan([]))
+        clock['t'] = 10.0 + node.scan_max_age + 0.1  # no scan since
+        node.trailing, node.last_msg_time = True, clock['t'] - 0.5
+        node.trail_tick()
+        self.assertEqual((sent, stops, node.trailing), ([], [(0.0, 0.0)], False))
+        node, clock, sent, stops = self.clocked()
+        node.crumbs = [(x / 10.0, 0.0, 9.0) for x in range(0, 21)]
+        node.cb_scan(scan([]))
+        node.trailing, node.last_msg_time = True, clock['t'] - node.trail_hold - 0.1
+        node.trail_tick()
+        self.assertEqual((sent, stops, node.trailing), ([], [(0.0, 0.0)], False))
+
     def test_dead_reckoning_and_crumbs(self):
         node = M.FollowStopNode()
         clock = {'t': 0.0}

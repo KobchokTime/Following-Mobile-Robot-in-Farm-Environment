@@ -366,6 +366,13 @@ class FollowStopNode(Node):
         self.advance_pose()
         self.recheck_last_cmd()
 
+    def update_wheel_speed(self, now):
+        """Step the bridge-ramp estimate of the wheel speed towards the last speed sent, up to now."""
+        if self.v_wheels_time is not None:
+            dtw = min(5.0, max(0.0, (now.nanoseconds - self.v_wheels_time.nanoseconds) / 1e9))
+            self.v_wheels = wheel_speed_estimate(self.v_wheels, self.last_linear, dtw, self.bridge_accel)
+        self.v_wheels_time = now
+
     def advance_pose(self):
         """Dead-reckon the robot from the bridge's estimated wheel speed and the last turn rate sent."""
         now = self.get_clock().now().nanoseconds / 1e9
@@ -549,8 +556,14 @@ class FollowStopNode(Node):
                 # speed from the way left along the path, not the straight gap: at a corner the target is close
                 # in a straight line but a corner away, and the crawl reached the corner too late to keep it in
                 # view (blind_corner s1/s3 on 47109fb, in view 0.897)
-                linear_x = max(linear_x, self.avoid_min_speed,
-                               min(0.6, 1.0 * (self.trail_length(aim) - self.target_distance)))
+                left = self.trail_length(aim) - self.target_distance
+                v_path = min(0.6, 1.0 * left)
+                if self.max_decel > 0.0:
+                    # never faster than it can still stop from, short of the target along its path: the same
+                    # braking cap the follower uses on the straight gap (T18 re-review, Codex 2026-11-01 07:49)
+                    v_path = min(v_path, math.sqrt(2.0 * self.max_decel * max(
+                        0.0, left - max(0.0, self.v_wheels) * self.latency_s)))
+                linear_x = max(linear_x, self.avoid_min_speed, v_path)
                 angular_z = max(-2.0 * linear_x, min(2.0 * linear_x, angular_z))
                 if not at_edge and angular_z * target_bearing < 0.0 and abs(target_bearing) >= 0.35:
                     # the crumb is one way and the target already 20 deg or more the other: going straight
@@ -633,10 +646,7 @@ class FollowStopNode(Node):
 
         # ---------- Confidence check ----------
         now = self.get_clock().now()
-        if self.v_wheels_time is not None:
-            dtw = min(5.0, (now - self.v_wheels_time).nanoseconds / 1e9)
-            self.v_wheels = wheel_speed_estimate(self.v_wheels, self.last_linear, dtw, self.bridge_accel)
-        self.v_wheels_time = now
+        self.update_wheel_speed(now)
         if P_fused_smooth < self.p_fused_threshold or not isfinite(dist):
             if (now - self.last_good_time).nanoseconds / 1e9 < 1.0:
                 held = Twist()
@@ -777,6 +787,9 @@ class FollowStopNode(Node):
             self.trailing = self.trail_since_msg = False
             self.publish_stop()
             return
+        # the wheel speed is stepped here too: with no target messages cb_fused does not run, and the pose froze
+        # while the trail drove the robot on (T18 re-review, Codex 2026-11-01 07:49, item 1)
+        self.update_wheel_speed(self.get_clock().now())
         self.advance_pose()
         aim = trail_aim([cr[:2] for cr in self.crumbs], self.pose, self.scan_xy, self.obstacle_half_w)
         if aim is None:
