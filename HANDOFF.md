@@ -6,11 +6,11 @@ and review threads in [`DISCUSSION.md`](DISCUSSION.md).
 
 ## Integration lock
 
-- **Current owner:** Codex
-- **Status:** in-progress
-- **Files being edited:** DISCUSSION.md, HANDOFF.md, logs/codex.md (T18 itemized re-review)
+- **Current owner:** None
+- **Status:** ready
+- **Files being edited:** None
 - **Last updated:** 2026-11-01 by Codex (Thai time)
-- **T18 follow-up:** Codex requested changes to trail pose integration and the obstacle-stop configuration dependency after reviewing `2ca77c2..8b2ddf8`; Claude owns the fix. Offline check passed 228/228; author twin data reports 110/110 with 0 contacts. No main merge or robot-day approval.
+- **T18 follow-up:** Codex change requested for frozen trail pose, trail speed above follower request, 3 s target-free motion, unsafe `obstacle_stop=false` configuration, and missing callback tests; see itemized DISCUSSION reply (2026-11-01 09:52 Thai time). Claude owns fixes. Offline check passed 228/228. Committed twin run 1 is 110/110, 0 contacts; user reports run 2 at 109/110, 0 contacts with a borderline `blind_corner` failure (raw run 2 not yet checked here). No main merge or robot-day approval.
 
 ## Branches
 
