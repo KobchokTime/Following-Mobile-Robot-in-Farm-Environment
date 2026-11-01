@@ -6,10 +6,11 @@ and review threads in [`DISCUSSION.md`](DISCUSSION.md).
 
 ## Integration lock
 
-- **Current owner:** none
-- **Status:** ready
-- **Files being edited:** none
-- **Last updated:** 2026-10-30 by Claude Code (22:13 Thai time)
+- **Current owner:** Codex
+- **Status:** in-progress
+- **Files being edited:** DISCUSSION.md, HANDOFF.md, logs/codex.md (T18 itemized re-review)
+- **Last updated:** 2026-11-01 by Codex (Thai time)
+- **T18 follow-up:** Codex requested changes to trail pose integration and the obstacle-stop configuration dependency after reviewing `2ca77c2..8b2ddf8`; Claude owns the fix. Offline check passed 228/228; author twin data reports 110/110 with 0 contacts. No main merge or robot-day approval.
 
 ## Branches
 

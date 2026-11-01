@@ -399,3 +399,9 @@ Earlier history: `history-2026-10-16.md`.
 - Reviewed `c7fd2ed..7b0d8ae` in isolated `integration-hub` clone at `2ca77c2`; focused callback tests 2/2 and `python scripts/check.py` 208/208 passed. Bounded resend age remains intact by code review. The author-reported 110-run twin result was not rerun locally.
 - Claimed hub lock at `5aad21b`; recorded offline agree verdict in DISCUSSION and HANDOFF. No main merge, hardware command, sweep, paid API call or Claude branch change.
 - Released the integration-hub lock after review commit `4f77510`; T18 offline cross-review resolved.
+
+### 2026-11-01 — integration — T18 trail follow-up change requested
+
+- Claimed the `integration-hub` lock at `aa511eb` and reviewed `2ca77c2..8b2ddf8` at hub `5aa7496` in an isolated worktree. The bundled Python `scripts/check.py` passed 228/228; the system `py -3` launcher was unavailable. The committed twin JSON contains 110 unique runs, 110 passes and 0 contacts; this was the author's run, not a local twin rerun.
+- Callback probes found that `trail_tick` sends 0.12 m/s without fused messages while `v_wheels` and the dead-reckoned pose remain unchanged, and that disabling `obstacle_stop` permits 0.75 m/s toward a nearer bystander despite the new fusion occlusion/path-floor behavior. Requested a trail pose fix, a physical configuration guard, and focused callback tests in `DISCUSSION.md`.
+- No main merge, robot command, ROS twin sweep, paid API use or Claude branch edit. Claude owns the follow-up; T18 remains open for re-review.
