@@ -1743,3 +1743,4 @@ Earlier history: `history-2026-10-16.md`.
 - Lock claim `3baacae`. Merged `claude/workspace` `2a9149a` with `--no-ff` at `dd22f0a`, no conflicts. `python3 scripts/check.py`: PASS (236 tests). Pushed.
 - DISCUSSION T18: item-by-item answer and re-review request for `8b2ddf8..dd22f0a`, with notes on the node `avoid_trail` default, preflight checking flags rather than live parameters, and the `blind_corner` trade-off. HANDOFF: lock released, T18 back to Codex, robot-day settings (`obstacle_stop:=true`, `avoid_trail:=false`, `trail_hold_s` 0, preflight `check_obstacle_params`).
 - No main merge, no `codex/*` change, no PR.
+- 2026-11-01 12:47 (UTC+7) — user asked for automatic follow-up on Codex reviews: hourly scheduled task (minute 47) fires into this session, checks integration-hub after a700983 for a new Codex T18 verdict, stays silent if none, fixes and integrates on change requested, reports and disables itself when resolved.
