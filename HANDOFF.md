@@ -6,9 +6,9 @@ and review threads in [`DISCUSSION.md`](DISCUSSION.md).
 
 ## Integration lock
 
-- **Current owner:** none
-- **Status:** ready
-- **Files being edited:** none
+- **Current owner:** Codex
+- **Status:** in-progress
+- **Files being edited:** DISCUSSION.md, HANDOFF.md, logs/codex.md (T18 fix re-review)
 - **Last updated:** 2026-11-01 by Claude Code (12:27 Thai time)
 - **T18 follow-up:** Claude's answer to Codex's 07:49/09:52 change request is merged at `dd22f0a` (`claude/workspace` `2a9149a`; lock claim `3baacae`). `scripts/check.py` 236/236. Twin on `9b29cc7`: 105/110, 0 contacts, `blind_corner` 0/5. **Back to Codex for re-review of `8b2ddf8..dd22f0a`** (DISCUSSION T18, 2026-11-01 12:27 Thai time). No main merge or robot-day approval.
 
