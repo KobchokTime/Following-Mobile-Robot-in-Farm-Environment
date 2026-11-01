@@ -196,15 +196,15 @@
  },
  "current_runs": {
   "title": "Current code, every twin scenario",
-  "description": "One row per finished run of the whole-twin baseline (experiments/sim/scripts/run_baseline.sh): every scenario (solo, identity, colour, obstacle), realism profile, seeds 0-4, with the code on integration-hub (code column: 8b2ddf8, the merge of claude/workspace 2765354; runs on bdae2c1, same code). 110/110 passed, 0 contacts. Built by tools/dashboard/live/gen_current.py. Simulation, not the robot.",
+  "description": "One row per finished run of the whole-twin baseline (experiments/sim/scripts/run_baseline.sh): every scenario (solo, identity, colour, obstacle), realism profile, seeds 0-4, with the code on integration-hub (code column: 7760bf1, the merge of claude/workspace 0632a22; runs on 6a64669, same code) in the robot-day configuration: obstacle_stop on, avoid_trail off, trail_hold_s 0. 106/110 passed, 0 contacts; blind_corner 1/5 is a recorded failure (T18). Built by tools/dashboard/live/gen_current.py. Simulation, not the robot.",
   "source": {
    "kind": "file",
    "name": "current_runs.json",
-   "url": "/_blob/ab336237bb560360b9ab1c4e4701c349"
+   "url": "/_blob/ccf5fefa8d17441bdc3a1dfd28d6b19c"
   },
   "staleAfterHours": 2,
   "updated": {
-   "at": "2026-10-30T15:26:08Z",
+   "at": "2026-11-01T10:20:00Z",
    "by": "Claude Code"
   }
  },
@@ -312,25 +312,25 @@
   "source": {
    "kind": "file",
    "name": "obstacle_paths.json",
-   "url": "/_blob/e70306d7743bce47d791c4b58c50e8ca"
+   "url": "/_blob/c50b3672368823cef59636196fc18563"
   },
   "title": "Obstacle stop/avoid: paths",
   "updated": {
-   "at": "2026-10-30T15:26:08Z",
+   "at": "2026-11-01T10:20:00Z",
    "by": "Claude Code"
   }
  },
  "obstacle_runs": {
-  "description": "One row per twin run comparing the obstacle switches on the current hub code (8b2ddf8, image from claude/workspace bdae2c1): pass_by with obstacle_avoid off/on and blind_corner with obstacle_stop off/on, realism, seeds 0-4, one run at a time. Pass, contact, closest distance to the hidden person and the robot pose at that moment. Built by tools/dashboard/live/gen_obstacle.py. Simulation, not the robot.",
+  "description": "One row per twin run comparing the obstacle switches on the current hub code (7760bf1, image from claude/workspace 6a64669, robot-day defaults: avoid_trail off, trail_hold_s 0): pass_by with obstacle_avoid off/on and blind_corner with obstacle_stop off/on, realism, seeds 0-4, one run at a time. Pass, contact, closest distance to the hidden person and the robot pose at that moment. Built by tools/dashboard/live/gen_obstacle.py. Simulation, not the robot.",
   "fixed": true,
   "source": {
    "kind": "file",
    "name": "obstacle_runs.json",
-   "url": "/_blob/2a98fa9511a30fa69d80990923d1cd83"
+   "url": "/_blob/abe2565445a65abd616ea7e736ccc20b"
   },
   "title": "Obstacle stop/avoid: off vs on",
   "updated": {
-   "at": "2026-10-30T15:26:08Z",
+   "at": "2026-11-01T10:20:00Z",
    "by": "Claude Code"
   }
  },
@@ -354,25 +354,25 @@
   "source": {
    "kind": "file",
    "name": "replay_paths.json",
-   "url": "/_blob/ba030fbbd3f4633e95688d6dd6d597ee"
+   "url": "/_blob/23ee14c2c6ce745c7c18ff2a518ea71b"
   },
   "title": "Replay: before vs now, paths",
   "updated": {
-   "at": "2026-10-30T15:26:08Z",
+   "at": "2026-11-01T10:20:00Z",
    "by": "Claude Code"
   }
  },
  "replay_runs": {
-  "description": "One row per twin run of two whole-twin baselines on the follow, target-gate and colour scenarios, realism, seeds 0-4: before = hub 5c72c4d (before the LiDAR stop/avoid/assist work), now = hub 8b2ddf8. Pass, contact, final gap, share of time in view, closest person. Built by tools/dashboard/live/gen_replay.py. Simulation, not the robot.",
+  "description": "One row per twin run of two whole-twin baselines on the follow, target-gate and colour scenarios, realism, seeds 0-4: before = hub 5c72c4d (before the LiDAR stop/avoid/assist work), now = hub 7760bf1 (robot-day configuration). Pass, contact, final gap, share of time in view, closest person. Built by tools/dashboard/live/gen_replay.py. Simulation, not the robot.",
   "fixed": true,
   "source": {
    "kind": "file",
    "name": "replay_runs.json",
-   "url": "/_blob/c142da2f73db7ec98daa11a85c4da1ca"
+   "url": "/_blob/2233bd18c679b5d9c57fc0b920bcbd46"
   },
   "title": "Replay: before vs now, per run",
   "updated": {
-   "at": "2026-10-30T15:26:08Z",
+   "at": "2026-11-01T10:20:00Z",
    "by": "Claude Code"
   }
  },
