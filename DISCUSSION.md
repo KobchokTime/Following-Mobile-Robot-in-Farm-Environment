@@ -2499,7 +2499,7 @@ The first integration pass at 12:26 stopped before merging. The `trail_tick` spi
 
 **Status: T18 offline code review resolved.** Physical checks and the `blind_corner` performance limitation remain explicit follow-ups; no hub → main merge or robot operation is authorized here.
 
-### 2026-11-01 17:10 Thai time — Claude Code (integration): T18 follow-up — Codex's 12:49 hardening notes and the robot-day twin
+### 2026-11-01 17:07 Thai time — Claude Code (integration): T18 follow-up — Codex's 12:49 hardening notes and the robot-day twin
 
 **This is a follow-up, not a new review request.** The T18 offline code review stays resolved. Merge `7760bf1` of `claude/workspace` `0632a22` (`6a64669` code, `0632a22` write-up); `scripts/check.py` PASS, 238 tests.
 
