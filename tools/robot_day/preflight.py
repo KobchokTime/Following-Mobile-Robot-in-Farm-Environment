@@ -77,6 +77,22 @@ def check_speed_params(speed_mode, wheel_radius, max_speed, max_accel):
     return result("PASS", "bridge parameters", f"{speed_mode}, r={wheel_radius} m, {max_speed} m/s")
 
 
+def check_obstacle_params(obstacle_stop, avoid_trail, trail_hold_s):
+    """The obstacle settings robot day needs (T18 re-review, Codex 2026-11-01 09:52, items 3-4).
+
+    The LiDAR stop must be on: sync_fusion's occlusion range and give-way floor leave the near person to it.
+    The trail drives on dead reckoning, so it stays off until checked against the wheels, and never drives
+    without target messages.
+    """
+    if not obstacle_stop:
+        return result("FAIL", "obstacle parameters", "obstacle_stop must be true on the robot")
+    if trail_hold_s > 0.0:
+        return result("FAIL", "obstacle parameters", f"trail_hold_s {trail_hold_s} > 0 drives without target messages")
+    if avoid_trail:
+        return result("WARN", "obstacle parameters", "avoid_trail on: only after the trail is checked on the wheels")
+    return result("PASS", "obstacle parameters", "obstacle_stop on, avoid_trail off, no target-free driving")
+
+
 def check_calibration(path=ROOT / "config" / "motor_wheel_calibration.md"):
     """Looks for a line like `wheel_radius_m = 0.083 (measured 2026-11-02)`."""
     text = path.read_text(encoding="utf-8") if path.exists() else ""
@@ -174,10 +190,15 @@ def main(argv=None):
     ap.add_argument("--wheel-radius", type=float, default=0.085)
     ap.add_argument("--max-speed", type=float, default=1.4)
     ap.add_argument("--max-accel", type=float, default=1.0)
+    ap.add_argument("--obstacle-stop", default="true", help="as passed to the launch file (obstacle_stop:=...)")
+    ap.add_argument("--avoid-trail", default="false", help="as passed to the launch file (avoid_trail:=...)")
+    ap.add_argument("--trail-hold", type=float, default=0.0, help="follow_stop trail_hold_s, if set")
     args = ap.parse_args(argv)
 
     checks = [check_git(), check_model(args.model), check_port(args.port), check_disk(args.output_root),
               check_speed_params(args.speed_mode, args.wheel_radius, args.max_speed, args.max_accel),
+              check_obstacle_params(args.obstacle_stop.lower() in ("true", "1", "yes"),
+                                    args.avoid_trail.lower() in ("true", "1", "yes"), args.trail_hold),
               check_calibration()]
     if args.live:
         checks += live_checks(args.seconds)

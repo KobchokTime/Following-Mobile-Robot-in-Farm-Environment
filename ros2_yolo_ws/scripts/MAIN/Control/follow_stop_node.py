@@ -241,7 +241,9 @@ class FollowStopNode(Node):
         self.declare_parameter('trail_s', 6.0)
         # going round on the trail can turn the target out of the camera's view (blind_corner s2): keep
         # following the crumbs this long without target messages, then stop as before
-        self.declare_parameter('trail_hold_s', 3.0)
+        # 0 = off (the default): no driving on the trail without target messages until the dead-reckoned pose is
+        # checked against the wheels; 3.0 was the offline experiment (T18 re-review, Codex 2026-11-01 09:52, item 3)
+        self.declare_parameter('trail_hold_s', 0.0)
         # stopped close in front of someone with no way round that keeps the target in view (blind_corner s2 on
         # f01dd98 stood 14 s at 0.68 m from the bystander): back off slowly, the stop checking behind, to make
         # room for a way round; at most avoid_back_s each time the path is blocked
@@ -563,7 +565,9 @@ class FollowStopNode(Node):
                     # braking cap the follower uses on the straight gap (T18 re-review, Codex 2026-11-01 07:49)
                     v_path = min(v_path, math.sqrt(2.0 * self.max_decel * max(
                         0.0, left - max(0.0, self.v_wheels) * self.latency_s)))
-                linear_x = max(linear_x, self.avoid_min_speed, v_path)
+                # never faster than the follower asks (the 10:37 rule; T18 re-review, Codex 2026-11-01 09:52,
+                # item 2): the path only lowers it, and a zero request stays zero (a spin-checked turn at most)
+                linear_x = min(max(0.0, linear_x), max(0.0, v_path))
                 angular_z = max(-2.0 * linear_x, min(2.0 * linear_x, angular_z))
                 if not at_edge and angular_z * target_bearing < 0.0 and abs(target_bearing) >= 0.35:
                     # the crumb is one way and the target already 20 deg or more the other: going straight
@@ -600,8 +604,8 @@ class FollowStopNode(Node):
             # from a near stop too (pass_by s4); the turn is limited to an arc of at least 0.5 m radius, which the
             # corridor checks as the arc it is (slower and sharper, it is a near spin checked as straight; beside
             # the worker both were refused, pass_by s1 on 838598d). The turn is eased, not the speed raised, so
-            # the robot never closes on the target faster than the follower asks (T18 integration review).
-            linear_x = max(linear_x, self.avoid_min_speed)
+            # the robot never closes on the target faster than the follower asks (T18 integration review): no
+            # 0.12 m/s floor under a slower request (T18 re-review, Codex 2026-11-01 09:52, item 2).
             angular_z = max(-2.0 * linear_x, min(2.0 * linear_x, angular_z))
             return self.moving_turn(linear_x, angular_z, target_xy, target_bearing)
         if self.avoid_offset != 0.0:
