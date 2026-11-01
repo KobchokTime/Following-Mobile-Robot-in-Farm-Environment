@@ -468,6 +468,11 @@ class SyncFusionNode(Node):
         # whoever is in front. 0 turns it off.
         self.declare_parameter('occluded_gap_m', 0.4)
         self.declare_parameter('occluded_bearing_deg', 6.0)
+        # the same value as follow_stop's obstacle_stop (the launch file passes one argument to both). The
+        # occlusion range and the give-way floor leave the near person to the LiDAR stop; without that stop they
+        # are turned off here, so the near range again holds the robot off them (T18 re-review, Codex
+        # 2026-11-01 07:49, item 2)
+        self.declare_parameter('obstacle_stop', True)
         # TargetGate tunables, so an experiment's -p really reaches the gate (undeclared -p are ignored)
         for name, value in GATE_PARAMS.items():
             self.declare_parameter(name, value)
@@ -510,6 +515,10 @@ class SyncFusionNode(Node):
         self.assist_speed = float(self.get_parameter('lidar_assist_speed_mps').value)
         self.assist_last = None       # (time, bearing, range) of the last assist
         self.occl_gap = float(self.get_parameter('occluded_gap_m').value)
+        if not bool(self.get_parameter('obstacle_stop').value):
+            self.occl_gap, self.path_floor = 0.0, 0.0
+            self.get_logger().info('[OBST] obstacle_stop off: occluded_gap_m and path_floor_m set to 0 '
+                                   '(the near range is used, as before the LiDAR stop)')
         self.occl_bearing = math.radians(float(self.get_parameter('occluded_bearing_deg').value))
         self.occl_logged = False
         # the effective settings, so a run's log shows what it actually ran with

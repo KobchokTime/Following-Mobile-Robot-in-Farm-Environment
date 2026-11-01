@@ -403,16 +403,32 @@ class TrailTest(unittest.TestCase):
         self.assertTrue(node.trailing)
         self.assertGreater(v, 0.0)
 
-    def test_the_trail_is_driven_at_the_speed_of_the_way_left_along_it(self):
-        # blind_corner s1/s3 on 47109fb: 0.8 m from the target in a straight line, a corner away along its path,
-        # the trail crawled to the corner and the target was out of view 2.7 s (in view 0.897)
+    def test_the_trail_is_never_faster_than_the_follower_asks(self):
+        # T18 re-review (Codex 2026-11-01 09:52, item 2): the path length used to raise the speed (0.1 asked, more
+        # than 0.2 sent); now it can only lower it, and a zero request stays zero
         node = M.FollowStopNode()
         node.crumbs = [(1.0, 0.0, 0.0), (1.0, 0.8, 0.0)]
         self.assertAlmostEqual(node.trail_length((1.0, 0.0)), 1.8)
         node.cb_scan(scan(person(0.55, 0.55)))
-        v, _ = node.obstacle_command(0.1, 0.0, (1.0, 0.8), math.atan2(0.8, 1.0))
+        tgt, tb = (1.0, 0.8), math.atan2(0.8, 1.0)
+        v, _ = node.obstacle_command(0.1, 0.0, tgt, tb)
         self.assertTrue(node.trailing)
-        self.assertGreater(v, 0.2)  # not the 0.12 crawl; the stop still caps it near the bystander
+        self.assertLessEqual(v, 0.1)
+        self.assertLessEqual(node.obstacle_command(0.5, 0.0, tgt, tb)[0], 0.5)
+        self.assertEqual(node.obstacle_command(0.0, 0.0, tgt, tb)[0], 0.0)
+        node.crumbs = [(0.3, 0.0, 0.0), (0.4, 0.0, 0.0), (0.4, 0.1, 0.0)]  # the target a short way along its path
+        self.assertLessEqual(node.obstacle_command(0.5, 0.0, (0.4, 0.1), 0.24)[0], 0.5)
+
+    def test_without_target_messages_the_trail_does_not_drive_by_default(self):
+        # T18 re-review (Codex 2026-11-01 09:52, item 3): trail_hold_s 0 by default, so the robot stops as soon as
+        # the target messages stop; the 3 s hold is an offline experiment only
+        node, clock, sent, stops = self.clocked()
+        self.assertEqual(node.trail_hold, 0.0)
+        node.crumbs = [(x / 10.0, 0.0, 9.0) for x in range(0, 21)]
+        node.cb_scan(scan([]))
+        node.trailing, node.last_msg_time = True, clock['t'] - 0.3
+        node.trail_tick()
+        self.assertEqual((sent, stops, node.trailing), ([], [(0.0, 0.0)], False))
 
     def test_with_no_crumb_reachable_the_trail_turns_to_where_the_target_was_seen(self):
         # blind_corner s1 on 9935332: no crumb in a clear line, it stopped facing away and never saw the target again
@@ -424,10 +440,87 @@ class TrailTest(unittest.TestCase):
         node.send = lambda twist, *a, **k: sent.append((twist.linear.x, twist.angular.z))
         node.cb_scan(scan([(0.6, y / 20.0) for y in range(-30, 31)]))  # a wall ahead, outside the spin circle
         node.crumbs = [(1.0, 0.9, 9.0)]  # beyond it, to the left
-        node.trailing, node.last_msg_time = True, 9.5
+        node.trailing, node.last_msg_time, node.trail_hold = True, 9.5, 3.0  # the offline experiment setting
         node.trail_tick()
         self.assertEqual(sent, [(0.0, 0.4)])  # left, where the target was last seen
         self.assertTrue(node.trailing)
+
+    def clocked(self, t=10.0):
+        """A node on a settable clock that records what it sends and what it publishes as a stop."""
+        node = M.FollowStopNode()
+        clock = {'t': t}
+        stamp = type('Stamp', (), {})
+
+        def now():  # a fixed stamp, like rclpy's Time: it does not follow the clock after it is taken
+            st = stamp()
+            st.nanoseconds = int(clock['t'] * 1e9)
+            return st
+        node.get_clock = lambda: type('Clock', (), {'now': lambda self_: now()})()
+        sent, stops = [], []
+        node.send = lambda twist, *a, **k: (sent.append((twist.linear.x, twist.angular.z)),
+                                            setattr(node, 'last_linear', twist.linear.x))
+        node.pub = type('Pub', (), {'publish': lambda self_, twist: stops.append((twist.linear.x, twist.angular.z))})()
+        return node, clock, sent, stops
+
+    def test_the_trail_without_target_messages_moves_the_dead_reckoned_pose(self):
+        # T18 re-review (Codex 2026-11-01 07:49, item 1): with no fused messages the wheel speed was never stepped,
+        # so the pose stayed put while the trail drove the robot on
+        node, clock, sent, _ = self.clocked()
+        node.crumbs = [(x / 10.0, 0.0, 9.0) for x in range(0, 21)]
+        node.trailing, node.last_msg_time, node.trail_hold = True, 9.9, 3.0  # the offline experiment setting
+        for k in range(8):
+            clock['t'] = 10.0 + 0.1 * k
+            node.cb_scan(scan([]))
+            node.trail_tick()
+        self.assertTrue(all(v > 0.0 for v, _ in sent))
+        self.assertGreater(node.v_wheels, 0.0)
+        self.assertGreater(node.pose[0], 0.02)
+
+    def test_the_trail_without_target_messages_never_turns_with_someone_in_the_spin_circle(self):
+        # the offline hold, so the trail reaches its turn: with the circle clear it turns (control); with a post
+        # beside the rear corner it stops instead (the default hold 0 would stop either way and prove nothing)
+        wall = [(0.6, y / 20.0) for y in range(-30, 31)]
+        for post, expect_turn in (([], True), (person(-0.1, 0.3, r=0.05), False)):
+            node, clock, sent, stops = self.clocked()
+            node.cb_scan(scan(wall + post))
+            node.crumbs = [(1.0, 0.9, 9.0)]
+            node.trailing, node.last_msg_time, node.trail_hold = True, 9.5, 3.0
+            node.trail_tick()
+            if expect_turn:
+                self.assertEqual(sent, [(0.0, 0.4)])
+            else:
+                self.assertEqual([c for c in sent if c[1] != 0.0], [])
+                self.assertFalse(node.trailing)
+                self.assertEqual(stops, [(0.0, 0.0)])
+
+    def test_the_trail_without_target_messages_stops_on_a_stale_scan_and_after_the_hold(self):
+        node, clock, sent, stops = self.clocked()
+        node.crumbs = [(x / 10.0, 0.0, 9.0) for x in range(0, 21)]
+        node.cb_scan(scan([]))
+        clock['t'] = 10.0 + node.scan_max_age + 0.1  # no scan since
+        node.trailing, node.last_msg_time, node.trail_hold = True, clock['t'] - 0.5, 3.0
+        node.trail_tick()
+        self.assertEqual((sent, stops, node.trailing), ([], [(0.0, 0.0)], False))
+        node, clock, sent, stops = self.clocked()
+        node.crumbs = [(x / 10.0, 0.0, 9.0) for x in range(0, 21)]
+        node.cb_scan(scan([]))
+        node.trail_hold = 3.0
+        node.trailing, node.last_msg_time = True, clock['t'] - node.trail_hold - 0.1
+        node.trail_tick()
+        self.assertEqual((sent, stops, node.trailing), ([], [(0.0, 0.0)], False))
+
+    def test_a_published_trail_turn_is_stopped_by_the_next_scan_that_fills_the_spin_circle(self):
+        # T18 re-review (Codex 2026-11-01 09:52, item 5): through the production send() and cb_scan()
+        node, clock, _, stops = self.clocked()
+        del node.send  # the real send, which records the command for the per-scan re-check
+        node.cb_scan(scan([(0.6, y / 20.0) for y in range(-30, 31)]))  # a wall ahead, the spin circle clear
+        node.crumbs = [(1.0, 0.9, 9.0)]
+        node.trailing, node.last_msg_time, node.trail_hold = True, 9.5, 3.0
+        node.trail_tick()
+        self.assertEqual(stops[-1], (0.0, 0.4))  # the turn to where the target was last seen, published
+        clock['t'] += 0.1
+        node.cb_scan(scan([(0.6, y / 20.0) for y in range(-30, 31)] + person(-0.1, 0.3, r=0.05)))
+        self.assertEqual(stops[-1], (0.0, 0.0))  # someone now beside the rear corner: the turn is stopped
 
     def test_dead_reckoning_and_crumbs(self):
         node = M.FollowStopNode()
