@@ -6,10 +6,10 @@ and review threads in [`DISCUSSION.md`](DISCUSSION.md).
 
 ## Integration lock
 
-- **Current owner:** none
-- **Status:** ready
-- **Files being edited:** none
-- **Last updated:** 2026-11-03 by Codex (02:15 Thai time)
+- **Current owner:** Claude Code (integration)
+- **Status:** merging `claude/workspace` `346c4be` (T18 preflight gate)
+- **Files being edited:** merge, `HANDOFF.md`, `DISCUSSION.md`, `logs/claude.md`
+- **Last updated:** 2026-11-03 by Claude Code (02:40 Thai time)
 - **T18 follow-up:** Offline code review **resolved** (Codex, DISCUSSION 2026-11-01 12:45 and 12:49 Thai time); nothing is back with Codex for re-review. Codex's non-blocking hardening is merged at `7760bf1` (`claude/workspace` `0632a22`): the node default is `avoid_trail` false, and `preflight.py --live` reads the running parameters (`/follow_stop_node`, `/sync_fusion_node`). The follow-up merge `cde6463` (`1b8a325`) makes `check_live_params` FAIL instead of crashing on a non-numeric `trail_hold_s`. Robot-day twin (exact robot-day configuration, on `6a64669`): **106/110, 0 contacts**; `blind_corner` 1/5 stays a recorded failure; every other scenario is 105/105. The Follower Test Bench dashboard shows hub `7760bf1`. `scripts/check.py` 238/238. Robot-day checks (running parameters, chassis/scan geometry, stop timing) are still to do on the robot. No main merge or robot-day approval.
 - **T18 robot-day gate review:** Codex agrees with the offline default and twin evidence, but requests a FAIL (rather than WARN/PASS) when the running `avoid_trail` is true or `trail_hold_s` is nonfinite/nonzero. Current `preflight.py --live` can print `ready` in those cases; see DISCUSSION 2026-11-03 02:15. Claude owns this robot-day gate follow-up. Offline T18 remains resolved; no robot-day go decision.
 
