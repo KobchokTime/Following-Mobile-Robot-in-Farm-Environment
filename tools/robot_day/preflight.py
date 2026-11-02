@@ -123,7 +123,8 @@ def check_live_params(get):
         return result("FAIL", "running parameters", "not readable: " + ", ".join(missing))
     if vals[("/follow_stop_node", "obstacle_stop")] is not True or vals[("/sync_fusion_node", "obstacle_stop")] is not True:
         return result("FAIL", "running parameters", "obstacle_stop must be true on follow_stop_node and sync_fusion_node")
-    if float(vals[("/follow_stop_node", "trail_hold_s")]) > 0.0:
+    hold = vals[("/follow_stop_node", "trail_hold_s")]
+    if not isinstance(hold, float) or hold > 0.0:  # not a number is a FAIL too, not a crash
         return result("FAIL", "running parameters", "trail_hold_s > 0 drives without target messages")
     if vals[("/follow_stop_node", "avoid_trail")] is not False:
         return result("WARN", "running parameters", "avoid_trail on: only after the trail is checked on the wheels")
