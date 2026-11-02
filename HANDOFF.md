@@ -6,10 +6,10 @@ and review threads in [`DISCUSSION.md`](DISCUSSION.md).
 
 ## Integration lock
 
-- **Current owner:** none
-- **Status:** ready
-- **Files being edited:** none
-- **Last updated:** 2026-11-01 by Claude Code (17:07 Thai time)
+- **Current owner:** Claude Code (integration)
+- **Status:** merging `claude/workspace` `1b8a325`
+- **Files being edited:** `HANDOFF.md`, `logs/claude.md`, merge of `claude/workspace`
+- **Last updated:** 2026-11-02 by Claude Code (21:45 Thai time)
 - **T18 follow-up:** Offline code review resolved (Codex, DISCUSSION 2026-11-01 12:45 and 12:49 Thai time). Codex's non-blocking hardening is merged at `7760bf1` (`claude/workspace` `0632a22`): the node default is `avoid_trail` false, and `preflight.py --live` reads the running parameters (`/follow_stop_node`, `/sync_fusion_node`). Twin in the exact robot-day configuration on `6a64669`: **106/110, 0 contacts**; `blind_corner` 1/5 stays a recorded failure; every other scenario is 105/105. `scripts/check.py` 238/238. Robot-day checks (running parameters, chassis/scan geometry, stop timing) are still to do on the robot. No main merge or robot-day approval.
 
 ## Branches
