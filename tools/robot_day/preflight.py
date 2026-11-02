@@ -10,6 +10,7 @@ Each line is PASS, WARN or FAIL; the exit code is 1 if anything failed.
 """
 
 import argparse
+import math
 import os
 import re
 import shutil
@@ -87,10 +88,12 @@ def check_obstacle_params(obstacle_stop, avoid_trail, trail_hold_s):
     """
     if not obstacle_stop:
         return result("FAIL", "obstacle parameters", "obstacle_stop must be true on the robot")
-    if trail_hold_s > 0.0:
-        return result("FAIL", "obstacle parameters", f"trail_hold_s {trail_hold_s} > 0 drives without target messages")
+    if not (math.isfinite(trail_hold_s) and trail_hold_s == 0.0):
+        return result("FAIL", "obstacle parameters", f"trail_hold_s must be exactly 0, not {trail_hold_s}")
     if avoid_trail:
-        return result("WARN", "obstacle parameters", "avoid_trail on: only after the trail is checked on the wheels")
+        # a FAIL, not a warning: the robot-day gate never says ready with the experimental trail on (T18, Codex
+        # 2026-11-03 02:15)
+        return result("FAIL", "obstacle parameters", "avoid_trail must be false on the robot")
     return result("PASS", "obstacle parameters", "obstacle_stop on, avoid_trail off, no target-free driving")
 
 
@@ -124,11 +127,40 @@ def check_live_params(get):
     if vals[("/follow_stop_node", "obstacle_stop")] is not True or vals[("/sync_fusion_node", "obstacle_stop")] is not True:
         return result("FAIL", "running parameters", "obstacle_stop must be true on follow_stop_node and sync_fusion_node")
     hold = vals[("/follow_stop_node", "trail_hold_s")]
-    if not isinstance(hold, float) or hold > 0.0:  # not a number is a FAIL too, not a crash
-        return result("FAIL", "running parameters", "trail_hold_s > 0 drives without target messages")
+    # exactly 0 and finite: nan made trail_tick's `quiet > trail_hold` false, so the trail never timed out, and a
+    # negative or text value is no setting at all (T18, Codex 2026-11-03 02:15)
+    if not (isinstance(hold, float) and math.isfinite(hold) and hold == 0.0):
+        return result("FAIL", "running parameters", f"trail_hold_s must be exactly 0, not {hold}")
     if vals[("/follow_stop_node", "avoid_trail")] is not False:
-        return result("WARN", "running parameters", "avoid_trail on: only after the trail is checked on the wheels")
+        return result("FAIL", "running parameters", "avoid_trail must be false on the robot")
     return result("PASS", "running parameters", "obstacle_stop on (both nodes), avoid_trail off, trail_hold_s 0")
+
+
+# the rest of the motion configuration, read back and compared with the documented robot-day values (T18, Codex
+# 2026-11-03 02:15). The expected values come from the command line, so measured values (a fitted spin radius,
+# a lower speed cap) can be passed in; the defaults are the documented ones.
+MOTION_PARAMS = (("/follow_stop_node", "obstacle_stop_m"), ("/follow_stop_node", "spin_clear_radius_m"),
+                 ("/follow_stop_node", "max_decel"), ("/follow_stop_node", "recheck_max_s"),
+                 ("/zlac_drive_bridge", "speed_mode"), ("/zlac_drive_bridge", "max_speed_mps"))
+
+
+def check_motion_params(get, expected):
+    """FAIL unless each running motion value is readable and equals the expected one. expected: {(node, name): value}."""
+    vals = {key: get(*key) for key in MOTION_PARAMS}
+    missing = [f"{n} {k}" for (n, k), v in vals.items() if v is None]
+    if missing:
+        return result("FAIL", "running motion parameters", "not readable: " + ", ".join(missing))
+    wrong = []
+    for key, want in expected.items():
+        got = vals[key]
+        same = (isinstance(got, float) and isinstance(want, float) and math.isfinite(got)
+                and abs(got - want) <= 1e-6) if isinstance(want, float) else got == want
+        if not same:
+            wrong.append(f"{key[0]} {key[1]} is {got}, expected {want}")
+    if wrong:
+        return result("FAIL", "running motion parameters", "; ".join(wrong))
+    return result("PASS", "running motion parameters",
+                  ", ".join(f"{k}={vals[(n, k)]}" for n, k in MOTION_PARAMS))
 
 
 def ros2_param_get(node, name, timeout=10.0):
@@ -239,6 +271,11 @@ def main(argv=None):
     ap.add_argument("--obstacle-stop", default="true", help="as passed to the launch file (obstacle_stop:=...)")
     ap.add_argument("--avoid-trail", default="false", help="as passed to the launch file (avoid_trail:=...)")
     ap.add_argument("--trail-hold", type=float, default=0.0, help="follow_stop trail_hold_s, if set")
+    # what --live expects the running nodes to report (documented values; pass measured ones when they exist)
+    ap.add_argument("--expect-obstacle-stop-m", type=float, default=0.45)
+    ap.add_argument("--expect-spin-clear-radius-m", type=float, default=0.40)
+    ap.add_argument("--expect-max-decel", type=float, default=0.8)
+    ap.add_argument("--expect-recheck-max-s", type=float, default=1.0)
     args = ap.parse_args(argv)
 
     checks = [check_git(), check_model(args.model), check_port(args.port), check_disk(args.output_root),
@@ -247,8 +284,18 @@ def main(argv=None):
                                     args.avoid_trail.lower() in ("true", "1", "yes"), args.trail_hold),
               check_calibration()]
     if args.live:
-        checks += live_checks(args.seconds)
+        try:
+            checks += live_checks(args.seconds)
+        except ImportError as e:  # no ROS Python packages: a labelled FAIL, not a traceback
+            checks.append(result("FAIL", "ROS", f"cannot import the ROS Python packages ({e})"))
         checks.append(check_live_params(ros2_param_get))
+        checks.append(check_motion_params(ros2_param_get, {
+            ("/follow_stop_node", "obstacle_stop_m"): args.expect_obstacle_stop_m,
+            ("/follow_stop_node", "spin_clear_radius_m"): args.expect_spin_clear_radius_m,
+            ("/follow_stop_node", "max_decel"): args.expect_max_decel,
+            ("/follow_stop_node", "recheck_max_s"): args.expect_recheck_max_s,
+            ("/zlac_drive_bridge", "speed_mode"): args.speed_mode,
+            ("/zlac_drive_bridge", "max_speed_mps"): args.max_speed}))
     for level, what, detail in checks:
         print(f"[{level}] {what}: {detail}")
     failed = sum(1 for c in checks if c[0] == "FAIL")

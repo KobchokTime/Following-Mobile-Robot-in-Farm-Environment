@@ -33,7 +33,9 @@ class PreflightTest(unittest.TestCase):
         self.assertEqual(P.check_obstacle_params(True, False, 0.0)[0], "PASS")
         self.assertEqual(P.check_obstacle_params(False, False, 0.0)[0], "FAIL")
         self.assertEqual(P.check_obstacle_params(True, False, 3.0)[0], "FAIL")
-        self.assertEqual(P.check_obstacle_params(True, True, 0.0)[0], "WARN")
+        self.assertEqual(P.check_obstacle_params(True, True, 0.0)[0], "FAIL")  # trail on: never ready (02:15)
+        for hold in (float("nan"), -1.0):
+            self.assertEqual(P.check_obstacle_params(True, False, hold)[0], "FAIL")
 
     def test_live_params(self):
         # T18 (Codex 2026-11-01 12:49): --live reads the running nodes' values, not the operator's flags
@@ -50,8 +52,29 @@ class PreflightTest(unittest.TestCase):
         self.assertEqual(P.check_live_params(get({("/sync_fusion_node", "obstacle_stop"): False}))[0], "FAIL")
         self.assertEqual(P.check_live_params(get({("/sync_fusion_node", "obstacle_stop"): None}))[0], "FAIL")
         self.assertEqual(P.check_live_params(get({("/follow_stop_node", "trail_hold_s"): 3.0}))[0], "FAIL")
-        self.assertEqual(P.check_live_params(get({("/follow_stop_node", "avoid_trail"): True}))[0], "WARN")
+        # T18 (Codex 2026-11-03 02:15): the trail on, or a hold that is not exactly 0, is a FAIL, never ready
+        self.assertEqual(P.check_live_params(get({("/follow_stop_node", "avoid_trail"): True}))[0], "FAIL")
+        for hold in (float("nan"), -1.0, float("inf")):
+            self.assertEqual(P.check_live_params(get({("/follow_stop_node", "trail_hold_s"): hold}))[0], "FAIL")
         self.assertEqual(P.check_live_params(get({("/follow_stop_node", "trail_hold_s"): "abc"}))[0], "FAIL")
+
+    def test_motion_params(self):
+        # T18 (Codex 2026-11-03 02:15): the rest of the motion configuration is read back and compared
+        running = {("/follow_stop_node", "obstacle_stop_m"): 0.45, ("/follow_stop_node", "spin_clear_radius_m"): 0.40,
+                   ("/follow_stop_node", "max_decel"): 0.8, ("/follow_stop_node", "recheck_max_s"): 1.0,
+                   ("/zlac_drive_bridge", "speed_mode"): "mps", ("/zlac_drive_bridge", "max_speed_mps"): 0.5}
+        expected = dict(running)
+
+        def get(changes):
+            vals = {**running, **changes}
+            return lambda node, name: vals.get((node, name))
+        self.assertEqual(P.check_motion_params(get({}), expected)[0], "PASS")
+        self.assertEqual(P.check_motion_params(get({("/zlac_drive_bridge", "max_speed_mps"): 1.4}), expected)[0], "FAIL")
+        self.assertEqual(P.check_motion_params(get({("/follow_stop_node", "spin_clear_radius_m"): 0.3}), expected)[0],
+                         "FAIL")
+        self.assertEqual(P.check_motion_params(get({("/zlac_drive_bridge", "speed_mode"): None}), expected)[0], "FAIL")
+        self.assertEqual(P.check_motion_params(get({("/follow_stop_node", "max_decel"): float("nan")}), expected)[0],
+                         "FAIL")
 
     def test_launch_passes_one_obstacle_stop_to_both_nodes(self):
         # the launch file, with stand-ins for the launch package: follow_stop and sync_fusion get the same value,
