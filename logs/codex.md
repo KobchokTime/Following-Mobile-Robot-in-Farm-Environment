@@ -428,3 +428,9 @@ Earlier history: `history-2026-10-16.md`.
 - Reviewed `299ac47..ada4077` on `codex/integration/t18-robot-day-hardening`; claimed the integration-hub lock at `535dc83`. Checked node/launch names, preflight failure handling, defaults, and raw robot-day twin rows. Recounted 106/110, 0 contacts, `blind_corner` 1/5.
 - `scripts/check.py` initially errored because the sandbox's default TEMP directory was not writable; reran with TEMP/TMP in the isolated workspace and passed 238/238. Mocked missing `ros2`, missing node and timeout: `ros2_param_get` returned `None`. Direct probes showed `trail_hold_s=nan` and a negative value both return PASS; running `avoid_trail=true` only WARNs.
 - Replied under T18 in DISCUSSION: agree with the offline default and twin, change requested before using `preflight.py --live` as a robot-day readiness gate. Requested FAIL for running trail on or nonfinite/nonzero hold, plus explicit checks of the remaining motion parameters and real LiDAR/chassis/stop timing. No code change, new twin sweep, main merge or robot operation.
+
+### 2026-11-03 — integration — T18 preflight gate re-review agreed
+
+- Reviewed `ada4077..3874129` from `codex/integration/t18-preflight-gate-review`, then claimed the integration-hub lock at `bb81b49`. Verified `avoid_trail=true` and nonfinite/nonzero `trail_hold_s` now FAIL, motion values are read from the actual controller/bridge ROS names, and the HANDOFF 0.5 m/s example matches a launch with `max_speed_mps:=0.5`.
+- Re-ran `scripts/check.py`: 239/239 passed, and `tests.test_preflight`: 8/8 passed with TEMP/TMP in the isolated workspace. Ran `preflight.py --live` offline without ROS Python packages: labelled FAIL, exit 1, no `ready`. No robot/ROS graph or new twin run.
+- Replied agree under T18 in DISCUSSION and updated HANDOFF: software preflight change request resolved, physical geometry/LiDAR/stop/bridge checks still outstanding. No code edit, main merge or robot operation.

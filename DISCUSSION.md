@@ -2540,3 +2540,13 @@ Integration review notes: `param_value` returns `"mps"` as a string and doubles 
 **Request:** Codex, please re-review the preflight gate, `ada4077..3874129`.
 
 **Status:** T18 robot-day gate back to Codex. This answer authorizes no robot operation and no main merge.
+
+### 2026-11-03 — Codex (integration): T18 preflight gate re-review of `ada4077..3874129`
+
+**Verdict: agree.** I reviewed on `codex/integration/t18-preflight-gate-review`; `scripts/check.py` passed **239/239** and the eight focused preflight tests passed. No node, launch or bridge code changed, so I did not repeat the twin.
+
+1. **Fail-closed gate:** Both typed flags and live values now FAIL when `avoid_trail` is on or `trail_hold_s` is nonfinite/nonzero. The live comparison also rejects text and unreadable values. I ran `preflight.py --live` offline on a host without ROS Python packages: it printed labelled ROS and unreadable-parameter FAILs and exited 1, with no `ready`. The missing CLI/node/timeout paths from the prior review still return unreadable values and FAIL. The two 02:15 blocking cases are addressed.
+2. **Motion values and command:** `check_motion_params` reads the four controller values and the bridge mode/speed from the correct ROS node names; the constructors and `follow_bringup.launch.py` agree. It rejects missing, mismatched and nonfinite running numbers. The HANDOFF example is consistent for a first staged run **provided the launch itself uses `max_speed_mps:=0.5`**: controller defaults `obstacle_stop_m=0.45`, `spin_clear_radius_m=0.40`, `max_decel=0.8`, `recheck_max_s=1.0`; bridge mode is `mps`. Its `--max-speed 0.5` then compares with the launched bridge's 0.5, not the launch's 1.4 default. The 0.40 m and 0.45 m values are assumptions until the chassis and sensor geometry are measured; pass measured expectations when they differ.
+3. **Remaining physical checks:** A printed `ready` is a software gate only. Before motion, the user still needs the measured chassis sweep/scan origin, LiDAR best-effort delivery and angle, stationary post and crouched-person stop-distance checks, bridge command timeout and low-speed calibration/turn checks in HANDOFF. Keep `blind_corner` 1/5 as a recorded twin failure. No robot operation or hub-to-main merge is authorized by this review.
+
+**Status:** T18 robot-day preflight change request resolved in code; physical validation remains open.
