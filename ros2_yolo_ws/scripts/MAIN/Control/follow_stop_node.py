@@ -6,7 +6,12 @@ from std_msgs.msg import Float32MultiArray
 from geometry_msgs.msg import Twist
 from sensor_msgs.msg import LaserScan
 import math
+import os
+import sys
 from math import exp, isfinite
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from local_grid import LocalGrid, path_length  # noqa: E402  (pure Python, beside this file)
 
 
 def wheel_speed_estimate(v_est, last_cmd, dt, accel):
@@ -251,6 +256,23 @@ class FollowStopNode(Node):
         # room for a way round; at most avoid_back_s each time the path is blocked
         self.declare_parameter('avoid_back_mps', 0.1)
         self.declare_parameter('avoid_back_s', 3.0)
+        # grib (experiment, off by default; never on the robot without a review): a rolling local occupancy grid
+        # from /scan in the dead-reckoned frame, hits scored with decay as in the Thesis Desk game, inflated by
+        # the robot's half width; when the straight line to the target is blocked, or the target has just left
+        # the image, A* to where the target is (or is predicted to be) and steer at the path's first waypoint.
+        # Every command still goes through the obstacle stop, the spin circle and the per-scan re-check, and is
+        # never faster than the follower asks.
+        self.declare_parameter('grib', False)
+        self.declare_parameter('grib_cell_m', 0.1)
+        self.declare_parameter('grib_size_m', 6.0)
+        self.declare_parameter('grib_hit', 1.0)
+        self.declare_parameter('grib_decay_per_s', 2.0)
+        self.declare_parameter('grib_threshold', 2.0)
+        self.declare_parameter('grib_max_score', 4.0)
+        self.declare_parameter('grib_inflate_m', 0.25)     # robot half width 0.235 m (thesis slides)
+        self.declare_parameter('grib_clearance_m', 0.3)    # steps this much beyond the inflation cost extra
+        self.declare_parameter('grib_lookahead_m', 1.0)
+        self.declare_parameter('grib_predict_s', 1.0)      # predict an unseen target this far ahead at most
         self.declare_parameter('scan_topic', '/scan')
         self.declare_parameter('lidar_angle_offset_deg', 180.0)  # as sync_fusion_node / lidar_sectorizer_node
         self.declare_parameter('scan_max_age_s', 0.3)
@@ -325,6 +347,20 @@ class FollowStopNode(Node):
         self.moving_time       = 0.0    # when that command was sent
         self.recheck_max       = float(self.get_parameter('recheck_max_s').value)
         self.spin_clear_r      = float(self.get_parameter('spin_clear_radius_m').value)
+        self.grib              = bool(self.get_parameter('grib').value)
+        self.grib_lookahead    = float(self.get_parameter('grib_lookahead_m').value)
+        self.grib_predict      = float(self.get_parameter('grib_predict_s').value)
+        self.grid = LocalGrid(
+            cell_m=float(self.get_parameter('grib_cell_m').value),
+            size_m=float(self.get_parameter('grib_size_m').value),
+            hit=float(self.get_parameter('grib_hit').value),
+            decay_per_s=float(self.get_parameter('grib_decay_per_s').value),
+            threshold=float(self.get_parameter('grib_threshold').value),
+            max_score=float(self.get_parameter('grib_max_score').value),
+            inflate_m=float(self.get_parameter('grib_inflate_m').value),
+            clearance_m=float(self.get_parameter('grib_clearance_m').value)) if self.grib else None
+        self.grib_seen         = []     # (x, y, time) of the target in the image, dead-reckoned frame, last 1 s
+        self.gribbing          = False  # last [GRIB] state written to the log
 
         # ---------- State ----------
         self.initialized   = False
@@ -368,7 +404,38 @@ class FollowStopNode(Node):
         self.scan_xy = pts
         self.scan_time = self.get_clock().now().nanoseconds / 1e9
         self.advance_pose()
+        if self.grid is not None:
+            self.update_grid()
         self.recheck_last_cmd()
+
+    def to_world(self, xy):
+        """Robot frame (x, y) -> the dead-reckoned frame."""
+        c, s = math.cos(self.pose[2]), math.sin(self.pose[2])
+        return self.pose[0] + c * xy[0] - s * xy[1], self.pose[1] + s * xy[0] + c * xy[1]
+
+    def to_robot(self, wxy):
+        """The dead-reckoned frame -> robot frame (x, y)."""
+        c, s = math.cos(self.pose[2]), math.sin(self.pose[2])
+        dx, dy = wxy[0] - self.pose[0], wxy[1] - self.pose[1]
+        return c * dx + s * dy, -s * dx + c * dy
+
+    def grib_target(self, now):
+        """Where the target is now in the dead-reckoned frame: its last place in the image, moved on at the speed
+        it was walking over the last second for as long as it has been out of it (at most grib_predict_s)."""
+        if not self.grib_seen:
+            return None
+        x1, y1, t1 = self.grib_seen[-1]
+        x0, y0, t0 = self.grib_seen[0]
+        if t1 - t0 < 0.2:
+            return x1, y1
+        k = min(max(0.0, now - t1), self.grib_predict) / (t1 - t0)
+        return x1 + (x1 - x0) * k, y1 + (y1 - y0) * k
+
+    def update_grid(self):
+        """Score the latest scan into the grid; returns at the target are not obstacles."""
+        tgt = self.grib_target(self.scan_time)
+        self.grid.update([self.to_world(p) for p in self.scan_xy], self.scan_time, self.pose[:2],
+                         tgt, self.obstacle_excl)
 
     def update_wheel_speed(self, now):
         """Step the bridge-ramp estimate of the wheel speed towards the last speed sent, up to now."""
@@ -519,6 +586,10 @@ class FollowStopNode(Node):
         bearing is not known."""
         now = self.get_clock().now().nanoseconds / 1e9
         fresh = self.scan_time is not None and 0.0 <= now - self.scan_time <= self.scan_max_age
+        if self.grid is not None:
+            cmd = self.grib_command(linear_x, target_xy, target_bearing, at_edge, fresh, now)
+            if cmd is not None:
+                return cmd
         offset = 0.0
         found = 0.0
         if self.obstacle_stop and self.obstacle_avoid and fresh and at_edge and (linear_x > 0.0 or angular_z != 0.0):
@@ -622,6 +693,70 @@ class FollowStopNode(Node):
                 if v > 0.0:
                     return self.stopped_turn(v, angular_z * f, target_xy)
         return self.stopped_turn(capped, angular_z, target_xy)
+
+    def grib_edge_goal(self, edge_xy, now):
+        """Where to plan to while the target is at the image edge (sync_fusion tracks it by LiDAR there): at the
+        tracked range, in the direction of its predicted position, but at least half the camera's field of view
+        and at most 90 deg to the edge's side (the side sync_fusion reports it on). None without a sighting to
+        predict from."""
+        pred = self.grib_target(now)
+        if pred is None:
+            return None
+        rx, ry = self.to_robot(pred)
+        side = 1.0 if edge_xy[1] > 0.0 else -1.0
+        half = math.radians(self.camera_hfov_deg / 2.0)
+        b = math.atan2(ry, rx)
+        # never behind the robot: a prediction past the robot's side is dead reckoning and a straight-line guess
+        # (blind_corner s0 probe: a goal behind flipped the turn between full left and full right)
+        b = side * min(math.pi / 2.0, max(half, abs(b))) if b * side > 0.0 else side * half
+        r = math.hypot(*edge_xy)
+        return self.to_world((r * math.cos(b), r * math.sin(b)))
+
+    def grib_command(self, linear_x, target_xy, target_bearing, at_edge, fresh, now):
+        """(linear, angular) along an A* path on the local grid, or None to leave the command to the usual
+        follower (and its avoid, trail and back-off). Only when the robot is asked to move forward and the
+        straight line to the target is blocked, or the target is at the image edge (just out of view, its
+        bearing unknown: the goal is its predicted position). The result goes through moving_turn, so the
+        obstacle stop, the spin circle and the re-check of the published command all still apply."""
+        plan = None
+        if self.obstacle_stop and fresh and linear_x > 0.0:
+            need = at_edge or segment_blocked(self.scan_xy, self.obstacle_half_w, target_xy, target_xy,
+                                              self.obstacle_excl)
+            goal = (self.grib_edge_goal(target_xy, now) if at_edge else self.to_world(target_xy)) if need else None
+            if goal is not None:
+                start = tuple(self.pose[:2])
+                path = self.grid.plan(start, goal, goal_r=self.target_distance)
+                wp = self.grid.waypoint(start, path, self.grib_lookahead) if path else None
+                if wp is not None:
+                    plan = (path, wp)
+        if plan is None:
+            if self.gribbing:
+                self.get_logger().info("[GRIB] off")
+                self.gribbing = False
+            return None
+        path, wp = plan
+        aim = self.to_robot(wp)
+        if not self.gribbing:
+            self.get_logger().info(f"[GRIB] on: A* {len(path)} cells, waypoint ({aim[0]:.2f}, {aim[1]:.2f}) m")
+            self.gribbing = True
+        angular_z = bearing_turn(math.atan2(aim[1], aim[0]), 0.0, self.latency_s, self.bearing_gain,
+                                 self.angular_limit, self.bearing_deadband)
+        # the speed rule of the trail: the way left along the path, with the braking cap, and never faster than
+        # the follower asks: min(max(0, asked), path cap)
+        left = path_length(tuple(self.pose[:2]), path)
+        v_path = min(0.6, 1.0 * left)
+        if self.max_decel > 0.0:
+            v_path = min(v_path, math.sqrt(2.0 * self.max_decel * max(
+                0.0, left - max(0.0, self.v_wheels) * self.latency_s)))
+        linear_x = min(max(0.0, linear_x), max(0.0, v_path))
+        angular_z = max(-2.0 * linear_x, min(2.0 * linear_x, angular_z))
+        if not at_edge and angular_z * target_bearing < 0.0 and abs(target_bearing) >= 0.1:
+            # never turn away from a target 6 deg or more the other way: the path round someone on the target's
+            # side turned the target out of the image as it went round the corner (blind_corner probe s0/s1: a
+            # right swerve at 0.8 rad/s while the target turned left)
+            angular_z = 0.0
+        return self.moving_turn(linear_x, angular_z, None if at_edge else target_xy,
+                                None if at_edge else target_bearing)
 
     def cb_fused(self, msg: Float32MultiArray):
         if len(msg.data) < 8:
@@ -740,6 +875,9 @@ class FollowStopNode(Node):
         crumb_now = self.advance_pose()
         if not (cx <= 0 or cx >= self.image_width - 1):
             self.add_crumb(target_xy, crumb_now)
+            if self.grid is not None:
+                self.grib_seen.append((*self.to_world(target_xy), crumb_now))
+                self.grib_seen = [g for g in self.grib_seen if crumb_now - g[2] <= 1.0]
         linear_x, angular_z = self.obstacle_command(linear_x, angular_z, target_xy, tb,
                                                     at_edge=cx <= 0 or cx >= self.image_width - 1)
         self.last_linear = linear_x

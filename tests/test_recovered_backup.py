@@ -16,7 +16,7 @@ MODEL_DIR = ROOT / "yolov8n_openvino_model"
 class RecoveredBackupTests(unittest.TestCase):
     def test_all_python_sources_parse(self):
         files = sorted(SCRIPTS.rglob("*.py"))
-        self.assertEqual(len(files), 29)
+        self.assertEqual(len(files), 30)  # 29 recovered + MAIN/Control/local_grid.py (grib experiment)
         for path in files:
             with self.subTest(path=path.relative_to(ROOT)):
                 ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
