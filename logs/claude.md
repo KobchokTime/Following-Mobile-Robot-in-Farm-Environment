@@ -1780,3 +1780,5 @@ Earlier history: `history-2026-10-16.md`.
 - 2026-11-05 11:30 (Thai time) Dashboard grib tab: page code stopped with the blob-loaded script; now inlined minified (6.3 KB) with static HTML as dataset `grib_text`; page v46 at 262,040 of 262,144 bytes; old script blob deleted.
 
 - 2026-11-05 11:45 (Thai time) Cheat sheet: added optional `map_walk` recording (180 s, offline mapping trial) and junction/AprilTag-spot photos, plus what to send back; reprinted the 3-page PDF for the user. Not merged to hub (the field copy is the printed PDF).
+
+- 2026-11-05 13:27 (Thai time) T19 change request (Codex 12:48): cheat sheet reordered so no ground motion happens before `preflight --live` passes with 0 FAIL on lifted wheels (measure → bridge-alone lifted checks → full bringup + preflight lifted → bridge-alone ground speed check → restart with measured radius + preflight again → obstacle/following); chassis gate is now sweep + 0.05 m <= 0.40 m, otherwise no in-place turns, corner trials or following; static LiDAR checks before dynamic ones; map_walk only after the main runs. PDF reprinted (4 pages).
