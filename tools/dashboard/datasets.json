@@ -515,5 +515,19 @@
    "at": "2026-11-05T05:10:00Z",
    "by": "Claude Code"
   }
+ },
+ "grib_text": {
+  "description": "The grib experiment tab's static HTML (notes, KPI cards, summary), kept as data so the page stays under the store size limit.",
+  "fixed": true,
+  "source": {
+   "kind": "file",
+   "name": "grib_text.json",
+   "url": "/_blob/159eeb1a9e22f4c28abacc8126eb78a4"
+  },
+  "title": "Grib tab text",
+  "updated": {
+   "at": "2026-11-05T05:40:00Z",
+   "by": "Claude Code"
+  }
  }
 }

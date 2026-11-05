@@ -1776,3 +1776,5 @@ Earlier history: `history-2026-10-16.md`.
 - 2026-11-05 11:26 (Thai time) Dashboard grib tab stuck at loading (static `<script src>` to the blob did not run in the dashboard). Page v44: the grib panel fetches the blob and runs it, with a script-tag fallback and an error message.
 
 - 2026-11-05 11:27 (Thai time) Dashboard grib tab: `grib_paths` failed to load as arrays of arrays; re-uploaded as objects (blob 17c6f4cc…), tab script re-uploaded (41e6196b…), page v45, dataset v2; old blobs deleted.
+
+- 2026-11-05 11:30 (Thai time) Dashboard grib tab: page code stopped with the blob-loaded script; now inlined minified (6.3 KB) with static HTML as dataset `grib_text`; page v46 at 262,040 of 262,144 bytes; old script blob deleted.

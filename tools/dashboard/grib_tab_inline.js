@@ -1,9 +1,5 @@
-/* Follower Test Bench: grib experiment tab (2026-11-05, branch claude/robot/grib-local-grid 2125e8b).
-   Loaded by index.html; draws into #panel-grib from datasets grib_runs and grib_paths. */
-(function () {
-  let dash, failed, ready, f2, built = false;
-  const PANEL_HTML = "\n    <p class=\"tb-history\">การทดลองเล่น ๆ (5 พ.ย.): แผนที่ตารางรอบตัวหุ่นจาก LiDAR + หาทางด้วย A* (แนวคิด grib จากเกม Godot) · branch <code>claude/robot/grib-local-grid</code> <code>2125e8b</code> · ปิดไว้เป็นค่าเริ่มต้น ไม่เข้า hub ไม่ใช้วันลงพื้นที่ · ผลจาก twin เท่านั้น Codex ยังไม่ review</p>\n    <div class=\"tb-kpis\" id=\"tb-gribkpis\" data-source=\"grib_runs\"></div>\n    <div class=\"tb-grid\">\n      <section class=\"tb-card\" id=\"grib-pass\">\n        <h2>ผ่านกี่รอบ ต่อฉาก (จาก 5)</h2>\n        <p class=\"tb-note\">\"ปิด\" = ค่าวันลงพื้นที่ · \"เปิด\" = <code>grib:=true</code> · กฎผ่านเดิม: เห็นเป้าตอนจบ, ห่าง ≤ 1.5 m, ไม่ชน, เห็นเป้า ≥ 90% ของเวลา</p>\n        <div class=\"tb-chart dash-skeleton\" id=\"tb-gribpass\" data-source=\"grib_runs\"></div>\n      </section>\n      <section class=\"tb-card\" id=\"grib-vis\">\n        <h2>สัดส่วนเวลาที่เห็นเป้า รายรอบ</h2>\n        <p class=\"tb-note\">จุดละ 1 รอบ (seed 0–4) · เส้นประคือเกณฑ์ 0.9 · จุดกลวง = ตก</p>\n        <div class=\"tb-chart dash-skeleton\" id=\"tb-gribvis\" data-source=\"grib_runs\"></div>\n      </section>\n    </div>\n    <section class=\"tb-card\" id=\"grib-map\">\n      <h2>เล่นซ้ำ ปิด vs เปิด (มองจากด้านบน)</h2>\n      <div class=\"tb-controls\">\n        <label class=\"tb-note\" for=\"tb-gribscen\">ฉาก</label>\n        <select class=\"tb-select\" id=\"tb-gribscen\">\n          <option value=\"blind_corner\">blind_corner · คนยืนมุมด้านใน</option>\n          <option value=\"zigzag\">zigzag · เดินส่ายซ้ายขวา</option>\n          <option value=\"pass_by\">pass_by · คนนั่งยองข้างทาง</option>\n          <option value=\"turn_90\">turn_90 · เลี้ยวหักมุม</option>\n          <option value=\"side_step\">side_step · ก้าวออกข้าง</option>\n        </select>\n        <label class=\"tb-note\" for=\"tb-gribseed\">seed</label>\n        <select class=\"tb-select\" id=\"tb-gribseed\"><option>0</option><option>1</option><option>2</option><option>3</option><option>4</option></select>\n      </div>\n      <div class=\"tb-sfgrid\">\n        <div class=\"tb-sfpane\"><h3>ปิด grib <span class=\"tb-pill\" id=\"tb-gribmap-off-res\"></span></h3><div class=\"tb-chart dash-skeleton\" id=\"tb-gribmap-off\" data-source=\"grib_paths\"></div></div>\n        <div class=\"tb-sfpane\"><h3>เปิด grib <span class=\"tb-pill\" id=\"tb-gribmap-on-res\"></span></h3><div class=\"tb-chart dash-skeleton\" id=\"tb-gribmap-on\" data-source=\"grib_paths\"></div></div>\n      </div>\n      <div class=\"tb-controls\">\n        <button type=\"button\" class=\"tb-play\" id=\"tb-gribplay\">▶ เล่น</button>\n        <input type=\"range\" class=\"tb-time\" id=\"tb-gribtime\" min=\"0\" max=\"40\" step=\"0.4\" value=\"40\" aria-label=\"เวลาในฉาก (วินาที)\">\n        <span class=\"tb-clock\" id=\"tb-gribclock\">t = 40.0 s</span>\n      </div>\n      <div class=\"tb-legend\"><span><i style=\"background:var(--cds-chart-status-critical)\"></i>หุ่น (ปิด)</span><span><i id=\"tb-gribleg-on\"></i>หุ่น (เปิด)</span><span><i style=\"border-top:2px dashed var(--color-fg-muted);height:0\"></i>คนเป้าหมาย</span><span>วงเทา = คนที่กล้องไม่เห็น</span></div>\n    </section>\n    <section class=\"tb-card\" id=\"grib-take\">\n      <h2>สรุป</h2>\n      <ul class=\"tb-note\">\n        <li><strong>รวม:</strong> ปิด 21/25 · เปิด 20/25 · ไม่ชนเลยทั้ง 50 รอบ</li>\n        <li><strong>blind_corner:</strong> 1/5 → 2/5 และไม่หลุดตามเลย (ตอนปิดหลุด 2 รอบ ห่างเกือบ 3 m) แต่ 2 รอบที่ผ่านเฉียดเกณฑ์ (0.900, 0.904) อยู่ในช่วงผลแกว่งระหว่างรอบ ข้อจำกัดเดิมยังอยู่: คนอยู่ในวงหมุน 0.40 m</li>\n        <li><strong>zigzag:</strong> 5/5 → 3/5 แย่ลงจริง grib ทำงานตอนเป้าไปขอบภาพทั้งที่ไม่มีอะไรขวาง และเลี้ยวช้ากว่าตัวตามปกติ (~0.3 vs 0.8 rad/s)</li>\n        <li><strong>ความปลอดภัย:</strong> ตัวหยุดหน้าสิ่งกีดขวาง วงหมุน และกฎความเร็วเดิมยังเป็นตัวตัดสินสุดท้าย</li>\n        <li><strong>ข้อจำกัด:</strong> grid ใช้ตำแหน่งจากคำสั่งความเร็ว ยังไม่เทียบล้อจริง · twin เท่านั้น · ไม่ได้รันชุดเต็ม 110 · เพิ่มกฎ 2 ข้อหลังดู blind_corner (ก่อนรันเปรียบเทียบ)</li>\n      </ul>\n    </section>\n  ";
-  // ---------- grib experiment (2026-11-05, branch claude/robot/grib-local-grid, datasets grib_runs, grib_paths) ----------
+const gribDraw = (() => {
+  let built = false;
   let GRIB = null;
   const GB = { t: 40, timer: null };
   const GRIBSC = ['blind_corner', 'zigzag', 'pass_by', 'turn_90', 'side_step'];
@@ -16,16 +12,6 @@
     GRIB = { runs: rd.data, paths: pd.data };
     document.getElementById('tb-gribleg-on').style.background = dash.colors[2];
     const R = GRIB.runs;
-    // KPIs
-    const k = document.getElementById('tb-gribkpis');
-    const tot = (v) => R.filter((r) => r.variant === v);
-    const kpi = (label, value, note) => { const d = document.createElement('div'); d.className = 'tb-kpi';
-      d.innerHTML = `<span class="tb-kpi-label"></span><span class="tb-kpi-value"></span><span class="tb-kpi-note"></span>`;
-      d.children[0].textContent = label; d.children[1].textContent = value; d.children[2].textContent = note; return d; };
-    k.replaceChildren(
-      kpi('ปิด grib (ค่าวันลงพื้นที่)', `${tot('off').filter((r) => r.pass).length}/${tot('off').length}`, `ชน ${tot('off').filter((r) => r.contact).length} ครั้ง`),
-      kpi('เปิด grib', `${tot('on').filter((r) => r.pass).length}/${tot('on').length}`, `ชน ${tot('on').filter((r) => r.contact).length} ครั้ง`),
-      kpi('ข้อสรุป', 'ไม่คุ้ม', 'blind_corner ดีขึ้นนิดเดียว แต่ zigzag แย่ลง'));
     // pass bars
     {
       const el = els[0]; ready(el);
@@ -111,8 +97,8 @@
     });
   }
 
-  function build() {
-    document.getElementById('panel-grib').innerHTML = PANEL_HTML;
+  function build(html) {
+    document.getElementById('panel-grib').innerHTML = html;
   ['tb-gribscen', 'tb-gribseed'].forEach((id) => document.getElementById(id).addEventListener('change', () => { GB.t = 99; drawGribMap(); }));
   document.getElementById('tb-gribtime').addEventListener('input', (e) => { GB.t = +e.target.value; drawGribMap(); });
   document.getElementById('tb-gribplay').addEventListener('click', (e) => {
@@ -129,5 +115,11 @@
 
     built = true;
   }
-  window.GribTab = { draw(ctx) { ({ dash, failed, ready, f2 } = ctx); if (!built) build(); drawGrib(); } };
+  return () => {
+    const tx = dash.data('grib_text');
+    if (tx.status === 'error' || tx.status === 'connect') { const m = document.getElementById('tb-gribload'); if (m) m.textContent = 'Failed to load'; return; }
+    if (tx.status !== 'ok' || !tx.data.length) return;
+    if (!built) build(tx.data[0].html);
+    drawGrib();
+  };
 })();
