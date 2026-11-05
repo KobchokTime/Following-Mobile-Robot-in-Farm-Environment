@@ -1770,3 +1770,5 @@ Earlier history: `history-2026-10-16.md`.
 - 2026-11-05 08:52 (Thai time) Updated `docs/robot_day_cheatsheet_th.md` for the 2026-11-07 field day: safety rules (no E-stop, Ctrl+C, bridge stop timing), lifted-wheel bridge stop-time check, chassis sweep vs the 0.40 m spin circle, full `preflight.py --live` gate (0 FAIL), `/scan` best-effort check, T18 LiDAR obstacle runs (`t18_*`), what to send back. `scripts/check.py` 239/239.
 
 - 2026-11-05 08:57 (Thai time) Printed `docs/robot_day_cheatsheet_th.md` (`6c9e3d5`) to a 3-page A4 PDF for the user (headless Chromium, Waree font); PDF kept in the session scratchpad, not committed.
+
+- 2026-11-05 11:18 (Thai time) Dashboard: new tab "grib (ทดลอง)" (off vs on pass bars, in-view per run, side-by-side replay). Datasets `grib_runs`, `grib_paths` (new blobs); tab code as asset `grib_tab.js` loaded by `<script src>` (page at 255.5 KB of the 256 KiB store limit); page `files/index.html` v43. Repo copy updated here (`tools/dashboard/`). Grib-on total is 20/25 (subagent had reported 21/25; corrected on the grib branch `3f3ae4a`).

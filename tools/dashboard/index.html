@@ -181,6 +181,7 @@
     <button type="button" class="tb-tab" role="tab" id="tab-identity" data-tab="identity" aria-selected="false" aria-controls="panel-identity">เลือกเป้า (target gate)</button>
     <button type="button" class="tb-tab" role="tab" id="tab-colour" data-tab="colour" aria-selected="false" aria-controls="panel-colour">แยกคนด้วยสีเสื้อ</button>
     <button type="button" class="tb-tab" role="tab" id="tab-filter" data-tab="filter" aria-selected="false" aria-controls="panel-filter">แผนที่ LiDAR (จุดนิ่ง · หยุด/หลบ)</button>
+    <button type="button" class="tb-tab" role="tab" id="tab-grib" data-tab="grib" aria-selected="false" aria-controls="panel-grib">grib (ทดลอง)</button>
     <button type="button" class="tb-tab" role="tab" id="tab-live" data-tab="live" aria-selected="false" aria-controls="panel-live">การทดลองที่กำลังรัน</button>
     <button type="button" class="tb-tab" role="tab" id="tab-tests" data-tab="tests" aria-selected="false" aria-controls="panel-tests">เทสต์และ CI</button>
     <button type="button" class="tb-tab" role="tab" id="tab-replay" data-tab="replay" aria-selected="false" aria-controls="panel-replay">เส้นทางโค้ดรุ่นก่อน</button>
@@ -651,6 +652,7 @@
     </section>
 
   </div>
+  <div class="tb-panel" role="tabpanel" id="panel-grib" aria-labelledby="tab-grib" hidden><p class="tb-note" id="tb-gribload">กำลังโหลด…</p></div>
   <div class="tb-panel" role="tabpanel" id="panel-arenas" aria-labelledby="tab-arenas" hidden>
     <p class="tb-history">ข้อมูลประวัติ: ผลตัดสิน Arena 1–2 (21 ต.ค.) ตามกติกาที่ล็อกไว้ ปิดไปแล้ว ไม่ใช่สถานะของโค้ดปัจจุบัน</p>
     <div class="tb-grid">
@@ -778,6 +780,7 @@ dash.calc('robust_totals', {
 });
 </script>
 
+<script src="/_blob/9594efb59031ae8891f124d5208d0548"></script>
 <script>
 (() => {
   const VERSIONS = ['Before fix', 'Claude entry', 'Codex entry', 'Combined', 'Arena 2 · Claude', 'Arena 2 · Codex',
@@ -2599,6 +2602,7 @@ dash.calc('robust_totals', {
   }
   setInterval(() => { if (S.tab === 'live' && !lvTimer) drawLive(); }, 30000);
   const PANELS = {
+    grib: () => { if (window.GribTab) window.GribTab.draw({ dash, failed, ready, f2 }); },
     live: () => drawLive(),
     ready: () => { drawCurrent(); drawCond(); drawClose(); },
     solo: () => { drawCurrent(); drawRpCard('solo'); drawSolo(); },

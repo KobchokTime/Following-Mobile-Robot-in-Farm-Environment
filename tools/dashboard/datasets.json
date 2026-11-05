@@ -487,5 +487,33 @@
    "at": "2026-10-30T05:55:00Z",
    "by": "Claude Code"
   }
+ },
+ "grib_runs": {
+  "description": "Twin comparison 2026-11-05, branch claude/robot/grib-local-grid 2125e8b: 5 scenarios x seeds 0-4, grib off (robot-day configuration) vs on. One row per run: pass, contact, final gap, in-view share, closest person range. Experiment only, not on the hub.",
+  "fixed": true,
+  "source": {
+   "kind": "file",
+   "name": "grib_runs.json",
+   "url": "/_blob/adc6606bca79f848e18c9ae4c12d36c5"
+  },
+  "title": "Grib experiment runs (off vs on)",
+  "updated": {
+   "at": "2026-11-05T04:15:00Z",
+   "by": "Claude Code"
+  }
+ },
+ "grib_paths": {
+  "description": "Robot, target and hidden-person positions every 0.4 s for each grib off/on run: [run_id, t, robot_x, robot_y, robot_yaw_deg, target_x, target_y, other_x, other_y].",
+  "fixed": true,
+  "source": {
+   "kind": "file",
+   "name": "grib_paths.json",
+   "url": "/_blob/a13c13cdb850ea0b6025720245c2ed6f"
+  },
+  "title": "Grib experiment paths (off vs on)",
+  "updated": {
+   "at": "2026-11-05T04:15:00Z",
+   "by": "Claude Code"
+  }
  }
 }
