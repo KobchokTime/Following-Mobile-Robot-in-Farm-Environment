@@ -780,7 +780,6 @@ dash.calc('robust_totals', {
 });
 </script>
 
-<script src="/_blob/9594efb59031ae8891f124d5208d0548"></script>
 <script>
 (() => {
   const VERSIONS = ['Before fix', 'Claude entry', 'Codex entry', 'Combined', 'Arena 2 · Claude', 'Arena 2 · Codex',
@@ -2602,7 +2601,16 @@ dash.calc('robust_totals', {
   }
   setInterval(() => { if (S.tab === 'live' && !lvTimer) drawLive(); }, 30000);
   const PANELS = {
-    grib: () => { if (window.GribTab) window.GribTab.draw({ dash, failed, ready, f2 }); },
+    grib: () => {
+      if (window.GribTab) return window.GribTab.draw({ dash, failed, ready, f2 });
+      if (window.gribLoading) return;
+      window.gribLoading = 1;
+      const u = '/_blob/9594efb59031ae8891f124d5208d0548', msg = document.getElementById('tb-gribload');
+      const fail = (e) => { if (msg) msg.textContent = 'โหลดโค้ด tab ไม่ได้: ' + e; };
+      fetch(u).then((r) => r.text()).then((src) => { new Function(src)(); draw(); }).catch((e1) => {
+        const s = document.createElement('script'); s.src = u; s.onload = () => draw(); s.onerror = () => fail(e1); document.head.append(s);
+      });
+    },
     live: () => drawLive(),
     ready: () => { drawCurrent(); drawCond(); drawClose(); },
     solo: () => { drawCurrent(); drawRpCard('solo'); drawSolo(); },
