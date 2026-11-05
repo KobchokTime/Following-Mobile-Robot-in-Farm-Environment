@@ -8,7 +8,8 @@
 
 | Path | What it is |
 |---|---|
-| `index.html` | The page (store document `files/index.html`, version 33 when copied, 2026-10-30). One file holds every tab. |
+| `index.html` | The page (store document `files/index.html`, version 46 since the grib tab, 2026-11-05). One file holds every tab. |
+| `grib_tab_inline.js`, `grib_text.json` | The grib experiment tab (2026-11-05). The page document is at the 256 KiB store limit, so the tab code is inlined minified (`npx terser@5.31.0 grib_tab_inline.js -c -m`, placed before `const PANELS`) and its static HTML is the dataset `grib_text`. A `<script src>` or `fetch` + `new Function` from a blob did not run in the dashboard. |
 | `datasets.json` | A snapshot of the store's `datasets/<id>` records: title, description, source (blob URL), `updated`. |
 | `live/gen_live.py` | Builds the five live-monitor datasets from twin run folders. |
 | `live/gen_obstacle.py` | Builds `obstacle_runs` and `obstacle_paths` (the LiDAR-map tab's off/on evidence) from run folders named `<scenario>_<off|on>_s<seed>`. |

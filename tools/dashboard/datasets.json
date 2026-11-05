@@ -487,5 +487,47 @@
    "at": "2026-10-30T05:55:00Z",
    "by": "Claude Code"
   }
+ },
+ "grib_runs": {
+  "description": "Twin comparison 2026-11-05, branch claude/robot/grib-local-grid 2125e8b: 5 scenarios x seeds 0-4, grib off (robot-day configuration) vs on. One row per run: pass, contact, final gap, in-view share, closest person range. Experiment only, not on the hub.",
+  "fixed": true,
+  "source": {
+   "kind": "file",
+   "name": "grib_runs.json",
+   "url": "/_blob/adc6606bca79f848e18c9ae4c12d36c5"
+  },
+  "title": "Grib experiment runs (off vs on)",
+  "updated": {
+   "at": "2026-11-05T04:15:00Z",
+   "by": "Claude Code"
+  }
+ },
+ "grib_paths": {
+  "description": "Robot, target and hidden-person positions every 0.4 s for each grib off/on run: run, t, rx, ry, ryaw (robot), tx, ty (target), ox, oy (hidden person, null if none).",
+  "fixed": true,
+  "source": {
+   "kind": "file",
+   "name": "grib_paths.json",
+   "url": "/_blob/17c6f4cc7f206f607d104afc17b4346c"
+  },
+  "title": "Grib experiment paths (off vs on)",
+  "updated": {
+   "at": "2026-11-05T05:10:00Z",
+   "by": "Claude Code"
+  }
+ },
+ "grib_text": {
+  "description": "The grib experiment tab's static HTML (notes, KPI cards, summary), kept as data so the page stays under the store size limit.",
+  "fixed": true,
+  "source": {
+   "kind": "file",
+   "name": "grib_text.json",
+   "url": "/_blob/159eeb1a9e22f4c28abacc8126eb78a4"
+  },
+  "title": "Grib tab text",
+  "updated": {
+   "at": "2026-11-05T05:40:00Z",
+   "by": "Claude Code"
+  }
  }
 }
