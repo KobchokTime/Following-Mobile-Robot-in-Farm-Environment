@@ -2605,7 +2605,7 @@ dash.calc('robust_totals', {
       if (window.GribTab) return window.GribTab.draw({ dash, failed, ready, f2 });
       if (window.gribLoading) return;
       window.gribLoading = 1;
-      const u = '/_blob/9594efb59031ae8891f124d5208d0548', msg = document.getElementById('tb-gribload');
+      const u = '/_blob/41e6196ba744d3a61871d9f9b54b9b66', msg = document.getElementById('tb-gribload');
       const fail = (e) => { if (msg) msg.textContent = 'โหลดโค้ด tab ไม่ได้: ' + e; };
       fetch(u).then((r) => r.text()).then((src) => { new Function(src)(); draw(); }).catch((e1) => {
         const s = document.createElement('script'); s.src = u; s.onload = () => draw(); s.onerror = () => fail(e1); document.head.append(s);

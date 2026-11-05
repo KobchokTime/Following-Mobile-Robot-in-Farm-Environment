@@ -73,11 +73,11 @@
     const scen = document.getElementById('tb-gribscen').value, seed = document.getElementById('tb-gribseed').value;
     document.getElementById('tb-gribclock').textContent = `t = ${GB.t.toFixed(1)} s`;
     const ids = ['off', 'on'].map((v) => `${scen}-${v}-${seed}`);
-    const P = GRIB.paths.filter((p) => p[0] === ids[0] || p[0] === ids[1]);
-    const tmax = d3.max(P, (p) => p[1]) || 40;
+    const P = GRIB.paths.filter((p) => p.run === ids[0] || p.run === ids[1]);
+    const tmax = d3.max(P, (p) => p.t) || 40;
     const slider = document.getElementById('tb-gribtime'); slider.max = String(tmax);
     if (GB.t > tmax) { GB.t = tmax; slider.value = String(tmax); }
-    const xs = P.flatMap((p) => [p[2], p[5], ...(p.length > 7 ? [p[7]] : [])]), ys = P.flatMap((p) => [p[3], p[6], ...(p.length > 7 ? [p[8]] : [])]);
+    const xs = P.flatMap((p) => [p.rx, p.tx, ...(p.ox != null ? [p.ox] : [])]), ys = P.flatMap((p) => [p.ry, p.ty, ...(p.oy != null ? [p.oy] : [])]);
     if (!xs.length) return;
     const [x0, x1] = d3.extent(xs), [y0, y1] = d3.extent(ys);
     ['off', 'on'].forEach((v, i) => {
@@ -86,7 +86,7 @@
       const res = document.getElementById(`tb-gribmap-${v}-res`);
       res.textContent = sum ? `${sum.pass ? 'ผ่าน' : 'ตก'} · ${sum.contact ? 'ชน' : 'ไม่ชน'} · เห็นเป้า ${Math.round(100 * sum.vis)}% · ห่างตอนจบ ${f2(sum.final_gap_m)} m` : 'ไม่มีข้อมูล';
       res.className = 'tb-pill ' + (sum ? (sum.contact ? 'tb-bad' : sum.pass ? 'tb-ok' : 'tb-warn') : '');
-      const rows = P.filter((p) => p[0] === ids[i] && p[1] <= GB.t + 1e-6);
+      const rows = P.filter((p) => p.run === ids[i] && p.t <= GB.t + 1e-6);
       const W = Math.max(240, el.clientWidth), pad = 16, span = 0.8;
       const k0 = (W - 2 * pad) / ((x1 - x0) + span);
       const H = Math.round(Math.min(380, Math.max(200, ((y1 - y0) + span) * k0 + 2 * pad)));
@@ -96,16 +96,16 @@
       d3.range(Math.ceil(x0), Math.floor(x1) + 1).forEach((g) => svg.append('line').attr('x1', X(g)).attr('x2', X(g)).attr('y1', 0).attr('y2', H).attr('stroke', 'var(--cds-chart-grid)'));
       d3.range(Math.ceil(y0), Math.floor(y1) + 1).forEach((g) => svg.append('line').attr('y1', Y(g)).attr('y2', Y(g)).attr('x1', 0).attr('x2', W).attr('stroke', 'var(--cds-chart-grid)'));
       const now = rows[rows.length - 1], c = gribColor(v);
-      if (now && now.length > 7) {
-        svg.append('circle').attr('cx', X(now[7])).attr('cy', Y(now[8])).attr('r', 0.2 * k).attr('fill', 'var(--color-fg-muted)').attr('opacity', 0.35).attr('stroke', 'var(--color-fg-muted)');
+      if (now && now.ox != null) {
+        svg.append('circle').attr('cx', X(now.ox)).attr('cy', Y(now.oy)).attr('r', 0.2 * k).attr('fill', 'var(--color-fg-muted)').attr('opacity', 0.35).attr('stroke', 'var(--color-fg-muted)');
       }
       const line = (a, b) => d3.line().x((p) => X(p[a])).y((p) => Y(p[b]));
-      svg.append('path').attr('d', line(5, 6)(rows) || '').attr('fill', 'none').attr('stroke', 'var(--color-fg-muted)').attr('stroke-dasharray', '4 4').attr('stroke-width', 1.5);
-      svg.append('path').attr('d', line(2, 3)(rows) || '').attr('fill', 'none').attr('stroke', c).attr('stroke-width', 2.5).attr('stroke-linecap', 'round').attr('stroke-linejoin', 'round');
+      svg.append('path').attr('d', line('tx', 'ty')(rows) || '').attr('fill', 'none').attr('stroke', 'var(--color-fg-muted)').attr('stroke-dasharray', '4 4').attr('stroke-width', 1.5);
+      svg.append('path').attr('d', line('rx', 'ry')(rows) || '').attr('fill', 'none').attr('stroke', c).attr('stroke-width', 2.5).attr('stroke-linecap', 'round').attr('stroke-linejoin', 'round');
       if (now) {
         svg.append('rect').attr('x', -0.26 * k).attr('y', -0.235 * k).attr('width', 0.52 * k).attr('height', 0.47 * k)
-          .attr('fill', 'none').attr('stroke', c).attr('stroke-width', 2).attr('transform', `translate(${X(now[2])},${Y(now[3])}) rotate(${-now[4]})`);
-        svg.append('circle').attr('cx', X(now[5])).attr('cy', Y(now[6])).attr('r', 5).attr('fill', 'var(--color-fg-muted)');
+          .attr('fill', 'none').attr('stroke', c).attr('stroke-width', 2).attr('transform', `translate(${X(now.rx)},${Y(now.ry)}) rotate(${-now.ryaw})`);
+        svg.append('circle').attr('cx', X(now.tx)).attr('cy', Y(now.ty)).attr('r', 5).attr('fill', 'var(--color-fg-muted)');
       }
       el.replaceChildren(svg.node());
     });

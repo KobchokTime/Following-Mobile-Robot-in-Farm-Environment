@@ -9,7 +9,7 @@
 | Path | What it is |
 |---|---|
 | `index.html` | The page (store document `files/index.html`, version 43 since the grib tab, 2026-11-05). One file holds every tab. |
-| `grib_tab.js` | The grib experiment tab (2026-11-05). The store page fetches it at run time from asset `/_blob/9594efb59031ae8891f124d5208d0548` (a static `<script src>` did not run), because the page document is close to the 256 KiB store limit; re-upload and change the `<script src>` when it changes. |
+| `grib_tab.js` | The grib experiment tab (2026-11-05). The store page fetches it at run time from asset `/_blob/41e6196ba744d3a61871d9f9b54b9b66` (a static `<script src>` did not run), because the page document is close to the 256 KiB store limit; re-upload and change the `<script src>` when it changes. |
 | `datasets.json` | A snapshot of the store's `datasets/<id>` records: title, description, source (blob URL), `updated`. |
 | `live/gen_live.py` | Builds the five live-monitor datasets from twin run folders. |
 | `live/gen_obstacle.py` | Builds `obstacle_runs` and `obstacle_paths` (the LiDAR-map tab's off/on evidence) from run folders named `<scenario>_<off|on>_s<seed>`. |

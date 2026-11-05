@@ -503,16 +503,16 @@
   }
  },
  "grib_paths": {
-  "description": "Robot, target and hidden-person positions every 0.4 s for each grib off/on run: [run_id, t, robot_x, robot_y, robot_yaw_deg, target_x, target_y, other_x, other_y].",
+  "description": "Robot, target and hidden-person positions every 0.4 s for each grib off/on run: run, t, rx, ry, ryaw (robot), tx, ty (target), ox, oy (hidden person, null if none).",
   "fixed": true,
   "source": {
    "kind": "file",
    "name": "grib_paths.json",
-   "url": "/_blob/a13c13cdb850ea0b6025720245c2ed6f"
+   "url": "/_blob/17c6f4cc7f206f607d104afc17b4346c"
   },
   "title": "Grib experiment paths (off vs on)",
   "updated": {
-   "at": "2026-11-05T04:15:00Z",
+   "at": "2026-11-05T05:10:00Z",
    "by": "Claude Code"
   }
  }

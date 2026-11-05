@@ -1774,3 +1774,5 @@ Earlier history: `history-2026-10-16.md`.
 - 2026-11-05 11:18 (Thai time) Dashboard: new tab "grib (ทดลอง)" (off vs on pass bars, in-view per run, side-by-side replay). Datasets `grib_runs`, `grib_paths` (new blobs); tab code as asset `grib_tab.js` loaded by `<script src>` (page at 255.5 KB of the 256 KiB store limit); page `files/index.html` v43. Repo copy updated here (`tools/dashboard/`). Grib-on total is 20/25 (subagent had reported 21/25; corrected on the grib branch `3f3ae4a`).
 
 - 2026-11-05 11:26 (Thai time) Dashboard grib tab stuck at loading (static `<script src>` to the blob did not run in the dashboard). Page v44: the grib panel fetches the blob and runs it, with a script-tag fallback and an error message.
+
+- 2026-11-05 11:27 (Thai time) Dashboard grib tab: `grib_paths` failed to load as arrays of arrays; re-uploaded as objects (blob 17c6f4cc…), tab script re-uploaded (41e6196b…), page v45, dataset v2; old blobs deleted.
