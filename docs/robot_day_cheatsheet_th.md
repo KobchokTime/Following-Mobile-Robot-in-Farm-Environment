@@ -130,11 +130,14 @@ ros2_yolo_ws/scripts/record_robot_day.sh --scenario <ชื่อ> --countdown 5
 - come_back: ใน simulation คนที่เดินกลับมาเข้าใกล้หุ่นถึง 0.36–0.39 m (กลางถึงกลาง) จดว่าบนหุ่นจริงเป็นอย่างไร ____________
 - ในแถวแคบ หุ่นอาจไม่ยอมหมุนอยู่กับที่ (มีของในวง 0.40 m) เป็นพฤติกรรมที่ตั้งใจ
 
-## 7. ถ้ามีเวลา: E4b, E3 และ E1
+## 7. ถ้ามีเวลา: E4b, E3, E1 และเก็บข้อมูลแผนที่
 
 - E4b (`docs/robot_day_protocol.md`): เดินคนเดียว/มีคนเดินข้าง ดู `[CROWD] on/off` ใน log ของ `sync_fusion_node`
 - E3 ยืนตรงหน้าหุ่นที่ 0.4, 0.5, 0.75, 1, 1.5, 2, 3 m หันหน้าและหันหลัง: `e3_d0.5_front`, `e3_d0.5_back` … (`--countdown 10 --duration 10`)
 - E1 ยืนบนเทปที่มุม −30…+30° ระยะ 1–3 m (ซ้ายของหุ่นเป็นบวก): `e1_b-20_d2.0` …
+- `map_walk` (เก็บไว้ลองทำแผนที่แบบ offline, ไม่ต้องแก้โค้ด): ให้หุ่นเดินตามคุณช้า ๆ รอบแปลงหนึ่งรอบ ผ่านทางแยกหรือมุมอย่างน้อย 1 จุด แล้วกลับมาจุดเริ่ม
+  `record_robot_day.sh --scenario map_walk --countdown 5 --duration 180` ☐
+- ถ่ายรูปทางแยกและมุมในแปลง (มุมสูงระดับกล้องหุ่น) และจุดที่มีเสาหรือที่ให้ติดป้าย AprilTag ได้ · จดระยะคร่าว ๆ ของแต่ละแยก ____________ ☐
 
 ## หลังเลิก
 
@@ -142,9 +145,10 @@ ros2_yolo_ws/scripts/record_robot_day.sh --scenario <ชื่อ> --countdown 5
 python3 tools/robot_day/analyze.py ~/robot_day_recordings --out robot_day_report.json
 ```
 
-ส่งให้ Claude (ไม่ต้องส่งไฟล์ bag):
+ส่งให้ Claude (ไม่ต้องส่งไฟล์ bag ยกเว้นข้อ map_walk):
 - ☐ `robot_day_report.json`
 - ☐ ผล preflight `--live` (คัดลอกข้อความทั้งหมด หรือถ่ายรูปหน้าจอ)
 - ☐ ค่าที่จดในหน้านี้: turn_dir, เวลาหยุดของ bridge, ขนาดตัวถัง, ระยะ LiDAR→มุมไกลสุด, รัศมีล้อ, ระยะหยุดหน้าเสา
 - ☐ log ของ `follow_stop` และ `sync_fusion_node` ช่วงหัวข้อ 5 (`[OBST]`, `[AVOID]`, `[BACK]`, `[GATE]`) · `analyze.py` ยังไม่สรุปป้าย `t18_` จึงต้องส่ง log นี้
 - ☐ ค่า `latency_s` จาก E2 (capture → `/cmd_vel` ค่ากลาง) = ______ s
+- ☐ ถ้าทำ `map_walk`: โฟลเดอร์ bag ของรอบนั้น (ถ้าใหญ่เกินส่ง ให้เก็บไว้ก่อน) และรูปทางแยก

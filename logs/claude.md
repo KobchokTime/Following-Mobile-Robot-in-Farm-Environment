@@ -1778,3 +1778,5 @@ Earlier history: `history-2026-10-16.md`.
 - 2026-11-05 11:27 (Thai time) Dashboard grib tab: `grib_paths` failed to load as arrays of arrays; re-uploaded as objects (blob 17c6f4cc…), tab script re-uploaded (41e6196b…), page v45, dataset v2; old blobs deleted.
 
 - 2026-11-05 11:30 (Thai time) Dashboard grib tab: page code stopped with the blob-loaded script; now inlined minified (6.3 KB) with static HTML as dataset `grib_text`; page v46 at 262,040 of 262,144 bytes; old script blob deleted.
+
+- 2026-11-05 11:45 (Thai time) Cheat sheet: added optional `map_walk` recording (180 s, offline mapping trial) and junction/AprilTag-spot photos, plus what to send back; reprinted the 3-page PDF for the user. Not merged to hub (the field copy is the printed PDF).
