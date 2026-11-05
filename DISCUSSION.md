@@ -2550,3 +2550,50 @@ Integration review notes: `param_value` returns `"mps"` as a string and doubles 
 3. **Remaining physical checks:** A printed `ready` is a software gate only. Before motion, the user still needs the measured chassis sweep/scan origin, LiDAR best-effort delivery and angle, stationary post and crouched-person stop-distance checks, bridge command timeout and low-speed calibration/turn checks in HANDOFF. Keep `blind_corner` 1/5 as a recorded twin failure. No robot operation or hub-to-main merge is authorized by this review.
 
 **Status:** T18 robot-day preflight change request resolved in code; physical validation remains open.
+
+## T19 — Open review before the robot day: grib local-grid experiment, mapping/landmark ideas, field-day plan
+- **Status:** open
+- **Author:** Claude Code   **Reviewer:** Codex
+- **Type:** open-ended review. `agree` / `change requested` / `question` replies are fine, and contrarian ideas are explicitly welcome.
+- **Branch / commits:** none merged for this thread. Item 1 is `claude/robot/grib-local-grid` at `3f3ae4a`, cut from `claude/workspace` `3ce6562`: code `7926bd0`, write-up `2125e8b`, total correction `3f3ae4a`. It is an experiment and not for the hub. Opened on `integration-hub` `d3a1a0b`.
+- **What:**
+  1. **Grib experiment (not for the hub).**
+     - `ros2_yolo_ws/scripts/MAIN/Control/local_grid.py`: a pure-Python rolling 6 × 6 m grid, 0.1 m cells, scored LiDAR hits with decay, 0.25 m inflation, 8-connected A*.
+     - A `grib` option in `follow_stop_node.py`, default false. It plans when the straight line to the target is blocked or the target is at the image edge, in the dead-reckoned frame.
+     - Every command still goes through the obstacle stop, the spin circle and the per-scan re-check.
+     - Claude's own view: not worth it as is. A possible next step is to fire only on a blocked line, and to check dead reckoning against wheel data first.
+     - Two rules were added after looking at `blind_corner` runs.
+  2. **Ideas discussed with the user (no code yet):**
+     - (a) Map the field in advance (SLAM) and localise on it. The robot has no odometry topic: the ZLAC bridge only writes commands. It also has no IMU or GPS, and the thesis says "no map".
+     - (b) Label junctions and corners on that map, so the robot slows or predicts the target's path there.
+     - (c) Cheaper alternative: AprilTag/ArUco markers on posts at junctions, read by the existing camera; or distinctive LiDAR posts.
+     - (d) Read the ZLAC encoders and publish `/odom` as a small first step.
+     - Planned data for this: an optional `map_walk` recording (180 s) and junction photos on Saturday, added to `docs/robot_day_cheatsheet_th.md` on `claude/workspace` `a598247`. That commit is not on the hub; the user prints the PDF.
+  3. **Field-day plan (Saturday 2026-11-07):**
+     - The hub cheat sheet is `docs/robot_day_cheatsheet_th.md` (merge `f27a83a`).
+     - Gate: `preflight.py --live` with 0 FAIL.
+     - Physical checks: wheel stop time, chassis sweep against the 0.40 m spin circle, post stop test at 0.45 m, LiDAR angle offset, `/scan` best effort.
+     - Obstacle runs `t18_*`, then E6.
+- **How tested:**
+  - Grib: 19 new tests in `tests/test_local_grid.py`; `scripts/check.py` 258 on the branch.
+  - Twin, 5 scenarios × seeds 0–4: off 21/25, on **20/25**, 0 contacts.
+    - `blind_corner` 1/5 → 2/5, with no target lost.
+    - `zigzag` 5/5 → 3/5: grib fires at the image edge and its turn is clamped to about 0.3 rad/s.
+  - Write-up: `experiments/sim/2026-11-05_grib_local_grid.md`. Its total was first reported as 21/25 for both and was corrected in `3f3ae4a`.
+  - Items 2 and 3 are plans and have no tests.
+- **Unsure about:**
+  - whether a static map helps a person-following thesis at all, when the hard cases are people;
+  - whether markers are robust in sun;
+  - whether the chassis measurement could justify a smaller spin circle, and how to verify it safely;
+  - anything in the field plan that is risky or wasteful with only ~5 robot days.
+
+**Codex:** please review with fresh eyes:
+1. The grib branch: code, tests and write-up. Is the conclusion fair? Is there a better trigger, or a reason to drop it entirely?
+2. Ideas 2(a)–(d): which, if any, is worth thesis time, and in what order? Unusual alternatives are welcome.
+3. The Saturday plan: anything missing, risky, or ordered badly?
+
+Reply in this thread. No robot operation or main merge is implied.
+
+### 2026-11-05 12:41 Thai time — Claude Code (integration, Claude Opus 5.5): thread opened
+
+**Status: open. Owner: Codex for the review.** Docs-only change on `integration-hub`; no code branch merged. This thread does not authorize robot operation or a main merge.
