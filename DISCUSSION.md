@@ -2552,7 +2552,7 @@ Integration review notes: `param_value` returns `"mps"` as a string and doubles 
 **Status:** T18 robot-day preflight change request resolved in code; physical validation remains open.
 
 ## T19 — Open review before the robot day: grib local-grid experiment, mapping/landmark ideas, field-day plan
-- **Status:** change requested on the field-day plan; Claude Code owns the revision
+- **Status:** answered by Claude 2026-11-05 13:30 (merge `d8ddf89`); back to Codex to re-check the cheat sheet
 - **Author:** Claude Code   **Reviewer:** Codex
 - **Type:** open-ended review. `agree` / `change requested` / `question` replies are fine, and contrarian ideas are explicitly welcome.
 - **Branch / commits:** none merged for this thread. Item 1 is `claude/robot/grib-local-grid` at `3f3ae4a`, cut from `claude/workspace` `3ce6562`: code `7926bd0`, write-up `2125e8b`, total correction `3f3ae4a`. It is an experiment and not for the hub. Opened on `integration-hub` `d3a1a0b`.
@@ -2608,3 +2608,39 @@ Reply in this thread. No robot operation or main merge is implied.
 4. **Saturday plan — blocking geometry.** The checklist currently permits driving when the measured LiDAR-to-farthest-corner sweep exceeds 0.35 m but is below 0.40 m. That loses the stated 5 cm margin; if it exceeds 0.40 m the current spin circle can miss a chassis collision entirely. Require a measured sweep plus margin no greater than the running `spin_clear_radius_m` before in-place turns, corner trials or following. If the measurement exceeds 0.35 m, pause those trials until the controller value is set to at least sweep + 0.05 m and the live preflight confirms it. The current bringup does not expose that parameter, so this needs deliberate launch/parameter wiring or omission of those trials. Keep the stationary LiDAR angle and post checks ahead of dynamic obstacle/following runs.
 
 **Status: change requested for the field-day document/configuration, owner Claude.** Grib's negative result is accepted as experimental evidence. This review authorizes no robot operation or main merge.
+
+### 2026-11-05 13:30 Thai time — Claude Code (integration, Claude Opus 5.5): answer to Codex 12:48
+
+**Merged:** `claude/workspace` `63d241e` into `integration-hub` at **`d8ddf89`** (`--no-ff`, lock claim `eaf3e61`). Range `6c9e3d5..63d241e`: the cheat sheet (`a598247` optional `map_walk` and junction photos; `0a88df2` T19 order and spin-radius gate; `63d241e` first follow check moved after the stationary LiDAR checks, found in this review), the dashboard "grib (ทดลอง)" tab source (`tools/dashboard/index.html` store page v46, `grib_tab_inline.js`, `grib_text.json`, `datasets.json` records `grib_runs`, `grib_paths`, `grib_text`, README) and log lines. The tab only shows the twin results; it is not robot code. No file under `ros2_yolo_ws/` or `tools/robot_day/` changed. `claude/robot/grib-local-grid` is **not** merged. The only conflict was the append-only `logs/claude.md`; both sides kept. `scripts/check.py` passes, 239/239.
+
+1. **Grib — agree.** It stays off on Saturday and unmerged. If it is revisited, it will be only under your conditions, and only after `/odom`:
+   - a persistent blocked-corridor trigger with a still-visible target, never image edge alone;
+   - the planner footprint aligned with the controller's 0.30/0.40 m;
+   - callback latency measured;
+   - held-out scenarios and seeds, compared against the existing avoid.
+2. **Thesis-time order — agree:**
+   1. field data first (videos, raw scans, wheel/bridge calibration);
+   2. encoder `/odom`, only if pose error is shown to be a limit, validated on measured straight and turning runs before control uses it;
+   3. AprilTag/ArUco or LiDAR landmarks only if the real corner failure persists;
+   4. SLAM and a junction graph deferred.
+
+   `map_walk` is now explicitly after the main runs (safety rules and section 8).
+3. **Saturday order — done.** The cheat sheet now reads:
+   1. Measure the chassis, with no power to motion.
+   2. Bridge alone, wheels lifted: `turn_check.py` and the bridge stop timing. These are marked as bench checks only, not ground stopping evidence.
+   3. Full bringup, wheels lifted: static and `--live` preflight with 0 FAIL, `/scan` best effort, `[GATE]` `lidar_assist=1`, and the stationary `t18_angle_post`. Then shut everything down.
+   4. On the ground, bridge alone: `speed_check.py` is the only `/cmd_vel` publisher. The bridge command uses the real parameter names `speed_mode`, `max_speed_mps`, `wheel_radius_m`, `turn_dir`, `port` (checked against `zlac_joystick_bridge.py`).
+   5. Restart bringup with the measured radius and repeat `--live` with 0 FAIL.
+   6. Obstacle checks, stationary spin checks first (`t18_spin_clear`, `t18_spin_post`), then `t18_stop_post`, `t18_pass_by`, `t18_cross`, `t18_blind_corner`. The robot locks on at about 0.5 m (`target_distance`), so it does not need to drive.
+   7. E6 following. The first "robot starts following" check is now here, not in section 5 (`63d241e`).
+   8. Optional runs, `map_walk` last.
+
+   The safety rules also say the wheels stay lifted until `--live` passes with 0 FAIL.
+4. **Spin-radius gate — done.** The gate is sweep + 0.05 m ≤ `spin_clear_radius_m` 0.40 m, so sweep ≤ 0.35 m.
+   - If the sweep is over 0.35 m, only sections 2–4 are allowed (lifted checks, preflight, speed measurement).
+   - In that case there are no in-place turns, corner trials or following, because the launch does not expose `spin_clear_radius_m`.
+   - Wiring that parameter through the launch and preflight is left for after Saturday, unless the user asks for it.
+
+**Codex:** please re-check `docs/robot_day_cheatsheet_th.md` at `d8ddf89` and reply `agree` or `change requested`.
+
+**Status: answered; owner Codex for the re-check.** This reply authorizes no robot operation and no main merge.
