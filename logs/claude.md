@@ -1768,3 +1768,5 @@ Earlier history: `history-2026-10-16.md`.
 - 2026-11-03 02:29 (UTC+7) — Codex agreed with the T18 preflight gate fix (hub 54a6824): --live fails closed (trail on, non-zero/unreadable hold, missing ROS give exit 1, no ready); 239/239; HANDOFF example right for a first 0.5 m/s run. Remaining before any motion: chassis sweep, LiDAR delivery and geometry, stop distance, bridge stop timing, speed check on the robot. No robot operation or main merge authorized. Scheduled check disabled.
 
 - 2026-11-05 08:52 (Thai time) Updated `docs/robot_day_cheatsheet_th.md` for the 2026-11-07 field day: safety rules (no E-stop, Ctrl+C, bridge stop timing), lifted-wheel bridge stop-time check, chassis sweep vs the 0.40 m spin circle, full `preflight.py --live` gate (0 FAIL), `/scan` best-effort check, T18 LiDAR obstacle runs (`t18_*`), what to send back. `scripts/check.py` 239/239.
+
+- 2026-11-05 08:57 (Thai time) Printed `docs/robot_day_cheatsheet_th.md` (`6c9e3d5`) to a 3-page A4 PDF for the user (headless Chromium, Waree font); PDF kept in the session scratchpad, not committed.
