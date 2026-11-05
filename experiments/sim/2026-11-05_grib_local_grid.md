@@ -64,7 +64,7 @@ walkable cells.
 | `turn_90` | 5/5 | 0 | 0.712 | 1.000 | 5/5 | 0 | 0.689 | 1.000 |
 | `side_step` | 5/5 | 0 | 0.724 | 0.967 | 5/5 | 0 | 0.716 | 0.934 |
 | `zigzag` | 5/5 | 0 | 0.654 | 0.919 | **3/5** | 0 | 0.707 | 0.849 |
-| **Total** | **21/25** | **0** | | | **21/25** | **0** | | |
+| **Total** | **21/25** | **0** | | | **20/25** | **0** | | |
 
 "Closest" is the closest approach to any person, target included, over the run (`min_person_range_m`).
 
@@ -102,7 +102,7 @@ There were no contacts in any of the 50 runs.
 - **`pass_by`, `turn_90`, `side_step`:** no change in passes. `pass_by` kept a little farther from the worker
   (closest 0.578 against 0.531 m).
 - **Contacts:** 0 out of 25 on and 0 out of 25 off.
-- **Total:** 21/25 either way. Grib trades a `blind_corner` gain for a `zigzag` loss.
+- **Total:** 21/25 off, 20/25 on (corrected 2026-11-05: an earlier version of this write-up said 21/25 for both). Grib trades a `blind_corner` gain of one run for a `zigzag` loss of two.
 
 The full 22 × 5 run with grib on was not done, because the subset was not promising.
 
