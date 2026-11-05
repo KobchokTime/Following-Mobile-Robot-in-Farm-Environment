@@ -1,0 +1,663 @@
+{
+ "code": "7926bd0",
+ "branch": "claude/robot/grib-local-grid",
+ "date": "2026-11-05",
+ "protocol": "realism profile, mps bridge, one run at a time (run_baseline.sh protocol, scenario subset)",
+ "settings": {
+  "off": "robot-day defaults (grib false, obstacle_stop true, avoid_trail false, trail_hold_s 0)",
+  "on": "robot-day defaults + grib:=true"
+ },
+ "image": "sha256:4303df46c6395ff0060a9d97c020cf17a2b29ecf553f120ba0d0d42c524a4dc2",
+ "runs": [
+  {
+   "scenario": "blind_corner",
+   "seed": 0,
+   "grib": false,
+   "passed": false,
+   "contact": false,
+   "final_gap_m": 2.89,
+   "visible_share": 0.336,
+   "min_person_range_m": 0.636,
+   "grib_on_events": 0,
+   "ros_params": []
+  },
+  {
+   "scenario": "blind_corner",
+   "seed": 1,
+   "grib": false,
+   "passed": true,
+   "contact": false,
+   "final_gap_m": 0.52,
+   "visible_share": 0.904,
+   "min_person_range_m": 0.526,
+   "grib_on_events": 0,
+   "ros_params": []
+  },
+  {
+   "scenario": "blind_corner",
+   "seed": 2,
+   "grib": false,
+   "passed": false,
+   "contact": false,
+   "final_gap_m": 2.99,
+   "visible_share": 0.454,
+   "min_person_range_m": 0.595,
+   "grib_on_events": 0,
+   "ros_params": []
+  },
+  {
+   "scenario": "blind_corner",
+   "seed": 3,
+   "grib": false,
+   "passed": false,
+   "contact": false,
+   "final_gap_m": 0.55,
+   "visible_share": 0.893,
+   "min_person_range_m": 0.596,
+   "grib_on_events": 0,
+   "ros_params": []
+  },
+  {
+   "scenario": "blind_corner",
+   "seed": 4,
+   "grib": false,
+   "passed": false,
+   "contact": false,
+   "final_gap_m": 0.52,
+   "visible_share": 0.889,
+   "min_person_range_m": 0.591,
+   "grib_on_events": 0,
+   "ros_params": []
+  },
+  {
+   "scenario": "pass_by",
+   "seed": 0,
+   "grib": false,
+   "passed": true,
+   "contact": false,
+   "final_gap_m": 0.53,
+   "visible_share": 1.0,
+   "min_person_range_m": 0.531,
+   "grib_on_events": 0,
+   "ros_params": []
+  },
+  {
+   "scenario": "pass_by",
+   "seed": 1,
+   "grib": false,
+   "passed": true,
+   "contact": false,
+   "final_gap_m": 0.53,
+   "visible_share": 1.0,
+   "min_person_range_m": 0.555,
+   "grib_on_events": 0,
+   "ros_params": []
+  },
+  {
+   "scenario": "pass_by",
+   "seed": 2,
+   "grib": false,
+   "passed": true,
+   "contact": false,
+   "final_gap_m": 0.53,
+   "visible_share": 1.0,
+   "min_person_range_m": 0.565,
+   "grib_on_events": 0,
+   "ros_params": []
+  },
+  {
+   "scenario": "pass_by",
+   "seed": 3,
+   "grib": false,
+   "passed": true,
+   "contact": false,
+   "final_gap_m": 0.52,
+   "visible_share": 0.942,
+   "min_person_range_m": 0.561,
+   "grib_on_events": 0,
+   "ros_params": []
+  },
+  {
+   "scenario": "pass_by",
+   "seed": 4,
+   "grib": false,
+   "passed": true,
+   "contact": false,
+   "final_gap_m": 0.53,
+   "visible_share": 1.0,
+   "min_person_range_m": 0.55,
+   "grib_on_events": 0,
+   "ros_params": []
+  },
+  {
+   "scenario": "side_step",
+   "seed": 0,
+   "grib": false,
+   "passed": true,
+   "contact": false,
+   "final_gap_m": 0.53,
+   "visible_share": 0.974,
+   "min_person_range_m": 0.727,
+   "grib_on_events": 0,
+   "ros_params": []
+  },
+  {
+   "scenario": "side_step",
+   "seed": 1,
+   "grib": false,
+   "passed": true,
+   "contact": false,
+   "final_gap_m": 0.52,
+   "visible_share": 0.978,
+   "min_person_range_m": 0.724,
+   "grib_on_events": 0,
+   "ros_params": []
+  },
+  {
+   "scenario": "side_step",
+   "seed": 2,
+   "grib": false,
+   "passed": true,
+   "contact": false,
+   "final_gap_m": 0.54,
+   "visible_share": 0.967,
+   "min_person_range_m": 0.739,
+   "grib_on_events": 0,
+   "ros_params": []
+  },
+  {
+   "scenario": "side_step",
+   "seed": 3,
+   "grib": false,
+   "passed": true,
+   "contact": false,
+   "final_gap_m": 0.53,
+   "visible_share": 0.967,
+   "min_person_range_m": 0.728,
+   "grib_on_events": 0,
+   "ros_params": []
+  },
+  {
+   "scenario": "side_step",
+   "seed": 4,
+   "grib": false,
+   "passed": true,
+   "contact": false,
+   "final_gap_m": 0.54,
+   "visible_share": 0.974,
+   "min_person_range_m": 0.734,
+   "grib_on_events": 0,
+   "ros_params": []
+  },
+  {
+   "scenario": "turn_90",
+   "seed": 0,
+   "grib": false,
+   "passed": true,
+   "contact": false,
+   "final_gap_m": 0.52,
+   "visible_share": 1.0,
+   "min_person_range_m": 0.722,
+   "grib_on_events": 0,
+   "ros_params": []
+  },
+  {
+   "scenario": "turn_90",
+   "seed": 1,
+   "grib": false,
+   "passed": true,
+   "contact": false,
+   "final_gap_m": 0.51,
+   "visible_share": 1.0,
+   "min_person_range_m": 0.712,
+   "grib_on_events": 0,
+   "ros_params": []
+  },
+  {
+   "scenario": "turn_90",
+   "seed": 2,
+   "grib": false,
+   "passed": true,
+   "contact": false,
+   "final_gap_m": 0.53,
+   "visible_share": 1.0,
+   "min_person_range_m": 0.733,
+   "grib_on_events": 0,
+   "ros_params": []
+  },
+  {
+   "scenario": "turn_90",
+   "seed": 3,
+   "grib": false,
+   "passed": true,
+   "contact": false,
+   "final_gap_m": 0.53,
+   "visible_share": 1.0,
+   "min_person_range_m": 0.728,
+   "grib_on_events": 0,
+   "ros_params": []
+  },
+  {
+   "scenario": "turn_90",
+   "seed": 4,
+   "grib": false,
+   "passed": true,
+   "contact": false,
+   "final_gap_m": 0.54,
+   "visible_share": 1.0,
+   "min_person_range_m": 0.732,
+   "grib_on_events": 0,
+   "ros_params": []
+  },
+  {
+   "scenario": "zigzag",
+   "seed": 0,
+   "grib": false,
+   "passed": true,
+   "contact": false,
+   "final_gap_m": 0.5,
+   "visible_share": 1.0,
+   "min_person_range_m": 0.654,
+   "grib_on_events": 0,
+   "ros_params": []
+  },
+  {
+   "scenario": "zigzag",
+   "seed": 1,
+   "grib": false,
+   "passed": true,
+   "contact": false,
+   "final_gap_m": 0.53,
+   "visible_share": 1.0,
+   "min_person_range_m": 0.731,
+   "grib_on_events": 0,
+   "ros_params": []
+  },
+  {
+   "scenario": "zigzag",
+   "seed": 2,
+   "grib": false,
+   "passed": true,
+   "contact": false,
+   "final_gap_m": 0.53,
+   "visible_share": 0.993,
+   "min_person_range_m": 0.733,
+   "grib_on_events": 0,
+   "ros_params": []
+  },
+  {
+   "scenario": "zigzag",
+   "seed": 3,
+   "grib": false,
+   "passed": true,
+   "contact": false,
+   "final_gap_m": 0.54,
+   "visible_share": 1.0,
+   "min_person_range_m": 0.722,
+   "grib_on_events": 0,
+   "ros_params": []
+  },
+  {
+   "scenario": "zigzag",
+   "seed": 4,
+   "grib": false,
+   "passed": true,
+   "contact": false,
+   "final_gap_m": 0.54,
+   "visible_share": 0.919,
+   "min_person_range_m": 0.735,
+   "grib_on_events": 0,
+   "ros_params": []
+  },
+  {
+   "scenario": "blind_corner",
+   "seed": 0,
+   "grib": true,
+   "passed": false,
+   "contact": false,
+   "final_gap_m": 0.53,
+   "visible_share": 0.841,
+   "min_person_range_m": 0.538,
+   "grib_on_events": 2,
+   "ros_params": [
+    "grib:=true"
+   ]
+  },
+  {
+   "scenario": "blind_corner",
+   "seed": 1,
+   "grib": true,
+   "passed": false,
+   "contact": false,
+   "final_gap_m": 0.51,
+   "visible_share": 0.86,
+   "min_person_range_m": 0.593,
+   "grib_on_events": 1,
+   "ros_params": [
+    "grib:=true"
+   ]
+  },
+  {
+   "scenario": "blind_corner",
+   "seed": 2,
+   "grib": true,
+   "passed": false,
+   "contact": false,
+   "final_gap_m": 0.53,
+   "visible_share": 0.856,
+   "min_person_range_m": 0.564,
+   "grib_on_events": 1,
+   "ros_params": [
+    "grib:=true"
+   ]
+  },
+  {
+   "scenario": "blind_corner",
+   "seed": 3,
+   "grib": true,
+   "passed": true,
+   "contact": false,
+   "final_gap_m": 0.54,
+   "visible_share": 0.904,
+   "min_person_range_m": 0.531,
+   "grib_on_events": 2,
+   "ros_params": [
+    "grib:=true"
+   ]
+  },
+  {
+   "scenario": "blind_corner",
+   "seed": 4,
+   "grib": true,
+   "passed": true,
+   "contact": false,
+   "final_gap_m": 0.52,
+   "visible_share": 0.9,
+   "min_person_range_m": 0.544,
+   "grib_on_events": 1,
+   "ros_params": [
+    "grib:=true"
+   ]
+  },
+  {
+   "scenario": "pass_by",
+   "seed": 0,
+   "grib": true,
+   "passed": true,
+   "contact": false,
+   "final_gap_m": 0.54,
+   "visible_share": 1.0,
+   "min_person_range_m": 0.619,
+   "grib_on_events": 2,
+   "ros_params": [
+    "grib:=true"
+   ]
+  },
+  {
+   "scenario": "pass_by",
+   "seed": 1,
+   "grib": true,
+   "passed": true,
+   "contact": false,
+   "final_gap_m": 0.53,
+   "visible_share": 1.0,
+   "min_person_range_m": 0.63,
+   "grib_on_events": 1,
+   "ros_params": [
+    "grib:=true"
+   ]
+  },
+  {
+   "scenario": "pass_by",
+   "seed": 2,
+   "grib": true,
+   "passed": true,
+   "contact": false,
+   "final_gap_m": 0.53,
+   "visible_share": 1.0,
+   "min_person_range_m": 0.612,
+   "grib_on_events": 1,
+   "ros_params": [
+    "grib:=true"
+   ]
+  },
+  {
+   "scenario": "pass_by",
+   "seed": 3,
+   "grib": true,
+   "passed": true,
+   "contact": false,
+   "final_gap_m": 0.54,
+   "visible_share": 1.0,
+   "min_person_range_m": 0.578,
+   "grib_on_events": 1,
+   "ros_params": [
+    "grib:=true"
+   ]
+  },
+  {
+   "scenario": "pass_by",
+   "seed": 4,
+   "grib": true,
+   "passed": true,
+   "contact": false,
+   "final_gap_m": 0.51,
+   "visible_share": 1.0,
+   "min_person_range_m": 0.601,
+   "grib_on_events": 2,
+   "ros_params": [
+    "grib:=true"
+   ]
+  },
+  {
+   "scenario": "side_step",
+   "seed": 0,
+   "grib": true,
+   "passed": true,
+   "contact": false,
+   "final_gap_m": 0.54,
+   "visible_share": 0.978,
+   "min_person_range_m": 0.741,
+   "grib_on_events": 1,
+   "ros_params": [
+    "grib:=true"
+   ]
+  },
+  {
+   "scenario": "side_step",
+   "seed": 1,
+   "grib": true,
+   "passed": true,
+   "contact": false,
+   "final_gap_m": 0.53,
+   "visible_share": 0.934,
+   "min_person_range_m": 0.722,
+   "grib_on_events": 1,
+   "ros_params": [
+    "grib:=true"
+   ]
+  },
+  {
+   "scenario": "side_step",
+   "seed": 2,
+   "grib": true,
+   "passed": true,
+   "contact": false,
+   "final_gap_m": 0.54,
+   "visible_share": 0.97,
+   "min_person_range_m": 0.738,
+   "grib_on_events": 2,
+   "ros_params": [
+    "grib:=true"
+   ]
+  },
+  {
+   "scenario": "side_step",
+   "seed": 3,
+   "grib": true,
+   "passed": true,
+   "contact": false,
+   "final_gap_m": 0.52,
+   "visible_share": 0.985,
+   "min_person_range_m": 0.716,
+   "grib_on_events": 2,
+   "ros_params": [
+    "grib:=true"
+   ]
+  },
+  {
+   "scenario": "side_step",
+   "seed": 4,
+   "grib": true,
+   "passed": true,
+   "contact": false,
+   "final_gap_m": 0.54,
+   "visible_share": 0.97,
+   "min_person_range_m": 0.74,
+   "grib_on_events": 2,
+   "ros_params": [
+    "grib:=true"
+   ]
+  },
+  {
+   "scenario": "turn_90",
+   "seed": 0,
+   "grib": true,
+   "passed": true,
+   "contact": false,
+   "final_gap_m": 0.52,
+   "visible_share": 1.0,
+   "min_person_range_m": 0.719,
+   "grib_on_events": 0,
+   "ros_params": [
+    "grib:=true"
+   ]
+  },
+  {
+   "scenario": "turn_90",
+   "seed": 1,
+   "grib": true,
+   "passed": true,
+   "contact": false,
+   "final_gap_m": 0.49,
+   "visible_share": 1.0,
+   "min_person_range_m": 0.689,
+   "grib_on_events": 0,
+   "ros_params": [
+    "grib:=true"
+   ]
+  },
+  {
+   "scenario": "turn_90",
+   "seed": 2,
+   "grib": true,
+   "passed": true,
+   "contact": false,
+   "final_gap_m": 0.53,
+   "visible_share": 1.0,
+   "min_person_range_m": 0.725,
+   "grib_on_events": 0,
+   "ros_params": [
+    "grib:=true"
+   ]
+  },
+  {
+   "scenario": "turn_90",
+   "seed": 3,
+   "grib": true,
+   "passed": true,
+   "contact": false,
+   "final_gap_m": 0.53,
+   "visible_share": 1.0,
+   "min_person_range_m": 0.734,
+   "grib_on_events": 0,
+   "ros_params": [
+    "grib:=true"
+   ]
+  },
+  {
+   "scenario": "turn_90",
+   "seed": 4,
+   "grib": true,
+   "passed": true,
+   "contact": false,
+   "final_gap_m": 0.53,
+   "visible_share": 1.0,
+   "min_person_range_m": 0.716,
+   "grib_on_events": 0,
+   "ros_params": [
+    "grib:=true"
+   ]
+  },
+  {
+   "scenario": "zigzag",
+   "seed": 0,
+   "grib": true,
+   "passed": true,
+   "contact": false,
+   "final_gap_m": 0.53,
+   "visible_share": 1.0,
+   "min_person_range_m": 0.717,
+   "grib_on_events": 0,
+   "ros_params": [
+    "grib:=true"
+   ]
+  },
+  {
+   "scenario": "zigzag",
+   "seed": 1,
+   "grib": true,
+   "passed": true,
+   "contact": false,
+   "final_gap_m": 0.53,
+   "visible_share": 1.0,
+   "min_person_range_m": 0.735,
+   "grib_on_events": 0,
+   "ros_params": [
+    "grib:=true"
+   ]
+  },
+  {
+   "scenario": "zigzag",
+   "seed": 2,
+   "grib": true,
+   "passed": false,
+   "contact": false,
+   "final_gap_m": 0.54,
+   "visible_share": 0.849,
+   "min_person_range_m": 0.727,
+   "grib_on_events": 5,
+   "ros_params": [
+    "grib:=true"
+   ]
+  },
+  {
+   "scenario": "zigzag",
+   "seed": 3,
+   "grib": true,
+   "passed": false,
+   "contact": false,
+   "final_gap_m": 0.53,
+   "visible_share": 0.897,
+   "min_person_range_m": 0.729,
+   "grib_on_events": 4,
+   "ros_params": [
+    "grib:=true"
+   ]
+  },
+  {
+   "scenario": "zigzag",
+   "seed": 4,
+   "grib": true,
+   "passed": true,
+   "contact": false,
+   "final_gap_m": 0.52,
+   "visible_share": 0.985,
+   "min_person_range_m": 0.707,
+   "grib_on_events": 1,
+   "ros_params": [
+    "grib:=true"
+   ]
+  }
+ ]
+}
