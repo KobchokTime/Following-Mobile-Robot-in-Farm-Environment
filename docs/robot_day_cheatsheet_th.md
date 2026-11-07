@@ -164,7 +164,9 @@ ros2_yolo_ws/scripts/record_robot_day.sh --scenario <ชื่อ> --countdown 5
 ## หลังเลิก
 
 ```bash
-python3 tools/robot_day/analyze.py ~/robot_day_recordings --out robot_day_report.json
+python3 tools/robot_day/analyze.py ~/robot_day_recordings \
+  --lidar-angle-offset-deg 0 --lidar-angle-sign -1 \
+  --out robot_day_report.json
 ```
 
 ส่งให้ Claude (ไม่ต้องส่งไฟล์ bag ยกเว้นข้อ map_walk):
