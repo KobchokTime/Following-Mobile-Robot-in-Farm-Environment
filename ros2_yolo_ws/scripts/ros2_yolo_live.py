@@ -1,3 +1,5 @@
+import os
+
 import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import Image
@@ -154,10 +156,11 @@ class YoloROSNode(Node):
 
                 self.get_logger().info(f'Target centroid=({cx},{cy}) sector={sector_id}')
 
-            cv2.namedWindow("YOLOv8 Person Detection", cv2.WINDOW_NORMAL)
-            cv2.resizeWindow("YOLOv8 Person Detection", 1280, 720)
-            cv2.imshow("YOLOv8 Person Detection", frame_copy)
-            cv2.waitKey(1)
+            if os.environ.get("DISPLAY"):
+                cv2.namedWindow("YOLOv8 Person Detection", cv2.WINDOW_NORMAL)
+                cv2.resizeWindow("YOLOv8 Person Detection", 1280, 720)
+                cv2.imshow("YOLOv8 Person Detection", frame_copy)
+                cv2.waitKey(1)
 
         stamp = msg.header.stamp
         self.frame_pub.publish(Int32MultiArray(
@@ -172,7 +175,8 @@ def main(args=None):
         pass
     node.destroy_node()
     rclpy.shutdown()
-    cv2.destroyAllWindows()
+    if os.environ.get("DISPLAY"):
+        cv2.destroyAllWindows()
 
 if __name__ == '__main__':
     main()
