@@ -2,6 +2,9 @@
 import rclpy
 from rclpy.node import Node
 from geometry_msgs.msg import Twist
+from nav_msgs.msg import Odometry
+from geometry_msgs.msg import TransformStamped
+import tf2_ros
 from contextlib import suppress
 import minimalmodbus
 import math
@@ -177,6 +180,14 @@ class DriveBridge(Node):
         self.sub = self.create_subscription(Twist, '/cmd_vel', self.cmd_callback, 10)
         self.timer = self.create_timer(1.0 / UPDATE_HZ, self.update_loop)
 
+        # Dead-reckoning odometry
+        self.odom_pub = self.create_publisher(Odometry, '/odom', 10)
+        self.tf_broadcaster = tf2_ros.TransformBroadcaster(self)
+        self.odom_x = 0.0
+        self.odom_y = 0.0
+        self.odom_theta = 0.0
+        self.last_odom_t = self.get_clock().now()
+
         self.get_logger().info("✅ ZLAC Drive Bridge started (listening to /cmd_vel)")
 
     def cmd_callback(self, msg: Twist):
@@ -209,10 +220,56 @@ class DriveBridge(Node):
         # ส่งค่าปัจจุบันเข้าไดรฟ์ทุก 0.1 วินาที
         if self.speed_mode == "legacy":
             self.zlac.set_velocity(self.left, self.right)
+            actual_l, actual_r = self.left, self.right
         else:
             self.out_left, self.out_right = ramp_pair((self.out_left, self.out_right),
                                                       (self.left, self.right), self.max_step)
             self.zlac.set_velocity(self.out_left, self.out_right)
+            actual_l, actual_r = self.out_left, self.out_right
+
+        self._publish_odom(actual_l, actual_r)
+
+    def _publish_odom(self, reg_l: float, reg_r: float) -> None:
+        # reg_l = value written to 0x2088 (phys. right wheel, positive = forward)
+        # reg_r = value written to 0x2089 (phys. left wheel, negative = forward → negate)
+        rpm2mps = 2.0 * math.pi * self.wheel_radius / 60.0
+        v_right = reg_l * rpm2mps
+        v_left = -reg_r * rpm2mps
+        v = (v_right + v_left) * 0.5
+        omega = (v_right - v_left) / self.track_width
+
+        now = self.get_clock().now()
+        dt = (now - self.last_odom_t).nanoseconds * 1e-9
+        self.last_odom_t = now
+
+        self.odom_theta += omega * dt
+        self.odom_x += v * math.cos(self.odom_theta) * dt
+        self.odom_y += v * math.sin(self.odom_theta) * dt
+
+        half = self.odom_theta * 0.5
+        qz, qw = math.sin(half), math.cos(half)
+
+        odom = Odometry()
+        odom.header.stamp = now.to_msg()
+        odom.header.frame_id = 'odom'
+        odom.child_frame_id = 'base_link'
+        odom.pose.pose.position.x = self.odom_x
+        odom.pose.pose.position.y = self.odom_y
+        odom.pose.pose.orientation.z = qz
+        odom.pose.pose.orientation.w = qw
+        odom.twist.twist.linear.x = v
+        odom.twist.twist.angular.z = omega
+        self.odom_pub.publish(odom)
+
+        t = TransformStamped()
+        t.header.stamp = now.to_msg()
+        t.header.frame_id = 'odom'
+        t.child_frame_id = 'base_link'
+        t.transform.translation.x = self.odom_x
+        t.transform.translation.y = self.odom_y
+        t.transform.rotation.z = qz
+        t.transform.rotation.w = qw
+        self.tf_broadcaster.sendTransform(t)
 
     def destroy_node(self):
         # ตอนปิดโปรแกรม ค่อย soft stop + hard stop
