@@ -76,6 +76,21 @@ class PreflightTest(unittest.TestCase):
         self.assertEqual(P.check_motion_params(get({("/follow_stop_node", "max_decel"): float("nan")}), expected)[0],
                          "FAIL")
 
+    def test_lidar_frame_params(self):
+        running = {key: (-1.0 if key[1].endswith("sign") else 0.0) for key in P.LIDAR_FRAME_PARAMS}
+
+        def get(changes):
+            vals = {**running, **changes}
+            return lambda node, name: vals.get((node, name))
+
+        self.assertEqual(P.check_lidar_frame_params(get({}), 0.0, -1.0)[0], "PASS")
+        for key in P.LIDAR_FRAME_PARAMS:
+            wrong = 1.0 if key[1].endswith("sign") else 180.0
+            self.assertEqual(P.check_lidar_frame_params(get({key: wrong}), 0.0, -1.0)[0], "FAIL")
+            self.assertEqual(P.check_lidar_frame_params(get({key: None}), 0.0, -1.0)[0], "FAIL")
+        self.assertEqual(P.check_lidar_frame_params(get({}), float("nan"), -1.0)[0], "FAIL")
+        self.assertEqual(P.check_lidar_frame_params(get({}), 0.0, 0.0)[0], "FAIL")
+
     def test_launch_passes_one_obstacle_stop_to_both_nodes(self):
         # the launch file, with stand-ins for the launch package: follow_stop and sync_fusion get the same value,
         # and avoid_trail is off by default on the robot
@@ -102,6 +117,12 @@ class PreflightTest(unittest.TestCase):
             self.assertIn(f"obstacle_stop:={value}", procs["follow_stop"])
             self.assertIn(f"obstacle_stop:={value}", procs["sync_fusion"])
         self.assertIn("avoid_trail:=false", {p["name"]: p["cmd"] for p in mod.actions(mod.DEFAULTS)}["follow_stop"])
+        procs = {p["name"]: p["cmd"] for p in mod.actions(mod.DEFAULTS)}
+        for name in ("follow_stop", "sync_fusion"):
+            self.assertIn("lidar_angle_offset_deg:=0.0", procs[name])
+            self.assertIn("lidar_angle_sign:=-1.0", procs[name])
+        self.assertIn("angle_offset_deg:=0.0", procs["lidar_sectorizer"])
+        self.assertIn("angle_sign:=-1.0", procs["lidar_sectorizer"])
 
     def test_model_and_calibration(self):
         with tempfile.TemporaryDirectory() as d:
