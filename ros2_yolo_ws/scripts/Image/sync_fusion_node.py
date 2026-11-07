@@ -446,6 +446,7 @@ class SyncFusionNode(Node):
         self.declare_parameter('lidar_track', True)
         self.declare_parameter('scan_topic', '/scan')
         self.declare_parameter('lidar_angle_offset_deg', 180.0)  # as lidar_sectorizer_node.py angle_offset
+        self.declare_parameter('lidar_angle_sign', 1.0)  # physical mount may reverse left/right
         self.declare_parameter('lidar_track_after_s', 0.3)  # camera silent this long -> use the LiDAR
         self.declare_parameter('lidar_track_max_s', 5.0)    # give up after this long without the camera
         self.declare_parameter('lidar_edge_deg', 8.0)  # only when last seen this close to the image edge
@@ -498,6 +499,9 @@ class SyncFusionNode(Node):
         self.last_target = None  # (cx, cy, sector_id, range) last published for the target
         self.use_lidar_track = bool(self.get_parameter('lidar_track').value)
         self.lidar_offset = math.radians(float(self.get_parameter('lidar_angle_offset_deg').value))
+        self.lidar_sign = float(self.get_parameter('lidar_angle_sign').value)
+        if self.lidar_sign not in (-1.0, 1.0):
+            raise ValueError('lidar_angle_sign must be -1.0 or 1.0')
         self.lidar_after = float(self.get_parameter('lidar_track_after_s').value)
         self.lidar_max = float(self.get_parameter('lidar_track_max_s').value)
         self.scan_points = []     # latest scan as (robot-frame bearing, range)
@@ -598,7 +602,8 @@ class SyncFusionNode(Node):
         pts = []
         for i, r in enumerate(msg.ranges):
             if math.isfinite(r) and msg.range_min < r < msg.range_max:
-                a = (msg.angle_min + i * msg.angle_increment + self.lidar_offset + math.pi) % (2.0 * math.pi) - math.pi
+                a = (self.lidar_sign * (msg.angle_min + i * msg.angle_increment)
+                     + self.lidar_offset + math.pi) % (2.0 * math.pi) - math.pi
                 pts.append((a, r))
         self.scan_points = pts
         self.scan_time = self.now_sec()

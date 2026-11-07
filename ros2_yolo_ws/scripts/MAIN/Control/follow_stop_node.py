@@ -253,6 +253,7 @@ class FollowStopNode(Node):
         self.declare_parameter('avoid_back_s', 3.0)
         self.declare_parameter('scan_topic', '/scan')
         self.declare_parameter('lidar_angle_offset_deg', 180.0)  # as sync_fusion_node / lidar_sectorizer_node
+        self.declare_parameter('lidar_angle_sign', 1.0)  # physical mount may reverse left/right
         self.declare_parameter('scan_max_age_s', 0.3)
 
         # ---------- Load ----------
@@ -295,6 +296,9 @@ class FollowStopNode(Node):
         self.obstacle_stop_m   = float(self.get_parameter('obstacle_stop_m').value)
         self.obstacle_excl     = float(self.get_parameter('obstacle_target_exclude_m').value)
         self.lidar_offset      = math.radians(float(self.get_parameter('lidar_angle_offset_deg').value))
+        self.lidar_sign        = float(self.get_parameter('lidar_angle_sign').value)
+        if self.lidar_sign not in (-1.0, 1.0):
+            raise ValueError('lidar_angle_sign must be -1.0 or 1.0')
         self.scan_max_age      = float(self.get_parameter('scan_max_age_s').value)
         self.scan_xy           = []     # latest scan in the robot frame
         self.scan_time         = None
@@ -363,7 +367,7 @@ class FollowStopNode(Node):
         pts = []
         for i, r in enumerate(msg.ranges):
             if math.isfinite(r) and msg.range_min < r < msg.range_max:
-                a = msg.angle_min + i * msg.angle_increment + self.lidar_offset
+                a = self.lidar_sign * (msg.angle_min + i * msg.angle_increment) + self.lidar_offset
                 pts.append((r * math.cos(a), r * math.sin(a)))
         self.scan_xy = pts
         self.scan_time = self.get_clock().now().nanoseconds / 1e9

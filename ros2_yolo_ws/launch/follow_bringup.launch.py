@@ -24,6 +24,8 @@ Arguments (default):
                             behaviours that rely on the stop (occlusion range, give-way floor) go off with it
     avoid_trail (false)     follow the target's path round obstacles ([TRAIL]); off on the robot until the
                             dead-reckoned trail is checked against the wheels (T18 re-review, 2026-11-01)
+    lidar_angle_offset_deg (0.0) measured /scan forward alignment for this robot (2026-11-07)
+    lidar_angle_sign (-1.0) raw negative /scan bearings are physically left on this robot
     camera_cmd, lidar_cmd   shell commands for the drivers (empty = not started here)
 """
 
@@ -49,6 +51,8 @@ DEFAULTS = {
     "bridge": "true",
     "obstacle_stop": "true",
     "avoid_trail": "false",
+    "lidar_angle_offset_deg": "0.0",  # measured robot: raw 0 deg faces forward
+    "lidar_angle_sign": "-1.0",       # measured robot: raw negative angles are left
     "camera_cmd": "",
     "lidar_cmd": "",
 }
@@ -70,14 +74,19 @@ def actions(a):
             out.append(ExecuteProcess(cmd=[a[name]], shell=True, name=name[:-4], output="screen"))
     out += [
         node("yolo", "ros2_yolo_live.py", {"model_path": a["model_path"]}),
-        node("lidar_sectorizer", "Lidar/lidar_sectorizer_node.py", {}),
-        node("sync_fusion", "Image/sync_fusion_node.py", {"obstacle_stop": a["obstacle_stop"]}),
+        node("lidar_sectorizer", "Lidar/lidar_sectorizer_node.py",
+             {"angle_offset_deg": a["lidar_angle_offset_deg"], "angle_sign": a["lidar_angle_sign"]}),
+        node("sync_fusion", "Image/sync_fusion_node.py",
+             {"obstacle_stop": a["obstacle_stop"], "lidar_angle_offset_deg": a["lidar_angle_offset_deg"],
+              "lidar_angle_sign": a["lidar_angle_sign"]}),
         node("fusion_prob", "Image/fusion_prob_node.py", {}),
         # max_decel is in m/s^2, which only means something on the "mps" bridge
         node("follow_stop", "MAIN/Control/follow_stop_node.py",
              {"target_distance": a["target_distance"], "latency_s": a["latency_s"],
               "bridge_accel_mps2": a["max_accel_mps2"],  # wheel-speed estimate for the braking cap
               "steer_mode": a["steer_mode"],
+              "lidar_angle_offset_deg": a["lidar_angle_offset_deg"],
+              "lidar_angle_sign": a["lidar_angle_sign"],
               "obstacle_stop": a["obstacle_stop"], "avoid_trail": a["avoid_trail"],
               "max_decel": "0.0" if a["speed_mode"] == "legacy" else "0.8"}),
     ]
@@ -88,7 +97,8 @@ def actions(a):
     return out
 
 
-FLOATS = ("max_speed_mps", "max_accel_mps2", "wheel_radius_m", "track_width_m", "turn_dir", "target_distance", "latency_s")
+FLOATS = ("max_speed_mps", "max_accel_mps2", "wheel_radius_m", "track_width_m", "turn_dir",
+          "target_distance", "latency_s", "lidar_angle_offset_deg", "lidar_angle_sign")
 
 
 def launch_setup(context):
