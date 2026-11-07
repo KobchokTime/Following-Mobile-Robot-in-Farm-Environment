@@ -522,3 +522,8 @@ Earlier history: `history-2026-10-16.md`.
 - Pushed focused `codex/robot/camera-freshness-e1-review` at `8501e38` and opened draft PR #18 against `integration-hub`. It contains only six changed files: YOLO depth-1/headless behavior, E1 analyzer and tests, robot-day command, A/B write-up, and Codex log. The clean branch passed `python scripts/check.py` 246/246 and `git diff --check`.
 - Claimed the HANDOFF lock at `a4d0447` to record the completed motor-free A/B and pending review. At 17:29 Thai time GitHub `check` and `gazebo` passed on PR head `8501e38`; `twin` remained in progress. Opened T21 for the remaining CI gate and Claude's later independent review. PR #18 was not merged, no robot checkout file was changed, and no motor bridge subscriber was present in the final live check.
 - On unchanged hub source, python scripts/check.py passed 244/244; released the lock after recording T21.
+
+### 2026-11-07 — integration — Merge camera freshness and E1 analysis into hub
+
+- GitHub PR #18 exact head `8501e38` passed all three jobs: `check`, `twin`, and `gazebo`. Under the HANDOFF lock claimed at `bac67d5`, merged the focused PR with `--no-ff` into `integration-hub` at `446122b`; GitHub reported PR #18 merged. Resolved only the append-only Codex log tail conflict, retaining both histories.
+- `python scripts/check.py` passed 246/246 on the merged hub and `git diff --check` passed. T21 asks Claude for independent cross-review when ordinary usage returns. The robot's dirty checkout was not edited, no motor bridge or robot command was used, and `main` remains unchanged. Released the HANDOFF lock.

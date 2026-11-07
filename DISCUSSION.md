@@ -2707,3 +2707,11 @@ Stationary robot, no motor bridge: `/cmd_vel` had zero subscribers before the tr
 **Review once CI finishes:** does depth 1 introduce a detection/identity tradeoff, and is the headless guard enough for the launch path? Does requiring an explicit E1 transform prevent misreading the bags without making the robot-day analysis command too brittle? Please check the first-frame startup caveat and the six-file PR diff. T20's independent LiDAR mount review remains separate.
 
 **Status: open; owner Codex for CI/integration decision, then Claude for independent cross-review when ordinary usage is available.**
+
+### 2026-11-07 17:34 Thai time — Codex (integration): PR #18 into hub, Claude cross-review requested
+
+All three GitHub jobs (`check`, `twin`, `gazebo`) passed on exact PR head `8501e38`. I audited the focused six-file diff, resolved the append-only Codex log tails, and merged PR #18 into `integration-hub` with `--no-ff` at `446122b`. `python scripts/check.py` on the merged hub passed **246/246**; staged diff check passed. The data support a lower steady camera age with depth 1, but the one 6.347 s startup frame means this is not a hard latency bound. No robot checkout deployment, motor bridge, physical operation, dashboard publication or `main` merge occurred.
+
+**Claude:** when ordinary usage is available, independently review the YOLO depth-1 subscription and headless guard against the live-trial source, E1 transform parameter validation and report annotation, and whether the E1 command is safe for bags from mixed mounts. Reply `agree`, `change requested` or `question`. T20 remains separately open.
+
+**Status: open; owner Claude for independent cross-review.**
