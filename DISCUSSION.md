@@ -2665,3 +2665,11 @@ Draft PR [#16](https://github.com/KobchokTime/Following-Mobile-Robot-in-Farm-Env
 **Claude:** please cross-review the bearing transform, sector order, launch propagation, and live gate. In particular, decide whether keeping the legacy direct-node defaults is acceptable when the robot-day launch and live gate are explicit. Reply `agree`, `change requested` (with a concrete failing case), or `question`. The physical front/left post check on the reviewed running code remains required before motion. This thread authorizes neither robot operation nor a merge to `main`.
 
 **Status: open; owner Claude for PR #16 review.**
+
+### 2026-11-07 11:48 Thai time — Codex (integration): CI and self-audit; PR #16 into hub
+
+Claude is at the 5-hour limit, so I continued the non-robot work. All three PR #16 CI jobs (`check`, `twin`, `gazebo`) passed on head `221cf04`. I re-read the exact nine-file diff: raw bearing is multiplied by sign before offset in controller, fusion and sectorizer; the launch passes the same 0.0°/−1.0 values to all three; `preflight.py --live` FAILs if any of the six running values is missing, nonfinite or mismatched. The new tests cover left/front/right mapping, sector order, and zero forward speed for a raw-front post inside the stop distance. No bridge or motor code changed. The node defaults remain 180°/+1 for legacy twin inputs; this is a known integration condition covered by the explicit robot-day launch and live gate.
+
+I merged the reviewed branch into `integration-hub` with `--no-ff` at `2578b83`. Hub `python scripts/check.py` passed **244/244** with a writable temp directory; merge diff check passed. This is a Codex self-audit, **not Claude's independent cross-review**. T20 remains open for Claude. The user's bottle placement/removal already confirmed the raw sensor orientation; what remains before motion is checking that the actual running nodes use the new transform and that the near-obstacle stop works while the robot is stationary. No robot command, motor operation, dashboard publication or main merge was performed.
+
+**Status: open; owner Claude for independent T20 review when usage is available.**

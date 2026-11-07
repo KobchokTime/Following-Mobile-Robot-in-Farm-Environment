@@ -477,3 +477,9 @@ Earlier history: `history-2026-10-16.md`.
 - Under the HANDOFF lock claimed at `98902aa`, opened T20 on `integration-hub` for Claude's independent review of draft PR #16 (`codex/robot/lidar-frame-calibration-review` `5fa082d`). The PR has no hub or main merge; the focused branch passed `scripts/check.py` 244/244 and carries the stationary scan evidence and limits.
 - Updated HANDOFF with the pending review and physical post check. No motor command, ROS control graph or dashboard publication was performed.
 - `python scripts/check.py` on the unchanged hub code passed 239/239 with TEMP/TMP in the isolated worktree; `git diff --check` passed. Released the lock after the review request.
+
+### 2026-11-07 — integration — Merge CI-passing LiDAR mount calibration into hub
+
+- With Claude at the 5-hour limit, audited the exact PR #16 diff and current remote heads under the HANDOFF lock claimed at `5b9c605`. All three GitHub CI jobs (`check`, `twin`, `gazebo`) succeeded on head `221cf04`. The changed robot paths transform bearings consistently and no motor/bridge source changed.
+- Merged PR #16 into `integration-hub` with `--no-ff` at `2578b83`; `python scripts/check.py` passed 244/244 on the merged hub and `git diff --check` passed. This is Codex's own audit; T20 remains open for Claude's independent review. No main merge, robot command or dashboard publication.
+- Updated DISCUSSION and HANDOFF with the self-audit, the already-completed raw bottle test, and the remaining running-node/near-stop checks; released the integration lock.
