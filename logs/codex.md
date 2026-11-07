@@ -522,3 +522,8 @@ Earlier history: `history-2026-10-16.md`.
 ### 2026-11-07 — qa — Check front obstacle after mount calibration
 
 - Added a focused regression on `codex/qa/lidar-frame-calibration`: a raw 0° post inside the 0.45 m stop distance must cap the controller's forward command to zero with the measured mount transform. The four focused calibration tests passed; no hardware or ROS graph was used.
+
+### 2026-11-07 — integration — Submit focused LiDAR mount review
+
+- Merged the robot, QA and research feature branches into isolated `codex/workspace` with `--no-ff`; final workspace head before this log was `e6269fd`. The full offline check passed 244/244 on a clean focused branch based on hub `db5407d`.
+- Pushed that focused branch and opened draft PR #16 against `integration-hub`; its review head after this PR log is `5fa082d`. The workspace is synced but remains separate from the hub. Independent review and a static on-robot post check remain before any motion.
