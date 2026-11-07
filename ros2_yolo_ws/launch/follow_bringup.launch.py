@@ -43,6 +43,7 @@ DEFAULTS = {
     "wheel_radius_m": "0.085",
     "track_width_m": "0.40",
     "turn_dir": "1.0",
+    "forward_dir": "1.0",
     "port": "/dev/ttyUSB1",
     "model_path": "/home/yakgreen001/yolov8n_openvino_model/",
     "target_distance": "0.5",
@@ -93,11 +94,11 @@ def actions(a):
     if a["bridge"].lower() in ("true", "1", "yes"):
         out.append(node("zlac_bridge", "MAIN/Control/zlac_joystick_bridge.py",
                         {k: a[k] for k in ("speed_mode", "max_speed_mps", "max_accel_mps2", "wheel_radius_m",
-                                           "track_width_m", "turn_dir", "port")}))
+                                           "track_width_m", "turn_dir", "forward_dir", "port")}))
     return out
 
 
-FLOATS = ("max_speed_mps", "max_accel_mps2", "wheel_radius_m", "track_width_m", "turn_dir",
+FLOATS = ("max_speed_mps", "max_accel_mps2", "wheel_radius_m", "track_width_m", "turn_dir", "forward_dir",
           "target_distance", "latency_s", "lidar_angle_offset_deg", "lidar_angle_sign")
 
 

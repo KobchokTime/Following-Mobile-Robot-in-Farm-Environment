@@ -107,6 +107,20 @@ class BridgeMpsTest(unittest.TestCase):
         self.assertAlmostEqual(reg_2089, rpm)
         self.assertAlmostEqual(reg_2088, -rpm)
 
+    def test_field_forward_direction_reaches_the_motor_registers(self):
+        # On this chassis the raised-wheel check found forward_dir=-1; the callback must use it.
+        bridge = types.SimpleNamespace(speed_mode="mps", wheel_radius=0.085, max_speed=0.5,
+                                       track_width=0.40, turn_dir=1.0, forward_dir=-1.0,
+                                       use_angular=True, get_logger=lambda: types.SimpleNamespace(info=lambda _: None))
+        cmd = types.SimpleNamespace(linear=types.SimpleNamespace(x=0.2),
+                                    angular=types.SimpleNamespace(z=0.0))
+        self.b.DriveBridge.cmd_callback(bridge, cmd)
+        self.assertGreater(bridge.left, 0.0)   # 0x2088 on the measured physical wiring
+        self.assertLess(bridge.right, 0.0)    # 0x2089 on the measured physical wiring
+        self.assertEqual((bridge.left, bridge.right),
+                         self.b.wheel_commands_mps(0.2, 0.0, wheel_radius=0.085,
+                                                   max_speed=0.5, forward_dir=-1.0))
+
     def test_cap_keeps_the_turn_shape(self):
         reg_2088, reg_2089 = self.b.wheel_commands_mps(3.0, 1.0, wheel_radius=0.085, max_speed=1.4)
         right, left = -reg_2088, reg_2089
