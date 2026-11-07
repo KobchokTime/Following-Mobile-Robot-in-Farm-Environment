@@ -143,6 +143,31 @@ MOTION_PARAMS = (("/follow_stop_node", "obstacle_stop_m"), ("/follow_stop_node",
                  ("/follow_stop_node", "max_decel"), ("/follow_stop_node", "recheck_max_s"),
                  ("/zlac_drive_bridge", "speed_mode"), ("/zlac_drive_bridge", "max_speed_mps"))
 
+LIDAR_FRAME_PARAMS = (("/follow_stop_node", "lidar_angle_offset_deg"),
+                      ("/follow_stop_node", "lidar_angle_sign"),
+                      ("/sync_fusion_node", "lidar_angle_offset_deg"),
+                      ("/sync_fusion_node", "lidar_angle_sign"),
+                      ("/lidar_sectorizer", "angle_offset_deg"),
+                      ("/lidar_sectorizer", "angle_sign"))
+
+
+def check_lidar_frame_params(get, expected_offset_deg, expected_sign):
+    """FAIL unless the running controller, fusion and sectorizer share the measured LiDAR frame."""
+    if not (math.isfinite(expected_offset_deg) and expected_sign in (-1.0, 1.0)):
+        return result("FAIL", "LiDAR frame", "expected offset must be finite and sign must be -1 or 1")
+    vals = {key: get(*key) for key in LIDAR_FRAME_PARAMS}
+    missing = [f"{n} {k}" for (n, k), v in vals.items() if v is None]
+    if missing:
+        return result("FAIL", "LiDAR frame", "not readable: " + ", ".join(missing))
+    wrong = []
+    for (node, name), got in vals.items():
+        want = expected_sign if name.endswith("sign") else expected_offset_deg
+        if not (isinstance(got, float) and math.isfinite(got) and abs(got - want) <= 1e-6):
+            wrong.append(f"{node} {name} is {got}, expected {want}")
+    if wrong:
+        return result("FAIL", "LiDAR frame", "; ".join(wrong))
+    return result("PASS", "LiDAR frame", f"all three nodes use offset={expected_offset_deg} deg, sign={expected_sign}")
+
 
 def check_motion_params(get, expected):
     """FAIL unless each running motion value is readable and equals the expected one. expected: {(node, name): value}."""
@@ -276,6 +301,8 @@ def main(argv=None):
     ap.add_argument("--expect-spin-clear-radius-m", type=float, default=0.40)
     ap.add_argument("--expect-max-decel", type=float, default=0.8)
     ap.add_argument("--expect-recheck-max-s", type=float, default=1.0)
+    ap.add_argument("--expect-lidar-angle-offset-deg", type=float, default=0.0)
+    ap.add_argument("--expect-lidar-angle-sign", type=float, default=-1.0)
     args = ap.parse_args(argv)
 
     checks = [check_git(), check_model(args.model), check_port(args.port), check_disk(args.output_root),
@@ -289,6 +316,8 @@ def main(argv=None):
         except ImportError as e:  # no ROS Python packages: a labelled FAIL, not a traceback
             checks.append(result("FAIL", "ROS", f"cannot import the ROS Python packages ({e})"))
         checks.append(check_live_params(ros2_param_get))
+        checks.append(check_lidar_frame_params(ros2_param_get, args.expect_lidar_angle_offset_deg,
+                                               args.expect_lidar_angle_sign))
         checks.append(check_motion_params(ros2_param_get, {
             ("/follow_stop_node", "obstacle_stop_m"): args.expect_obstacle_stop_m,
             ("/follow_stop_node", "spin_clear_radius_m"): args.expect_spin_clear_radius_m,
