@@ -69,8 +69,9 @@ class YoloROSNode(Node):
         self.declare_parameter('model_path', '/home/yakgreen001/yolov8n_openvino_model/')
 
         # ----- IO -----
+        # Process the newest available image instead of buffering stale frames during inference.
         self.subscription = self.create_subscription(Image, '/image_raw',
-                                                     self.listener_callback, 10)
+                                                     self.listener_callback, 1)
         self.bridge = CvBridge()
         self.model = YOLO(str(self.get_parameter('model_path').value))
 
