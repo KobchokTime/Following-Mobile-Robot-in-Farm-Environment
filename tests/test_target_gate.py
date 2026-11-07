@@ -1,0 +1,389 @@
+"""Offline tests for TargetGate in Image/sync_fusion_node.py (Arena 3 entry, no ROS)."""
+
+import importlib.util
+import math
+import sys
+import types
+import unittest
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+NODE = ROOT / "ros2_yolo_ws" / "scripts" / "Image" / "sync_fusion_node.py"
+
+
+def _load(node_class=object):
+    names = ["rclpy", "rclpy.node", "rclpy.qos", "std_msgs", "std_msgs.msg", "sensor_msgs", "sensor_msgs.msg"]
+    stubs = {n: types.ModuleType(n) for n in names}
+    stubs["rclpy.node"].Node = node_class
+    for k in ("QoSProfile", "QoSReliabilityPolicy", "QoSHistoryPolicy", "QoSDurabilityPolicy"):
+        setattr(stubs["rclpy.qos"], k, object)
+    stubs["std_msgs.msg"].Int32MultiArray = object
+    stubs["std_msgs.msg"].Float32MultiArray = object
+    stubs["sensor_msgs.msg"].LaserScan = object
+    previous = {k: sys.modules.get(k) for k in stubs}
+    sys.modules.update(stubs)
+    try:
+        spec = importlib.util.spec_from_file_location("sync_fusion_gate_under_test", NODE)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        return module
+    finally:
+        for k, v in previous.items():
+            if v is None:
+                sys.modules.pop(k, None)
+            else:
+                sys.modules[k] = v
+
+
+D = math.radians
+RED, BLUE = (110, 165), (160, 110)
+
+
+class TargetGateTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        module = _load()
+        cls.Gate = module.TargetGate
+        cls.gate_params = module.GATE_PARAMS
+        cls.in_path = staticmethod(module.in_path)
+        cls.lidar_track = staticmethod(module.lidar_track)
+        cls.bearing_to_cx = staticmethod(module.bearing_to_cx)
+        cls.scan_is_fresh = staticmethod(module.scan_is_fresh)
+        cls.parse_hist = staticmethod(module.parse_hist)
+
+    def test_old_or_missing_scans_are_not_used(self):
+        self.assertTrue(self.scan_is_fresh(10.0, 9.9, 0.3))
+        self.assertFalse(self.scan_is_fresh(10.0, 6.0, 0.3))   # Codex's 4 s old scan
+        self.assertFalse(self.scan_is_fresh(10.0, None, 0.3))  # never received
+        self.assertFalse(self.scan_is_fresh(10.0, 10.5, 0.3))  # clock went backwards
+
+    @staticmethod
+    def _blob(centre_deg, rng, width_m, step_deg=0.5):
+        """Returns of a round object of a given width at (bearing, range)."""
+        half = math.degrees(width_m / 2.0 / rng)
+        n = max(1, int(2 * half / step_deg))
+        return [(D(centre_deg - half + i * step_deg), rng) for i in range(n + 1)]
+
+    def test_lidar_track_finds_the_target_beside_the_image(self):
+        pts = self._blob(-58, 0.85, 0.4) + self._blob(10, 3.0, 0.4) + self._blob(170, 0.5, 0.4)
+        found = self.lidar_track(pts, D(-50), 0.8, D(25), 0.5)
+        self.assertAlmostEqual(found[1], 0.85)
+        self.assertAlmostEqual(math.degrees(found[0]), -58, delta=1.0)
+        self.assertIsNone(self.lidar_track(pts, D(40), 0.8, D(25), 0.5))   # nothing there
+        self.assertIsNone(self.lidar_track(pts, D(-50), 2.0, D(25), 0.5))  # wrong range
+
+    def test_lidar_track_ignores_a_row_seen_at_an_angle(self):
+        # integration's reproducer: a row 1 m to the side, from 1.6 m to 3.0 m ahead
+        pts = []
+        x = 1.6
+        while x <= 3.0:
+            pts.append((math.atan2(1.0, x), math.hypot(x, 1.0)))
+            x += 0.02
+        self.assertIsNone(self.lidar_track(pts, 0.5, 2.0, D(25), 0.5))
+
+    def test_lidar_track_ignores_posts_and_rows(self):
+        # one range per bearing, as a real scan: person, then a post, then a crop row
+        person = self._blob(-62, 0.9, 0.4)            # about -75 to -49 deg
+        post = self._blob(-45, 0.75, 0.05)            # thin post near the prediction
+        row = [(D(a / 2.0), 1.1) for a in range(-80, 21)]  # -40 to +10 deg at 1.1 m: about 0.96 m wide
+        self.assertIsNone(self.lidar_track(post + row, D(-50), 0.8, D(25), 0.5))
+        found = self.lidar_track(post + row + person, D(-50), 0.8, D(25), 0.5)
+        self.assertAlmostEqual(math.degrees(found[0]), -62, delta=1.0)
+
+    def test_bearing_to_cx_is_the_inverse_and_clamps(self):
+        self.assertEqual(self.bearing_to_cx(0.0, 640, 70.0), 320)
+        self.assertEqual(self.bearing_to_cx(D(80), 640, 70.0), 0)     # far left of the image
+        self.assertEqual(self.bearing_to_cx(D(-80), 640, 70.0), 639)  # far right
+
+    def test_lidar_fix_moves_the_track(self):
+        g = self.Gate()
+        g.accept(0.0, 0.0, 0.8)
+        g.accept_lidar(0.5, D(-45), 0.9)
+        self.assertLess(g.bearing, D(-20))
+
+    def test_corridor(self):
+        self.assertTrue(self.in_path(D(10), 1.0, 0.45))    # 0.17 m to the side
+        self.assertFalse(self.in_path(D(-21), 1.7, 0.45))  # 0.61 m to the side
+        self.assertFalse(self.in_path(D(170), 1.0, 0.45))  # behind
+
+    def test_locks_only_in_the_start_window(self):
+        g = self.Gate()
+        self.assertFalse(g.accept(0.0, D(-21), 1.7))  # farther person off-centre
+        self.assertFalse(g.accept(0.0, D(30), 0.8))   # close but far off-centre
+        self.assertTrue(g.accept(0.1, 0.0, 0.8))
+
+    def test_boxes_ranged_off_someone_in_front_do_not_drive_the_prediction_negative(self):
+        # shade_crossing s0: while someone crossed in front, the target's boxes read their range (0.63 -> 0.34 m);
+        # the range rate drove the prediction to -0.25 m and the target's own boxes at 0.64-2 m were refused
+        g = self.Gate()
+        t = 0.0
+        for k in range(10):
+            self.assertTrue(g.accept(t, 0.0, 0.63))
+            t += 0.1
+        for r in (0.55, 0.45, 0.38, 0.34):
+            g.accept(t, 0.0, r)
+            t += 0.1
+        self.assertGreaterEqual(g._predict(t + 0.5)[1], 0.3)
+        self.assertTrue(g.accept(t + 0.5, D(-4), 0.75))  # the target itself, seen again
+
+    def test_rejects_a_second_person_beside_the_target(self):
+        g = self.Gate()
+        g.accept(0.0, 0.0, 0.8, RED)
+        for i in range(1, 30):
+            t = 0.1 * i
+            self.assertTrue(g.accept(t, 0.0, 0.8 + 0.01 * i, RED))
+            self.assertFalse(g.accept(t + 0.001, D(-21), 1.7, BLUE))
+
+    def test_geometry_alone_rejects_a_same_coloured_person(self):
+        g = self.Gate()
+        g.accept(0.0, 0.0, 0.8, RED)
+        for i in range(1, 20):
+            g.accept(0.1 * i, 0.0, 0.8, RED)
+            self.assertFalse(g.accept(0.1 * i + 0.001, D(-21), 1.7, RED))
+
+    def test_colour_rejects_a_differently_dressed_person_at_the_same_place(self):
+        g = self.Gate()
+        g.accept(0.0, 0.0, 0.8, RED)
+        g.accept(0.1, 0.0, 0.8, RED)
+        self.assertFalse(g.accept(0.2, D(2), 0.85, BLUE))
+        self.assertTrue(g.accept(0.2, D(2), 0.85, RED))
+
+    @staticmethod
+    def _hist(hue_bin, sat_bin, grey=0.0):
+        """A 12 x 4 hue-saturation histogram: mostly one colour, plus a share of grey (low saturation)."""
+        h = [0.0] * 48
+        h[hue_bin * 4 + sat_bin] = 1.0 - grey
+        for b in range(12):
+            h[b * 4] += grey / 12.0
+        return h
+
+    def test_histogram_ranks_and_with_geometry_rejects_another_colour(self):
+        g = self.Gate()
+        blue, grey = self._hist(8, 2), self._hist(0, 0, grey=1.0)
+        g.accept(0.0, 0.0, 0.8, (139, 125), blue)
+        g.accept(0.1, 0.0, 0.8, (139, 125), blue)
+        shade = [0.5 * a + 0.2 * b + 0.3 * c for a, b, c in zip(blue, self._hist(8, 1), grey)]
+        self.assertAlmostEqual(sum(shade), 1.0)
+        # colour alone may not veto (a quarter weight), but it ranks the target in shade first ...
+        self.assertLess(g.cost(0.2, D(10), 1.0, (131, 128), shade), g.cost(0.2, D(10), 1.0, (131, 128), grey))
+        # ... and together with a small miss in place (10 deg, 0.17 m sideways at 1 m; 8 deg was 9.0 once
+        # the lateral sigma applies) it rejects the other colour, not the target
+        self.assertFalse(g.accept(0.2, D(10), 1.0, (131, 128), grey))
+        self.assertTrue(g.accept(0.2, D(10), 1.0, (131, 128), shade))
+
+    def test_gate_ros_parameters_match_the_gate_defaults(self):
+        """An undeclared -p is silently ignored by ROS 2: the T13 'rule off' twin runs never turned the rule
+        off. Every exposed name must be a TargetGate argument with the same default."""
+        import inspect
+        defaults = {k: v.default for k, v in inspect.signature(self.Gate).parameters.items()}
+        for name, value in self.gate_params.items():
+            self.assertIn(name, defaults)
+            self.assertEqual(defaults[name], value, name)
+        for name in ('lateral_sigma_m', 'reacquire_dist_m', 'reacquire_dist_max_m', 'hist_weight'):
+            self.assertIn(name, self.gate_params)
+
+    def test_gate_ros_overrides_are_declared_and_reach_the_constructed_gate(self):
+        """Exercise actual node initialization: a dictionary-only guard misses the T13 wiring failure."""
+        overrides = {name: default + 0.0123 for name, default in self.gate_params.items()}
+
+        class ParameterNode:
+            def __init__(self, name):
+                self.parameters = {}
+
+            def declare_parameter(self, name, default):
+                self.parameters[name] = overrides.get(name, default)
+
+            def get_parameter(self, name):
+                # Missing declarations must fail rather than silently returning an override.
+                return types.SimpleNamespace(value=self.parameters[name])
+
+            def create_subscription(self, *args):
+                pass
+
+            create_publisher = create_subscription
+            create_timer = create_subscription
+
+            def get_logger(self):
+                return types.SimpleNamespace(info=lambda *args: None)
+
+        module = _load(node_class=ParameterNode)
+        module.QoSProfile = lambda **kwargs: None
+        module.QoSReliabilityPolicy = types.SimpleNamespace(BEST_EFFORT=1)
+        module.QoSHistoryPolicy = types.SimpleNamespace(KEEP_LAST=1)
+        module.QoSDurabilityPolicy = types.SimpleNamespace(VOLATILE=1)
+        node = module.SyncFusionNode()
+        for name, value in overrides.items():
+            self.assertEqual(node.parameters[name], value, name)
+        expected_gate = self.Gate(**overrides)
+        self.assertEqual(node.gate.__dict__, expected_gate.__dict__)
+
+    def test_a_same_clothes_person_beside_the_target_is_not_taken(self):
+        """T15 (Codex): target at (1.0, 0), stranger at (1.0, 0.44), same clothes, both boxes in one frame."""
+        sb, sr = math.atan2(0.44, 1.0), math.hypot(1.0, 0.44) - 0.2
+        g = self.Gate()
+        for k in range(5):
+            self.assertTrue(g.accept(0.1 * k, 0.0, 0.8))
+        self.assertTrue(g.accept(0.5, 0.0, 0.8))
+        self.assertFalse(g.accept(0.501, sb, sr))  # the same frame: someone is beside the target
+        # the target's own box is missed in the next frames; the stranger alone is still not taken
+        self.assertFalse(g.accept(0.6, sb, sr))
+        self.assertFalse(g.accept(0.7, sb, sr))
+
+    def test_a_person_beside_the_target_at_lock_on_is_not_taken(self):
+        """Twin close_pair_same: the stranger's box arrives just after the lock-on box, in the same frame."""
+        g = self.Gate()
+        self.assertTrue(g.accept(0.0, 0.0, 0.8))
+        self.assertFalse(g.accept(0.001, math.atan2(0.44, 1.0), math.hypot(1.0, 0.44) - 0.2))
+        self.assertFalse(g.accept(0.1, math.atan2(0.44, 1.0), math.hypot(1.0, 0.44) - 0.2))
+
+    def test_the_wider_gate_returns_once_the_other_person_has_gone(self):
+        g = self.Gate()
+        for k in range(5):
+            g.accept(0.1 * k, 0.0, 0.7)
+            g.accept(0.1 * k + 0.001, D(30), 0.75)  # someone 0.38 m to the side, every frame
+        for k in range(5, 18):
+            g.accept(0.1 * k, 0.0, 0.7)  # alone for 1.3 s
+        self.assertTrue(g.accept(1.8, D(16), 0.7))  # a fast sidestep is in the gate again
+
+    def test_a_fast_close_sidestep_stays_in_the_gate(self):
+        """side_step trace (box_range_debug/true_s10_gate.log): 6.5 -> 27.5 deg in 0.3 s at about 0.7 m."""
+        old, new = self.Gate(lateral_sigma_m=0.0), self.Gate()
+        for g in (old, new):
+            for k in range(7):  # standing for the first 0.6 s (the plain gate holds for 1 s after lock-on)
+                g.accept(0.1 * k, D(0.5), 0.66)
+            for k in range(5):
+                g.accept(0.7 + 0.1 * k, D(0.5 + 1.5 * k), 0.66)
+        self.assertGreater(old.cost(1.4, D(27.5), 0.72), 9.0)  # the old gate rejects the target
+        self.assertTrue(new.accept(1.4, D(27.5), 0.72))
+
+    def test_lateral_sigma_leaves_far_targets_and_side_people_alone(self):
+        far_old, far_new = self.Gate(lateral_sigma_m=0.0), self.Gate()
+        near = self.Gate()
+        for k in range(5):
+            for g in (far_old, far_new):
+                g.accept(0.1 * k, 0.0, 0.8 + 0.3 * k)  # walks out to 2 m
+            near.accept(0.1 * k, 0.0, 0.7)
+        self.assertAlmostEqual(far_old.cost(0.5, D(6), 2.0), far_new.cost(0.5, D(6), 2.0))  # 2 m: unchanged
+        self.assertFalse(near.accept(0.5, math.atan2(0.6, 0.7), math.hypot(0.6, 0.7)))  # 0.6 m to the side
+
+    def test_histogram_learns_the_target_but_not_a_wrong_pick(self):
+        g = self.Gate()
+        blue = self._hist(8, 2)
+        g.accept(0.0, 0.0, 0.8, None, blue)
+        for i in range(1, 6):
+            g.accept(0.1 * i, 0.0, 0.8, None, self._hist(8, 2, grey=0.1 * (i % 2)))
+        n = len(g.hists)
+        g.accept(0.6, 0.0, 0.8, None, self._hist(8, 2, grey=0.6))  # close in place, far in colour: in the gate, not learned
+        self.assertEqual(len(g.hists), n)
+        self.assertLessEqual(len(g.hists), g.hist_window)
+
+    def test_histogram_window_is_capped(self):
+        g = self.Gate()
+        for i in range(25):
+            g.accept(0.1 * i, 0.0, 0.8, None, self._hist(8, 2))
+        self.assertEqual(len(g.hists), g.hist_window)
+
+    def test_hist_is_read_after_cb_cr_and_normalised(self):
+        msg = [320, 240, 4, 139, 125] + [0] * 47 + [500]
+        h = self.parse_hist(msg[5:])
+        self.assertAlmostEqual(sum(h), 1.0)
+        self.assertEqual(h[47], 1.0)
+        self.assertIsNone(self.parse_hist([320, 240, 4, 139, 125][5:]))  # old 5-value message
+        self.assertIsNone(self.parse_hist([0] * 48))
+
+    def test_lost_target_is_taken_back_by_colour_near_its_bearing(self):
+        g = self.Gate()
+        blue, grey = self._hist(8, 2), self._hist(0, 0, grey=1.0)
+        for i in range(5):
+            g.accept(0.1 * i, D(1), 0.8, (139, 125), blue)
+        g.bearing_rate, g.range_rate = D(-25), -1.0  # a bad fix sent the prediction away
+        self.assertFalse(g.accept(0.6, D(1), 2.0, (139, 125), blue))   # too soon: the normal gate decides
+        self.assertFalse(g.accept(1.8, D(1), 2.0, (131, 128), grey))   # someone else, at the same place
+        self.assertFalse(g.accept(1.8, D(60), 2.0, (139, 125), blue))  # same colours, far off the bearing
+        self.assertTrue(g.accept(1.8, D(1), 2.0, (139, 125), blue))    # the target, 2 m away
+        self.assertEqual((g.bearing_rate, g.range_rate), (0.0, 0.0))
+        self.assertAlmostEqual(g.range, 2.0)
+
+    def test_a_look_alike_far_away_is_not_taken_back(self):
+        """T13: target hidden for 1.2 s, then someone in the same clothes appears at 18 deg, 7.43 m."""
+        g = self.Gate()
+        blue = self._hist(8, 2)
+        for i in range(5):
+            self.assertTrue(g.accept(0.1 * i, D(2), 0.8 + 0.05 * i, (139, 125), blue))
+        self.assertFalse(g.accept(1.6, D(18), 7.43, (139, 125), blue))
+        self.assertTrue(g.accept(1.6, D(4), 1.6, (139, 125), blue))  # the target, a step further on
+
+    def test_reacquisition_reach_grows_with_time_but_is_capped(self):
+        g = self.Gate()
+        blue = self._hist(8, 2)
+        for i in range(5):
+            g.accept(0.1 * i, 0.0, 0.8, (139, 125), blue)
+        far = 0.8 + 3.2  # 3.2 m beyond the last place: more than the 3 m cap
+        self.assertFalse(g.accept(4.0, 0.0, far, (139, 125), blue))
+        self.assertTrue(g.accept(4.0, 0.0, 0.8 + 2.8, (139, 125), blue))
+
+    def test_no_colour_reacquisition_without_histogram(self):
+        g = self.Gate()
+        for i in range(5):
+            g.accept(0.1 * i, D(1), 0.8, RED)
+        g.bearing_rate, g.range_rate = D(-40), -1.0
+        self.assertFalse(g.accept(1.8, D(1), 2.0, RED))
+
+    def test_without_histogram_the_chroma_still_decides(self):
+        g = self.Gate()
+        g.accept(0.0, 0.0, 0.8, RED, None)
+        g.accept(0.1, 0.0, 0.8, RED, None)
+        self.assertFalse(g.accept(0.2, D(2), 0.85, BLUE, None))
+
+    def test_shade_on_the_target_is_tolerated(self):
+        g = self.Gate()
+        g.accept(0.0, 0.0, 0.8, RED)
+        shaded = (119, 146)  # saturation halved towards grey
+        self.assertTrue(g.accept(0.1, 0.0, 0.8, shaded))
+
+    def test_follows_a_turning_target(self):
+        g = self.Gate()
+        g.accept(0.0, 0.0, 0.8)
+        for i in range(1, 40):  # bearing drifts 3 deg per frame
+            self.assertTrue(g.accept(0.1 * i, D(3 * i) if i < 10 else D(30 - 3 * (i - 10)), 0.8))
+
+    def test_gate_widens_after_a_loss(self):
+        g = self.Gate()
+        g.accept(0.0, 0.0, 0.8)
+        g.accept(0.1, 0.0, 0.8)
+        self.assertFalse(g.accept(0.2, D(8), 1.6))  # a jump of 0.8 m at once is not the target
+        self.assertTrue(g.accept(4.1, D(8), 1.9))    # after 4 s unseen the target may have walked on
+
+    def test_two_boxes_in_one_frame_do_not_lose_the_target(self):
+        g = self.Gate()
+        for i in range(5):
+            self.assertTrue(g.accept(0.1 * i, 0.0, 0.8))
+        self.assertTrue(g.accept(0.5, 0.0, 0.8))
+        g.accept(0.501, D(4), 0.8)  # a second, offset box on the same person, 1 ms later
+        for i in range(6, 30):
+            self.assertTrue(g.accept(0.1 * i, 0.0, 0.8), i)
+
+    def test_rate_is_estimated_at_high_frame_rates(self):
+        for fps in (10, 30, 60):
+            g = self.Gate()
+            for i in range(3 * fps):
+                g.accept(i / fps, 0.3 * i / fps, 0.8)
+            self.assertAlmostEqual(g.bearing_rate, 0.3, delta=0.02, msg=fps)
+
+    def test_long_loss_returns_to_the_lock_on_window(self):
+        g = self.Gate()
+        g.accept(0.0, 0.0, 0.8)
+        g.accept(0.1, 0.0, 0.8)
+        self.assertFalse(g.accept(7.0, D(20), 3.5))  # a false box 3.5 m away after 7 s unseen
+        self.assertFalse(g.locked)
+        self.assertTrue(g.accept(9.0, D(2), 0.8))     # the person walks back to the robot
+
+    def test_old_three_value_messages_work(self):
+        g = self.Gate()
+        self.assertTrue(g.accept(0.0, 0.0, 0.8, None))
+        self.assertTrue(g.accept(0.1, 0.0, 0.82, None))
+        self.assertTrue(g.accept(0.2, 0.0, 0.84, RED))  # colour learned once it appears
+
+
+if __name__ == "__main__":
+    unittest.main()

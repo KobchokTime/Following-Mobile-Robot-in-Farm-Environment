@@ -1,0 +1,115 @@
+t=1793122930.97 b=-0.1 d=0.82 sec=0.82 pb=0.0 pr=0.00 cost=-1.00 ok=True
+t=1793122931.07 b=-0.3 d=0.80 sec=0.80 pb=-0.1 pr=0.82 cost=0.14 ok=True
+t=1793122931.17 b=-0.3 d=0.79 sec=0.79 pb=-0.2 pr=0.81 cost=0.24 ok=True
+t=1793122931.27 b=-0.3 d=0.77 sec=0.77 pb=-0.3 pr=0.79 cost=0.28 ok=True
+t=1793122931.47 b=-0.1 d=0.72 sec=0.72 pb=-0.3 pr=0.75 cost=0.11 ok=True
+t=1793122931.67 b=0.4 d=0.63 sec=0.63 pb=-0.2 pr=0.71 cost=0.35 ok=True
+t=1793122931.77 b=0.0 d=0.58 sec=0.58 pb=0.2 pr=0.64 cost=0.24 ok=True
+t=1793122931.87 b=0.1 d=0.55 sec=0.55 pb=0.1 pr=0.57 cost=0.08 ok=True
+t=1793122931.97 b=-0.3 d=0.52 sec=0.52 pb=0.1 pr=0.52 cost=0.07 ok=True
+t=1793122932.07 b=0.0 d=0.49 sec=0.49 pb=-0.2 pr=0.48 cost=0.26 ok=True
+t=1793122932.27 b=-0.3 d=0.50 sec=0.50 pb=-0.1 pr=0.42 cost=0.38 ok=True
+t=1793122932.47 b=-0.1 d=0.49 sec=0.49 pb=-0.3 pr=0.41 cost=0.43 ok=True
+t=1793122932.67 b=-0.1 d=0.49 sec=0.49 pb=-0.2 pr=0.42 cost=0.45 ok=True
+t=1793122932.77 b=0.0 d=0.49 sec=0.49 pb=-0.2 pr=0.45 cost=0.33 ok=True
+t=1793122932.87 b=-0.3 d=0.47 sec=0.47 pb=-0.1 pr=0.47 cost=0.12 ok=True
+t=1793122932.97 b=0.4 d=0.48 sec=0.48 pb=-0.2 pr=0.47 cost=0.09 ok=True
+t=1793122933.07 b=-0.4 d=0.47 sec=0.47 pb=0.2 pr=0.48 cost=0.11 ok=True
+t=1793122933.17 b=-0.3 d=0.51 sec=0.51 pb=-0.2 pr=0.47 cost=0.19 ok=True
+t=1793122933.27 b=-0.4 d=0.49 sec=0.49 pb=-0.3 pr=0.50 cost=0.12 ok=True
+t=1793122933.37 b=-0.1 d=0.47 sec=0.47 pb=-0.4 pr=0.49 cost=0.09 ok=True
+t=1793122933.47 b=-0.1 d=0.48 sec=0.48 pb=-0.3 pr=0.48 cost=0.13 ok=True
+t=1793122933.57 b=-0.1 d=0.48 sec=0.48 pb=-0.2 pr=0.48 cost=0.09 ok=True
+t=1793122933.77 b=0.1 d=0.48 sec=0.48 pb=-0.1 pr=0.48 cost=0.04 ok=True
+t=1793122933.87 b=0.0 d=0.53 sec=0.53 pb=0.1 pr=0.48 cost=0.20 ok=True
+t=1793122933.97 b=-0.5 d=0.56 sec=0.56 pb=0.1 pr=0.52 cost=0.17 ok=True
+t=1793122934.07 b=-0.1 d=0.62 sec=0.62 pb=-0.4 pr=0.56 cost=0.21 ok=True
+t=1793122934.17 b=0.3 d=0.64 sec=0.64 pb=-0.3 pr=0.62 cost=0.10 ok=True
+t=1793122934.47 b=-0.3 d=0.72 sec=0.72 pb=0.2 pr=0.73 cost=0.04 ok=True
+t=1793122934.57 b=-0.8 d=0.74 sec=0.74 pb=-0.0 pr=0.76 cost=0.16 ok=True
+t=1793122935.07 b=-0.6 d=0.73 sec=0.73 pb=-1.1 pr=0.88 cost=0.78 ok=True
+t=1793122935.17 b=-0.5 d=0.70 sec=0.70 pb=-0.9 pr=0.81 cost=0.69 ok=True
+t=1793122935.27 b=-0.8 d=0.70 sec=0.70 pb=-0.7 pr=0.75 cost=0.19 ok=True
+t=1793122935.37 b=-0.3 d=0.69 sec=0.69 pb=-0.8 pr=0.70 cost=0.05 ok=True
+t=1793122935.47 b=-0.8 d=0.70 sec=0.70 pb=-0.4 pr=0.68 cost=0.15 ok=True
+t=1793122935.57 b=-1.1 d=0.69 sec=0.69 pb=-0.6 pr=0.69 cost=0.19 ok=True
+t=1793122935.67 b=25.9 sec=inf skip-inf
+t=1793122935.77 b=-1.8 d=0.70 sec=0.70 pb=-1.1 pr=0.67 cost=0.21 ok=True
+t=1793122935.87 b=-1.1 d=0.70 sec=0.70 pb=-1.7 pr=0.68 cost=0.12 ok=True
+t=1793122936.07 b=-1.3 d=0.68 sec=0.68 pb=-1.5 pr=0.68 cost=0.06 ok=True
+t=1793122936.27 b=-1.6 d=0.69 sec=0.69 pb=-1.4 pr=0.67 cost=0.34 ok=True
+t=1793122936.27 b=17.8 d=7.87 sec=7.87 pb=-1.5 pr=0.68 cost=2318.73 ok=False
+t=1793122936.37 b=-2.0 d=0.70 sec=0.70 pb=-1.6 pr=0.68 cost=0.31 ok=True
+t=1793122936.47 b=-1.8 d=0.68 sec=0.68 pb=-2.0 pr=0.69 cost=0.07 ok=True
+t=1793122936.57 b=-1.8 d=0.66 sec=0.66 pb=-1.9 pr=0.69 cost=0.10 ok=True
+t=1793122936.87 b=-0.9 d=0.67 sec=0.67 pb=-2.0 pr=0.65 cost=0.15 ok=True
+t=1793122937.17 b=20.5 d=0.65 sec=0.65 pb=-1.3 pr=0.65 cost=15.91 ok=False
+t=1793122937.27 b=28.0 d=0.64 sec=0.64 pb=-1.3 pr=0.64 cost=23.99 ok=False
+t=1793122938.07 b=10.7 d=9.27 sec=9.27 pb=-1.1 pr=0.61 cost=848.39 ok=False
+t=1793122940.57 b=34.9 d=1.58 sec=1.58 pb=-1.1 pr=0.61 cost=4.75 ok=True
+t=1793122940.67 b=34.1 d=1.62 sec=1.62 pb=20.5 pr=1.19 cost=15.58 ok=False
+t=1793122940.77 b=33.0 d=1.62 sec=1.62 pb=20.5 pr=1.19 cost=14.30 ok=False
+t=1793122940.87 b=32.4 d=1.64 sec=1.64 pb=20.5 pr=1.19 cost=12.25 ok=False
+t=1793122940.95 lidar-track b=30.5 r=1.61
+t=1793122940.97 b=31.5 d=1.65 sec=1.65 pb=26.6 pr=1.45 cost=2.87 ok=True
+t=1793122941.27 b=27.5 d=1.68 sec=1.68 pb=44.6 pr=2.19 cost=19.66 ok=False
+t=1793122941.35 lidar-track b=71.0 r=1.88
+t=1793122941.45 lidar-track b=70.5 r=1.83
+t=1793122941.47 b=23.3 d=1.61 sec=1.61 pb=71.0 pr=2.02 cost=98.71 ok=False
+t=1793122941.55 lidar-track b=69.0 r=1.83
+t=1793122941.57 b=21.4 d=1.58 sec=1.58 pb=73.0 pr=1.95 cost=112.87 ok=False
+t=1793122941.65 lidar-track b=68.0 r=1.80
+t=1793122941.67 b=18.5 d=1.51 sec=1.51 pb=72.4 pr=1.87 cost=122.24 ok=False
+t=1793122941.75 lidar-track b=67.5 r=1.72
+t=1793122941.77 b=14.8 d=1.49 sec=1.49 pb=70.9 pr=1.78 cost=129.82 ok=False
+t=1793122941.85 lidar-track b=67.0 r=1.72
+t=1793122941.95 lidar-track b=66.5 r=1.63
+t=1793122941.97 b=9.4 d=1.31 sec=1.31 pb=67.9 pr=1.65 cost=142.07 ok=False
+t=1793122942.05 lidar-track b=66.5 r=1.61
+t=1793122942.15 lidar-track b=64.5 r=1.55
+t=1793122942.17 b=1.6 d=1.15 sec=1.15 pb=65.3 pr=1.54 cost=169.40 ok=False
+t=1793122942.25 lidar-track b=62.5 r=1.49
+t=1793122942.27 b=-3.6 d=1.12 sec=1.12 pb=63.1 pr=1.48 cost=184.23 ok=False
+t=1793122942.35 lidar-track b=62.0 r=1.43
+t=1793122942.45 lidar-track b=61.5 r=1.42
+t=1793122942.47 b=-16.5 d=0.99 sec=0.99 pb=61.0 pr=1.39 cost=247.70 ok=False
+t=1793122942.55 lidar-track b=59.0 r=1.36
+t=1793122942.65 lidar-track b=60.0 r=1.27
+t=1793122942.75 lidar-track b=61.0 r=1.23
+t=1793122942.85 lidar-track b=61.0 r=1.20
+t=1793122942.95 lidar-track b=44.0 r=1.18
+t=1793122943.05 lidar-track b=44.5 r=1.05
+t=1793122943.15 lidar-track b=46.0 r=0.97
+t=1793122943.25 lidar-track b=46.5 r=0.96
+t=1793122943.35 lidar-track b=44.0 r=0.88
+t=1793122943.45 lidar-track b=42.5 r=0.84
+t=1793122943.55 lidar-track b=40.0 r=0.80
+t=1793122943.65 lidar-track b=37.0 r=0.75
+t=1793122943.75 lidar-track b=34.5 r=0.68
+t=1793122943.85 lidar-track b=30.5 r=0.68
+t=1793122943.95 lidar-track b=27.0 r=0.63
+t=1793122944.05 lidar-track b=24.0 r=0.58
+t=1793122944.15 lidar-track b=20.5 r=0.55
+t=1793122944.25 lidar-track b=15.5 r=0.52
+t=1793122944.35 lidar-track b=10.5 r=0.51
+t=1793122944.45 lidar-track b=6.5 r=0.50
+t=1793122944.55 lidar-track b=2.0 r=0.49
+t=1793122944.65 lidar-track b=-2.0 r=0.52
+t=1793122944.75 lidar-track b=-7.0 r=0.49
+t=1793122944.85 lidar-track b=-9.5 r=0.50
+t=1793122944.95 lidar-track b=-10.5 r=0.51
+t=1793122945.05 lidar-track b=-9.5 r=0.49
+t=1793122945.15 lidar-track b=-6.0 r=0.51
+t=1793122945.25 lidar-track b=-1.0 r=0.50
+t=1793122945.35 lidar-track b=4.0 r=0.49
+t=1793122945.45 lidar-track b=8.5 r=0.48
+t=1793122945.55 lidar-track b=10.5 r=0.48
+t=1793122945.65 lidar-track b=9.5 r=0.50
+t=1793122945.75 lidar-track b=6.5 r=0.47
+t=1793122945.85 lidar-track b=1.0 r=0.51
+t=1793122945.95 lidar-track b=-3.0 r=0.49
+t=1793122946.27 b=-11.6 d=0.52 sec=0.52 pb=-7.1 pr=0.49 cost=18.69 ok=False
+t=1793122946.87 b=-10.3 d=0.63 sec=0.63 pb=-20.0 pr=0.50 cost=20.38 ok=False
+t=1793122949.18 b=28.3 d=3.38 sec=3.38 pb=-21.6 pr=0.50 cost=41.34 ok=False
+t=1793122952.47 b=13.3 sec=inf skip-inf
+t=1793122953.27 b=31.7 d=3.36 sec=3.36 pb=-21.6 pr=0.50 cost=30.23 ok=False

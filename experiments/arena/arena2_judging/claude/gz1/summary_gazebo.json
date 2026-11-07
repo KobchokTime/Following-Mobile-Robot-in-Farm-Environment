@@ -1,0 +1,26 @@
+[
+  {
+    "scenario": "curve_left",
+    "bridge_mode": "fixed",
+    "simulator": "gazebo",
+    "seed": 0,
+    "doc": "Target walks ahead, then turns about 60 deg to the left.",
+    "samples": 321,
+    "duration_s": 31.96,
+    "distance_travelled_m": 5.736984497894168,
+    "final_gap_m": 0.36481351162518655,
+    "median_gap_m": 0.5142671923422746,
+    "max_gap_m": 0.8,
+    "gap_target_m": 0.5,
+    "time_moving_s": 14.1,
+    "max_speed_mps": 0.3560471674068433,
+    "min_speed_mps": -0.05810776992219924,
+    "max_abs_target_bearing_deg": 23.34994610706553,
+    "final_target_bearing_deg": 12.112438492562593,
+    "target_in_camera_fov_end": true,
+    "min_person_range_m": 0.5475099783235786,
+    "contact": false,
+    "max_abs_rpm": 40.0,
+    "turned": true
+  }
+]

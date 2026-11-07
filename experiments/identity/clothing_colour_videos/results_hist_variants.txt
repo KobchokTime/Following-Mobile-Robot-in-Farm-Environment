@@ -1,0 +1,13 @@
+hist N=10                                blue  94.0  96.9 | dark  21.1  19.7
+grey bin N=10                            blue  93.5  96.9 | dark  21.7  19.7
+grey bin + anchor 0.5                    blue  57.7  96.9 | dark  93.8  90.9
+grey bin + margin 0.05                   blue  75.0  96.9 | dark  41.0  19.7
+grey bin + anchor 0.5 + margin 0.05      blue  57.1  96.9 | dark  92.5  89.4
+hist + anchor 0.5 + margin 0.05          blue  70.8  95.4 | dark  93.2  96.0
+grey bin N=0                             blue  31.5  60.5 | dark 100.0  96.5
+hist + self gate 0.05                    blue  95.2  96.4 | dark  99.4  97.0
+hist + self gate 0.1                     blue  99.4  96.9 | dark  99.4  97.0
+grey bin + self gate 0.05                blue  76.2  86.2 | dark  36.0  97.0
+grey bin + self gate 0.1                 blue  99.4  96.9 | dark  16.1  19.7
+hist + self gate 0.1 + anchor 0.3        blue  72.6  96.9 | dark  99.4  94.4
+hist + self gate 0.05 + anchor 0.3       blue  97.6  92.3 | dark  99.4  97.0

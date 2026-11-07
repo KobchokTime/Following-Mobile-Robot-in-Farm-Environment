@@ -1,0 +1,5 @@
+.git
+**/__pycache__
+sim_runs
+tools/thesis_desk/.tools
+yolov8n_openvino_model

@@ -1,0 +1,28 @@
+{
+  "scenario": "side_step",
+  "bridge_mode": "mps",
+  "seed": 12,
+  "ros_params": [
+    "box_range_from_scan:=false"
+  ],
+  "realism": true,
+  "doc": "Target steps 1 m sideways (out of the camera's view at this range), then walks on.",
+  "samples": 300,
+  "duration_s": 29.9,
+  "distance_travelled_m": 4.1577425103550905,
+  "final_gap_m": 1.1751398398036057,
+  "median_gap_m": 1.1751398398036057,
+  "max_gap_m": 1.752627228128384,
+  "gap_target_m": 0.5,
+  "time_moving_s": 12.0,
+  "max_speed_mps": 1.2933454480544775,
+  "min_speed_mps": -0.4314043760268384,
+  "max_abs_target_bearing_deg": 179.20852383365437,
+  "final_target_bearing_deg": 120.71493624216535,
+  "target_in_camera_fov_end": false,
+  "min_person_range_m": 0.6834819568323884,
+  "contact": false,
+  "max_abs_rpm": 153.222134824699,
+  "turned": true,
+  "target_visible_share": 0.21033210332103322
+}
