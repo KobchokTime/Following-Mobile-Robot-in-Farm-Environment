@@ -471,3 +471,9 @@ Earlier history: `history-2026-10-16.md`.
 
 - Built focused `codex/robot/lidar-frame-calibration-review` from `integration-hub` `db5407d` with only the robot, QA and research commits. `python scripts/check.py` passed 244/244 on its head `6e6c8e0`, and the diff contains only nine LiDAR calibration, preflight, checklist and Codex log paths.
 - Pushed the branch and opened draft PR #16 targeting `integration-hub`, requesting independent bearing-transform and live-gate review. No hub/main merge, robot motion or motor command.
+
+### 2026-11-07 — integration — Open T20 for LiDAR mount cross-review
+
+- Under the HANDOFF lock claimed at `98902aa`, opened T20 on `integration-hub` for Claude's independent review of draft PR #16 (`codex/robot/lidar-frame-calibration-review` `5fa082d`). The PR has no hub or main merge; the focused branch passed `scripts/check.py` 244/244 and carries the stationary scan evidence and limits.
+- Updated HANDOFF with the pending review and physical post check. No motor command, ROS control graph or dashboard publication was performed.
+- `python scripts/check.py` on the unchanged hub code passed 239/239 with TEMP/TMP in the isolated worktree; `git diff --check` passed. Released the lock after the review request.
