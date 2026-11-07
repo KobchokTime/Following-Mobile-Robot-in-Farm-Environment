@@ -446,6 +446,32 @@ Earlier history: `history-2026-10-16.md`.
 - `py -3 scripts/check.py` could not find Python. `python scripts/check.py` first hit the sandbox's unwritable default TEMP directory; rerun with TEMP/TMP under the isolated workspace passed 239/239. No code or twin change, ROS graph or robot operation.
 - Replied `agree` in T19, marked it resolved and released the lock. Physical geometry, LiDAR, ground stop timing and live parameter checks remain for the user on the robot; no main merge or robot operation was authorized.
 
+### 2026-11-07 — robot — Calibrate the mounted LiDAR frame
+
+- Synced the isolated `codex/workspace` with `integration-hub` `db5407d` at merge `af29db4`, preserving both append-only log tails. Cut `codex/robot/lidar-frame-calibration` in a separate worktree; the user's main checkout and `claude/*` branches were untouched.
+- Read only the live `/scan` through the localhost viewer. A post directly ahead appeared near raw +3–5° at about 0.96–1.00 m. A post placed physically to the left appeared at raw −23–24° and 0.93–0.98 m; after removal, the same beams read 1.90–1.91 m over 20 frames. No motor command or robot movement was requested or sent.
+- Added a sign parameter to the controller, fusion and sectorizer bearing transforms. The robot bringup now passes offset 0.0° and sign −1.0 to all three nodes. Legacy node defaults remain available for existing offline twin inputs. Follow-up: QA regression tests, preflight live-parameter checks, static front/left post verification on the running ROS graph, and independent cross-review before motion.
+
+### 2026-11-07 — qa — Verify LiDAR frame calibration and live parameters
+
+- On `codex/qa/lidar-frame-calibration`, added offline left/front/right scan regressions for controller, fusion and sectorizer, plus launch propagation and live preflight checks for all three nodes' angle offset/sign. The robot-day preflight tool is included with the QA harness so a missing or mismatched running value is a FAIL.
+- Focused calibration tests passed 3/3. Focused preflight tests passed 9/9 after setting TEMP/TMP to the isolated writable worktree; the first preflight run hit only the sandbox's unwritable default temp path. `python scripts/check.py` passed 243/243, including compile and thesis JSON checks. No ROS graph, bridge or motor was operated.
+- Still required: static post verification against the running ROS nodes with the new launch and independent review before any ground motion. Existing twin runs use their legacy node defaults and do not validate this physical mount.
+
+### 2026-11-07 — research — Correct the robot-day LiDAR orientation checklist
+
+- On `codex/research/lidar-mount-calibration`, updated the lifted-wheel bringup and live preflight commands to show the measured offset 0.0° and sign −1.0. Replaced the obsolete 180° post instruction with stationary front/left/removal checks and a readback of all three running nodes.
+- Evidence is the read-only `/scan` post-placement and removal comparison in this Codex session; a raw before/after scan file was not retained, so the checklist requires repeating the physical check on the reviewed running code. No robot motion was performed.
+
+### 2026-11-07 — qa — Check front obstacle after mount calibration
+
+- Added a focused regression on `codex/qa/lidar-frame-calibration`: a raw 0° post inside the 0.45 m stop distance must cap the controller's forward command to zero with the measured mount transform. The four focused calibration tests passed; no hardware or ROS graph was used.
+
+### 2026-11-07 — integration — Submit mounted LiDAR frame for review
+
+- Built focused `codex/robot/lidar-frame-calibration-review` from `integration-hub` `db5407d` with only the robot, QA and research commits. `python scripts/check.py` passed 244/244 on its head `6e6c8e0`, and the diff contains only nine LiDAR calibration, preflight, checklist and Codex log paths.
+- Pushed the branch and opened draft PR #16 targeting `integration-hub`, requesting independent bearing-transform and live-gate review. No hub/main merge, robot motion or motor command.
+
 ### 2026-11-07 — integration — Open T20 for LiDAR mount cross-review
 
 - Under the HANDOFF lock claimed at `98902aa`, opened T20 on `integration-hub` for Claude's independent review of draft PR #16 (`codex/robot/lidar-frame-calibration-review` `5fa082d`). The PR has no hub or main merge; the focused branch passed `scripts/check.py` 244/244 and carries the stationary scan evidence and limits.
