@@ -36,10 +36,30 @@ class GeometryTest(unittest.TestCase):
 
     def test_scan_points_undo_the_backwards_mount(self):
         # a return straight ahead of the robot is at scan angle -pi with the 180 deg mount
-        pts = A.scan_points(-math.pi, math.pi / 2, [2.0, math.inf, 3.0, 0.0])
+        pts = A.scan_points(-math.pi, math.pi / 2, [2.0, math.inf, 3.0, 0.0],
+                            angle_offset_deg=180.0, angle_sign=1.0)
         self.assertEqual(len(pts), 2)
         self.assertAlmostEqual(pts[0][0], 0.0)
         self.assertAlmostEqual(abs(pts[1][0]), math.pi)
+
+    def test_measured_mount_maps_raw_left_to_positive_e1_bearing(self):
+        pts = A.scan_points(-math.pi / 6, 0.0, [1.8], angle_offset_deg=0.0, angle_sign=-1.0)
+        self.assertAlmostEqual(pts[0][0], math.pi / 6)
+        f = 320 / math.tan(math.radians(A.CAMERA_HFOV_DEG) / 2)
+        cx = 320 - f * math.tan(math.pi / 6)
+        stats = A.e1_stats({"bearing_deg": 30.0, "distance_m": 2.0},
+                           [(0.0, cx)], [(0.0, pts)])
+        self.assertEqual(stats["lidar_hit_share"], 1.0)
+        self.assertEqual(stats["lidar_bearing_err_deg"]["mae"], 0.0)
+
+    def test_e1_refuses_implicit_or_nonfinite_mount(self):
+        recording = [("e1_b30_d2.0", Path("unused"))]
+        with self.assertRaisesRegex(ValueError, "E1 needs"):
+            A.analyse(recording)
+        with self.assertRaisesRegex(ValueError, "finite"):
+            A.analyse(recording, lidar_angle_offset_deg=math.nan, lidar_angle_sign=-1.0)
+        with self.assertRaisesRegex(ValueError, "sign"):
+            A.scan_points(0, 0, [1.0], angle_offset_deg=0, angle_sign=2.0)
 
     def test_nearest_return_in_window(self):
         pts = [(math.radians(-1), 1.8), (math.radians(4), 1.5), (math.radians(30), 0.6)]
