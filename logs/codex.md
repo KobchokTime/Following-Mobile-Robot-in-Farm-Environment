@@ -483,3 +483,9 @@ Earlier history: `history-2026-10-16.md`.
 - With Claude at the 5-hour limit, audited the exact PR #16 diff and current remote heads under the HANDOFF lock claimed at `5b9c605`. All three GitHub CI jobs (`check`, `twin`, `gazebo`) succeeded on head `221cf04`. The changed robot paths transform bearings consistently and no motor/bridge source changed.
 - Merged PR #16 into `integration-hub` with `--no-ff` at `2578b83`; `python scripts/check.py` passed 244/244 on the merged hub and `git diff --check` passed. This is Codex's own audit; T20 remains open for Claude's independent review. No main merge, robot command or dashboard publication.
 - Updated DISCUSSION and HANDOFF with the self-audit, the already-completed raw bottle test, and the remaining running-node/near-stop checks; released the integration lock.
+
+### 2026-11-07 — integration — Validate updated checkout on robot without operation
+
+- Under the HANDOFF lock claimed at `a5c6acf`, verified the robot had only the LiDAR driver, camera and read-only viewer running. The `/home/yakgreen001/robot-code` checkout was clean on `integration-hub` `db5407d` and was fast-forwarded to `043b877`; no controller or bridge was launched.
+- `python3 scripts/check.py` on the robot passed 244/244; `git status --short` remained empty. Recorded this in HANDOFF and T20. No `/cmd_vel` publication, motor command, physical motion, main merge, or dashboard publication.
+- Released the HANDOFF lock after the read-only/offline validation record.
