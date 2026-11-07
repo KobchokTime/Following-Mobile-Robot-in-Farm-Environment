@@ -489,3 +489,8 @@ Earlier history: `history-2026-10-16.md`.
 - Under the HANDOFF lock claimed at `a5c6acf`, verified the robot had only the LiDAR driver, camera and read-only viewer running. The `/home/yakgreen001/robot-code` checkout was clean on `integration-hub` `db5407d` and was fast-forwarded to `043b877`; no controller or bridge was launched.
 - `python3 scripts/check.py` on the robot passed 244/244; `git status --short` remained empty. Recorded this in HANDOFF and T20. No `/cmd_vel` publication, motor command, physical motion, main merge, or dashboard publication.
 - Released the HANDOFF lock after the read-only/offline validation record.
+
+### 2026-11-07 — integration — Check live LiDAR transform without a drive node
+
+- Under the HANDOFF lock claimed at `1f2e595`, confirmed the robot checkout `043b877` was clean, the follow controller/bridge were absent, and `/cmd_vel` was unknown. Ran only temporary `lidar_sectorizer` and `sync_fusion_node` instances with offset 0.0° and sign −1.0 against the existing `/scan`; each exited normally.
+- Sectorizer saw 3 scans of 384 beams and produced 9 ordered sectors; fusion saw 278 valid points, with its +23° return at 1.89 m matching the sectorizer's +23.3° sector at 1.89 m. Final ROS inventory again had only the original driver/camera/viewer/launch nodes, `/cmd_vel` remained unknown, and the checkout stayed clean. No controller, bridge or motor command; the live controller stop remains untested.
