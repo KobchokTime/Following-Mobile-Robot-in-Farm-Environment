@@ -27,6 +27,13 @@ class LidarFrameCalibrationTest(unittest.TestCase):
         self.assertAlmostEqual(node.scan_xy[1][1], 0.0)
         self.assertAlmostEqual(node.scan_xy[2][1], -1.5)
 
+    def test_controller_stops_for_raw_front_post(self):
+        node = _load_follow_stop().FollowStopNode()
+        node.lidar_offset = 0.0
+        node.lidar_sign = -1.0
+        node.cb_scan(mounted_scan([math.inf, 0.4, math.inf]))
+        self.assertEqual(node.obstacle_limited(0.5, None), 0.0)
+
     def test_fusion_agrees_with_controller_bearings(self):
         _, node = make_node(lidar_angle_offset_deg=0.0, lidar_angle_sign=-1.0)
         node.cb_scan(mounted_scan([1.0, 2.0, 3.0]))
