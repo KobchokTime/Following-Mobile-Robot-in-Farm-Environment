@@ -1,0 +1,214 @@
+diff --git a/config/motor_wheel_calibration.md b/config/motor_wheel_calibration.md
+index 0e8e162..0bbdcb5 100644
+--- a/config/motor_wheel_calibration.md
++++ b/config/motor_wheel_calibration.md
+@@ -56,3 +56,17 @@ robot spins.
+ 3. Send `angular.z = 0.3` and confirm the robot would turn left: the right wheel forwards, the left
+    wheel backwards.
+ 4. If step 3 turns right, set `turn_dir:=-1` and record the result here.
++
++## Robot-day raised-wheel turn check — 2026-11-07 (T6)
++
++Performed with wheels lifted, `zlac_joystick_bridge.py` running.
++
++| Step | Command | Observed | Pass |
++| --- | --- | --- | --- |
++| `linear.x = 0.2` | both wheels forward | correct | yes |
++| `angular.z = 0.3` | right fwd / left back (CCW / left turn) | correct | yes |
++
++**Result:** `FORWARD_DIR = -1.0` required (default 1.0 drove both wheels backwards).
++`turn_dir = 1` (default) is correct — no override needed.
++
++Change applied: `FORWARD_DIR = 1.0` to `FORWARD_DIR = -1.0` in `zlac_joystick_bridge.py`.
+diff --git a/ros2_yolo_ws/launch/follow_bringup.launch.py b/ros2_yolo_ws/launch/follow_bringup.launch.py
+index de6551c..6122122 100644
+--- a/ros2_yolo_ws/launch/follow_bringup.launch.py
++++ b/ros2_yolo_ws/launch/follow_bringup.launch.py
+@@ -58,11 +58,13 @@ DEFAULTS = {
+ }
+ 
+ 
+-def node(name, script, params):
++OPENVINO_PYTHON = "/home/yakgreen001/openvino_env/bin/python3"
++
++def node(name, script, params, python_exec="python3"):
+     args = []
+     for key, value in params.items():
+         args += ["-p", f"{key}:={value}"]
+-    cmd = ["python3", str(SCRIPTS / script)] + (["--ros-args", *args] if args else [])
++    cmd = [python_exec, str(SCRIPTS / script)] + (["--ros-args", *args] if args else [])
+     return ExecuteProcess(cmd=cmd, cwd=str(SCRIPTS), name=name, output="screen")
+ 
+ 
+@@ -73,7 +75,7 @@ def actions(a):
+         if a[name].strip():
+             out.append(ExecuteProcess(cmd=[a[name]], shell=True, name=name[:-4], output="screen"))
+     out += [
+-        node("yolo", "ros2_yolo_live.py", {"model_path": a["model_path"]}),
++        node("yolo", "ros2_yolo_live.py", {"model_path": a["model_path"]}, python_exec=OPENVINO_PYTHON),
+         node("lidar_sectorizer", "Lidar/lidar_sectorizer_node.py",
+              {"angle_offset_deg": a["lidar_angle_offset_deg"], "angle_sign": a["lidar_angle_sign"]}),
+         node("sync_fusion", "Image/sync_fusion_node.py",
+diff --git a/ros2_yolo_ws/scripts/MAIN/Control/zlac_joystick_bridge.py b/ros2_yolo_ws/scripts/MAIN/Control/zlac_joystick_bridge.py
+index 1a32732..1369321 100644
+--- a/ros2_yolo_ws/scripts/MAIN/Control/zlac_joystick_bridge.py
++++ b/ros2_yolo_ws/scripts/MAIN/Control/zlac_joystick_bridge.py
+@@ -2,6 +2,9 @@
+ import rclpy
+ from rclpy.node import Node
+ from geometry_msgs.msg import Twist
++from nav_msgs.msg import Odometry
++from geometry_msgs.msg import TransformStamped
++import tf2_ros
+ from contextlib import suppress
+ import minimalmodbus
+ import math
+@@ -17,7 +20,7 @@ SPEED_GAIN = 40.0      # lin=0.5 → ~20
+ MAX_CMD    = 40.0      # กันไม่ให้ส่งแรงเกินไป
+ 
+ # ถ้าเดินหน้ากลายเป็นถอยหลัง สลับเป็น -1.0 ได้
+-FORWARD_DIR = 1.0
++FORWARD_DIR = -1.0
+ 
+ TIMEOUT = 1.0  # วินาที: ถ้าไม่ได้ cmd_vel ใหม่เกินนี้ → set vel = 0
+ 
+@@ -30,7 +33,7 @@ TURN_DIR = 1.0         # set -1.0 if a positive angular.z spins the robot clockw
+ # capped at MAX_SPEED_MPS per wheel and ramped at MAX_ACCEL_MPS2. "legacy": the old mapping
+ # (40 RPM per unit of linear.x, capped at 40 RPM, about 0.36 m/s with a 0.085 m wheel).
+ SPEED_MODE = "mps"
+-WHEEL_RADIUS_M = 0.085   # not measured on this chassis yet; measure on robot day
++WHEEL_RADIUS_M = 0.0757  # LiDAR round-trip calibration 2026-11-07: actual 1.424m vs expected 1.200m
+ MAX_SPEED_MPS = 1.4      # brisk walking pace
+ MAX_ACCEL_MPS2 = 1.0     # per wheel; the ramp also applies when slowing down
+ UPDATE_HZ = 10.0
+@@ -177,6 +180,14 @@ class DriveBridge(Node):
+         self.sub = self.create_subscription(Twist, '/cmd_vel', self.cmd_callback, 10)
+         self.timer = self.create_timer(1.0 / UPDATE_HZ, self.update_loop)
+ 
++        # Dead-reckoning odometry
++        self.odom_pub = self.create_publisher(Odometry, '/odom', 10)
++        self.tf_broadcaster = tf2_ros.TransformBroadcaster(self)
++        self.odom_x = 0.0
++        self.odom_y = 0.0
++        self.odom_theta = 0.0
++        self.last_odom_t = self.get_clock().now()
++
+         self.get_logger().info("✅ ZLAC Drive Bridge started (listening to /cmd_vel)")
+ 
+     def cmd_callback(self, msg: Twist):
+@@ -209,10 +220,56 @@ class DriveBridge(Node):
+         # ส่งค่าปัจจุบันเข้าไดรฟ์ทุก 0.1 วินาที
+         if self.speed_mode == "legacy":
+             self.zlac.set_velocity(self.left, self.right)
++            actual_l, actual_r = self.left, self.right
+         else:
+             self.out_left, self.out_right = ramp_pair((self.out_left, self.out_right),
+                                                       (self.left, self.right), self.max_step)
+             self.zlac.set_velocity(self.out_left, self.out_right)
++            actual_l, actual_r = self.out_left, self.out_right
++
++        self._publish_odom(actual_l, actual_r)
++
++    def _publish_odom(self, reg_l: float, reg_r: float) -> None:
++        # reg_l = value written to 0x2088 (phys. right wheel, positive = forward)
++        # reg_r = value written to 0x2089 (phys. left wheel, negative = forward → negate)
++        rpm2mps = 2.0 * math.pi * self.wheel_radius / 60.0
++        v_right = reg_l * rpm2mps
++        v_left = -reg_r * rpm2mps
++        v = (v_right + v_left) * 0.5
++        omega = (v_right - v_left) / self.track_width
++
++        now = self.get_clock().now()
++        dt = (now - self.last_odom_t).nanoseconds * 1e-9
++        self.last_odom_t = now
++
++        self.odom_theta += omega * dt
++        self.odom_x += v * math.cos(self.odom_theta) * dt
++        self.odom_y += v * math.sin(self.odom_theta) * dt
++
++        half = self.odom_theta * 0.5
++        qz, qw = math.sin(half), math.cos(half)
++
++        odom = Odometry()
++        odom.header.stamp = now.to_msg()
++        odom.header.frame_id = 'odom'
++        odom.child_frame_id = 'base_link'
++        odom.pose.pose.position.x = self.odom_x
++        odom.pose.pose.position.y = self.odom_y
++        odom.pose.pose.orientation.z = qz
++        odom.pose.pose.orientation.w = qw
++        odom.twist.twist.linear.x = v
++        odom.twist.twist.angular.z = omega
++        self.odom_pub.publish(odom)
++
++        t = TransformStamped()
++        t.header.stamp = now.to_msg()
++        t.header.frame_id = 'odom'
++        t.child_frame_id = 'base_link'
++        t.transform.translation.x = self.odom_x
++        t.transform.translation.y = self.odom_y
++        t.transform.rotation.z = qz
++        t.transform.rotation.w = qw
++        self.tf_broadcaster.sendTransform(t)
+ 
+     def destroy_node(self):
+         # ตอนปิดโปรแกรม ค่อย soft stop + hard stop
+diff --git a/ros2_yolo_ws/scripts/record_robot_day.sh b/ros2_yolo_ws/scripts/record_robot_day.sh
+index cb6461b..1eefefc 100755
+--- a/ros2_yolo_ws/scripts/record_robot_day.sh
++++ b/ros2_yolo_ws/scripts/record_robot_day.sh
+@@ -116,7 +116,7 @@ manifest = {
+     "started_at_utc": started,
+     "ended_at_utc": None,
+     "recorded_topics": "all topics available when rosbag2 starts",
+-    "storage_id": "mcap",
++    "storage_id": "sqlite3",
+     "config": config_entries,
+     "exit_code": None,
+ }
+@@ -155,9 +155,9 @@ done
+ if ((duration > 0)); then
+     # SIGINT lets rosbag2 close the bag cleanly; timeout's own 124 means it ran the full time.
+     # --foreground keeps the recorder in this process group, so Ctrl-C still stops it early.
+-    timeout --foreground --signal=INT "$duration" ros2 bag record --all --storage mcap --output "$session_dir/recording" \
++    timeout --foreground --signal=INT "$duration" ros2 bag record --all --storage sqlite3 --output "$session_dir/recording" \
+         || { code=$?; ((code == 124)) || exit "$code"; }
+     printf '\aDone after %s s.\n' "$duration"
+ else
+-    ros2 bag record --all --storage mcap --output "$session_dir/recording"
++    ros2 bag record --all --storage sqlite3 --output "$session_dir/recording"
+ fi
+diff --git a/ros2_yolo_ws/scripts/ros2_yolo_live.py b/ros2_yolo_ws/scripts/ros2_yolo_live.py
+index 1800cee..8492d2f 100644
+--- a/ros2_yolo_ws/scripts/ros2_yolo_live.py
++++ b/ros2_yolo_ws/scripts/ros2_yolo_live.py
+@@ -1,3 +1,4 @@
++import os
+ import rclpy
+ from rclpy.node import Node
+ from sensor_msgs.msg import Image
+@@ -153,10 +154,11 @@ class YoloROSNode(Node):
+ 
+                 self.get_logger().info(f'Target centroid=({cx},{cy}) sector={sector_id}')
+ 
+-            cv2.namedWindow("YOLOv8 Person Detection", cv2.WINDOW_NORMAL)
+-            cv2.resizeWindow("YOLOv8 Person Detection", 1280, 720)
+-            cv2.imshow("YOLOv8 Person Detection", frame_copy)
+-            cv2.waitKey(1)
++            if os.environ.get("DISPLAY"):
++                cv2.namedWindow("YOLOv8 Person Detection", cv2.WINDOW_NORMAL)
++                cv2.resizeWindow("YOLOv8 Person Detection", 1280, 720)
++                cv2.imshow("YOLOv8 Person Detection", frame_copy)
++                cv2.waitKey(1)
+ 
+         stamp = msg.header.stamp
+         self.frame_pub.publish(Int32MultiArray(
+@@ -171,7 +173,7 @@ def main(args=None):
+         pass
+     node.destroy_node()
+     rclpy.shutdown()
+-    cv2.destroyAllWindows()
++    if os.environ.get("DISPLAY"): cv2.destroyAllWindows()
+ 
+ if __name__ == '__main__':
+     main()
