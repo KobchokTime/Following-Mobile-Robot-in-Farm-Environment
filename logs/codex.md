@@ -466,3 +466,8 @@ Earlier history: `history-2026-10-16.md`.
 ### 2026-11-07 — qa — Check front obstacle after mount calibration
 
 - Added a focused regression on `codex/qa/lidar-frame-calibration`: a raw 0° post inside the 0.45 m stop distance must cap the controller's forward command to zero with the measured mount transform. The four focused calibration tests passed; no hardware or ROS graph was used.
+
+### 2026-11-07 — integration — Submit mounted LiDAR frame for review
+
+- Built focused `codex/robot/lidar-frame-calibration-review` from `integration-hub` `db5407d` with only the robot, QA and research commits. `python scripts/check.py` passed 244/244 on its head `6e6c8e0`, and the diff contains only nine LiDAR calibration, preflight, checklist and Codex log paths.
+- Pushed the branch and opened draft PR #16 targeting `integration-hub`, requesting independent bearing-transform and live-gate review. No hub/main merge, robot motion or motor command.
