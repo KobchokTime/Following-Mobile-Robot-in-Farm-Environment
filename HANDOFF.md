@@ -6,13 +6,14 @@ and review threads in [`DISCUSSION.md`](DISCUSSION.md).
 
 ## Integration lock
 
-- **Current owner:** Codex
-- **Status:** in-progress
-- **Files being edited:** DISCUSSION.md, HANDOFF.md, logs/codex.md (LiDAR mount review request)
-- **Last updated:** 2026-11-07 11:34 Thai time by Codex (claim LiDAR mount review request)
+- **Current owner:** none
+- **Status:** ready
+- **Files being edited:** none
+- **Last updated:** 2026-11-07 11:36 Thai time by Codex (T20 review request posted; lock released)
 - **T18 follow-up:** Offline code review **resolved** (Codex, DISCUSSION 2026-11-01 12:45 and 12:49 Thai time); nothing is back with Codex for re-review. Codex's non-blocking hardening is merged at `7760bf1` (`claude/workspace` `0632a22`): the node default is `avoid_trail` false, and `preflight.py --live` reads the running parameters (`/follow_stop_node`, `/sync_fusion_node`). The follow-up merge `cde6463` (`1b8a325`) makes `check_live_params` FAIL instead of crashing on a non-numeric `trail_hold_s`. Robot-day twin (exact robot-day configuration, on `6a64669`): **106/110, 0 contacts**; `blind_corner` 1/5 stays a recorded failure; every other scenario is 105/105. The Follower Test Bench dashboard shows hub `7760bf1`. `scripts/check.py` 238/238. Robot-day checks (running parameters, chassis/scan geometry, stop timing) are still to do on the robot. No main merge or robot-day approval.
 - **T18 robot-day gate review:** Codex (DISCUSSION 2026-11-03 02:15) agreed with the offline default and twin evidence and requested that `preflight.py --live` not be a fail-open go signal. Claude's answer is merged at `3874129` (`claude/workspace` `346c4be`): `avoid_trail` true is a FAIL (static and live), `trail_hold_s` must be finite and exactly 0, missing ROS Python packages give a labelled FAIL, and the new `check_motion_params` reads back and compares `obstacle_stop_m`, `spin_clear_radius_m`, `max_decel`, `recheck_max_s` (`/follow_stop_node`) and `speed_mode`, `max_speed_mps` (`/zlac_drive_bridge`). `scripts/check.py` 239/239. **Back to Codex for re-review of the preflight gate (`ada4077..3874129`).** Offline T18 remains resolved; no robot operation or main merge is authorized.
 - **T18 preflight re-review:** Codex agrees with the gate fix (DISCUSSION 2026-11-03, `ada4077..3874129`); `scripts/check.py` 239/239 and focused preflight tests 8/8. The software gate change request is resolved. Chassis, LiDAR, stop timing, command timeout and low-speed calibration checks remain on the real robot; no operation or main merge is authorized here.
+- **T20 LiDAR mount:** Draft PR #16 (`codex/robot/lidar-frame-calibration-review` `5fa082d`) proposes offset 0.0° and sign −1.0 for the robot-day launch after a stationary post/removal scan. Offline check 244/244; no hub merge. Claude cross-review is requested in DISCUSSION. Repeat the stationary post check on the reviewed running code before motion.
 
 ## Branches
 

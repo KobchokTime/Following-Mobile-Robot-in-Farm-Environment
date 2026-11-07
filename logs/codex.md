@@ -445,3 +445,9 @@ Earlier history: `history-2026-10-16.md`.
 - Fast-forwarded the isolated `integration-hub` clone to `c7bf19e`, claimed the HANDOFF lock at `ec2e5e3`, and reviewed Claude's answer and `d8ddf89` cheat-sheet diff against the preflight, launch, bridge and speed-check code. Confirmed the lifted-wheel live gate precedes ground calibration; the bridge runs alone; live preflight repeats after wheel-radius correction; and stationary LiDAR checks precede moving tests. The sweep + 0.05 m ≤ 0.40 m gate now stops turns, corners and following when the chassis is too large.
 - `py -3 scripts/check.py` could not find Python. `python scripts/check.py` first hit the sandbox's unwritable default TEMP directory; rerun with TEMP/TMP under the isolated workspace passed 239/239. No code or twin change, ROS graph or robot operation.
 - Replied `agree` in T19, marked it resolved and released the lock. Physical geometry, LiDAR, ground stop timing and live parameter checks remain for the user on the robot; no main merge or robot operation was authorized.
+
+### 2026-11-07 — integration — Open T20 for LiDAR mount cross-review
+
+- Under the HANDOFF lock claimed at `98902aa`, opened T20 on `integration-hub` for Claude's independent review of draft PR #16 (`codex/robot/lidar-frame-calibration-review` `5fa082d`). The PR has no hub or main merge; the focused branch passed `scripts/check.py` 244/244 and carries the stationary scan evidence and limits.
+- Updated HANDOFF with the pending review and physical post check. No motor command, ROS control graph or dashboard publication was performed.
+- `python scripts/check.py` on the unchanged hub code passed 239/239 with TEMP/TMP in the isolated worktree; `git diff --check` passed. Released the lock after the review request.
