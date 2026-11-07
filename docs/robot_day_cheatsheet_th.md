@@ -65,6 +65,7 @@ ros2 topic pub -r 10 /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.5}}"
 python3 tools/robot_day/preflight.py --max-speed 0.5 --wheel-radius 0.085
 ros2 launch ros2_yolo_ws/launch/follow_bringup.launch.py max_speed_mps:=0.5 \
     wheel_radius_m:=0.085 turn_dir:=<1.0 หรือ -1.0> \
+    lidar_angle_offset_deg:=0.0 lidar_angle_sign:=-1.0 \
     camera_cmd:="<คำสั่งเปิดกล้อง>" lidar_cmd:="<คำสั่งเปิด LiDAR>"
 ```
 
@@ -75,6 +76,7 @@ ros2 launch ros2_yolo_ws/launch/follow_bringup.launch.py max_speed_mps:=0.5 \
 ```bash
 python3 tools/robot_day/preflight.py --live --obstacle-stop true --avoid-trail false \
     --speed-mode mps --max-speed 0.5 --wheel-radius 0.085 \
+    --expect-lidar-angle-offset-deg 0.0 --expect-lidar-angle-sign -1.0 \
     --expect-obstacle-stop-m 0.45 --expect-spin-clear-radius-m 0.40 \
     --expect-max-decel 0.8 --expect-recheck-max-s 1.0
 ros2 topic info /scan --verbose
@@ -84,7 +86,8 @@ ros2 topic info /scan --verbose
 - ☐ `/scan` มีผู้รับของ `follow_stop` แบบ reliability `BEST_EFFORT`
 - ☐ log ของ `sync_fusion_node` บรรทัด `[GATE]` มี `lidar_assist=1`
 - ☐ ไม่มีบรรทัด `[OBST] on clearance=0.00 m (no fresh scan)` ขณะ LiDAR เปิดและไม่มีอะไรใกล้
-- ☐ `t18_angle_post` (หุ่นนิ่ง ล้อลอย): วางเสาตรงหน้า 1.0 m → `clr=` ราว 1.0 m · ย้ายเสาไปข้างหลัง → ไม่ทำให้หยุด (เช็ก `lidar_angle_offset_deg` 180) · ถ้าไม่ตรง **หยุด** ส่ง log ให้ Claude
+- ☐ `t18_angle_post` (หุ่นนิ่ง ล้อลอย): ตรวจ `/scan` ด้วยเสาตรงหน้า → มุมดิบใกล้ 0°; ย้ายเสาไปซ้ายหน้า → มุมดิบติดลบ และ `/lidar_sector_dists` ต้องรายงานทางซ้าย (sector หมายเลขสูง); ยกเสาออกแล้วระยะคืนเดิม
+- ☐ preflight อ่านค่าที่รันอยู่จริงของทั้ง `follow_stop_node`, `sync_fusion_node` และ `lidar_sectorizer`: offset 0.0°, sign −1.0 เหมือนกันทั้งหมด · วางเสากลับมาตรงหน้าจึงตรวจ `clr=`; ถ้าค่าหรือทิศไม่ตรง **หยุด** ส่ง log ให้ Claude
 - แล้วปิดระบบทั้งหมด (Ctrl+C)
 
 ## 4. วางหุ่นบนพื้น เช็กความเร็วด้วย bridge อย่างเดียว (10 นาที)
