@@ -494,3 +494,8 @@ Earlier history: `history-2026-10-16.md`.
 
 - Under the HANDOFF lock claimed at `1f2e595`, confirmed the robot checkout `043b877` was clean, the follow controller/bridge were absent, and `/cmd_vel` was unknown. Ran only temporary `lidar_sectorizer` and `sync_fusion_node` instances with offset 0.0° and sign −1.0 against the existing `/scan`; each exited normally.
 - Sectorizer saw 3 scans of 384 beams and produced 9 ordered sectors; fusion saw 278 valid points, with its +23° return at 1.89 m matching the sectorizer's +23.3° sector at 1.89 m. Final ROS inventory again had only the original driver/camera/viewer/launch nodes, `/cmd_vel` remained unknown, and the checkout stayed clean. No controller, bridge or motor command; the live controller stop remains untested.
+
+### 2026-11-07 — integration — Check live preflight fails closed with control graph absent
+
+- Under the HANDOFF lock claimed at `5ce22b5`, ran the robot's `tools/robot_day/preflight.py --live --seconds 2 --max-speed 0.5` read-only on checkout `043b877`. An unsourced shell gave a labelled ROS import FAIL; rerunning after sourcing `/opt/ros/humble/setup.bash` returned exit 1 with 7 FAIL and no `ready` line. Camera 28.4 Hz, LiDAR 10.3 Hz and 70% valid scan rays passed. Missing YOLO/sector topics, `/cmd_vel` publisher/subscriber, and running controller/fusion/sectorizer/bridge parameters correctly failed. No node or motor command was started; this is a fail-closed check, not readiness for motion.
+- Released the integration lock after recording this result; T20 remains open for Claude's independent review and controller near-stop remains untested on the running graph.
