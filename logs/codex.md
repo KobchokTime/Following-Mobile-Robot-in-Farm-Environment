@@ -462,3 +462,7 @@ Earlier history: `history-2026-10-16.md`.
 
 - On `codex/research/lidar-mount-calibration`, updated the lifted-wheel bringup and live preflight commands to show the measured offset 0.0° and sign −1.0. Replaced the obsolete 180° post instruction with stationary front/left/removal checks and a readback of all three running nodes.
 - Evidence is the read-only `/scan` post-placement and removal comparison in this Codex session; a raw before/after scan file was not retained, so the checklist requires repeating the physical check on the reviewed running code. No robot motion was performed.
+
+### 2026-11-07 — qa — Check front obstacle after mount calibration
+
+- Added a focused regression on `codex/qa/lidar-frame-calibration`: a raw 0° post inside the 0.45 m stop distance must cap the controller's forward command to zero with the measured mount transform. The four focused calibration tests passed; no hardware or ROS graph was used.
