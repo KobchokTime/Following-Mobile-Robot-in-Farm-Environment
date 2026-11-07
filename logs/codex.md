@@ -513,3 +513,7 @@ Earlier history: `history-2026-10-16.md`.
 - On `codex/qa/lidar-frame-calibration`, added offline left/front/right scan regressions for controller, fusion and sectorizer, plus launch propagation and live preflight checks for all three nodes' angle offset/sign. The robot-day preflight tool is included with the QA harness so a missing or mismatched running value is a FAIL.
 - Focused calibration tests passed 3/3. Focused preflight tests passed 9/9 after setting TEMP/TMP to the isolated writable worktree; the first preflight run hit only the sandbox's unwritable default temp path. `python scripts/check.py` passed 243/243, including compile and thesis JSON checks. No ROS graph, bridge or motor was operated.
 - Still required: static post verification against the running ROS nodes with the new launch and independent review before any ground motion. Existing twin runs use their legacy node defaults and do not validate this physical mount.
+
+### 2026-11-07 — qa — Check front obstacle after mount calibration
+
+- Added a focused regression on `codex/qa/lidar-frame-calibration`: a raw 0° post inside the 0.45 m stop distance must cap the controller's forward command to zero with the measured mount transform. The four focused calibration tests passed; no hardware or ROS graph was used.
