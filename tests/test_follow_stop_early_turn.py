@@ -57,6 +57,9 @@ class _Node:
     def create_subscription(self, *_args):
         return object()
 
+    def create_timer(self, *_args):
+        return object()
+
     def create_publisher(self, _message_type, topic, _qos):
         publisher = _Publisher()
         self.publishers[topic] = publisher
@@ -164,7 +167,9 @@ class FollowStopEarlyTurnTests(unittest.TestCase):
             node.cb_fused(message)
             return publisher.messages[-1]
 
+        node.cb_scan(_LaserScan([math.inf] * 360))  # a fresh, empty scan: turning in place is allowed
         send(4)
+        node.cb_scan(_LaserScan([math.inf] * 360))
         self.assertGreater(send(2).angular.z, 0.0)
 
 

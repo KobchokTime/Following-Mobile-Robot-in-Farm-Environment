@@ -244,6 +244,8 @@ class TargetGate:
         # After this long with no fix the widened gates would take almost anything (a false box in
         # front of a post); start over from the lock-on window instead, like the controller does.
         self.unlock_after_s = unlock_after_s
+        self.min_range = 0.3          # m: nobody is followed from nearer than this
+        self.max_range_rate = 2.0     # m/s: faster than anyone walks towards or away from the robot
         self.reset()
 
     def reset(self):
@@ -269,8 +271,14 @@ class TargetGate:
             self.hists = (self.hists + [hist])[-self.hist_window:]
 
     def _predict(self, t):
+        # never nearer than min_range_m: boxes ranged off someone crossing in front drove the range rate so far
+        # down that the prediction went negative and the target's own boxes were refused until the lock was
+        # dropped (shade_crossing s0, predicted -0.25 m)
         dt = max(0.0, min(t - self.t, 1.0))
-        return self.bearing + self.bearing_rate * dt, self.range + self.range_rate * dt
+        return self.bearing + self.bearing_rate * dt, max(self.min_range, self.range + self.range_rate * dt)
+
+    def _clamp_rates(self):
+        self.range_rate = max(-self.max_range_rate, min(self.max_range_rate, self.range_rate))
 
     def cost(self, t, bearing, rng, chroma=None, hist=None):
         """Normalised squared distance of a detection from the target (inf before lock-on)."""
@@ -335,6 +343,7 @@ class TargetGate:
         if self.min_rate_dt <= dt < 1.0:
             self.bearing_rate += self.beta * eb / dt
             self.range_rate += self.beta * er / dt
+            self._clamp_rates()
         self.t = t
 
     def _note_box(self, t, bearing, rng):
@@ -382,6 +391,7 @@ class TargetGate:
         elif dt >= self.min_rate_dt:
             self.bearing_rate += self.beta * eb / dt
             self.range_rate += self.beta * er / dt
+            self._clamp_rates()
         self.t = t
         self._learn_colour(chroma, hist)
         return True
@@ -428,6 +438,10 @@ class SyncFusionNode(Node):
         # only someone at least this much nearer than the target is in the way; a spurious box over the
         # target itself reads the target's own LiDAR range and must not make the robot back off
         self.declare_parameter('path_min_gap_m', 0.2)
+        # giving way stops the robot short of them; it never reads nearer than this (the controller's follow
+        # distance), so the controller holds rather than reverses (pass_by s0/s1 on 5cfb21b backed off at 0.5-0.7
+        # m/s from a worker 0.5 m away and fell 2.8 m behind). The LiDAR obstacle stop guards the corridor.
+        self.declare_parameter('path_floor_m', 0.5)
         # LiDAR keeps the target when it leaves the camera's view (a side step, a sharp turn)
         self.declare_parameter('lidar_track', True)
         self.declare_parameter('scan_topic', '/scan')
@@ -441,6 +455,24 @@ class SyncFusionNode(Node):
         # the scan tells the gate when someone else is near the target, whatever order the boxes come in
         self.declare_parameter('crowd_from_scan', True)
         self.declare_parameter('crowd_radius_m', 0.5)  # only returns this close to the predicted target count
+        # each fresh scan moves the target track to the target's own cluster when nobody else is near it,
+        # so a fast side step does not leave the camera gate behind (side_step twin failures)
+        self.declare_parameter('lidar_assist', True)
+        self.declare_parameter('lidar_assist_dist_m', 0.35)  # the cluster must be this close to the prediction
+        # nobody walks faster than this: a cluster farther from the target's last fix is someone else
+        # (a passer-by covering the target from the LiDAR, twin crossing run)
+        self.declare_parameter('lidar_assist_speed_mps', 1.5)
+        # the target's box where the gate predicts it, but the LiDAR range there is someone nearer covering it
+        # (blind_corner: the bystander at the corner). Use the predicted range rather than the near one, which
+        # made the follower stop as if the target were 0.5 m away; the obstacle stop in follow_stop deals with
+        # whoever is in front. 0 turns it off.
+        self.declare_parameter('occluded_gap_m', 0.4)
+        self.declare_parameter('occluded_bearing_deg', 6.0)
+        # the same value as follow_stop's obstacle_stop (the launch file passes one argument to both). The
+        # occlusion range and the give-way floor leave the near person to the LiDAR stop; without that stop they
+        # are turned off here, so the near range again holds the robot off them (T18 re-review, Codex
+        # 2026-11-01 07:49, item 2)
+        self.declare_parameter('obstacle_stop', True)
         # TargetGate tunables, so an experiment's -p really reaches the gate (undeclared -p are ignored)
         for name, value in GATE_PARAMS.items():
             self.declare_parameter(name, value)
@@ -461,6 +493,7 @@ class SyncFusionNode(Node):
         self.path_hold = float(self.get_parameter('path_hold_s').value)
         self.path_margin = float(self.get_parameter('path_margin_m').value)
         self.path_min_gap = float(self.get_parameter('path_min_gap_m').value)
+        self.path_floor = float(self.get_parameter('path_floor_m').value)
         self.path_block = None  # (time, range) of the latest other person in the corridor
         self.last_target = None  # (cx, cy, sector_id, range) last published for the target
         self.use_lidar_track = bool(self.get_parameter('lidar_track').value)
@@ -468,14 +501,31 @@ class SyncFusionNode(Node):
         self.lidar_after = float(self.get_parameter('lidar_track_after_s').value)
         self.lidar_max = float(self.get_parameter('lidar_track_max_s').value)
         self.scan_points = []     # latest scan as (robot-frame bearing, range)
+        self.covered_fix = None   # the last camera fix after which someone nearer covered the target
+        self.recent_ranges = []   # (time, range) of the camera fixes in the last second
         self.scan_time = None     # when it arrived
         self.scan_max_age = float(self.get_parameter('lidar_scan_max_age_s').value)
         self.box_range_from_scan = bool(self.get_parameter('box_range_from_scan').value)
         self.crowd_from_scan = bool(self.get_parameter('crowd_from_scan').value)
         self.crowd_radius = float(self.get_parameter('crowd_radius_m').value)
+        self.crowd_logged = False  # last [CROWD] state written to the log
+        self.lidar_assist = bool(self.get_parameter('lidar_assist').value)
+        self.assist_dist = float(self.get_parameter('lidar_assist_dist_m').value)
+        self.assist_scan_time = None  # the scan the last assist used, so each scan is used once
+        self.assist_speed = float(self.get_parameter('lidar_assist_speed_mps').value)
+        self.assist_last = None       # (time, bearing, range) of the last assist
+        self.occl_gap = float(self.get_parameter('occluded_gap_m').value)
+        if not bool(self.get_parameter('obstacle_stop').value):
+            self.occl_gap, self.path_floor = 0.0, 0.0
+            self.get_logger().info('[OBST] obstacle_stop off: occluded_gap_m and path_floor_m set to 0 '
+                                   '(the near range is used, as before the LiDAR stop)')
+        self.occl_bearing = math.radians(float(self.get_parameter('occluded_bearing_deg').value))
+        self.occl_logged = False
         # the effective settings, so a run's log shows what it actually ran with
         self.get_logger().info('[GATE] ' + ' '.join(f'{k}={v:g}' for k, v in sorted(
-            {**gate_args, 'crowd_from_scan': float(self.crowd_from_scan), 'crowd_radius_m': self.crowd_radius}.items())))
+            {**gate_args, 'crowd_from_scan': float(self.crowd_from_scan), 'crowd_radius_m': self.crowd_radius,
+             'lidar_assist': float(self.lidar_assist), 'lidar_assist_dist_m': self.assist_dist,
+             'lidar_assist_speed_mps': self.assist_speed, 'occluded_gap_m': self.occl_gap}.items())))
         self.last_camera_fix = None  # time of the last camera detection accepted as the target
         self.last_camera_bearing = 0.0
         self.edge_rad = math.radians(self.camera_hfov_deg / 2.0 - float(self.get_parameter('lidar_edge_deg').value))
@@ -509,7 +559,7 @@ class SyncFusionNode(Node):
 
         # ---------- timers ----------
         self.gc_timer = self.create_timer(0.5, self.gc_buffers)
-        self.track_timer = self.create_timer(0.1, self.track_with_lidar)
+        self.track_timer = self.create_timer(0.1, self.on_track_timer)
         self.sync_count = 0
 
         self.get_logger().info(
@@ -553,7 +603,60 @@ class SyncFusionNode(Node):
         self.scan_points = pts
         self.scan_time = self.now_sec()
 
-    def track_with_lidar(self):
+    def on_track_timer(self):
+        self.track_with_lidar(self.assist_with_lidar())
+
+    def assist_with_lidar(self):
+        """Move the target track to the target's own LiDAR cluster, once per fresh scan.
+
+        The camera track lags a fast side step (0.25 m at 0.7 m is 20 deg in 0.3 s), so the next box falls
+        outside the gate even though the LiDAR saw every step. Only a person-sized cluster within
+        lidar_assist_dist_m of the prediction is taken, and only when the scan shows nobody else near the
+        target (scan_crowded), so a passer-by is never taken this way; with someone close the camera
+        decides alone, as before. Not more than lidar_track_max_s after the last camera fix.
+        Returns (bearing, range) of the cluster used, or None.
+        """
+        if not (self.use_gate and self.lidar_assist and self.gate.locked and self.last_camera_fix is not None):
+            return None
+        now = self.now_sec()
+        if not scan_is_fresh(now, self.scan_time, self.scan_max_age) or self.scan_time == self.assist_scan_time:
+            return None
+        self.assist_scan_time = self.scan_time
+        if now - self.last_camera_fix > self.lidar_max:
+            return None
+        if now < self.gate.ambiguous_until:
+            # someone was just near the target (two boxes, or the scan's crowd check): their cluster may have
+            # lent its range to the target's box, and following clusters would carry the track off with them
+            # (twin crossing runs). Until the window ends the camera decides alone.
+            return None
+        pb, pr = self.gate._predict(now)
+        found = lidar_track(self.scan_points, pb, pr, math.atan2(self.assist_dist, max(pr, 0.3)),
+                            self.assist_dist, width_m=(0.05, 0.8))
+        if found is None:
+            return None
+        bearing, rng = found
+        px, py = pr * math.cos(pb), pr * math.sin(pb)
+        if math.hypot(rng * math.cos(bearing) - px, rng * math.sin(bearing) - py) > self.assist_dist:
+            return None
+        if scan_crowded(self.scan_points, bearing, rng, pb, pr, self.crowd_radius):
+            return None
+        if rng < pr - 0.2:
+            return None  # well in front of where the target should be: someone covering it from the LiDAR
+        # the last fix of the target, by the camera or by an earlier assist
+        last = (self.last_camera_fix, self.last_camera_bearing, self.last_target[3]) \
+            if self.last_target is not None else None
+        if self.assist_last is not None and (last is None or self.assist_last[0] > last[0]):
+            last = self.assist_last
+        if last is not None:
+            _, lb, lr = last
+            moved = math.hypot(rng * math.cos(bearing) - lr * math.cos(lb), rng * math.sin(bearing) - lr * math.sin(lb))
+            if moved > self.assist_speed * max(0.0, now - last[0]) + 0.08:
+                return None  # faster than anyone walks: someone else, such as a passer-by covering the target
+        self.gate.accept_lidar(now, bearing, rng)
+        self.assist_last = (now, bearing, rng)
+        return found
+
+    def track_with_lidar(self, assisted=None):
         """The target stepped out of the camera's view: keep it with the LiDAR and turn towards it.
 
         Only when it was last seen near the image edge. If it vanished from the middle of the image
@@ -566,19 +669,49 @@ class SyncFusionNode(Node):
                 or now - self.last_camera_fix > self.lidar_max:
             return
         pb, pr = self.gate._predict(now)
-        # last seen near the edge, or moving fast enough to be past it by now (frames arrive late)
-        if abs(self.last_camera_bearing) < self.edge_rad and abs(pb) < self.edge_rad:
-            return
         if not scan_is_fresh(now, self.scan_time, self.scan_max_age):
             return  # no recent scan: do not steer by an old one; the controller's normal stop applies
-        found = lidar_track(self.scan_points, pb, pr, math.radians(25.0), 0.5)
-        if found is None:
-            return
-        bearing, rng = found
-        self.gate.accept_lidar(now, bearing, rng)
-        # the image edge on the target's side: the controller turns that way at its full turn rate
-        cx = 0 if bearing > 0 else self.image_width - 1
-        sector = 0 if bearing > 0 else 8
+        # last seen near the edge, or moving fast enough to be past it by now (frames arrive late), or
+        # covered by someone nearer at the last bearing it was seen (blind_corner: it walked behind the
+        # bystander, out of the image on the far side, and only the LiDAR could see it come out)
+        if abs(self.last_camera_bearing) < self.edge_rad and abs(pb) < self.edge_rad \
+                and self.covered_fix != self.last_camera_fix:
+            cover = box_range(self.scan_points, self.last_camera_bearing)
+            if cover is None or cover >= pr - max(self.occl_gap, 0.2):
+                return
+            # remembered until the next camera fix: once the target has come out beyond the one who covered
+            # it, they no longer cover the bearing it was last seen at (blind_corner s3 on a30c90d)
+            self.covered_fix = self.last_camera_fix
+        if assisted is not None:
+            bearing, rng = assisted  # the assist already moved the track to the target's own cluster
+        else:
+            # only returns no nearer than the target should be: someone the target walked behind is not it
+            # (blind_corner s4 on bddf0ba took the bystander and the gate followed them for 4 s)
+            # nor nearer than it was last seen by the camera: fix by fix the track can creep onto the edge of
+            # someone it walked past (blind_corner s0 on f01dd98 ended on the bystander at 0.28 m)
+            # the farthest of the last second's camera ranges: as the target goes behind someone its box range
+            # drops to theirs (0.50 m for a target 0.78 m out, blind_corner s0 on 47109fb, which then took them)
+            seen = max([r0 for _, r0 in self.recent_ranges] + [self.last_target[3]])
+            far = [p for p in self.scan_points if p[1] >= max(pr, seen) - 0.2]
+            # out from behind someone, it can be anywhere past them: a wider window than at the image edge
+            window = math.radians(40.0 if self.covered_fix == self.last_camera_fix else 25.0)
+            # the prediction holds still after a second unseen while the target walks on: allow walking pace
+            # in range for the time it has been unseen (blind_corner s2 on 1b5dc92 lost it 1.3 m out at 0.5 m)
+            tol = min(1.2, 0.5 + 1.0 * max(0.0, now - self.gate.t - 0.5))  # since the last fix of any kind
+            found = lidar_track(far, pb, pr, window, tol)
+            if found is None:
+                return
+            bearing, rng = found
+            self.gate.accept_lidar(now, bearing, rng)
+        # the image edge on the target's side: the controller turns that way at its full turn rate. A target
+        # covered inside the image (blind_corner) is given at its own column instead: sent to the edge at 6 deg,
+        # the robot spun at full rate past it and out of view (s1 on e80a83d)
+        if abs(bearing) < math.radians(self.camera_hfov_deg / 2.0 - 3.0):
+            cx = bearing_to_cx(bearing, self.image_width, self.camera_hfov_deg)
+            sector = min(8, int(cx * 9 / self.image_width))
+        else:
+            cx = 0 if bearing > 0 else self.image_width - 1
+            sector = 0 if bearing > 0 else 8
         _, cy, _, _ = self.last_target
         self.publish_synced(cx, cy, rng, sector, 0.0)
 
@@ -623,12 +756,36 @@ class SyncFusionNode(Node):
             self.get_logger().debug(f"Skip frame: invalid LiDAR dist in sector {sector_id}")
             return
 
-        if self.use_gate and self.crowd_from_scan and self.gate.locked \
-                and scan_is_fresh(ty, self.scan_time, self.scan_max_age):
-            pb, pr = self.gate._predict(ty)
-            if scan_crowded(self.scan_points, bearing, dist, pb, pr, self.crowd_radius):
+        reason = 'gate'
+        if self.use_gate and self.crowd_from_scan and self.gate.locked:
+            if not scan_is_fresh(ty, self.scan_time, self.scan_max_age):
+                # no fresh scan (stale, missing or dated ahead): nobody can be ruled out beside the
+                # target, so keep the plain gate rather than let a stranger in (T15, Codex)
                 self.gate.note_crowded(ty)
+                reason = 'no-fresh-scan'
+            else:
+                pb, pr = self.gate._predict(ty)
+                if scan_crowded(self.scan_points, bearing, dist, pb, pr, self.crowd_radius):
+                    self.gate.note_crowded(ty)
+                    reason = 'scan'
+        if self.use_gate:
+            # one line each time the plain gate starts or stops being forced, for robot day (E4b)
+            crowded = self.gate.locked and ty < self.gate.ambiguous_until
+            if crowded != self.crowd_logged:
+                self.get_logger().info(f"[CROWD] {'on' if crowded else 'off'} t={ty:.2f}"
+                                       + (f" reason={reason}" if crowded else ''))
+                self.crowd_logged = crowded
 
+        occluded = False
+        if self.use_gate and self.gate.locked and self.occl_gap > 0.0:
+            pb, pr = self.gate._predict(ty)
+            occluded = abs(bearing - pb) <= self.occl_bearing and dist < pr - self.occl_gap
+            if occluded:
+                dist = pr  # the target's own range, as predicted; someone nearer covers it from the LiDAR
+            if occluded != self.occl_logged:
+                self.get_logger().info(f"[OCCL] {'on' if occluded else 'off'} t={ty:.2f}"
+                                       + (f" predicted range {pr:.2f} m" if occluded else ''))
+                self.occl_logged = occluded
         if self.use_gate and not self.gate.accept(ty, bearing, dist, chroma, hist):
             # another person, not the one being followed: remember them only if they are in the way
             # Only someone in the corridor and clearly nearer than the target is in the way
@@ -637,13 +794,14 @@ class SyncFusionNode(Node):
                 self.path_block = (ty, dist)
                 # They may hide the target, so give way now instead of waiting to see the target again
                 cx_t, cy_t, sector_t, _ = self.last_target
-                self.publish_synced(cx_t, cy_t, max(0.0, dist - self.path_margin), sector_t, best_dt)
+                self.publish_synced(cx_t, cy_t, max(self.path_floor, dist - self.path_margin), sector_t, best_dt)
             return
         self.last_target = (cx, cy, sector_id, dist)  # the target's own range, before any give-way
+        self.recent_ranges = [(t0, r0) for t0, r0 in self.recent_ranges if ty - t0 <= 1.0] + [(ty, dist)]
         self.last_camera_fix = ty
         self.last_camera_bearing = bearing
         if self.path_block is not None and ty - self.path_block[0] <= self.path_hold:
-            dist = min(dist, max(0.0, self.path_block[1] - self.path_margin))  # give way to whoever is in it
+            dist = min(dist, max(self.path_floor, self.path_block[1] - self.path_margin))  # give way to whoever is in it
         self.publish_synced(cx, cy, dist, sector_id, best_dt)
 
         self.sync_count += 1

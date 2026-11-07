@@ -367,3 +367,137 @@ Earlier history: `history-2026-10-16.md`.
 - In a clean isolated clone of `codex/workspace` at `062d57f`, fetched `integration-hub` at `c265d9a` and merged it with `--no-ff` and no rebase. The dirty main checkout and `claude/*` branches were not changed.
 - Resolved only `logs/codex.md` and `tests/test_target_gate.py`: preserved both original log histories in order, kept the constructor override test once (the merged test blob matches the hub), and retained the hub's additional gate tests. Merge diff and file list were inspected; `HANDOFF.md`/`DISCUSSION.md` arrived from the hub without direct edits.
 - Focused target gate suite passed 34/34, Office Node suite passed 9/9, and `python scripts/check.py` passed 166/166 with writable TEMP/TMP. Follow-up: commit the merge and push only if remote `codex/workspace` remains at `062d57f`.
+### 2026-10-29 — thesis-desk — Run Office seat work and idle-agent meetings
+
+- Developed on isolated `codex/thesis-desk/office-active-work` from verified `integration-hub` `c265d9a`. The seat button now starts actual offline Python and Office Node checks plus commit/time inspection, followed by plan-authenticated read-only Codex assessments. The meeting button selects up to three idle agents for sequential proposal, challenge and plan turns. Results and raw check logs are persisted outside the checkout and displayed in Office.
+- Kept the 3D desks and scene controls. Browser smoke at `127.0.0.1:8769` confirmed the desks remain visible with the results panel, a completed seat round (Python 166/166, Office Node 15/15, three recorded assessments), and a completed three-agent meeting with recorded turns. An earlier preview stop was marked `interrupted` on restart, as designed. Coding assignments still use the separate native-subagent queue; a meeting proposal does not execute itself.
+- Independent review found and fixes addressed concurrent agent reservation, append failure recovery, missing workflow tests in the seat check, meeting evidence context, and scene state after reload. Focused Node tests passed 15/15; `python scripts/check.py` passed 166/166 with writable TEMP/TMP; JavaScript syntax and `git diff --check` passed. No dashboard artifact was published from this branch.
+
+### 2026-10-29 — thesis-desk — Rename Office feature branch for GitHub
+
+- Commit `0ad41b5` was created locally. GitHub rejected the first push to `codex/thesis-desk/office-active-work` because the existing remote branch `codex/thesis-desk` is a file/directory ref conflict. Renamed the local feature branch to `codex/thesis-desk-office-active-work`; the code and base commit are unchanged. Follow-up: push this branch and open a draft PR to `integration-hub`.
+
+### 2026-10-29 — thesis-desk — Submit Office controls for review
+
+- Pushed `codex/thesis-desk-office-active-work` at `c55c182` and opened draft PR #13 against `integration-hub`. Attached the PR to this task. Its current CI head must be checked before integration; Claude cross-review remains pending.
+- The isolated preview at `127.0.0.1:8769` was restarted on the committed server code. Its saved seat and meeting results survived restart and the desks remained visible. The main checkout and dashboard artifact were not changed.
+
+### 2026-10-29 — thesis-desk — Include every idle agent in meeting rotation
+
+- Follow-up on draft PR #13: the meeting rotation now reaches Krit, Mew and Boss after the other nine agents, so a free desk agent can also join. Added an offline four-round rotation test.
+- Focused Office Node tests passed 16/16, `python scripts/check.py` passed 166/166, and `git diff --check` passed. No new model run or sweep was needed for this change.
+
+### 2026-10-29 — thesis-desk — Keep busy Office agents at work while idle agents rest
+
+- On isolated `codex/thesis-desk-office-active-work` / draft PR #13, renamed the walk control to พักผ่อน. The browser now starts continuous aisle walking only for agents free in the server's action and direct-chat state; desk work and meeting participants stay at their positions until their recorded action ends. A running meeting restores its full seating order after page reload.
+- Local Chrome smoke on the separate `127.0.0.1:8769` preview saw all 12 initially idle agents move, remain moving after about 20 seconds, and stop resting when toggled off. The scene screenshot showed desks visible. An offline browser-controller regression covered running meetings, desk work, direct chat, completion and repeated polling without interrupting busy agents.
+- Office Node suites passed 17/17; `python scripts/check.py` passed 166/166 with writable TEMP/TMP after the sandbox default Temp produced permission errors. Scene and server JavaScript syntax checks and `git diff --check` passed. No live model call, robot action, main merge or dashboard publication was made for this change.
+
+### 2026-10-29 — thesis-desk — Address T16 Office cross-review blockers
+
+- In isolated `codex/thesis-desk-t16-review-fix` from `integration-hub` `61742ce`, added a local Host check for all Office requests and matching Origin plus JSON media-type checks for POST. A foreign page or DNS-rebound hostname is rejected before a chat request can start Codex. Direct `readMessage` also rejects non-JSON bodies.
+- The automatic queue now requires zero changed files for a read-only assignment and at least one for a writing assignment before review-ready. Added focused regressions for allowed-path edits in read-only mode and for foreign Host/Origin, text/plain, GET rebinding and local GET acceptance.
+- Focused Office Node tests passed 12/12 and `python scripts/check.py` passed 169/169 with writable TEMP/TMP. A separate local HTTP smoke returned 200 for `/api/agents`; temporary headless Chrome loaded the Office document but its external Three.js module did not initialize in that browser run, so 3D rendering was not confirmed there. No Codex chat, robot action, sweep or paid API call was made.
+
+### 2026-10-29 — integration — Agree on T15 no-fresh-scan re-review
+
+- On isolated `integration-hub` review clone at `61742ce`, inspected `51f5dff` / `210f422` and the production-path no-fresh-scan fallback. Focused walk-up tests passed 11/11 and `python scripts/check.py` passed 169/169 with writable TEMP/TMP. Recounted 220 unique JSON rows: published totals and unmatched/other breakdowns agree; the 40 scan-check walk-up runs report zero stranger publications and round-1 no-check reports 571 stranger plus two false boxes.
+- Claimed the integration lock at `71a3ce6`, replied `agree` in DISCUSSION T15, and updated HANDOFF to mark T15 resolved. No sweep, ROS, Docker, hardware or main merge was run. Real-leg and nearby-post behavior remains for robot-day E4.
+- Separately pushed T16 request-validation/read-only-gate fix `5a6a0b3` and opened draft PR #14 against `integration-hub` for Claude's review; it is not integrated or published.
+
+### 2026-10-29 — integration — Hand T16 fixes to Claude for re-review
+
+- After the T15 review hub moved to `100b257`, merged it into the isolated T16 branch with `--no-ff` at `1664217` and preserved both append-only Codex log entries. The updated draft PR #14 is mergeable against that hub head; focused Office Node tests passed 12/12 and `scripts/check.py` passed 169/169 after the merge.
+- Claimed the integration lock at `a6e4be1`, updated DISCUSSION T16 with the two fixes and exact checks, and asked Claude to re-review the draft PR. T16 remains open; no Office feature was merged into hub or main.
+
+### 2026-10-29 — integration — Merge reviewed Office guard PR #14 and resolve T16
+
+- Verified Claude's `agree` in DISCUSSION on hub `4c8d657` and exact PR #14 head `a6a10fb` with GitHub check, twin and Gazebo jobs passing. Claimed the HANDOFF lock at `8f87d41`.
+- Merged PR #14 with `--no-ff` into `integration-hub` at `961b92d` and pushed. Focused Office Node tests passed 12/12, `python scripts/check.py` passed 169/169, and first-parent merge diff whitespace check passed.
+- Recorded T16 resolved in DISCUSSION and released the HANDOFF lock. PR #13 remains separate at `327b07b` pending its exact-head CI; no main merge or dashboard publication.
+
+### 2026-10-29 — thesis-desk — Secure the active Office preview after T16 review
+
+- Brought the tested T16 fix branch into isolated Office feature branch `codex/thesis-desk-office-active-work` so the active `127.0.0.1:8769` preview can use the same Host/Origin/JSON guard. Preserved both append-only log histories and the latest T15/T16 hub notes. The Office seat/meeting POSTs now send JSON, which the new guard requires; the older route-specific Origin check was removed in favor of the common guard.
+- Added a browser-controller regression for JSON seat and meeting POSTs. Focused Office Node suites passed 20/20; `python scripts/check.py` passed 169/169 with writable TEMP/TMP, and JavaScript syntax plus diff checks passed. The preview will be restarted only after this merge commit is complete; no model job was started during this verification.
+
+### 2026-10-29 — thesis-desk — Clarify the Office seat-check checkout before integration
+
+- Claude agreed with T16 on hub `4c8d657` and confirmed PR #13 head `d6ed026` passed focused Node 20/20 and `scripts/check.py` 169/169. Follow-up on `codex/thesis-desk-office-active-work`: README now says explicitly that seat checks run in the user's own working checkout containing `server.mjs` (`repoRoot`), not an isolated clone; uncommitted files there can affect the checks. The separate automatic feature queue creates clones.
+- No new model, sweep, robot command or dashboard publication was used for this documentation correction. PR #13 remains a draft pending this commit's CI and hub integration.
+
+### 2026-10-29 — integration — Merge reviewed Office controls PR #13
+
+- Exact PR #13 head `327b07b` passed GitHub check, twin and Gazebo jobs. Updated its PR description with the current head and README clarification that seat checks run in the user's own checkout, while the automatic queue uses isolated clones.
+- Claimed the hub lock at `33bcd43`, merged PR #13 with `--no-ff` at `ab24dd6`, and preserved both append-only log histories in the sole conflict. Merged Office Node suites passed 20/20, `python scripts/check.py` passed 169/169 with writable TEMP/TMP, and merge diff whitespace check passed.
+- Updated DISCUSSION and HANDOFF to record Office controls integrated and T16 resolved, then released the lock. No main merge, dashboard publication, paid API call, sweep or robot command.
+
+### 2026-10-30 — integration — Request Claude cross-review of pending draft PRs
+
+- Checked `integration-hub` `5c72c4d` and clean lock, then GitHub exact heads and CI for draft PRs #9–#12; all check, twin and Gazebo jobs passed, and no review responses were recorded. The Office queue dry run selected no assignments.
+- Claimed the integration lock at `7941e6a` and added one DISCUSSION review request, prioritizing PR #12. No feature branch, main, dashboard artifact or model job was changed.
+- Released the lock after logging the request. Follow-up: await Claude's review when its included usage permits; resolve feedback and conflicts in Codex-owned branches before integration.
+
+### 2026-10-30 — integration — T18 change request after offline cross-review
+
+- Reviewed `ad11ba9` plus `ef6054c` on `integration-hub` `a72c0e3`. `python scripts/check.py` passed 198/198; recounted 210 JSON evidence rows (98/100 baseline, 105/110 final, zero contacts). Docker and ROS 2 are unavailable on this Windows host, so twin and Gazebo were not rerun.
+- A callback-level probe showed fused commands `(0.0, -0.8)` both without any scan and with a close post that capped translation at zero. The regular fused and low-confidence HOLD paths retain the turn; the re-check-only zero-turn fix does not cover them.
+- Found the new `/scan` subscription requests default reliable QoS while the robot's existing LiDAR consumers use BEST_EFFORT sensor-data QoS. The reliable twin publisher masks this hardware compatibility issue. Claimed the hub lock at `08d2eba`, requested Claude fix both items in DISCUSSION, and held hub → main/robot-day review pending recheck. No Claude branch, model job, hardware or main changed.
+
+### 2026-10-30 — integration — Re-review T18 scan-turn fixes
+
+- On `integration-hub` `ea9e587`, reran `python scripts/check.py`: 206 tests passed. Inspected the controller and focused tests; the original no-scan turn and reliable-QoS findings are fixed, as are the near-spin, lowered-resend and avoid speed-floor follow-ups.
+- Reproduced a new scan-triggered gap with production callback stubs: a pure turn `(0.0, -0.8)` and a near spin `(0.06, -0.8)` continue after a new post enters the spin circle, because the scan re-check ignores pure turns and rechecks near-spin angular safety only when speed decreases. No new fused message was sent. Requested Claude fix in DISCUSSION under lock `98c4f34` and held T18 before main or robot day.
+- Docker and ROS 2 are unavailable on this host; no twin, hardware, sweep, Claude branch or main change was made. The full 110-run author result remains pending.
+
+### 2026-10-30 — integration — Agree on T18 per-scan turn fix
+
+- Reviewed `c7fd2ed..7b0d8ae` in isolated `integration-hub` clone at `2ca77c2`; focused callback tests 2/2 and `python scripts/check.py` 208/208 passed. Bounded resend age remains intact by code review. The author-reported 110-run twin result was not rerun locally.
+- Claimed hub lock at `5aad21b`; recorded offline agree verdict in DISCUSSION and HANDOFF. No main merge, hardware command, sweep, paid API call or Claude branch change.
+- Released the integration-hub lock after review commit `4f77510`; T18 offline cross-review resolved.
+
+### 2026-11-01 — integration — T18 trail follow-up change requested
+
+- Claimed the `integration-hub` lock at `aa511eb` and reviewed `2ca77c2..8b2ddf8` at hub `5aa7496` in an isolated worktree. The bundled Python `scripts/check.py` passed 228/228; the system `py -3` launcher was unavailable. The committed twin JSON contains 110 unique runs, 110 passes and 0 contacts; this was the author's run, not a local twin rerun.
+- Callback probes found that `trail_tick` sends 0.12 m/s without fused messages while `v_wheels` and the dead-reckoned pose remain unchanged, and that disabling `obstacle_stop` permits 0.75 m/s toward a nearer bystander despite the new fusion occlusion/path-floor behavior. Requested a trail pose fix, a physical configuration guard, and focused callback tests in `DISCUSSION.md`.
+- No main merge, robot command, ROS twin sweep, paid API use or Claude branch edit. Claude owns the follow-up; T18 remains open for re-review.
+
+### 2026-11-01 — integration — Itemized T18 re-review and blind-corner decision
+
+- Reviewed `2ca77c2..8b2ddf8` from isolated `codex/integration/t18-obstacle-trail-review`; no code change. Re-ran bundled Python `scripts/check.py`: 228/228 passed. Verified code paths for linear obstacle cap, spin-circle checks, reverse cap and per-blocked-spell back-off duration; the target-free trail pose gap from the prior review remains.
+- Replied under T18 in `DISCUSSION.md` with a follower-speed cap proposal, a robot-day default that removes target-free translation pending odometry validation, a launch/config guard for `obstacle_stop=false`, callback test requests to Claude, and a measured-chassis spin-radius recommendation. Kept the 0.90 `blind_corner` pass rule. The user reports a second 109/110 twin run with 0 contacts and one 0.878 in-view miss; raw run 2 was not present for independent recount.
+- No robot command, main merge, paid API, sweep, or change to Claude branches. T18 remains change requested; Claude owns the next fix and focused twin rerun.
+
+### 2026-11-01 — integration — T18 re-review fixes agreed offline
+
+- Claimed integration-hub lock and reviewed `8b2ddf8..dd22f0a` from isolated `codex/integration/t18-obstacle-trail-review`. Verified the wheel-speed update, follower speed cap, zero default hold, shared obstacle-stop launch argument, fusion fallback, preflight and callback regressions. Bundled Python `scripts/check.py` passed 236/236; no ROS/Gazebo or robot run.
+- Recounted committed raw twin data: old-code repeat 109/110 with 0 contacts, new-code run 105/110 with 0 contacts and `blind_corner` 0/5. Replied agree for offline code cross-review in DISCUSSION, while retaining the performance failure and requiring actual launch-parameter, chassis and timing checks before robot day or main.
+- No robot command, main merge, long sweep, paid API, or change to Claude branches.
+
+### 2026-11-01 — integration — T18 regression proof and robot-day settings clarified
+
+- On `codex/integration/t18-obstacle-trail-review`, nine focused tests passed on fixed hub code. In a disposable worktree at old `8b2ddf8`, copied current tests exposed five failures and one missing-function error across the pose, speed, default hold, fusion fallback, launch and preflight fixes. Three new trail callback tests also passed on old code: they are regression guards; in-memory mutations removing `turn_allowed` or scan re-check made the relevant tests fail. Removed the disposable worktree without changing tracked code.
+- Clarified in DISCUSSION that the standalone fusion fallback and shared launch setting are enough for offline agreement, with a required manual check of actual `obstacle_stop` on both nodes and trail settings on the controller before any robot-day validation. Updated HANDOFF's parameter checklist accordingly. Kept `blind_corner` 0/5 as a performance failure; no main merge, robot command or twin sweep.
+
+### 2026-11-03 — integration — T18 robot-day hardening review
+
+- Reviewed `299ac47..ada4077` on `codex/integration/t18-robot-day-hardening`; claimed the integration-hub lock at `535dc83`. Checked node/launch names, preflight failure handling, defaults, and raw robot-day twin rows. Recounted 106/110, 0 contacts, `blind_corner` 1/5.
+- `scripts/check.py` initially errored because the sandbox's default TEMP directory was not writable; reran with TEMP/TMP in the isolated workspace and passed 238/238. Mocked missing `ros2`, missing node and timeout: `ros2_param_get` returned `None`. Direct probes showed `trail_hold_s=nan` and a negative value both return PASS; running `avoid_trail=true` only WARNs.
+- Replied under T18 in DISCUSSION: agree with the offline default and twin, change requested before using `preflight.py --live` as a robot-day readiness gate. Requested FAIL for running trail on or nonfinite/nonzero hold, plus explicit checks of the remaining motion parameters and real LiDAR/chassis/stop timing. No code change, new twin sweep, main merge or robot operation.
+
+### 2026-11-03 — integration — T18 preflight gate re-review agreed
+
+- Reviewed `ada4077..3874129` from `codex/integration/t18-preflight-gate-review`, then claimed the integration-hub lock at `bb81b49`. Verified `avoid_trail=true` and nonfinite/nonzero `trail_hold_s` now FAIL, motion values are read from the actual controller/bridge ROS names, and the HANDOFF 0.5 m/s example matches a launch with `max_speed_mps:=0.5`.
+- Re-ran `scripts/check.py`: 239/239 passed, and `tests.test_preflight`: 8/8 passed with TEMP/TMP in the isolated workspace. Ran `preflight.py --live` offline without ROS Python packages: labelled FAIL, exit 1, no `ready`. No robot/ROS graph or new twin run.
+- Replied agree under T18 in DISCUSSION and updated HANDOFF: software preflight change request resolved, physical geometry/LiDAR/stop/bridge checks still outstanding. No code edit, main merge or robot operation.
+
+### 2026-11-05 — integration — T19 grib and field-day plan review
+
+- Reviewed T19 on `codex/integration/t19-grib-review`, `claude/robot/grib-local-grid` `3f3ae4a` in a clean disposable worktree, and the hub field cheat sheet. Claimed integration-hub lock at `29caa83`. Ran `scripts/check.py`: 258/258 on grib, 239/239 on hub; 19 focused grid tests passed. Recounted 50 unique twin rows: off 21/25, on 20/25, zero contacts. Removed the disposable worktree after checking it was clean and inside the isolated workspace.
+- Replied under T19: agree with keeping grib as an unmerged negative experiment; prioritize field evidence and then encoder `/odom` over junction maps or outdoor SLAM. Found that the cheat sheet orders ground `speed_check.py` before the agreed live preflight gate, and permits spinning with less than its stated 5 cm chassis margin. Requested a revised sequence and measured spin radius before ground following/corner trials. No code change, robot/ROS operation, main merge or new twin sweep.
+
+### 2026-11-05 — integration — T19 cheat-sheet re-check agreed
+
+- Fast-forwarded the isolated `integration-hub` clone to `c7bf19e`, claimed the HANDOFF lock at `ec2e5e3`, and reviewed Claude's answer and `d8ddf89` cheat-sheet diff against the preflight, launch, bridge and speed-check code. Confirmed the lifted-wheel live gate precedes ground calibration; the bridge runs alone; live preflight repeats after wheel-radius correction; and stationary LiDAR checks precede moving tests. The sweep + 0.05 m ≤ 0.40 m gate now stops turns, corners and following when the chassis is too large.
+- `py -3 scripts/check.py` could not find Python. `python scripts/check.py` first hit the sandbox's unwritable default TEMP directory; rerun with TEMP/TMP under the isolated workspace passed 239/239. No code or twin change, ROS graph or robot operation.
+- Replied `agree` in T19, marked it resolved and released the lock. Physical geometry, LiDAR, ground stop timing and live parameter checks remain for the user on the robot; no main merge or robot operation was authorized.

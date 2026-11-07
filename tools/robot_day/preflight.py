@@ -2,13 +2,15 @@
 """Check the robot is ready before a run: files, ports, disk, and (with --live) every topic's rate.
 
     python3 tools/robot_day/preflight.py                  # static checks only, no ROS needed
-    python3 tools/robot_day/preflight.py --live           # also listen to the running pipeline for 5 s
+    python3 tools/robot_day/preflight.py --live           # also listen to the running pipeline for 5 s and
+                                                          # read back the running obstacle parameters
 
 Start the pipeline first for --live (ros2 launch ros2_yolo_ws/launch/follow_bringup.launch.py).
 Each line is PASS, WARN or FAIL; the exit code is 1 if anything failed.
 """
 
 import argparse
+import math
 import os
 import re
 import shutil
@@ -75,6 +77,98 @@ def check_speed_params(speed_mode, wheel_radius, max_speed, max_accel):
         return result("WARN", "bridge parameters",
                       f"max_speed_mps {max_speed}: the protocol starts at 0.5 until speed_check.py has passed")
     return result("PASS", "bridge parameters", f"{speed_mode}, r={wheel_radius} m, {max_speed} m/s")
+
+
+def check_obstacle_params(obstacle_stop, avoid_trail, trail_hold_s):
+    """The obstacle settings robot day needs (T18 re-review, Codex 2026-11-01 09:52, items 3-4).
+
+    The LiDAR stop must be on: sync_fusion's occlusion range and give-way floor leave the near person to it.
+    The trail drives on dead reckoning, so it stays off until checked against the wheels, and never drives
+    without target messages.
+    """
+    if not obstacle_stop:
+        return result("FAIL", "obstacle parameters", "obstacle_stop must be true on the robot")
+    if not (math.isfinite(trail_hold_s) and trail_hold_s == 0.0):
+        return result("FAIL", "obstacle parameters", f"trail_hold_s must be exactly 0, not {trail_hold_s}")
+    if avoid_trail:
+        # a FAIL, not a warning: the robot-day gate never says ready with the experimental trail on (T18, Codex
+        # 2026-11-03 02:15)
+        return result("FAIL", "obstacle parameters", "avoid_trail must be false on the robot")
+    return result("PASS", "obstacle parameters", "obstacle_stop on, avoid_trail off, no target-free driving")
+
+
+# the running nodes' parameters --live reads back (T18, Codex 2026-11-01 12:49): the flags above describe what the
+# operator meant; these are what the nodes actually run with
+LIVE_PARAMS = (("/follow_stop_node", "obstacle_stop"), ("/sync_fusion_node", "obstacle_stop"),
+               ("/follow_stop_node", "avoid_trail"), ("/follow_stop_node", "trail_hold_s"))
+PARAM_VALUE_RE = re.compile(r"value is:\s*(\S+)")
+
+
+def param_value(text):
+    """The value from `ros2 param get` output ("Boolean value is: True"), as bool, float or str; None if absent."""
+    m = PARAM_VALUE_RE.search(text or "")
+    if not m:
+        return None
+    v = m.group(1)
+    if v in ("True", "False"):
+        return v == "True"
+    try:
+        return float(v)
+    except ValueError:
+        return v
+
+
+def check_live_params(get):
+    """FAIL unless every running node reports the robot-day obstacle settings. get(node, name) -> value or None."""
+    vals = {(n, k): get(n, k) for n, k in LIVE_PARAMS}
+    missing = [f"{n} {k}" for (n, k), v in vals.items() if v is None]
+    if missing:
+        return result("FAIL", "running parameters", "not readable: " + ", ".join(missing))
+    if vals[("/follow_stop_node", "obstacle_stop")] is not True or vals[("/sync_fusion_node", "obstacle_stop")] is not True:
+        return result("FAIL", "running parameters", "obstacle_stop must be true on follow_stop_node and sync_fusion_node")
+    hold = vals[("/follow_stop_node", "trail_hold_s")]
+    # exactly 0 and finite: nan made trail_tick's `quiet > trail_hold` false, so the trail never timed out, and a
+    # negative or text value is no setting at all (T18, Codex 2026-11-03 02:15)
+    if not (isinstance(hold, float) and math.isfinite(hold) and hold == 0.0):
+        return result("FAIL", "running parameters", f"trail_hold_s must be exactly 0, not {hold}")
+    if vals[("/follow_stop_node", "avoid_trail")] is not False:
+        return result("FAIL", "running parameters", "avoid_trail must be false on the robot")
+    return result("PASS", "running parameters", "obstacle_stop on (both nodes), avoid_trail off, trail_hold_s 0")
+
+
+# the rest of the motion configuration, read back and compared with the documented robot-day values (T18, Codex
+# 2026-11-03 02:15). The expected values come from the command line, so measured values (a fitted spin radius,
+# a lower speed cap) can be passed in; the defaults are the documented ones.
+MOTION_PARAMS = (("/follow_stop_node", "obstacle_stop_m"), ("/follow_stop_node", "spin_clear_radius_m"),
+                 ("/follow_stop_node", "max_decel"), ("/follow_stop_node", "recheck_max_s"),
+                 ("/zlac_drive_bridge", "speed_mode"), ("/zlac_drive_bridge", "max_speed_mps"))
+
+
+def check_motion_params(get, expected):
+    """FAIL unless each running motion value is readable and equals the expected one. expected: {(node, name): value}."""
+    vals = {key: get(*key) for key in MOTION_PARAMS}
+    missing = [f"{n} {k}" for (n, k), v in vals.items() if v is None]
+    if missing:
+        return result("FAIL", "running motion parameters", "not readable: " + ", ".join(missing))
+    wrong = []
+    for key, want in expected.items():
+        got = vals[key]
+        same = (isinstance(got, float) and isinstance(want, float) and math.isfinite(got)
+                and abs(got - want) <= 1e-6) if isinstance(want, float) else got == want
+        if not same:
+            wrong.append(f"{key[0]} {key[1]} is {got}, expected {want}")
+    if wrong:
+        return result("FAIL", "running motion parameters", "; ".join(wrong))
+    return result("PASS", "running motion parameters",
+                  ", ".join(f"{k}={vals[(n, k)]}" for n, k in MOTION_PARAMS))
+
+
+def ros2_param_get(node, name, timeout=10.0):
+    try:
+        out = subprocess.run(["ros2", "param", "get", node, name], capture_output=True, text=True, timeout=timeout)
+    except (OSError, subprocess.TimeoutExpired):
+        return None
+    return param_value(out.stdout) if out.returncode == 0 else None
 
 
 def check_calibration(path=ROOT / "config" / "motor_wheel_calibration.md"):
@@ -174,13 +268,34 @@ def main(argv=None):
     ap.add_argument("--wheel-radius", type=float, default=0.085)
     ap.add_argument("--max-speed", type=float, default=1.4)
     ap.add_argument("--max-accel", type=float, default=1.0)
+    ap.add_argument("--obstacle-stop", default="true", help="as passed to the launch file (obstacle_stop:=...)")
+    ap.add_argument("--avoid-trail", default="false", help="as passed to the launch file (avoid_trail:=...)")
+    ap.add_argument("--trail-hold", type=float, default=0.0, help="follow_stop trail_hold_s, if set")
+    # what --live expects the running nodes to report (documented values; pass measured ones when they exist)
+    ap.add_argument("--expect-obstacle-stop-m", type=float, default=0.45)
+    ap.add_argument("--expect-spin-clear-radius-m", type=float, default=0.40)
+    ap.add_argument("--expect-max-decel", type=float, default=0.8)
+    ap.add_argument("--expect-recheck-max-s", type=float, default=1.0)
     args = ap.parse_args(argv)
 
     checks = [check_git(), check_model(args.model), check_port(args.port), check_disk(args.output_root),
               check_speed_params(args.speed_mode, args.wheel_radius, args.max_speed, args.max_accel),
+              check_obstacle_params(args.obstacle_stop.lower() in ("true", "1", "yes"),
+                                    args.avoid_trail.lower() in ("true", "1", "yes"), args.trail_hold),
               check_calibration()]
     if args.live:
-        checks += live_checks(args.seconds)
+        try:
+            checks += live_checks(args.seconds)
+        except ImportError as e:  # no ROS Python packages: a labelled FAIL, not a traceback
+            checks.append(result("FAIL", "ROS", f"cannot import the ROS Python packages ({e})"))
+        checks.append(check_live_params(ros2_param_get))
+        checks.append(check_motion_params(ros2_param_get, {
+            ("/follow_stop_node", "obstacle_stop_m"): args.expect_obstacle_stop_m,
+            ("/follow_stop_node", "spin_clear_radius_m"): args.expect_spin_clear_radius_m,
+            ("/follow_stop_node", "max_decel"): args.expect_max_decel,
+            ("/follow_stop_node", "recheck_max_s"): args.expect_recheck_max_s,
+            ("/zlac_drive_bridge", "speed_mode"): args.speed_mode,
+            ("/zlac_drive_bridge", "max_speed_mps"): args.max_speed}))
     for level, what, detail in checks:
         print(f"[{level}] {what}: {detail}")
     failed = sum(1 for c in checks if c[0] == "FAIL")

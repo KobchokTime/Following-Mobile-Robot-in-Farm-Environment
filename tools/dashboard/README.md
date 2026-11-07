@@ -8,9 +8,12 @@
 
 | Path | What it is |
 |---|---|
-| `index.html` | The page (store document `files/index.html`, version 24 when copied, 2026-10-28). One file holds every tab. |
+| `index.html` | The page (store document `files/index.html`, version 46 since the grib tab, 2026-11-05). One file holds every tab. |
+| `grib_tab_inline.js`, `grib_text.json` | The grib experiment tab (2026-11-05). The page document is at the 256 KiB store limit, so the tab code is inlined minified (`npx terser@5.31.0 grib_tab_inline.js -c -m`, placed before `const PANELS`) and its static HTML is the dataset `grib_text`. A `<script src>` or `fetch` + `new Function` from a blob did not run in the dashboard. |
 | `datasets.json` | A snapshot of the store's `datasets/<id>` records: title, description, source (blob URL), `updated`. |
 | `live/gen_live.py` | Builds the five live-monitor datasets from twin run folders. |
+| `live/gen_obstacle.py` | Builds `obstacle_runs` and `obstacle_paths` (the LiDAR-map tab's off/on evidence) from run folders named `<scenario>_<off|on>_s<seed>`. |
+| `live/gen_replay.py` | Builds `replay_runs` and `replay_paths` (before vs now replays on the follow, target-gate and colour tabs) from two `run_baseline.sh` folders. |
 | `live/registry.json` | The experiments the live tab shows, and the runs each one expects. |
 
 ## Who can change what
@@ -61,7 +64,7 @@ All times are UTC ISO 8601 (`YYYY-MM-DDTHH:MM:SSZ`). The page shows them in Thai
 | `dir` | str | Run folder, relative to `--runs-root` |
 | `started_utc` | str | When the experiment started (used for the ETA) |
 | `order` | int | Higher numbers are newer; the page lists them newest first |
-| `live` | bool | At most one experiment is `true`. Its tracks go in `live_tracks` at 2 Hz; the others go in `past_tracks` at 1 Hz |
+| `live` | bool | At most one experiment is `true`. Its tracks go in `live_tracks` at 2 Hz; the others go in `past_tracks` at 1 Hz (oldest thinned to 0.5 Hz if needed). Keep the newest experiment `true` after it finishes: the page shows an empty `live_tracks` as a load failure |
 | `purpose`, `compare`, `result` | str | Thai text for the "การทดลองนี้ทดสอบอะไร" card; `result` is empty until written |
 | `stopped` | bool, optional | Marks an abandoned experiment |
 | `runs` | list | `{tag, scenario, seed, variant, light}`: `tag` is the run folder; `variant` and `light` (`ปกติ` / `สมจริง`) group the grid |
@@ -104,7 +107,9 @@ All times are UTC ISO 8601 (`YYYY-MM-DDTHH:MM:SSZ`). The page shows them in Thai
 
 ### `live_tracks.json` and `past_tracks.json`: positions for the replay
 
-- **One row per sample.** `live_tracks` is at 2 Hz; `past_tracks` is at 1 Hz.
+- **One row per sample.** `live_tracks` is at 2 Hz; `past_tracks` is at 1 Hz, except that `gen_live.py`
+  thins the oldest experiments to 0.5 Hz, one at a time, until `past_tracks` fits 6.5 MB
+  (`PAST_TRACKS_BUDGET`).
 - **Fields:** `run` (as above), `t` (s), and robot pose `rx`, `ry` (m, world frame), `ryaw` (deg) and `v`
   (m/s).
 - **Target:** `tx`, `ty`, `gap` (m, range − 0.2) and `tb` (deg). All four are null if the target is not in
@@ -131,3 +136,14 @@ All times are UTC ISO 8601 (`YYYY-MM-DDTHH:MM:SSZ`). The page shows them in Thai
   - move each tab's drawing code into `tabs/<tab>.js`;
   - the dashboard type loads `<script src>` from other `files/<name>` documents;
   - then each tab can have its own owner and branch.
+
+## Current code, every scenario (`current_runs`)
+
+- `experiments/sim/scripts/run_baseline.sh <out> <image> 0 4` runs every twin scenario with realism on one image.
+- `tools/dashboard/live/gen_current.py --runs <out> --code <hub commit> --out current_runs.json` makes one row per
+  finished run: `run`, `scenario`, `group` (solo, identity, colour), `seed`, `realism`, `code`, `pass`, `contact`,
+  `final_gap_m`, `visible_share`, `min_person_range_m`, `published_other`, `finished_utc`.
+- The page shows it in the "ทุกฉาก ด้วยโค้ดปัจจุบัน" cards (ready, solo, identity and colour tabs), the first KPI
+  and the takeaway line. Dated experiments keep their own cards, labelled with their date; the replay, filter
+  and arena tabs carry a history banner.
+- Rebuild it from the hub commit the baseline ran on, whenever that commit changes the gate or the controller.

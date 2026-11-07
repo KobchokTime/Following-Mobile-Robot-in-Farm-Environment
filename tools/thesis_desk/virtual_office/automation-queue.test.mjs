@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { changedPathsAllowed, checksPassed, run, selectJobs } from "./automation-queue.mjs";
+import { changedPathsAllowed, changesMatchMode, checksPassed, run, selectJobs } from "./automation-queue.mjs";
 
 test("limits assignments to three independent lanes and active capacity", () => {
   const jobs = [
@@ -22,6 +22,15 @@ test("rejects edits outside the assigned scope", () => {
   assert.equal(changedPathsAllowed(["tests/../src/controller.py"], ["tests/"]), false);
   assert.equal(changedPathsAllowed(["C:\\robot\\motor.py"], ["tests/"]), false);
   assert.equal(changedPathsAllowed(["tests_evil/example.py"], ["tests/"]), false);
+});
+
+test("read-only assignments cannot become review-ready with edits in allowed paths", () => {
+  const changed = ["tests/allowed_test.py"];
+  assert.equal(changedPathsAllowed(changed, ["tests/"]), true);
+  assert.equal(changesMatchMode("read-only", changed), false);
+  assert.equal(changesMatchMode("read-only", []), true);
+  assert.equal(changesMatchMode("workspace-write", changed), true);
+  assert.equal(changesMatchMode("workspace-write", []), false);
 });
 
 test("a required focused check failure blocks review-ready", () => {

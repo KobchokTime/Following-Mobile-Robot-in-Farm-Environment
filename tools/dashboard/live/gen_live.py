@@ -128,6 +128,29 @@ def track_points(key, state_path):
     return pts
 
 
+PAST_TRACKS_BUDGET = 6_500_000  # bytes; the dashboard refuses files over 8 MB
+
+
+def fit_past_tracks(past, budget=PAST_TRACKS_BUDGET):
+    """Rows for past_tracks: 1 Hz (every other 2 Hz point), thinned to 0.5 Hz from the oldest experiment
+    up until the file fits the budget. past: (order, [points of each run]) per finished experiment."""
+    step = {i: 2 for i in range(len(past))}
+
+    def rows():
+        return [p for i, (_, runs_pts) in enumerate(past) for pts in runs_pts for p in pts[::step[i]]]
+
+    def size(rs):
+        return len(json.dumps(rs, separators=(',', ':')).encode('utf-8'))
+
+    out = rows()
+    for i in sorted(range(len(past)), key=lambda k: past[k][0]):  # oldest first
+        if size(out) <= budget:
+            break
+        step[i] = 4
+        out = rows()
+    return out
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument('--registry', default=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'registry.json'))
@@ -148,19 +171,20 @@ def main(argv=None):
 
     cache_p = os.path.join(a.out, 'tracks_cache.json')
     cache = json.load(open(cache_p, encoding='utf-8')) if os.path.exists(cache_p) else {}
-    tracks, live_tracks = [], []
+    past, live_tracks = [], []
     for e in reg:
+        runs_pts = []
         for r in e['runs']:
             key = f"{e['id']}|{r['tag']}|{r['scenario']}"
             d = os.path.join(a.runs_root, e['dir'], r['tag'], f"{r['scenario']}_mps")
             if key not in cache and os.path.exists(os.path.join(d, 'score.json')):
                 cache[key] = track_points(key, os.path.join(d, 'state.jsonl'))
-            pts = cache.get(key, [])
-            # finished experiments at 1 Hz (every other point) to stay under the dashboard's 8 MB file limit
-            if e.get('live'):
-                live_tracks.extend(pts)
-            else:
-                tracks.extend(pts[::2])
+            runs_pts.append(cache.get(key, []))
+        if e.get('live'):
+            live_tracks.extend(p for pts in runs_pts for p in pts)
+        else:
+            past.append((e.get('order', 0), runs_pts))
+    tracks = fit_past_tracks(past)
     json.dump(cache, open(cache_p, 'w', encoding='utf-8'))
     json.dump(tracks, open(os.path.join(a.out, 'past_tracks.json'), 'w', encoding='utf-8'), separators=(',', ':'))
     json.dump(live_tracks, open(os.path.join(a.out, 'live_tracks.json'), 'w', encoding='utf-8'), separators=(',', ':'))

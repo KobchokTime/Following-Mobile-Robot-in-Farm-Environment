@@ -37,6 +37,10 @@ export function checksPassed(checks) {
   return checks.every((check) => check.code === 0 && !check.timedOut);
 }
 
+export function changesMatchMode(mode, changed) {
+  return mode === "read-only" ? changed.length === 0 : changed.length > 0;
+}
+
 function validateJob(job) {
   if (!/^[a-z0-9][a-z0-9-]{2,50}$/.test(job.id) ||
       !/^[a-z0-9][a-z0-9-]{2,50}$/.test(job.lane) ||
@@ -185,7 +189,7 @@ async function finish(jobId) {
     const headCommit = await git(["rev-parse", "HEAD"], checkout);
     const scopeValid = changedPathsAllowed(changed, job.allowedPaths);
     const headUnchanged = headCommit === assignment.baseCommit;
-    const hasWork = job.mode === "read-only" || changed.length > 0;
+    const modeValid = changesMatchMode(job.mode, changed);
     const tempDir = join(checkout, ".office-tmp");
     const env = { ...process.env, TEMP: tempDir, TMP: tempDir, TMPDIR: tempDir };
     const check = await run(process.env.OFFICE_PYTHON || "python", ["scripts/check.py"], {
@@ -201,19 +205,20 @@ async function finish(jobId) {
       focusedChecks.push({ path, code: result.code, timedOut: result.timedOut,
         spawnError: result.spawnError, log });
     }
-    const ok = scopeValid && headUnchanged && hasWork && check.code === 0 && !check.timedOut &&
+    const ok = scopeValid && headUnchanged && modeValid && check.code === 0 && !check.timedOut &&
       checksPassed(focusedChecks);
     const focusedFailure = focusedChecks.find((item) => item.code !== 0 || item.timedOut);
     const result = {
       jobId, lane: job.lane, agent: job.agent, state: ok ? "review-ready" : "failed",
       branch: assignment.branch, baseCommit: assignment.baseCommit, headCommit, checkout, changed,
-      scopeValid, headUnchanged, checkExit: check.code, checkTimedOut: check.timedOut,
+      scopeValid, headUnchanged, modeValid, checkExit: check.code, checkTimedOut: check.timedOut,
       checkSpawnError: check.spawnError, checkLog,
       focusedChecks,
       summary: ok ? "มีงานและเช็กออฟไลน์ผ่าน รอคนรีวิว" :
         !scopeValid ? "ไฟล์ที่แก้อยู่นอกขอบเขตงาน" :
         !headUnchanged ? "HEAD ของ clone เปลี่ยนจากฐานที่มอบหมาย" :
-        !hasWork ? "งานเขียนไม่มีไฟล์เปลี่ยน" :
+        !modeValid ? (job.mode === "read-only" ? "งานอ่านอย่างเดียวมีไฟล์เปลี่ยน" :
+          "งานเขียนไม่มีไฟล์เปลี่ยน") :
         check.spawnError ? `Python check เริ่มไม่ได้ (${check.spawnError})` :
         check.code !== 0 || check.timedOut ? `Python check ไม่ผ่าน (exit ${check.code})` :
         focusedFailure.spawnError ? `Node test เริ่มไม่ได้: ${focusedFailure.path} (${focusedFailure.spawnError})` :

@@ -102,9 +102,15 @@ def _load_controller():
     std_msgs_msg = types.ModuleType("std_msgs.msg")
     std_msgs_msg.Float32MultiArray = _Float32MultiArray
     std_msgs.msg = std_msgs_msg
+    sensor_msgs = types.ModuleType("sensor_msgs")
+    sensor_msgs_msg = types.ModuleType("sensor_msgs.msg")
+    sensor_msgs_msg.LaserScan = object
+    sensor_msgs.msg = sensor_msgs_msg
     modules = {
         "rclpy": rclpy,
         "rclpy.node": rclpy_node,
+        "sensor_msgs": sensor_msgs,
+        "sensor_msgs.msg": sensor_msgs_msg,
         "geometry_msgs": geometry_msgs,
         "geometry_msgs.msg": geometry_msgs_msg,
         "std_msgs": std_msgs,
