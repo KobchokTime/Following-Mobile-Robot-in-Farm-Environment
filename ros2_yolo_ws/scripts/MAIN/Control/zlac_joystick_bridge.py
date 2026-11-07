@@ -30,7 +30,7 @@ TURN_DIR = 1.0         # set -1.0 if a positive angular.z spins the robot clockw
 # capped at MAX_SPEED_MPS per wheel and ramped at MAX_ACCEL_MPS2. "legacy": the old mapping
 # (40 RPM per unit of linear.x, capped at 40 RPM, about 0.36 m/s with a 0.085 m wheel).
 SPEED_MODE = "mps"
-WHEEL_RADIUS_M = 0.085   # not measured on this chassis yet; measure on robot day
+WHEEL_RADIUS_M = 0.0757  # LiDAR round-trip calibration 2026-11-07: actual 1.424m vs expected 1.200m
 MAX_SPEED_MPS = 1.4      # brisk walking pace
 MAX_ACCEL_MPS2 = 1.0     # per wheel; the ramp also applies when slowing down
 UPDATE_HZ = 10.0

@@ -70,3 +70,23 @@ Performed with wheels lifted, `zlac_joystick_bridge.py` running.
 `turn_dir = 1` (default) is correct — no override needed.
 
 Change applied: `FORWARD_DIR = 1.0` to `FORWARD_DIR = -1.0` in `zlac_joystick_bridge.py`.
+
+## LiDAR wheel-radius calibration — 2026-11-07 (T-cal)
+
+Round-trip calibration using YDLidar TminiPro `/scan` wall distance at 0°.
+Script: `/home/yakgreen001/lidar_speed_cal.py` on robot.
+Command: `speed = 0.4 m/s`, `duration = 3.0 s` backward then forward.
+
+| Measurement | Value |
+| --- | --- |
+| Wall at 0° before backward | 2.654 m |
+| Wall at 0° after backward | 1.230 m |
+| Actual distance (LiDAR delta) | 1.424 m |
+| Expected distance (cmd × time) | 1.200 m |
+| Ratio actual/expected | 1.1867 |
+| Old `WHEEL_RADIUS_M` | 0.0638 m (tape measure, 2026-11-07 T-speed) |
+| **New `WHEEL_RADIUS_M`** | **0.0757 m** (LiDAR calibrated) |
+| Wall at 0° after return | 2.740 m (error 8.6 cm) |
+
+**Result:** `WHEEL_RADIUS_M = 0.0757 m` applied to `zlac_joystick_bridge.py`.
+Return-trip error 8.6 cm / 2.4 m round-trip = 3.6% — acceptable for odometry.
