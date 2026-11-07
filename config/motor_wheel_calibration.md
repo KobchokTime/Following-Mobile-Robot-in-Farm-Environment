@@ -90,3 +90,18 @@ Command: `speed = 0.4 m/s`, `duration = 3.0 s` backward then forward.
 
 **Result:** `WHEEL_RADIUS_M = 0.0757 m` applied to `zlac_joystick_bridge.py`.
 Return-trip error 8.6 cm / 2.4 m round-trip = 3.6% — acceptable for odometry.
+
+## Block B raised-wheel motor verification — 2026-11-07 (site01)
+
+Params: `speed_mode=mps`, `max_speed_mps=0.5`, `wheel_radius_m=0.085`, `turn_dir=1.0`, `port=/dev/ttyUSB1`.
+Wheels lifted off the ground, spotters present throughout.
+
+| Test | Result |
+| --- | --- |
+| turn_check step 1 (`linear.x=0.2`): both wheels forward | ✅ PASS |
+| turn_check step 3 (`angular.z=0.3`): right fwd / left back | ✅ PASS |
+| Stop-time (cmd_vel timeout): wheels stop after cmd halts | ✅ PASS — nearly immediate (<1 s) |
+| E-stop: wheels stop when red button pressed | ✅ PASS — immediate |
+| Ctrl+C bridge (SIGINT): wheels stop when bridge killed | ✅ PASS — immediate |
+
+All Block B safety checks passed. `turn_dir=1.0` confirmed correct.
