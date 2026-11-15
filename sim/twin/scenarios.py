@@ -84,6 +84,13 @@ IDENTITY_SCENARIOS: Dict[str, dict] = {
 # One person only, at realistic walking speeds and with the moves a farm worker makes. The earlier
 # scenarios walk at 0.3 m/s; people usually walk at 1.0-1.4 m/s.
 SOLO_SCENARIOS: Dict[str, dict] = {
+    "fast_side_step_left": {
+        "doc": "Target quickly steps left, then continues ahead.",
+        "duration_s": 18.0,
+        "people": [("target", True, [(0, 1.0, 0.0), (3, 1.0, 0.0), (5.5, 1.8, 0.0),
+                                      (6.0, 2.0, 0.5), (7.0, 2.4, 1.4),
+                                      (11.0, 4.0, 2.2), (18.0, 6.8, 2.2)])],
+    },
     "walk_0p6": {
         "doc": "Target walks straight at 0.6 m/s for 10 s, then stops.",
         "duration_s": 25.0,

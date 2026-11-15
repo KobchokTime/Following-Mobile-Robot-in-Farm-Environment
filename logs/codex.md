@@ -527,3 +527,21 @@ Earlier history: `history-2026-10-16.md`.
 
 - GitHub PR #18 exact head `8501e38` passed all three jobs: `check`, `twin`, and `gazebo`. Under the HANDOFF lock claimed at `bac67d5`, merged the focused PR with `--no-ff` into `integration-hub` at `446122b`; GitHub reported PR #18 merged. Resolved only the append-only Codex log tail conflict, retaining both histories.
 - `python scripts/check.py` passed 246/246 on the merged hub and `git diff --check` passed. T21 asks Claude for independent cross-review when ordinary usage returns. The robot's dirty checkout was not edited, no motor bridge or robot command was used, and `main` remains unchanged. Released the HANDOFF lock.
+### 2026-11-15 ‚Äî robot ‚Äî Fail closed on LiDAR edge conflict (T22)
+
+- Confirmed T22 path in `ros2_yolo_ws/scripts/Image/sync_fusion_node.py`: `assist_with_lidar()` and `track_with_lidar()` update `TargetGate` through `accept_lidar()`; a rejected camera box did not stop the LiDAR-only publisher. Added an opposite-side in-image conflict latch. While latched, edge-track publishing stops; it clears only after the gate accepts a camera fix, so no identity gate or stranger threshold is loosened.
+- Added drift reproducer/conflict coverage in `tests/test_target_gate.py` and no-publication coverage in `tests/test_walk_up.py`. Added repeatable replay `--param NODE:NAME:=VALUE` routing in `sim/replay/replay_bag.py` and `Processes.start_robot_nodes()`, with argument tests in `tests/test_replay_params.py`. Added `fast_side_step_left_static_cluster` in the existing twin solo scenario format.
+- `git diff --check` passed. The requested `scripts/check.py` command could not start: Windows reported `Unable to create process using '"C:\Users\Time\AppData\Local\Programs\Python\Python312\python.exe" scripts/check.py'`; direct system Python execution was also denied. No `[PASS]` check result is available. ROS bag replay and the twin were not run (ROS 2 is unavailable here); CI was not run. No robot contact, push, PR, or integration-file edit.
+- Local commit was attempted as requested but Git could not create `.git/index.lock` (`Permission denied`); no commit was created. Changes remain in the working tree on `codex/robot/t22-edge-track`.
+
+### 2026-11-15 √¢‚Ç¨‚Äù robot √¢‚Ç¨‚Äù Address T22 review feedback
+
+- Corrected the TargetGate drift fixture to acquire at 0.85 m, added the zero-degree camera conflict assertion, used `self.edge_rad` for conflict evaluation, and added a real eligible LiDAR edge-track publication case plus node-level camera rejection/accepted-fix latch coverage.
+- Renamed the twin scenario to `fast_side_step_left`: inspection confirmed it defines only the target and does not add a static object, so the prior name and description overstated the setup.
+- Tests were not run in this sandbox; Claude will run `scripts/check.py` with the venv. Changes remain uncommitted by instruction. No push, PR, robot contact, or integration-file edit.
+
+### 2026-11-15 ó qa ó Correct T22 edge-track fixtures
+
+- Updated both T22 `track_with_lidar()` fixtures to model a +30∞ last camera sighting and a predicted track beyond `edge_rad`; added explicit edge eligibility, fresh scan, 0.15ñ0.8 m cluster width, 25∞ search window, 0.5 m range tolerance, and far-filter range assertions.
+- The no-latch case now asserts that a publication occurs and maps to `cx=0` before asserting the conflict latch suppresses publication. The center-camera conflict test asserts its valid pre-latch publication, latch suppression, and clearing after an accepted camera fix.
+- Production code unchanged. Tests not run in this environment; Claude reported the existing suite result and requested fixture corrections. No robot, push, PR, or integration-file changes.

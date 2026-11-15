@@ -162,6 +162,12 @@ def parse_hist(values, bins=48):
     return [v / total for v in h] if total > 0 else None
 
 
+def camera_lidar_conflict(camera_bearing, lidar_prediction, edge_rad):
+    """An in-image camera box lies across the centre from a LiDAR prediction beyond an edge."""
+    return abs(camera_bearing) < edge_rad and abs(lidar_prediction) >= edge_rad \
+        and camera_bearing * lidar_prediction <= 0
+
+
 class TargetGate:
     """Keeps one person as the target when several are detected (Arena 3).
 
@@ -532,6 +538,9 @@ class SyncFusionNode(Node):
              'lidar_assist_speed_mps': self.assist_speed, 'occluded_gap_m': self.occl_gap}.items())))
         self.last_camera_fix = None  # time of the last camera detection accepted as the target
         self.last_camera_bearing = 0.0
+        # Once an in-image box contradicts a LiDAR-only edge prediction, do not let LiDAR
+        # keep commanding toward that edge. Resume only after the camera gate accepts a fix.
+        self.camera_lidar_conflict = False
         self.edge_rad = math.radians(self.camera_hfov_deg / 2.0 - float(self.get_parameter('lidar_edge_deg').value))
 
         # ---------- buffers ----------
@@ -669,6 +678,8 @@ class SyncFusionNode(Node):
         """
         if not (self.use_gate and self.use_lidar_track and self.gate.locked and self.last_target is not None):
             return
+        if self.camera_lidar_conflict:
+            return  # fail closed until identity is confirmed again by an accepted camera box
         now = self.now_sec()
         if self.last_camera_fix is None or now - self.last_camera_fix < self.lidar_after \
                 or now - self.last_camera_fix > self.lidar_max:
@@ -792,6 +803,9 @@ class SyncFusionNode(Node):
                                        + (f" predicted range {pr:.2f} m" if occluded else ''))
                 self.occl_logged = occluded
         if self.use_gate and not self.gate.accept(ty, bearing, dist, chroma, hist):
+            pb, _ = self.gate._predict(ty)
+            if camera_lidar_conflict(bearing, pb, self.edge_rad):
+                self.camera_lidar_conflict = True
             # another person, not the one being followed: remember them only if they are in the way
             # Only someone in the corridor and clearly nearer than the target is in the way
             if self.last_target is not None and in_path(bearing, dist, self.path_half_width) \
@@ -805,6 +819,7 @@ class SyncFusionNode(Node):
         self.recent_ranges = [(t0, r0) for t0, r0 in self.recent_ranges if ty - t0 <= 1.0] + [(ty, dist)]
         self.last_camera_fix = ty
         self.last_camera_bearing = bearing
+        self.camera_lidar_conflict = False
         if self.path_block is not None and ty - self.path_block[0] <= self.path_hold:
             dist = min(dist, max(self.path_floor, self.path_block[1] - self.path_margin))  # give way to whoever is in it
         self.publish_synced(cx, cy, dist, sector_id, best_dt)
