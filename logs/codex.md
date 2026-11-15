@@ -529,6 +529,11 @@ Earlier history: `history-2026-10-16.md`.
 - `python scripts/check.py` passed 253/253, and `git diff --check` passed. Added a separate T22 twin scenario without changing the frozen 110-run baseline. Inspected the two-bag field handoff and E6 checker. The change has not been run against either field bag or the full twin: this Windows environment lacks ROS 2 packages; WSL was denied and Docker is unavailable. Therefore the T22 wrong-turn criterion and 106/110 twin gate remain unverified.
 - This is an offline draft only. No hub lock was claimed, no PR or main merge was made, and no robot or motor command was sent. Controller, identity, and fusion changes still need safety audit and Claude cross-review before integration.
 
+### 2026-11-15 — robot — Open stacked T22 draft review
+
+- Pushed `codex/robot/t22-edge-gate` at `de5aef9` and opened draft PR #20 against `codex/robot/field-forward-review` (draft PR #19). The stacked base keeps the T22 diff focused; it must be retargeted to `integration-hub` after #19 is reviewed and merged. No `claude/*` branch was changed.
+- PR #20 is a request for CI and independent safety review, not a merge-ready result. Both field-bag replays, the 110-trial twin gate, and the T22 scenario remain unrun here because ROS 2 is unavailable. No robot or motor command, hub merge, or main merge.
+
 ### 2026-11-07 — integration — Merge camera freshness and E1 analysis into hub
 
 - GitHub PR #18 exact head `8501e38` passed all three jobs: `check`, `twin`, and `gazebo`. Under the HANDOFF lock claimed at `bac67d5`, merged the focused PR with `--no-ff` into `integration-hub` at `446122b`; GitHub reported PR #18 merged. Resolved only the append-only Codex log tail conflict, retaining both histories.
