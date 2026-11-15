@@ -534,6 +534,11 @@ Earlier history: `history-2026-10-16.md`.
 - Pushed `codex/robot/t22-edge-gate` at `de5aef9` and opened draft PR #20 against `codex/robot/field-forward-review` (draft PR #19). The stacked base keeps the T22 diff focused; it must be retargeted to `integration-hub` after #19 is reviewed and merged. No `claude/*` branch was changed.
 - PR #20 is a request for CI and independent safety review, not a merge-ready result. Both field-bag replays, the 110-trial twin gate, and the T22 scenario remain unrun here because ROS 2 is unavailable. No robot or motor command, hub merge, or main merge.
 
+### 2026-11-15 — qa — Keep T22 twin cluster off the target path
+
+- On draft PR #20's `codex/robot/t22-edge-gate`, committed `32eab3e` to place the stationary camera-hidden cluster beside, rather than across, the target's scripted path. Rechecked the separate `t22` scenario construction and `python scripts/check.py` (253/253) with TEMP/TMP inside the writable clone; `git diff --check` passed. An initial check without those TEMP/TMP variables hit Windows sandbox temp-file permissions, not a code failure. The scenario still needs a ROS twin run.
+- At the latest PR head, GitHub `check` passed; `twin` and `gazebo` were in progress. No robot command or merge.
+
 ### 2026-11-07 — integration — Merge camera freshness and E1 analysis into hub
 
 - GitHub PR #18 exact head `8501e38` passed all three jobs: `check`, `twin`, and `gazebo`. Under the HANDOFF lock claimed at `bac67d5`, merged the focused PR with `--no-ff` into `integration-hub` at `446122b`; GitHub reported PR #18 merged. Resolved only the append-only Codex log tail conflict, retaining both histories.
