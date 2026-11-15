@@ -1,0 +1,280 @@
+{
+  "e1": [],
+  "e2": [
+    {
+      "label": "lock_walkback_3p8",
+      "frames": 68,
+      "bad_stamps": 0,
+      "capture_to_detection_ms": {
+        "median": 184.3,
+        "p95": 208.6
+      },
+      "detection_to_cmd_vel_ms": {
+        "median": 14.4,
+        "p95": 164.5
+      },
+      "capture_to_cmd_vel_ms": {
+        "median": 198.6,
+        "p95": 332.5,
+        "n": 68
+      }
+    },
+    {
+      "label": "follow_first_short",
+      "frames": 152,
+      "bad_stamps": 0,
+      "capture_to_detection_ms": {
+        "median": 182.9,
+        "p95": 207.3
+      },
+      "detection_to_cmd_vel_ms": {
+        "median": 13.5,
+        "p95": 327.1
+      },
+      "capture_to_cmd_vel_ms": {
+        "median": 200.0,
+        "p95": 531.3,
+        "n": 128
+      }
+    },
+    {
+      "label": "follow_edge_td1p0",
+      "frames": 3617,
+      "bad_stamps": 0,
+      "capture_to_detection_ms": {
+        "median": 167.0,
+        "p95": 257.5
+      },
+      "detection_to_cmd_vel_ms": {
+        "median": null,
+        "p95": null
+      },
+      "capture_to_cmd_vel_ms": {
+        "median": null,
+        "p95": null,
+        "n": 0
+      }
+    },
+    {
+      "label": "follow_edge_td1p0_indoor",
+      "frames": 2656,
+      "bad_stamps": 0,
+      "capture_to_detection_ms": {
+        "median": 174.1,
+        "p95": 275.7
+      },
+      "detection_to_cmd_vel_ms": {
+        "median": null,
+        "p95": null
+      },
+      "capture_to_cmd_vel_ms": {
+        "median": null,
+        "p95": null,
+        "n": 0
+      }
+    },
+    {
+      "label": "follow_edge_td1p0_open",
+      "frames": 4006,
+      "bad_stamps": 0,
+      "capture_to_detection_ms": {
+        "median": 162.9,
+        "p95": 206.1
+      },
+      "detection_to_cmd_vel_ms": {
+        "median": null,
+        "p95": null
+      },
+      "capture_to_cmd_vel_ms": {
+        "median": null,
+        "p95": null,
+        "n": 0
+      }
+    },
+    {
+      "label": "follow_edge_td1p0_open_b",
+      "frames": 72,
+      "bad_stamps": 0,
+      "capture_to_detection_ms": {
+        "median": 157.0,
+        "p95": 230.4
+      },
+      "detection_to_cmd_vel_ms": {
+        "median": null,
+        "p95": null
+      },
+      "capture_to_cmd_vel_ms": {
+        "median": null,
+        "p95": null,
+        "n": 0
+      }
+    },
+    {
+      "label": "e6_straight_1",
+      "frames": 203,
+      "bad_stamps": 0,
+      "capture_to_detection_ms": {
+        "median": 166.0,
+        "p95": 188.4
+      },
+      "detection_to_cmd_vel_ms": {
+        "median": null,
+        "p95": null
+      },
+      "capture_to_cmd_vel_ms": {
+        "median": null,
+        "p95": null,
+        "n": 0
+      }
+    },
+    {
+      "label": "e6_straight_1",
+      "frames": 185,
+      "bad_stamps": 0,
+      "capture_to_detection_ms": {
+        "median": 160.7,
+        "p95": 185.6
+      },
+      "detection_to_cmd_vel_ms": {
+        "median": null,
+        "p95": null
+      },
+      "capture_to_cmd_vel_ms": {
+        "median": null,
+        "p95": null,
+        "n": 0
+      }
+    },
+    {
+      "label": "e6_straight_1",
+      "frames": 189,
+      "bad_stamps": 0,
+      "capture_to_detection_ms": {
+        "median": 154.4,
+        "p95": 186.0
+      },
+      "detection_to_cmd_vel_ms": {
+        "median": 23.0,
+        "p95": 23.0
+      },
+      "capture_to_cmd_vel_ms": {
+        "median": 164.7,
+        "p95": 164.7,
+        "n": 1
+      }
+    },
+    {
+      "label": "20261115-site01",
+      "frames": 4721,
+      "bad_stamps": 1,
+      "capture_to_detection_ms": {
+        "median": 147.7,
+        "p95": 196.8
+      },
+      "detection_to_cmd_vel_ms": {
+        "median": 2624.6,
+        "p95": 27465.8
+      },
+      "capture_to_cmd_vel_ms": {
+        "median": 2774.7,
+        "p95": 27615.6,
+        "n": 362
+      }
+    }
+  ],
+  "e3": [],
+  "e4": [],
+  "e4_overlap_shift": [],
+  "e6": [
+    {
+      "label": "e6_straight_1",
+      "truth": {
+        "exp": "e6",
+        "move": "straight",
+        "run": 1
+      },
+      "target_messages": 0
+    },
+    {
+      "label": "e6_straight_1",
+      "truth": {
+        "exp": "e6",
+        "move": "straight",
+        "run": 1
+      },
+      "target_messages": 0
+    },
+    {
+      "label": "e6_straight_1",
+      "truth": {
+        "exp": "e6",
+        "move": "straight",
+        "run": 1
+      },
+      "duration_s": 0.1,
+      "target_messages": 2,
+      "tracked_share": 1.0,
+      "longest_dropout_s": 0.14,
+      "median_gap_m": 0.5,
+      "p95_gap_m": 0.5,
+      "min_gap_m": 0.5,
+      "median_gap_error_m": 0.0,
+      "max_forward_cmd": -0.61
+    }
+  ],
+  "_inputs": {
+    "analyze_py": "analyze_hub2.py",
+    "bag_reader": "rosbags (pure Python) in place of rosbag2_py",
+    "recordings": [
+      {
+        "label": "lock_walkback_3p8",
+        "bag": "20261115T041011Z_lock_walkback_3p8\\recording"
+      },
+      {
+        "label": "follow_first_short",
+        "bag": "20261115T041627Z_follow_first_short\\recording"
+      },
+      {
+        "label": "slam_map_1115",
+        "bag": "20261115T043413Z_slam_map_1115\\recording"
+      },
+      {
+        "label": "follow_edge_td1p0",
+        "bag": "20261115T045636Z_follow_edge_td1p0\\recording"
+      },
+      {
+        "label": "follow_edge_td1p0_indoor",
+        "bag": "20261115T050332Z_follow_edge_td1p0_indoor\\recording"
+      },
+      {
+        "label": "follow_edge_td1p0_open",
+        "bag": "20261115T051102Z_follow_edge_td1p0_open\\recording"
+      },
+      {
+        "label": "follow_edge_td1p0_open_b",
+        "bag": "20261115T052117Z_follow_edge_td1p0_open_b\\recording"
+      },
+      {
+        "label": "e6_straight_1",
+        "bag": "20261115T061413Z_e6_straight_1\\recording"
+      },
+      {
+        "label": "e6_straight_1",
+        "bag": "20261115T061538Z_e6_straight_1\\recording"
+      },
+      {
+        "label": "e6_straight_1",
+        "bag": "20261115T061932Z_e6_straight_1\\recording"
+      },
+      {
+        "label": "20261115-site01",
+        "bag": "20261115T060903Z_e6_session"
+      }
+    ],
+    "skipped_no_bag": [],
+    "bags_without_recording_json_labelled_by_folder": [
+      "20261115T060903Z_e6_session"
+    ],
+    "relabelled_untrusted_ground_truth": {}
+  }
+}
