@@ -1,0 +1,32 @@
+{
+  "recordedAt": "2026-10-28T08:08:53Z",
+  "baseBranch": "integration-hub",
+  "activeLaneLimit": 3,
+  "lanes": [
+    {
+      "id": "experiment-data",
+      "title": "ผลการทดลอง",
+      "owner": "Codex → Claude",
+      "state": "รอรวมเข้าซอร์ส dashboard",
+      "next": "รวมตัวตรวจข้อมูล PR #5 กับซอร์สที่ Claude ดูแล แล้วตรวจข้อมูลจาก commit ที่รวมจริง",
+      "evidence": "https://github.com/KobchokTime/Following-Mobile-Robot-in-Farm-Environment/pull/5"
+    },
+    {
+      "id": "ci-data",
+      "title": "สถานะ CI",
+      "owner": "Codex → Claude",
+      "state": "พร้อมตรวจรวม",
+      "next": "ตรวจ PR #6 และเชื่อมผล check, twin, Gazebo จาก run ที่ระบุ commit และเวลาได้",
+      "evidence": "https://github.com/KobchokTime/Following-Mobile-Robot-in-Farm-Environment/pull/6"
+    },
+    {
+      "id": "unit-tests",
+      "title": "Unit tests",
+      "owner": "Claude review",
+      "state": "รอรีวิว",
+      "next": "รีวิว PR #7 แล้วสร้างตัวเลข unit tests จากการรันจริงบน commit ที่รวมแล้ว",
+      "evidence": "https://github.com/KobchokTime/Following-Mobile-Robot-in-Farm-Environment/pull/7"
+    }
+  ],
+  "afterMerge": "Claude เผยแพร่ artifact dashboard หลังรวมและตรวจหลักฐานของทั้งสามสายงาน"
+}

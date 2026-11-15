@@ -1,0 +1,16 @@
+case             | wrong takes | belief AUC (correct vs wrong takes)
+lab_1_B          |   18/ 260 | 0.10
+lab_1_D          |   87/ 260 | 0.03
+lab_2_B          |   19/ 272 | 0.35
+lab_2_D          |   72/ 272 | 0.05
+park_black_1     |  102/ 155 | 0.41
+park_black_2     |   37/ 165 | 0.11
+park_pattern     |    9/ 175 | 0.05
+farm_beige_1     |   78/ 717 | 0.21
+farm_beige_2     |   15/ 183 | 0.29
+vtest_RN         |  274/ 646 | 0.25
+vtest_LB         |   28/ 120 | 0.01
+vtest_BL         |  240/ 622 | 0.74
+vtest_RD         |  349/ 355 | 0.95
+vtest_BJ         |   20/ 104 | 0.00
+all              | 1348/4306 | 0.50

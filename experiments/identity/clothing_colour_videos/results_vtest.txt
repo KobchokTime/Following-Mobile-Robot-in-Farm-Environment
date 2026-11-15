@@ -1,0 +1,8 @@
+person                 visits frames | Cb/Cr  hist  hist+Cb/Cr  GMM N=10
+RN red/navy puffer          2    590 |   1.4%  83.6%  62.9%       0.0%
+LB light blue jacket        1     93 |  97.8%  98.9%  98.9%       0.0%
+BL blonde, black coat       2    590 |  40.3%  53.2%  53.4%      19.2%
+RD red top                  2    310 |   3.5%  58.1%   6.1%       6.8%
+BJ blue jacket              1     84 | 100.0% 100.0% 100.0%     100.0%
+all chroma 25.9% (432/1667) hist 69.8% (1163/1667) both 52.8% (881/1667) gmm 13.1% (218/1667)
+chance (a random pick among the boxes in view): 17.0%

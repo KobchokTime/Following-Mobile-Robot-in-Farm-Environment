@@ -1,0 +1,14 @@
+.venv/
+__pycache__/
+*.pyc
+.env
+.env.*
+!.env.example
+.ai-session.lock
+.claude/settings.local.json
+.tools/godot/
+godot_game/.godot/
+
+# Local robot-follow diagnostics
+follow_log.csv
+godot_game/collision_audit_tmp.gd.uid

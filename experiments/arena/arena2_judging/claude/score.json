@@ -1,0 +1,24 @@
+{
+  "points": 97.84,
+  "max_points": 100,
+  "lag": {
+    "points": 47.84,
+    "mean_median_gap_m": {
+      "straight": 0.58,
+      "stop_and_go": 0.548,
+      "curve_left": 0.566
+    }
+  },
+  "reliability": {
+    "points": 30.0,
+    "runs": 5,
+    "failures": 0
+  },
+  "behaviour": {
+    "points": 20,
+    "failed_checks": []
+  },
+  "twin_repeats": 3,
+  "gazebo_runs": 2,
+  "out_of_scope": []
+}

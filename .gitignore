@@ -1,0 +1,42 @@
+# Local tooling and editor state
+.pnpm-store/
+.vscode/
+tmp/
+output/
+
+# Python and ROS generated artifacts
+**/__pycache__/
+**/*.py[cod]
+**/build/
+**/install/
+**/log/
+!ros2_yolo_ws/scripts/log/
+!ros2_yolo_ws/scripts/log/*.py
+!ros2_yolo_ws/scripts/log/*.csv
+
+# Recovered environments and unrelated backups
+openvino_env/
+Aerothai/
+/dashboard/
+
+# Quarantined ROS/vendor workspaces (see quarantine/BACKUP_AUDIT.md)
+ros2_rplidar_ws/
+ros2_ws_OLD/
+rplidar_ws/
+ydlidar_ws/
+ydlidar_ros2_ws_OLD/
+ydlidar_ros2_driver-master/
+YDLidar-SDK/
+
+# Large recordings
+*.avi
+*.mp4
+*.bag
+*.db3
+
+# Shared editor settings for Thesis Desk are intentionally tracked
+!tools/thesis_desk/.vscode/
+
+# Offline twin output
+sim_runs/
+replay_out/

@@ -1,0 +1,15 @@
+clip             others                                   | AUC Cb/Cr  hist  mix
+lab_1_B          same clip                                | 0.385   0.996  0.995
+lab_1_D          same clip                                | 0.657   0.989  0.990
+lab_2_B          same clip                                | 0.237   0.982  0.973
+lab_2_D          same clip                                | 0.868   0.983  0.982
+park_black_1     strangers from other clips               | 0.674   0.360  0.357
+park_black_2     strangers from other clips               | 0.918   0.918  0.941
+park_pattern     strangers from other clips               | 0.499   0.981  0.978
+farm_beige_1     strangers from other clips + 9 boxes of  | 0.732   0.868  0.879
+farm_beige_2     strangers from other clips               | 0.766   0.938  0.942
+vtest_RN         everyone else in view (crowd)            | 0.195   0.934  0.848
+vtest_LB         everyone else in view (crowd)            | 0.990   0.999  0.999
+vtest_BL         everyone else in view (crowd)            | 0.796   0.916  0.914
+vtest_RD         everyone else in view (crowd)            | 0.020   0.790  0.058
+vtest_BJ         everyone else in view (crowd)            | 1.000   1.000  1.000
