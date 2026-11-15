@@ -1,0 +1,6 @@
+direct alignment: overlap 41%, pose (0.47, -0.47, -185.5 deg)
+chained 0.5 s alignment: pose (0.50, -0.53, -186.0 deg)
+reference (mean): (0.48, -0.50, -185.8 deg)
+wheel /odom (commanded): (0.72, -0.31, -248.0 deg) | pos err 0.30 m, yaw err -62.2 deg
+SLAM experiments/hardware-runs/20261115-site01/slam_live_viewer/bag_replay_1/r1.csv: (0.47, -0.59, -158.4 deg) | pos err 0.09 m, yaw err 27.4 deg
+SLAM experiments/hardware-runs/20261115-site01/slam_live_viewer/bag_replay_1/r2.csv: (0.48, -0.39, -181.8 deg) | pos err 0.11 m, yaw err 4.0 deg

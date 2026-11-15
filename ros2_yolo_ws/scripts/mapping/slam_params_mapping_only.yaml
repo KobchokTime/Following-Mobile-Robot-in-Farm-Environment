@@ -4,7 +4,9 @@
 #   minimum_travel_distance/heading 0.5 -> 0.0: identity odom never 'travels', so with
 #     non-zero values only the first scan would ever be added and /map would never grow;
 #     scans are now added by time (minimum_time_interval).
-#   minimum_time_interval 0.5 -> 0.3: smaller motion between matched scans.
+#   minimum_time_interval 0.5 -> 0.1 and coarse_search_angle_offset 0.349 -> 0.524 (30 deg):
+#     bag replay 2026-11-15 (slam_live_viewer/bag_replay_1): heading error vs scan geometry
+#     27.1 deg with 0.3 / 0.349, 3.7 deg with 0.1 / 0.524 (position error 0.09 / 0.12 m).
 #   correlation_search_space_dimension 0.5 -> 0.8: wider search, no odometry prediction.
 #   map_update_interval 5.0 -> 2.0: /map refresh for the live viewer.
 slam_toolbox:
@@ -29,7 +31,7 @@ slam_toolbox:
     map_update_interval: 2.0
     resolution: 0.05
     max_laser_range: 12.0
-    minimum_time_interval: 0.3
+    minimum_time_interval: 0.1
     transform_timeout: 0.5
     tf_buffer_duration: 30.0
     stack_size_to_use: 40000000
@@ -58,7 +60,7 @@ slam_toolbox:
     distance_variance_penalty: 0.5
     angle_variance_penalty: 1.0
     fine_search_angle_offset: 0.00349
-    coarse_search_angle_offset: 0.349
+    coarse_search_angle_offset: 0.524
     coarse_angle_resolution: 0.0349
     minimum_angle_penalty: 0.9
     minimum_distance_penalty: 0.5

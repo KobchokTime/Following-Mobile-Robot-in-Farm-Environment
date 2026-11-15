@@ -16,8 +16,9 @@ MODEL_DIR = ROOT / "yolov8n_openvino_model"
 class RecoveredBackupTests(unittest.TestCase):
     def test_all_python_sources_parse(self):
         files = sorted(SCRIPTS.rglob("*.py"))
-        # 29 recovered sources + 2 in mapping/ (live_slam_viewer.py, lidar_health.py, 2026-11-15)
-        self.assertEqual(len(files), 31)
+        # 29 recovered sources + 4 in mapping/ (live_slam_viewer, lidar_health, slam_pose_logger,
+        # scan_pose_reference; 2026-11-15)
+        self.assertEqual(len(files), 33)
         for path in files:
             with self.subTest(path=path.relative_to(ROOT)):
                 ast.parse(path.read_text(encoding="utf-8"), filename=str(path))

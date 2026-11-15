@@ -9,6 +9,8 @@ wheels ever being driven.
 | `slam_params_mapping_only.yaml` | robot | slam_toolbox params for running with no wheel odometry |
 | `lidar_health.py` | robot | Fails if `/scan` is degraded (copied from `20261115-site01`); the start script runs it |
 | `live_slam_viewer.py` | PC | Local page at http://127.0.0.1:8772/ that subscribes read-only to `/map` and `/scan` over SSH and saves a fresh live map |
+| `replay_scan_only.sh`, `slam_pose_logger.py` | robot | Replay `/scan` from a bag through mapping-only SLAM (own ROS domain, no bag `/tf`) and log the SLAM pose next to the bag `/odom` |
+| `scan_pose_reference.py` | PC | Independent pose reference from scan geometry; compares SLAM and wheel `/odom` against it |
 
 ## Run
 
@@ -138,7 +140,16 @@ The script's motor guard used to flag its own launching shell, because an `ssh "
 command line contained the word `zlac`. The guard now skips its own ancestor processes. It was
 re-checked: a real `zlac_*` process is still refused (exit 2).
 
-Not tested yet: the map growing while the robot is moved, because that needs the operator's OK
+### Bag replay (17:23–17:42, user's OK): scan-only SLAM tracks real motion
+
+The 2026-11-15 joystick bag (1.7 m drive and a ~186° spin) was replayed with only `/scan` going in.
+Against a scan-geometry reference, the tuned params give a final error of **0.11 m and 4.0°**. The
+old params gave 0.09 m and 27.4°: heading was lost during fast spins. The wheel `/odom` (commanded
+speeds) was off by 0.30 m and 62°. The tuned values (`minimum_time_interval` 0.1,
+`coarse_search_angle_offset` 0.524) are now the defaults. Evidence:
+`experiments/hardware-runs/20261115-site01/slam_live_viewer/bag_replay_1/`.
+
+Not tested yet live: the map growing while the robot is actually moved (the bag replay covers tracking offline), because that needs the operator's OK
 to push or carry the robot.
 
 Known issue: the T-mini Pro sends scans with 384 and 386 beams in turn. slam_toolbox drops the

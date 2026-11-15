@@ -1809,3 +1809,9 @@ Earlier history: `history-2026-10-16.md`.
 - Fix: `slam_mapping_only.sh` motor guard now skips its own ancestor processes (it had refused because the ssh launch line contained "zlac"). A real `zlac_*` process is still refused.
 - Evidence: `experiments/hardware-runs/20261115-site01/slam_live_viewer/push_test_1/`.
 - Follow-up (same day): the user said the robot "barely moved" during push test 1. The README and the push_test_1 notes now say so. Tracking during real motion is still untested. Proposed a no-motion check: replay `/scan` only from bag `20261115T043413Z_slam_map_1115` through mapping-only slam_toolbox and compare the pose path with the bag's `/odom`.
+
+### 2026-11-15 — robot — SLAM bag replay: scan-only tracking (user OK in chat)
+- What: replayed `/scan` from bag `20261115T043413Z_slam_map_1115` through mapping-only slam_toolbox on the robot, in ROS domain 87 with no LiDAR, no motors and no bag `/tf`. Compared against a scan-geometry reference (direct plus chained alignment: 0.48, −0.50 m, −185.8°). Old params gave an error of 0.09 m / 27.4°. Tuned params (`minimum_time_interval` 0.1, `coarse_search_angle_offset` 0.524) gave 0.11 m / 4.0°, so they are now the defaults. The wheel `/odom` was off by 0.30 m / 62°.
+- Added `replay_scan_only.sh`, `slam_pose_logger.py` and `scan_pose_reference.py`. `test_recovered_backup` count is now 33.
+- Evidence: `experiments/hardware-runs/20261115-site01/slam_live_viewer/bag_replay_1/`. check.py 264/264.
+- Robot: a copy of the bag is in `~/slam_mapping_only/replay/` (23 MB, md5-verified). The deployed params were updated to the tuned values.
