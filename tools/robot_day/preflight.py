@@ -141,7 +141,9 @@ def check_live_params(get):
 # a lower speed cap) can be passed in; the defaults are the documented ones.
 MOTION_PARAMS = (("/follow_stop_node", "obstacle_stop_m"), ("/follow_stop_node", "spin_clear_radius_m"),
                  ("/follow_stop_node", "max_decel"), ("/follow_stop_node", "recheck_max_s"),
-                 ("/zlac_drive_bridge", "speed_mode"), ("/zlac_drive_bridge", "max_speed_mps"))
+                 ("/zlac_drive_bridge", "speed_mode"), ("/zlac_drive_bridge", "max_speed_mps"),
+                 ("/zlac_drive_bridge", "wheel_radius_m"), ("/zlac_drive_bridge", "turn_dir"),
+                 ("/zlac_drive_bridge", "forward_dir"))
 
 LIDAR_FRAME_PARAMS = (("/follow_stop_node", "lidar_angle_offset_deg"),
                       ("/follow_stop_node", "lidar_angle_sign"),
@@ -301,6 +303,8 @@ def main(argv=None):
     ap.add_argument("--expect-spin-clear-radius-m", type=float, default=0.40)
     ap.add_argument("--expect-max-decel", type=float, default=0.8)
     ap.add_argument("--expect-recheck-max-s", type=float, default=1.0)
+    ap.add_argument("--expect-turn-dir", type=float, choices=(-1.0, 1.0), default=1.0)
+    ap.add_argument("--expect-forward-dir", type=float, choices=(-1.0, 1.0), default=1.0)
     ap.add_argument("--expect-lidar-angle-offset-deg", type=float, default=0.0)
     ap.add_argument("--expect-lidar-angle-sign", type=float, default=-1.0)
     args = ap.parse_args(argv)
@@ -324,7 +328,10 @@ def main(argv=None):
             ("/follow_stop_node", "max_decel"): args.expect_max_decel,
             ("/follow_stop_node", "recheck_max_s"): args.expect_recheck_max_s,
             ("/zlac_drive_bridge", "speed_mode"): args.speed_mode,
-            ("/zlac_drive_bridge", "max_speed_mps"): args.max_speed}))
+            ("/zlac_drive_bridge", "max_speed_mps"): args.max_speed,
+            ("/zlac_drive_bridge", "wheel_radius_m"): args.wheel_radius,
+            ("/zlac_drive_bridge", "turn_dir"): args.expect_turn_dir,
+            ("/zlac_drive_bridge", "forward_dir"): args.expect_forward_dir}))
     for level, what, detail in checks:
         print(f"[{level}] {what}: {detail}")
     failed = sum(1 for c in checks if c[0] == "FAIL")

@@ -150,6 +150,7 @@ class DriveBridge(Node):
         self.declare_parameter('use_angular', USE_ANGULAR)
         self.declare_parameter('track_width_m', TRACK_WIDTH_M)
         self.declare_parameter('turn_dir', TURN_DIR)
+        self.declare_parameter('forward_dir', FORWARD_DIR)
         self.declare_parameter('speed_mode', SPEED_MODE)
         self.declare_parameter('wheel_radius_m', WHEEL_RADIUS_M)
         self.declare_parameter('max_speed_mps', MAX_SPEED_MPS)
@@ -158,6 +159,9 @@ class DriveBridge(Node):
         self.use_angular = bool(self.get_parameter('use_angular').value)
         self.track_width = float(self.get_parameter('track_width_m').value)
         self.turn_dir = float(self.get_parameter('turn_dir').value)
+        self.forward_dir = float(self.get_parameter('forward_dir').value)
+        if self.forward_dir not in (-1.0, 1.0):
+            raise ValueError('forward_dir must be -1.0 or 1.0')
         self.speed_mode = str(self.get_parameter('speed_mode').value)
         self.wheel_radius = float(self.get_parameter('wheel_radius_m').value)
         self.max_speed = float(self.get_parameter('max_speed_mps').value)
@@ -186,11 +190,12 @@ class DriveBridge(Node):
         if self.speed_mode == "legacy":
             self.left, self.right = wheel_commands(
                 linear, angular, track_width=self.track_width,
-                turn_dir=self.turn_dir, use_angular=self.use_angular)
+                forward_dir=self.forward_dir, turn_dir=self.turn_dir, use_angular=self.use_angular)
         else:
             self.left, self.right = wheel_commands_mps(
                 linear, angular, wheel_radius=self.wheel_radius, max_speed=self.max_speed,
-                track_width=self.track_width, turn_dir=self.turn_dir, use_angular=self.use_angular)
+                track_width=self.track_width, forward_dir=self.forward_dir,
+                turn_dir=self.turn_dir, use_angular=self.use_angular)
 
         self.last_cmd_time = time.time()
 

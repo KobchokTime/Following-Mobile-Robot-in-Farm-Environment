@@ -62,7 +62,9 @@ class PreflightTest(unittest.TestCase):
         # T18 (Codex 2026-11-03 02:15): the rest of the motion configuration is read back and compared
         running = {("/follow_stop_node", "obstacle_stop_m"): 0.45, ("/follow_stop_node", "spin_clear_radius_m"): 0.40,
                    ("/follow_stop_node", "max_decel"): 0.8, ("/follow_stop_node", "recheck_max_s"): 1.0,
-                   ("/zlac_drive_bridge", "speed_mode"): "mps", ("/zlac_drive_bridge", "max_speed_mps"): 0.5}
+                   ("/zlac_drive_bridge", "speed_mode"): "mps", ("/zlac_drive_bridge", "max_speed_mps"): 0.5,
+                   ("/zlac_drive_bridge", "wheel_radius_m"): 0.085, ("/zlac_drive_bridge", "turn_dir"): 1.0,
+                   ("/zlac_drive_bridge", "forward_dir"): -1.0}
         expected = dict(running)
 
         def get(changes):
@@ -73,6 +75,8 @@ class PreflightTest(unittest.TestCase):
         self.assertEqual(P.check_motion_params(get({("/follow_stop_node", "spin_clear_radius_m"): 0.3}), expected)[0],
                          "FAIL")
         self.assertEqual(P.check_motion_params(get({("/zlac_drive_bridge", "speed_mode"): None}), expected)[0], "FAIL")
+        self.assertEqual(P.check_motion_params(get({("/zlac_drive_bridge", "forward_dir"): 1.0}), expected)[0], "FAIL")
+        self.assertEqual(P.check_motion_params(get({("/zlac_drive_bridge", "wheel_radius_m"): 0.0757}), expected)[0], "FAIL")
         self.assertEqual(P.check_motion_params(get({("/follow_stop_node", "max_decel"): float("nan")}), expected)[0],
                          "FAIL")
 
@@ -123,6 +127,9 @@ class PreflightTest(unittest.TestCase):
             self.assertIn("lidar_angle_sign:=-1.0", procs[name])
         self.assertIn("angle_offset_deg:=0.0", procs["lidar_sectorizer"])
         self.assertIn("angle_sign:=-1.0", procs["lidar_sectorizer"])
+        self.assertIn("forward_dir:=1.0", procs["zlac_bridge"])
+        self.assertIn("forward_dir:=-1.0", {p["name"]: p["cmd"] for p in
+                                            mod.actions({**mod.DEFAULTS, "forward_dir": "-1.0"})}["zlac_bridge"])
 
     def test_model_and_calibration(self):
         with tempfile.TemporaryDirectory() as d:

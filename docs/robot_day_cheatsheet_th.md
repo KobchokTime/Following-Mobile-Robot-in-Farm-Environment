@@ -35,9 +35,15 @@
 
 เป็นการเช็กบนแท่น ล้อลอยจากพื้นตลอดหัวข้อนี้ · เปิด bridge ตัวเดียว (ยังไม่เปิดระบบตามคน):
 
+ผลยกล้อของ site01 วันที่ 2026-11-07: `forward_dir=-1.0`, `turn_dir=1.0`.
+รอบตรวจความเร็วบนพื้น 0.3 และ 0.5 m/s ใช้ `wheel_radius_m=0.085`;
+อย่าใช้ค่า 0.0757 ที่ยังไม่ได้ตรวจความเร็วซ้ำสำหรับรอบตามครั้งแรก
+([Block D, commit c2cd577](https://github.com/KobchokTime/Following-Mobile-Robot-in-Farm-Environment/commit/c2cd577de5fb8958897312ef86d2ca3b9081b8e5)).
+
 ```bash
 python3 ros2_yolo_ws/scripts/MAIN/Control/zlac_joystick_bridge.py --ros-args \
-    -p speed_mode:=mps -p max_speed_mps:=0.5 -p wheel_radius_m:=0.085 -p turn_dir:=1.0 -p port:=/dev/ttyUSB1
+    -p speed_mode:=mps -p max_speed_mps:=0.5 -p wheel_radius_m:=0.085 \
+    -p forward_dir:=-1.0 -p turn_dir:=1.0 -p port:=/dev/ttyUSB1
 # เทอร์มินัลที่ 2:
 python3 tools/robot_day/turn_check.py
 ```
@@ -64,7 +70,7 @@ ros2 topic pub -r 10 /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.5}}"
 ```bash
 python3 tools/robot_day/preflight.py --max-speed 0.5 --wheel-radius 0.085
 ros2 launch ros2_yolo_ws/launch/follow_bringup.launch.py max_speed_mps:=0.5 \
-    wheel_radius_m:=0.085 turn_dir:=<1.0 หรือ -1.0> \
+    wheel_radius_m:=0.085 forward_dir:=-1.0 turn_dir:=1.0 \
     lidar_angle_offset_deg:=0.0 lidar_angle_sign:=-1.0 \
     camera_cmd:="<คำสั่งเปิดกล้อง>" lidar_cmd:="<คำสั่งเปิด LiDAR>"
 ```
@@ -76,6 +82,7 @@ ros2 launch ros2_yolo_ws/launch/follow_bringup.launch.py max_speed_mps:=0.5 \
 ```bash
 python3 tools/robot_day/preflight.py --live --obstacle-stop true --avoid-trail false \
     --speed-mode mps --max-speed 0.5 --wheel-radius 0.085 \
+    --expect-forward-dir -1.0 --expect-turn-dir 1.0 \
     --expect-lidar-angle-offset-deg 0.0 --expect-lidar-angle-sign -1.0 \
     --expect-obstacle-stop-m 0.45 --expect-spin-clear-radius-m 0.40 \
     --expect-max-decel 0.8 --expect-recheck-max-s 1.0
