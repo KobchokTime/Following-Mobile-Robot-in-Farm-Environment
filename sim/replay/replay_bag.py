@@ -134,8 +134,10 @@ def replay(bag: Path, out: Path, inputs: List[str], rate: float,
               "start_offset": start_offset, "max_wall_s": max_wall_s, "play_delay_s": play_delay_s,
               "ros_domain_id": env["ROS_DOMAIN_ID"], "node_params": node_params or {},
               "original_cmd_vel": summarize(original), "replayed_cmd_vel": summarize(replayed)}
-    if original and replayed:
+    if original and replayed and start_offset == 0.0 and max_wall_s is None:
         result["linear_x_rmse"] = aligned_linear_rmse(original, replayed)
+    elif original and replayed:
+        result["comparison_note"] = "Windowed replay: command streams are not time-aligned; RMSE omitted"
     (out / "compare.json").write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
     return result
 
