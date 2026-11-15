@@ -1,4 +1,4 @@
-# Push test 1, 2026-11-15 17:12–17:19. Result: INCONCLUSIVE (the pose never left the start)
+# Push test 1, 2026-11-15 17:12–17:19. Result: the robot barely moved (user); tracking not tested
 
 The user OK'd this test in chat ("Push test is OK"). Mapping-only bringup: LiDAR + static TFs + slam_toolbox,
 no drive bridge, no motor command. The user pushed the robot by hand.
@@ -19,3 +19,13 @@ resisted pushing), or it moved and scan matching never moved the pose. The stead
 the end alignment fit "hardly moved" better, but this run cannot tell the two apart. Map growth
 without a pose change can come from small movements or people in view. **Map growth from tracked
 motion is still unverified.**
+
+**User's answer (in chat, after the run): "It barely moved."** This fits the data: SLAM correctly
+kept the pose at the start, and the small map growth came from small movements or people in view.
+The test therefore says nothing about tracking real motion. Scan-only tracking during real motion
+is **still unverified**.
+
+Suggested next check, with no robot motion: replay only `/scan` from the 2026-11-15 joystick bag
+`20261115T043413Z_slam_map_1115` (3,102 scans and 2,990 `/odom` messages over 299 s, in the PC
+backup). Use the mapping-only TFs, `use_sim_time`, and do not replay the bag's `/tf`. Then compare
+the SLAM pose path with the bag's wheel `/odom` path.
