@@ -58,6 +58,39 @@ PR #8 head `0aa2e20` is integrated at merge `7fab5ac` after lock claim `6ddec9a`
 
 ## Open items
 
+### Live SLAM map viewer — handoff to Claude, 2026-11-15
+
+- The user wants to save a map and watch scanned versus unknown area update in real time. ROS 2 Humble,
+  `slam_toolbox` and `nav2_map_server` are already installed on the robot (`ros2 pkg prefix` passed), so
+  no ROS installation is needed. At the 2026-11-15 read-only SSH check, the ROS graph had no nodes
+  publishing `/map` or `/scan`; the live-map path has **not** been validated on a running graph.
+- Two saved map pairs are on this Windows PC under
+  `%USERPROFILE%\Documents\robot_day_data\20261115-site01\maps\`. The latest,
+  `map_20261115T115027.pgm` plus YAML and posegraph, is 126 x 120 cells at 0.05 m/cell
+  (6.3 x 6.0 m), with about 18.7% known cells. It is a short local map, not a field map.
+- Codex's **local-only, uncommitted prototype** is
+  `%USERPROFILE%\.codex\visualizations\2026\10\28\01a18067-7e34-71b1-bf40-73435f41bd14\lidar-live-view\live_slam_viewer.py`
+  (SHA-256 `D3CE8FDEF1EA765754D1DA0884CAB90DC06C78B8990341422386DC64FF2790BA`).
+  It serves `http://127.0.0.1:8772/` on localhost (PID 35664 at handoff), displays the archived
+  map with a clear non-live label, subscribes read-only via SSH to ROS `/map` and `/scan`, and
+  can overlay recent scan points when TF gives `map -> laser`. Its Save button writes a local
+  PGM/YAML pair under
+  `%USERPROFILE%\.codex\visualizations\2026\10\28\01a18067-7e34-71b1-bf40-73435f41bd14\slam-live-captures\`
+  **only when a fresh live `/map` exists**. It does not publish ROS topics or connect to the
+  drive bridge. Claude in a cloud container cannot read the local prototype; use a local Claude
+  session or first move a reviewed version into a feature branch.
+- Verified: Python compilation, loading the latest saved PGM/YAML, a 2 x 2 occupancy-to-PGM
+  save round trip, localhost `/api/state` returning `source=archive`, and `/api/save` rejecting
+  the archive with HTTP 409. A true live `/map`, TF placement, real save, and the UI during
+  SLAM operation still need testing. The viewer currently shows the saved map and waits for ROS.
+- The robot's existing `~/slam_bringup.sh` explicitly expects `start_lidar.sh` and
+  `zlac_joystick_bridge.py` to provide `/odom` and `odom -> base_link`. Do not run that
+  bringup as a harmless viewer command: it depends on a bridge connected to the drive system.
+  Claude's next task is to review a mapping-only path with no wheel actuation, validate TF and
+  `/map` update behavior, and then test Save on a fresh map. Keep the viewer's archive/live
+  distinction and avoid claiming a complete map from the short saved scan. No motor command,
+  main merge or dashboard publication was authorized by this handoff.
+
 1. **T1** in `DISCUSSION.md`: Codex reviewed the branch restructure and role setup. Still open:
    Codex's model on `integration-hub` is now **GPT-6 Astra** (was Sol 6). Codex reported its runtime
    only as **GPT-6**; Codex must set GPT-6 Astra and confirm the exact model ID before T1 can close.
