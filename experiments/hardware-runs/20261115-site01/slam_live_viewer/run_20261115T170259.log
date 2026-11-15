@@ -1,0 +1,189 @@
+[mapping-only] starting LiDAR driver (/home/yakgreen001/ydlidar_tmini.yaml)
+[INFO] [launch]: All log files can be found below /home/yakgreen001/.ros/log/2026-11-15-17-03-02-191485-yakgreen001-UPN-APL01-25719
+[INFO] [launch]: Default logging verbosity is set to INFO
+[INFO] [ydlidar_ros2_driver_node-1]: process started with pid [25735]
+[ydlidar_ros2_driver_node-1] [0m[INFO] [1794736982.889722476] [ydlidar_ros2_driver_node]: [YDLIDAR INFO] Current ROS Driver Version: 1.0.1[0m
+[ydlidar_ros2_driver_node-1] [YDLIDAR] SDK initializing
+[ydlidar_ros2_driver_node-1] [YDLIDAR] SDK has been initialized
+[ydlidar_ros2_driver_node-1] [YDLIDAR] SDK Version: 1.1.4
+[ydlidar_ros2_driver_node-1] [YDLIDAR] Lidar successfully connected
+[ydlidar_ros2_driver_node-1] [YDLIDAR] Lidar running correctly! The health status: bad
+[ydlidar_ros2_driver_node-1] [YDLIDAR] Error, YDLidar internal error detected. Please reboot the device to retry.
+[ydlidar_ros2_driver_node-1] [YDLIDAR] Connection established in [/dev/ttyUSB0][230400]:
+[ydlidar_ros2_driver_node-1] Firmware version: 1.0
+[ydlidar_ros2_driver_node-1] Hardware version: 2
+[ydlidar_ros2_driver_node-1] Model: T-mini Pro
+[ydlidar_ros2_driver_node-1] Serial: 2023122000090162
+[ydlidar_ros2_driver_node-1] [YDLIDAR] Current scan frequency: 10.00Hz
+[ydlidar_ros2_driver_node-1] [YDLIDAR] Lidar init success, Elapsed time 732 ms
+[ydlidar_ros2_driver_node-1] [YDLIDAR] Start to getting intensity flag
+[ydlidar_ros2_driver_node-1] [YDLIDAR] Auto set intensity 1
+[ydlidar_ros2_driver_node-1] [YDLIDAR] End to getting intensity flag
+[ydlidar_ros2_driver_node-1] [YDLIDAR] Create thread 0xE4C13640
+[ydlidar_ros2_driver_node-1] [YDLIDAR] Successed to start scan mode, Elapsed time 1907 ms
+[ydlidar_ros2_driver_node-1] [YDLIDAR] Fixed Size: 404
+[ydlidar_ros2_driver_node-1] [YDLIDAR] Sample Rate: 4.00K
+[ydlidar_ros2_driver_node-1] [YDLIDAR] Current Sampling Rate : 4.00K
+[ydlidar_ros2_driver_node-1] [YDLIDAR] Now lidar is scanning...
+PASS: 31 scans (10.3 Hz), valid beams median 80% (min 79%, need >= 70%)
+[INFO] [1794736989.687708547] [mapping_only_odom_tf]: Spinning until stopped - publishing transform
+translation: ('0.000000', '0.000000', '0.000000')
+rotation: ('0.000000', '0.000000', '0.000000', '1.000000')
+from 'odom' to 'base_link'
+[INFO] [1794736989.707342637] [mapping_only_laser_tf]: Spinning until stopped - publishing transform
+translation: ('0.000000', '0.000000', '0.715000')
+rotation: ('0.998537', '0.054079', '0.000000', '0.000000')
+from 'base_link' to 'laser'
+[mapping-only] running (pgid 25684). No drive bridge. Ctrl-C or '/home/yakgreen001/slam_mapping_only/slam_mapping_only.sh stop' to end.
+[INFO] [launch]: All log files can be found below /home/yakgreen001/.ros/log/2026-11-15-17-03-12-446525-yakgreen001-UPN-APL01-25785
+[INFO] [launch]: Default logging verbosity is set to INFO
+[INFO] [async_slam_toolbox_node-1]: process started with pid [25786]
+[async_slam_toolbox_node-1] [INFO] [1794736992.732647971] [slam_toolbox]: Node using stack size 40000000
+[async_slam_toolbox_node-1] [INFO] [1794736992.837587609] [slam_toolbox]: Using solver plugin solver_plugins::CeresSolver
+[async_slam_toolbox_node-1] [INFO] [1794736992.838048776] [slam_toolbox]: CeresSolver: Using SCHUR_JACOBI preconditioner.
+[async_slam_toolbox_node-1] [WARN] [1794736995.535037858] [slam_toolbox]: minimum laser range setting (0.0 m) exceeds the capabilities of the used Lidar (0.1 m)
+[async_slam_toolbox_node-1] Registering sensor: [Custom Described Lidar]
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 382 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[async_slam_toolbox_node-1] LaserRangeScan contains 386 range readings, expected 384
+[INFO] [1794737109.949772179] [rclcpp]: signal_handler(SIGINT/SIGTERM)
+[INFO] [1794737109.950189069] [rclcpp]: signal_handler(SIGINT/SIGTERM)
+[async_slam_toolbox_node-1] [INFO] [1794737109.949882977] [rclcpp]: signal_handler(SIGINT/SIGTERM)
+[ydlidar_ros2_driver_node-1] [0m[INFO] [1794737109.949884006] [rclcpp]: signal_handler(SIGINT/SIGTERM)[0m
+[ydlidar_ros2_driver_node-1] terminate called after throwing an instance of 'rclcpp::exceptions::RCLError'
+[ydlidar_ros2_driver_node-1]   what():  failed to create guard condition: the given context is not valid, either rcl_init() was not called or rcl_shutdown() was called., at ./src/rcl/guard_condition.c:67
+[INFO] [async_slam_toolbox_node-1]: process has finished cleanly [pid 25786]
+[ERROR] [ydlidar_ros2_driver_node-1]: process has died [pid 25735, exit code -6, cmd '/home/yakgreen001/ydlidar_ros2_ws/install/ydlidar_ros2_driver/lib/ydlidar_ros2_driver/ydlidar_ros2_driver_node --ros-args -r __node:=ydlidar_ros2_driver_node -r __ns:=/ --params-file /home/yakgreen001/ydlidar_tmini.yaml'].
+[mapping-only] stopping
