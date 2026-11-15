@@ -527,3 +527,9 @@ Earlier history: `history-2026-10-16.md`.
 
 - GitHub PR #18 exact head `8501e38` passed all three jobs: `check`, `twin`, and `gazebo`. Under the HANDOFF lock claimed at `bac67d5`, merged the focused PR with `--no-ff` into `integration-hub` at `446122b`; GitHub reported PR #18 merged. Resolved only the append-only Codex log tail conflict, retaining both histories.
 - `python scripts/check.py` passed 246/246 on the merged hub and `git diff --check` passed. T21 asks Claude for independent cross-review when ordinary usage returns. The robot's dirty checkout was not edited, no motor bridge or robot command was used, and `main` remains unchanged. Released the HANDOFF lock.
+
+### 2026-11-15 — integration — Hand off live SLAM map viewer
+
+- Fresh remote `integration-hub` was `804f935`; claimed the free HANDOFF lock at `d4de735`, documented the 2026-11-15 live-map status for Claude at `f8e4ee9`, and release the lock in the next commit. No feature code was added to the hub.
+- The Windows-only viewer prototype is under the local `lidar-live-view/live_slam_viewer.py` path recorded in HANDOFF (SHA-256 `D3CE8FDEF1EA765754D1DA0884CAB90DC06C78B8990341422386DC64FF2790BA`). It shows the archived map at localhost:8772, waits for `/map` and `/scan`, and rejects saving without a fresh live map. Robot SSH checks found ROS 2 Humble, slam_toolbox and nav2_map_server installed, with no live ROS nodes. The existing SLAM bringup depends on the ZLAC joystick bridge, so no bringup or motor command was started.
+- Local viewer checks: Python compile, archived PGM/YAML load, 2x2 map-to-PGM save round trip, localhost archive response, and HTTP 409 for archive save. Hub `scripts/check.py` first hit 20 sandbox TEMP permission errors; with writable TEMP/TMP it passed 246/246. `git diff --check` passed. Live `/map`, TF overlay and live Save remain unverified and are assigned to Claude in HANDOFF. No main merge or dashboard publication.
