@@ -631,6 +631,21 @@ class FollowStopNode(Node):
         if len(msg.data) < 8:
             return
         cx, cy, dist, sector, P_C, P_L, P_fused, dt_ms = msg.data
+        if dist < 0.0 and sector < 0.0:
+            # Explicit identity conflict from sync_fusion. Low-confidence HOLD would repeat the
+            # previous (possibly wrong-way) command, so this signal always sends zero immediately.
+            self.publish_stop()
+            self.last_good_cmd = Twist()
+            self.p_buffer.clear()
+            self.speed_ff = 0.0
+            self.last_linear = 0.0
+            self.last_ctrl_time = None
+            self.prev_bearing = None
+            self.bearing_rate = 0.0
+            self.trailing = False
+            self.trail_since_msg = False
+            self.stale_stopped = True
+            return
         sector = int(sector)
         self.last_msg_time = self.get_clock().now().nanoseconds / 1e9
         self.stale_stopped = False

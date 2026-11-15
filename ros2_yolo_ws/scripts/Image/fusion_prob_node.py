@@ -81,6 +81,16 @@ class FusionProbNode(Node):
         cx, cy, dist, sector, dt_ms, stamp = data
         stamp = float(stamp)
 
+        # sync_fusion uses negative distance and sector as an explicit identity-conflict stop.
+        # Bypass confidence smoothing so a previously good target cannot mask the stop.
+        if dist < 0.0 and sector < 0.0:
+            self.prev_p_fused = 0.0
+            self.lidar_buffer.clear()
+            out = Float32MultiArray()
+            out.data = [cx, cy, dist, sector, 0.0, 0.0, 0.0, 0.0]
+            self.pub_prob.publish(out)
+            return
+
         # ----------------------------------------------------
         # 1. Camera confidence (P_C)
         # ----------------------------------------------------
