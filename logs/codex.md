@@ -539,6 +539,11 @@ Earlier history: `history-2026-10-16.md`.
 - On draft PR #20's `codex/robot/t22-edge-gate`, committed `32eab3e` to place the stationary camera-hidden cluster beside, rather than across, the target's scripted path. Rechecked the separate `t22` scenario construction and `python scripts/check.py` (253/253) with TEMP/TMP inside the writable clone; `git diff --check` passed. An initial check without those TEMP/TMP variables hit Windows sandbox temp-file permissions, not a code failure. The scenario still needs a ROS twin run.
 - At the latest PR head, GitHub `check` passed; `twin` and `gazebo` were in progress. No robot command or merge.
 
+### 2026-11-15 — qa — Exercise T22 replay command and CI
+
+- On clean `codex/robot/t22-edge-gate`, confirmed draft PR #20 head `8be7763` and GitHub run 43691494521 completed successfully in all three jobs: `check`, `twin`, and `gazebo`. Locally `python scripts/check.py` passed 253/253; the two replay-parameter tests and four edge-conflict tests passed. `python -m sim.replay.replay_bag --help` exposed `--node-param`, measured E6 overrides parsed to their intended nodes, and an unknown node exited 2 before starting ROS.
+- Verified the E6 backup bag is the `20261115T060903Z_e6_session` directory itself (SQLite metadata at its root); the first-follow bag is its `recording` subdirectory. The Windows machine still lacks `rosbag2_py`, `rclpy`, and ROS 2 CLI, so neither full field-bag replay nor the 110-trial robot-day twin was run locally. CI's twin job is a smoke set, not that gate. No robot or motor command and no merge.
+
 ### 2026-11-07 — integration — Merge camera freshness and E1 analysis into hub
 
 - GitHub PR #18 exact head `8501e38` passed all three jobs: `check`, `twin`, and `gazebo`. Under the HANDOFF lock claimed at `bac67d5`, merged the focused PR with `--no-ff` into `integration-hub` at `446122b`; GitHub reported PR #18 merged. Resolved only the append-only Codex log tail conflict, retaining both histories.
