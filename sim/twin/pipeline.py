@@ -8,7 +8,7 @@ import signal
 import subprocess
 import sys
 from pathlib import Path
-from typing import Dict, List, Sequence
+from typing import Dict, List, Mapping, Sequence
 
 ROOT = Path(__file__).resolve().parents[2]
 SCRIPTS = ROOT / "ros2_yolo_ws" / "scripts"
@@ -48,9 +48,13 @@ class Processes:
         self.procs.append(proc)
         return proc
 
-    def start_robot_nodes(self, ros_args: Sequence[str] = ()) -> None:
-        extra = ["--ros-args", *ros_args] if ros_args else []
+    def start_robot_nodes(self, ros_args: Sequence[str] = (),
+                          node_params: Mapping[str, Mapping[str, str]] | None = None) -> None:
+        node_params = node_params or {}
         for name, path in ROBOT_NODES.items():
+            params = [item for key, value in node_params.get(name, {}).items()
+                      for item in ("-p", f"{key}:={value}")]
+            extra = ["--ros-args", *ros_args, *params] if ros_args or params else []
             self.start(name, [sys.executable, str(path), *extra], SCRIPTS)
 
     def stop(self) -> None:

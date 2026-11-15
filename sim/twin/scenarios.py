@@ -192,8 +192,22 @@ OBSTACLE_SCENARIOS: Dict[str, dict] = {
     },
 }
 
+# T22 regression runs separately from the frozen 110-run robot-day baseline.
+REGRESSION_SCENARIOS: Dict[str, dict] = {
+    "fast_step_static_cluster": {
+        "doc": "Target steps rapidly left past a stationary camera-hidden LiDAR cluster, then crosses back "
+               "into the camera view. An uncertain edge track must stop instead of turning away.",
+        "duration_s": 18.0,
+        "people": [("target", True, [(0, 1.0, 0.0), (3, 1.0, 0.0), (5, 2.2, 0.0),
+                                     (5.8, 2.2, 1.4), (7.2, 2.2, -0.4), (14, 5.0, -0.4)]),
+                   ("cluster", False, [(0, 1.5, 0.75), (18, 1.5, 0.75)])],
+        "hidden": {"cluster": [(0.0, 18.0)]},
+    },
+}
+
 ALL_SCENARIOS: Dict[str, dict] = {**SCENARIOS, **IDENTITY_SCENARIOS}  # frozen: the Arena 3 scorer checks runs against it
-SCENARIO_LOOKUP: Dict[str, dict] = {**ALL_SCENARIOS, **SOLO_SCENARIOS, **COLOUR_SCENARIOS, **OBSTACLE_SCENARIOS}  # every scenario that can be run
+SCENARIO_LOOKUP: Dict[str, dict] = {**ALL_SCENARIOS, **SOLO_SCENARIOS, **COLOUR_SCENARIOS,
+                                   **OBSTACLE_SCENARIOS, **REGRESSION_SCENARIOS}  # every runnable scenario
 SCENARIO_SETS: Dict[str, list] = {
     "all": sorted(SCENARIOS),  # the Arena 2 set; kept as "all" so existing commands mean the same
     "identity": ["crossing", *sorted(IDENTITY_SCENARIOS)],
@@ -201,6 +215,7 @@ SCENARIO_SETS: Dict[str, list] = {
     "solo": ["straight", "stop_and_go", "curve_left", "target_loss", *sorted(SOLO_SCENARIOS)],
     "colour": sorted(COLOUR_SCENARIOS),
     "obstacle": sorted(OBSTACLE_SCENARIOS),
+    "t22": sorted(REGRESSION_SCENARIOS),
 }
 
 

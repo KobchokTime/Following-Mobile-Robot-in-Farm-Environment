@@ -523,7 +523,39 @@ Earlier history: `history-2026-10-16.md`.
 - Claimed the HANDOFF lock at `a4d0447` to record the completed motor-free A/B and pending review. At 17:29 Thai time GitHub `check` and `gazebo` passed on PR head `8501e38`; `twin` remained in progress. Opened T21 for the remaining CI gate and Claude's later independent review. PR #18 was not merged, no robot checkout file was changed, and no motor bridge subscriber was present in the final live check.
 - On unchanged hub source, python scripts/check.py passed 244/244; released the lock after recording T21.
 
+### 2026-11-15 — robot / qa — Draft T22 edge conflict stop
+
+- In isolated `codex/robot/t22-edge-gate`, committed the LiDAR edge / camera disagreement stop (`795514a`), QA regressions and per-node bag replay parameter routing (`2f1e76d`), then combined them with a no-ff merge (`138927f`). The replay tools in `sim/` accompany QA coverage because no repository role owns that path explicitly.
+- `python scripts/check.py` passed 253/253, and `git diff --check` passed. Added a separate T22 twin scenario without changing the frozen 110-run baseline. Inspected the two-bag field handoff and E6 checker. The change has not been run against either field bag or the full twin: this Windows environment lacks ROS 2 packages; WSL was denied and Docker is unavailable. Therefore the T22 wrong-turn criterion and 106/110 twin gate remain unverified.
+- This is an offline draft only. No hub lock was claimed, no PR or main merge was made, and no robot or motor command was sent. Controller, identity, and fusion changes still need safety audit and Claude cross-review before integration.
+
+### 2026-11-15 — robot — Open stacked T22 draft review
+
+- Pushed `codex/robot/t22-edge-gate` at `de5aef9` and opened draft PR #20 against `codex/robot/field-forward-review` (draft PR #19). The stacked base keeps the T22 diff focused; it must be retargeted to `integration-hub` after #19 is reviewed and merged. No `claude/*` branch was changed.
+- PR #20 is a request for CI and independent safety review, not a merge-ready result. Both field-bag replays, the 110-trial twin gate, and the T22 scenario remain unrun here because ROS 2 is unavailable. No robot or motor command, hub merge, or main merge.
+
+### 2026-11-15 — qa — Keep T22 twin cluster off the target path
+
+- On draft PR #20's `codex/robot/t22-edge-gate`, committed `32eab3e` to place the stationary camera-hidden cluster beside, rather than across, the target's scripted path. Rechecked the separate `t22` scenario construction and `python scripts/check.py` (253/253) with TEMP/TMP inside the writable clone; `git diff --check` passed. An initial check without those TEMP/TMP variables hit Windows sandbox temp-file permissions, not a code failure. The scenario still needs a ROS twin run.
+- At the latest PR head, GitHub `check` passed; `twin` and `gazebo` were in progress. No robot command or merge.
+
+### 2026-11-15 — qa — Exercise T22 replay command and CI
+
+- On clean `codex/robot/t22-edge-gate`, confirmed draft PR #20 head `8be7763` and GitHub run 43691494521 completed successfully in all three jobs: `check`, `twin`, and `gazebo`. Locally `python scripts/check.py` passed 253/253; the two replay-parameter tests and four edge-conflict tests passed. `python -m sim.replay.replay_bag --help` exposed `--node-param`, measured E6 overrides parsed to their intended nodes, and an unknown node exited 2 before starting ROS.
+- Verified the E6 backup bag is the `20261115T060903Z_e6_session` directory itself (SQLite metadata at its root); the first-follow bag is its `recording` subdirectory. The Windows machine still lacks `rosbag2_py`, `rclpy`, and ROS 2 CLI, so neither full field-bag replay nor the 110-trial robot-day twin was run locally. CI's twin job is a smoke set, not that gate. No robot or motor command and no merge.
+
+### 2026-11-15 — integration — Verify SSH reachability only
+
+- From the isolated `codex/robot/t22-edge-gate` checkout, an ordinary sandbox SSH attempt to the previously used robot address was denied locally. With normal approved execution, a batch-mode, pinned-host-key, read-only `hostname` command connected and returned `yakgreen001-UPN-APL01`. This proves current SSH reachability only; no ROS, bridge, motor, or replay command ran on the robot.
+
 ### 2026-11-07 — integration — Merge camera freshness and E1 analysis into hub
 
 - GitHub PR #18 exact head `8501e38` passed all three jobs: `check`, `twin`, and `gazebo`. Under the HANDOFF lock claimed at `bac67d5`, merged the focused PR with `--no-ff` into `integration-hub` at `446122b`; GitHub reported PR #18 merged. Resolved only the append-only Codex log tail conflict, retaining both histories.
 - `python scripts/check.py` passed 246/246 on the merged hub and `git diff --check` passed. T21 asks Claude for independent cross-review when ordinary usage returns. The robot's dirty checkout was not edited, no motor bridge or robot command was used, and `main` remains unchanged. Released the HANDOFF lock.
+
+### 2026-11-15 — qa / research — Isolated T22 bag replay and control
+
+- On `codex/robot/t22-edge-gate`, merged bounded replay support (`a6102ad`, `e848acd`), subscriber delay (`b2b6ab4`), and windowed comparison correction (`aab3ec0`) through no-ff QA merges. The replay now records YOLO frames, accepts per-node field parameters and a fixed isolated ROS domain, and can stop long bags cleanly. `python scripts/check.py` passed 254/254; `git diff --check` passed.
+- From the existing robot bags, ran read-only ROS replays in RAM on localhost-only domain 187, checked empty before each run. Only sectorizer, sync fusion, confidence fusion, and follow controller were started; no ZLAC bridge or hardware driver ran. Original E6: 5 wrong-direction turns at >=0.9 m. The clean pre-fix `026fe17` replay of the same 540–635 s window: 5. T22 robot code replay: 0, with the identity-conflict marker and an immediate zero `/cmd_vel` at replay t=72.83 s. Claude's E6 checker was used unchanged.
+- The original first-follow bag also has 5 wrong turns. Fresh-node replays of both pre-fix and patched code scored 0 and reached only 0.98 m fused range versus 1.57 m originally; this bag does not independently validate the fix because its tracker state predates recording. A single synthetic T22 twin run had no contact but lost the target; the pre-fix run on the low-power host never moved, so that comparison is not a pass. The 110-case twin gate remains open.
+- Preserved four small derived replay bags and logs outside Git, and committed the evidence write-up as `53642ae` under `experiments/robot_day/`. The source robot checkout and original bags stayed untouched. No physical motor command, hub merge, or main merge. PR #20 remains draft pending CI on the updated head, the full twin gate, and independent safety review.

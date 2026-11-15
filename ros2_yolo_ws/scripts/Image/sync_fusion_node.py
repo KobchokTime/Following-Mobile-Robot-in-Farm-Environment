@@ -140,6 +140,18 @@ def scan_is_fresh(now, scan_time, max_age):
     return scan_time is not None and 0.0 <= now - scan_time <= max_age
 
 
+def camera_disagrees_with_lidar_edge(camera_bearing, lidar_bearing, edge_rad, hfov_deg):
+    """Fail closed when an in-image box disagrees with a LiDAR-only edge track.
+
+    Camera boxes have no identity, so disagreement cannot prove which observation is the target.
+    The safe response is to stop this run, never to transfer the target to that box.
+    """
+    half = math.radians(hfov_deg) / 2.0
+    return (lidar_bearing is not None and abs(lidar_bearing) >= edge_rad
+            and abs(camera_bearing) < half - math.radians(3.0)
+            and abs(camera_bearing - lidar_bearing) >= math.radians(20.0))
+
+
 def bearing_to_cx(bearing, image_width, hfov_deg):
     """Image column for a bearing (inverse of camera_bearing_rad), clamped to the image."""
     f = (image_width / 2.0) / math.tan(math.radians(hfov_deg) / 2.0)
@@ -518,6 +530,8 @@ class SyncFusionNode(Node):
         self.assist_scan_time = None  # the scan the last assist used, so each scan is used once
         self.assist_speed = float(self.get_parameter('lidar_assist_speed_mps').value)
         self.assist_last = None       # (time, bearing, range) of the last assist
+        self.lidar_driven_bearing = None  # most recent LiDAR-only gate fix, cleared by a camera fix
+        self.camera_conflict_latched = False  # requires a node restart; no automatic identity switch
         self.occl_gap = float(self.get_parameter('occluded_gap_m').value)
         if not bool(self.get_parameter('obstacle_stop').value):
             self.occl_gap, self.path_floor = 0.0, 0.0
@@ -621,7 +635,8 @@ class SyncFusionNode(Node):
         decides alone, as before. Not more than lidar_track_max_s after the last camera fix.
         Returns (bearing, range) of the cluster used, or None.
         """
-        if not (self.use_gate and self.lidar_assist and self.gate.locked and self.last_camera_fix is not None):
+        if self.camera_conflict_latched or not (self.use_gate and self.lidar_assist and self.gate.locked
+                                               and self.last_camera_fix is not None):
             return None
         now = self.now_sec()
         if not scan_is_fresh(now, self.scan_time, self.scan_max_age) or self.scan_time == self.assist_scan_time:
@@ -659,6 +674,7 @@ class SyncFusionNode(Node):
                 return None  # faster than anyone walks: someone else, such as a passer-by covering the target
         self.gate.accept_lidar(now, bearing, rng)
         self.assist_last = (now, bearing, rng)
+        self.lidar_driven_bearing = bearing
         return found
 
     def track_with_lidar(self, assisted=None):
@@ -667,7 +683,8 @@ class SyncFusionNode(Node):
         Only when it was last seen near the image edge. If it vanished from the middle of the image
         the camera or detector failed instead, and the controller's normal stop applies.
         """
-        if not (self.use_gate and self.use_lidar_track and self.gate.locked and self.last_target is not None):
+        if self.camera_conflict_latched or not (self.use_gate and self.use_lidar_track and self.gate.locked
+                                               and self.last_target is not None):
             return
         now = self.now_sec()
         if self.last_camera_fix is None or now - self.last_camera_fix < self.lidar_after \
@@ -708,6 +725,7 @@ class SyncFusionNode(Node):
                 return
             bearing, rng = found
             self.gate.accept_lidar(now, bearing, rng)
+        self.lidar_driven_bearing = bearing
         # the image edge on the target's side: the controller turns that way at its full turn rate. A target
         # covered inside the image (blind_corner) is given at its own column instead: sent to the edge at 6 deg,
         # the robot spun at full rate past it and out of view (s1 on e80a83d)
@@ -730,6 +748,17 @@ class SyncFusionNode(Node):
         self.pub_synced.publish(out)
 
     def try_sync_from_yolo(self, ty, cx, cy, sector_id, chroma=None, hist=None):
+        if self.camera_conflict_latched:
+            return
+        camera_bearing = camera_bearing_rad(cx, self.image_width, self.camera_hfov_deg)
+        if camera_disagrees_with_lidar_edge(camera_bearing, self.lidar_driven_bearing,
+                                             self.edge_rad, self.camera_hfov_deg):
+            # A LiDAR-only fix may belong to a post while the real person is still in the image.
+            # Stop immediately, and do not resume by adopting a different camera box as the target.
+            self.camera_conflict_latched = True
+            self.get_logger().info('[IDENTITY] camera/LiDAR edge disagreement: stop and relock manually')
+            self.publish_synced(-1, -1, -1.0, -1, 0.0)
+            return
         if not self.buf_lidar or not self.lidar_angles:
             return
 
@@ -805,6 +834,7 @@ class SyncFusionNode(Node):
         self.recent_ranges = [(t0, r0) for t0, r0 in self.recent_ranges if ty - t0 <= 1.0] + [(ty, dist)]
         self.last_camera_fix = ty
         self.last_camera_bearing = bearing
+        self.lidar_driven_bearing = None
         if self.path_block is not None and ty - self.path_block[0] <= self.path_hold:
             dist = min(dist, max(self.path_floor, self.path_block[1] - self.path_margin))  # give way to whoever is in it
         self.publish_synced(cx, cy, dist, sector_id, best_dt)

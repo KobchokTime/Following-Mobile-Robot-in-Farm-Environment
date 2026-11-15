@@ -4,7 +4,7 @@
     python3 -m sim.replay.replay_bag BAG_DIR --out replay_out
 
 Plays only the sensor inputs (`--inputs`, default `/scan /target_centroid_sector
-/target_centroid`) into the perception -> fusion -> controller chain, records what
+/target_centroid /yolo_frame`) into the perception -> fusion -> controller chain, records what
 the chain publishes, and compares the new `/cmd_vel` with the `/cmd_vel` stored in
 the original bag (when there is one). Works with sqlite3 bags out of the box and
 with MCAP bags (from `record_robot_day.sh`) when the MCAP storage plugin is installed.
@@ -17,21 +17,24 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import os
+import signal
 import statistics
+import subprocess
 import sys
 import time
 from pathlib import Path
 from typing import Dict, List, Tuple
 
-import yaml
+from sim.twin.pipeline import ROOT, ROBOT_NODES, Processes, isolated_env
 
-from sim.twin.pipeline import ROOT, Processes, isolated_env
-
-DEFAULT_INPUTS = ["/scan", "/target_centroid_sector", "/target_centroid"]
-OUTPUTS = ["/lidar_sector_dists", "/synced_target", "/target_fused_prob", "/cmd_vel"]
+DEFAULT_INPUTS = ["/scan", "/target_centroid_sector", "/target_centroid", "/yolo_frame"]
+OUTPUTS = ["/yolo_frame", "/lidar_sector_dists", "/synced_target", "/target_fused_prob", "/cmd_vel"]
 
 
 def storage_id(bag: Path) -> str:
+    import yaml
+
     meta = yaml.safe_load((bag / "metadata.yaml").read_text(encoding="utf-8"))
     return meta["rosbag2_bagfile_information"]["storage_identifier"]
 
@@ -85,17 +88,42 @@ def aligned_linear_rmse(a, b, step: float = 0.1) -> float:
     return math.sqrt(statistics.fmean((hold(a, t) - hold(b, t)) ** 2 for t in ts))
 
 
-def replay(bag: Path, out: Path, inputs: List[str], rate: float) -> dict:
+def parse_node_params(items: List[str]) -> Dict[str, Dict[str, str]]:
+    """Parse NODE.PARAM=VALUE without leaking a node's overrides into other nodes."""
+    params: Dict[str, Dict[str, str]] = {}
+    for item in items:
+        lhs, sep, value = item.partition("=")
+        node, dot, key = lhs.partition(".")
+        if not sep or not dot or node not in ROBOT_NODES or not key.isidentifier() or not value:
+            raise ValueError(f"Invalid --node-param {item!r}; expected NODE.PARAM=VALUE")
+        params.setdefault(node, {})[key] = value
+    return params
+
+
+def replay(bag: Path, out: Path, inputs: List[str], rate: float,
+           node_params: Dict[str, Dict[str, str]] | None = None,
+           start_offset: float = 0.0, max_wall_s: float | None = None,
+           domain_id: int | None = None, play_delay_s: float = 3.0) -> dict:
     out.mkdir(parents=True, exist_ok=True)
-    procs = Processes(out, isolated_env())
+    env = isolated_env()
+    if domain_id is not None:
+        env["ROS_DOMAIN_ID"] = str(domain_id)
+    procs = Processes(out, env)
     try:
-        procs.start_robot_nodes()
+        procs.start_robot_nodes(node_params=node_params)
         procs.start("bag_record", ["ros2", "bag", "record", "-s", "sqlite3",
                                    "-o", str(out / "replay"), *OUTPUTS], ROOT)
         time.sleep(2.0)
-        play = procs.start("bag_play", ["ros2", "bag", "play", str(bag), "--rate", str(rate),
-                                        "--topics", *inputs], ROOT)
-        play.wait()
+        play_cmd = ["ros2", "bag", "play", str(bag), "--rate", str(rate),
+                    "--delay", str(play_delay_s), "--disable-keyboard-controls", "--topics", *inputs]
+        if start_offset:
+            play_cmd.extend(("--start-offset", str(start_offset)))
+        play = procs.start("bag_play", play_cmd, ROOT)
+        try:
+            play.wait(timeout=max_wall_s)
+        except subprocess.TimeoutExpired:
+            os.killpg(play.pid, signal.SIGINT)
+            play.wait(timeout=10)
         time.sleep(1.5)  # let the chain flush the last frames
     finally:
         procs.stop()
@@ -103,9 +131,13 @@ def replay(bag: Path, out: Path, inputs: List[str], rate: float) -> dict:
     original = read_cmd_vel(bag)
     replayed = read_cmd_vel(out / "replay")
     result = {"bag": str(bag), "inputs": inputs, "rate": rate,
+              "start_offset": start_offset, "max_wall_s": max_wall_s, "play_delay_s": play_delay_s,
+              "ros_domain_id": env["ROS_DOMAIN_ID"], "node_params": node_params or {},
               "original_cmd_vel": summarize(original), "replayed_cmd_vel": summarize(replayed)}
-    if original and replayed:
+    if original and replayed and start_offset == 0.0 and max_wall_s is None:
         result["linear_x_rmse"] = aligned_linear_rmse(original, replayed)
+    elif original and replayed:
+        result["comparison_note"] = "Windowed replay: command streams are not time-aligned; RMSE omitted"
     (out / "compare.json").write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
     return result
 
@@ -116,8 +148,30 @@ def main() -> int:
     ap.add_argument("--out", default=Path("replay_out"), type=Path)
     ap.add_argument("--inputs", nargs="+", default=DEFAULT_INPUTS)
     ap.add_argument("--rate", default=1.0, type=float)
+    ap.add_argument("--start-offset", default=0.0, type=float,
+                    help="Skip this many seconds from the beginning of a long bag")
+    ap.add_argument("--max-wall-s", type=float,
+                    help="Stop playback after this many wall-clock seconds, then flush the output bag")
+    ap.add_argument("--domain-id", type=int,
+                    help="Explicit isolated ROS domain (100-200), useful for checking it is empty before replay")
+    ap.add_argument("--play-delay-s", type=float, default=3.0,
+                    help="Wait for ROS subscriptions before playing; included in max wall time")
+    ap.add_argument("--node-param", action="append", default=[], metavar="NODE.PARAM=VALUE",
+                    help="Pass a ROS parameter only to the named replay node (repeatable)")
     args = ap.parse_args()
-    print(json.dumps(replay(args.bag, args.out, args.inputs, args.rate), indent=2))
+    if (args.rate <= 0 or args.start_offset < 0 or args.play_delay_s < 0
+            or (args.max_wall_s is not None and args.max_wall_s <= args.play_delay_s)):
+        ap.error("--rate must be positive, --start-offset and --play-delay-s non-negative, "
+                 "and --max-wall-s greater than play delay")
+    if args.domain_id is not None and not 100 <= args.domain_id <= 200:
+        ap.error("--domain-id must be in the isolated range 100-200")
+    try:
+        node_params = parse_node_params(args.node_param)
+    except ValueError as error:
+        ap.error(str(error))
+    print(json.dumps(replay(args.bag, args.out, args.inputs, args.rate, node_params,
+                            args.start_offset, args.max_wall_s, args.domain_id,
+                            args.play_delay_s), indent=2))
     return 0
 
 
