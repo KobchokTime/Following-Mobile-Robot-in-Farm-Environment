@@ -44,7 +44,11 @@ source /opt/ros/humble/setup.bash
 source "$HOME/ydlidar_ros2_ws/install/setup.bash"
 set -u
 
-motor=$(pgrep -af "$MOTOR_PATTERN" || true)
+# Skip this script's own ancestors (e.g. an ssh "bash -c" line that merely mentions a pattern).
+ancestors=" $$ "; p=$$
+while [ "${p:-1}" -gt 1 ]; do p=$(ps -o ppid= -p "$p" | tr -d ' '); ancestors="$ancestors${p:-1} "; done
+motor=$(pgrep -af "$MOTOR_PATTERN" | while read -r pid rest; do
+  case "$ancestors" in *" $pid "*) ;; *) echo "$pid $rest" ;; esac; done)
 if [ -n "$motor" ]; then
   echo "[mapping-only] REFUSED: a process that can drive the wheels is running:"; echo "$motor"
   exit 2

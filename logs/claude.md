@@ -1803,3 +1803,8 @@ Earlier history: `history-2026-10-16.md`.
 - Where: `claude/robot/slam-live-viewer`.
 - check.py: 264/264 PASS.
 - Robot leftovers (not removed, since that would mean acting on the robot): `~/slam_mapping_only/` (script, params, lidar_health, run log).
+
+### 2026-11-15 — robot — SLAM push test 1 (user OK in chat)
+- What: the user OK'd the push test ("Push test is OK"). Ran the mapping-only bringup (no drive bridge); the user pushed the robot. Save on the live map worked (`live_map_20261115T171845`, 30.4% known). The SLAM pose stayed at (0, 0, 0) for all 433 graph nodes, so the result is inconclusive: the robot hardly moved, or scan matching did not track it. SLAM was stopped afterwards; all processes ended.
+- Fix: `slam_mapping_only.sh` motor guard now skips its own ancestor processes (it had refused because the ssh launch line contained "zlac"). A real `zlac_*` process is still refused.
+- Evidence: `experiments/hardware-runs/20261115-site01/slam_live_viewer/push_test_1/`.

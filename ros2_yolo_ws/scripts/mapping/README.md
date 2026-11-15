@@ -126,6 +126,18 @@ Evidence is in `experiments/hardware-runs/20261115-site01/slam_live_viewer/`.
   - The script refused to start when a fake `zlac` process was running (exit 2, nothing started).
   - `stop` ended every process.
 
+### Push test 1 (17:12–17:19, user's OK): inconclusive
+
+The robot was pushed by hand with the mapping-only bringup running. Save worked on the live map
+(`live_map_20261115T171845`, 30.4% known), and known cells grew from 5,732 to 6,679. **The SLAM
+pose never left (0, 0, 0):** 433 graph nodes were added, all at the start. So either the robot
+hardly moved, or scan matching did not track it.
+Evidence: `experiments/hardware-runs/20261115-site01/slam_live_viewer/push_test_1/`.
+
+The script's motor guard used to flag its own launching shell, because an `ssh "bash -c ..."`
+command line contained the word `zlac`. The guard now skips its own ancestor processes. It was
+re-checked: a real `zlac_*` process is still refused (exit 2).
+
 Not tested yet: the map growing while the robot is moved, because that needs the operator's OK
 to push or carry the robot.
 

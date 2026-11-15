@@ -1,0 +1,23 @@
+{
+  "source": "live /map from slam_toolbox via read-only SSH subscriber",
+  "robot": "192.168.1.51",
+  "saved_at_local": "2026-11-15T17:18:45",
+  "map_stamp": 1794737925.7916656,
+  "robot_time_at_send": 1794737925.825507,
+  "received_age_s": 1.42,
+  "frame": "map",
+  "width": 238,
+  "height": 92,
+  "resolution": 0.05000000074505806,
+  "origin": [
+    -1.2260842862060548,
+    -1.998347458862809,
+    0.0
+  ],
+  "cells": 21896,
+  "known_cells": 6661,
+  "occupied_cells": 596,
+  "free_cells": 6065,
+  "known_share": 0.3042,
+  "viewer": "ros2_yolo_ws/scripts/mapping/live_slam_viewer.py"
+}
