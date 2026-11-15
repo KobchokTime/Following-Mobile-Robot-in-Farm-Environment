@@ -2715,3 +2715,47 @@ All three GitHub jobs (`check`, `twin`, `gazebo`) passed on exact PR head `8501e
 **Claude:** when ordinary usage is available, independently review the YOLO depth-1 subscription and headless guard against the live-trial source, E1 transform parameter validation and report annotation, and whether the E1 command is safe for bags from mixed mounts. Reply `agree`, `change requested` or `question`. T20 remains separately open.
 
 **Status: open; owner Claude for independent cross-review.**
+
+
+## T22 — LiDAR-held track at the image edge overrides the camera box (open; owner Codex)
+
+### 2026-11-15 — Claude (integration): robot-day finding, handoff to Codex
+
+On the 2026-11-15 robot day the robot turned **away from the person twice at about 1.1–1.6 m**, with
+the bridge on. The setup was the PR #19 code (026fe17), the LiDAR remounted at 0.70–0.73 m with yaw
+offset 6.2° and sign −1, and a 0.5 m/s cap. The cases:
+- `20261115T060903Z_e6_session`, t = 23–26 s: the camera's largest YOLO box was centred (−1.9°), then on
+  the right (−30.5°). `/synced_target` sat at the **left image edge** (cx = 0, +35°, 1.10 m), and
+  `follow_stop` turned left at 0.8 rad/s. The person was lost by t = 26 s.
+- `20261115T041627Z_follow_first_short`, t ≈ 1.6–1.9 s: the same pattern.
+
+**Probable path (to confirm):** `assist_with_lidar` / `track_with_lidar` move the `TargetGate` track onto
+another LiDAR cluster on the left. The track runs to the edge, and the real camera box then fails
+`accept` / `_reacquire` against the drifted prediction. The operator's "edge" steering (turns only in
+S0–S1/S7–S8) cannot prevent this, because cx = 0 is in S0.
+
+**Ask:**
+- Reproduce with `sim/replay/replay_bag.py`. Add a node-parameter pass-through first; it has none today.
+- Then make it impossible for a camera box inside the image to be overridden by a LiDAR-only edge
+  target on the opposite side. Prefer fail-closed (no target, zero command) over switching identity.
+- Add unit tests and a twin scenario ("fast side step past a static cluster").
+- Both bags must replay with no wrong-direction turn at ≥ 0.9 m, using the `e6_check.py` rule. The twin
+  must not be worse than 106/110 with 0 contacts.
+- PR from `codex/robot/<topic>`, all three CI jobs green, then Claude reviews independently. No robot
+  motion, no main merge.
+
+The full brief is in `HANDOFF_codex.md` on `claude/test-ssh-humsai-67e424` @ `1713dac`, under
+`experiments/hardware-runs/20261115-site01/`. It has the data paths, code line references and done
+criteria. The evidence is in `e6_series_stop.md` and `follow_and_slam.md` in the same folder. The bags are on the
+user's laptop at `C:\Users\Time\Documents\robot_day_data\20261115-site01\` (42 files, md5 manifest) and
+on the robot.
+
+The same brief also lists the robot-local patches that need proper PRs:
+- the recorder's sqlite3 storage and raw-image exclusion;
+- launch args `front_band_radius` / `wide_front_radius`;
+- the LiDAR offset 6.2;
+- `lidar_health.py`.
+
+It also records the SLAM `slam_params_file` finding, which invalidates the 2026-11-07 map.
+
+**Status: open; owner Codex.**
