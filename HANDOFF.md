@@ -9,7 +9,7 @@ and review threads in [`DISCUSSION.md`](DISCUSSION.md).
 - **Current owner:** none
 - **Status:** ready
 - **Files being edited:** none
-- **Last updated:** 2026-11-15 by Claude (T22 opened for Codex; lock released)
+- **Last updated:** 2026-11-15 16:40 Thai time by Codex (SLAM live-map handoff posted; lock released)
 - **T18 follow-up:** Offline code review **resolved** (Codex, DISCUSSION 2026-11-01 12:45 and 12:49 Thai time); nothing is back with Codex for re-review. Codex's non-blocking hardening is merged at `7760bf1` (`claude/workspace` `0632a22`): the node default is `avoid_trail` false, and `preflight.py --live` reads the running parameters (`/follow_stop_node`, `/sync_fusion_node`). The follow-up merge `cde6463` (`1b8a325`) makes `check_live_params` FAIL instead of crashing on a non-numeric `trail_hold_s`. Robot-day twin (exact robot-day configuration, on `6a64669`): **106/110, 0 contacts**; `blind_corner` 1/5 stays a recorded failure; every other scenario is 105/105. The Follower Test Bench dashboard shows hub `7760bf1`. `scripts/check.py` 238/238. Robot-day checks (running parameters, chassis/scan geometry, stop timing) are still to do on the robot. No main merge or robot-day approval.
 - **T18 robot-day gate review:** Codex (DISCUSSION 2026-11-03 02:15) agreed with the offline default and twin evidence and requested that `preflight.py --live` not be a fail-open go signal. Claude's answer is merged at `3874129` (`claude/workspace` `346c4be`): `avoid_trail` true is a FAIL (static and live), `trail_hold_s` must be finite and exactly 0, missing ROS Python packages give a labelled FAIL, and the new `check_motion_params` reads back and compares `obstacle_stop_m`, `spin_clear_radius_m`, `max_decel`, `recheck_max_s` (`/follow_stop_node`) and `speed_mode`, `max_speed_mps` (`/zlac_drive_bridge`). `scripts/check.py` 239/239. **Back to Codex for re-review of the preflight gate (`ada4077..3874129`).** Offline T18 remains resolved; no robot operation or main merge is authorized.
 - **T18 preflight re-review:** Codex agrees with the gate fix (DISCUSSION 2026-11-03, `ada4077..3874129`); `scripts/check.py` 239/239 and focused preflight tests 8/8. The software gate change request is resolved. Chassis, LiDAR, stop timing, command timeout and low-speed calibration checks remain on the real robot; no operation or main merge is authorized here.
@@ -57,6 +57,39 @@ The 12-week plan is in [`docs/PLAN.md`](docs/PLAN.md) (20 Oct 2026 to about 15 J
 PR #8 head `0aa2e20` is integrated at merge `7fab5ac` after lock claim `6ddec9a`. DISCUSSION **T16: resolved** after Claude agreed to reviewed PR #14 `a6a10fb` and Codex merged it under lock `8f87d41` at `961b92d` (Office Node 12/12, `scripts/check.py` 169/169). PR #13 Office controls head `327b07b` then passed exact-head GitHub check, twin and Gazebo jobs and was merged under lock `33bcd43` at `ab24dd6`. Its append-only log conflict was preserved from both sides; merged Office Node tests passed 20/20 and `scripts/check.py` passed 169/169. The README states that seat checks run in the user's Office checkout. The four non-blocking T16 notes remain separate follow-ups. Codex integration model: `gpt-6-astra`. Dashboard publication and stacked PRs #9–#11 remain pending; main is unchanged.
 
 ## Open items
+
+### Live SLAM map viewer — handoff to Claude, 2026-11-15
+
+- The user wants to save a map and watch scanned versus unknown area update in real time. ROS 2 Humble,
+  `slam_toolbox` and `nav2_map_server` are already installed on the robot (`ros2 pkg prefix` passed), so
+  no ROS installation is needed. At the 2026-11-15 read-only SSH check, the ROS graph had no nodes
+  publishing `/map` or `/scan`; the live-map path has **not** been validated on a running graph.
+- Two saved map pairs are on this Windows PC under
+  `%USERPROFILE%\Documents\robot_day_data\20261115-site01\maps\`. The latest,
+  `map_20261115T115027.pgm` plus YAML and posegraph, is 126 x 120 cells at 0.05 m/cell
+  (6.3 x 6.0 m), with about 18.7% known cells. It is a short local map, not a field map.
+- Codex's **local-only, uncommitted prototype** is
+  `%USERPROFILE%\.codex\visualizations\2026\10\28\01a18067-7e34-71b1-bf40-73435f41bd14\lidar-live-view\live_slam_viewer.py`
+  (SHA-256 `D3CE8FDEF1EA765754D1DA0884CAB90DC06C78B8990341422386DC64FF2790BA`).
+  It serves `http://127.0.0.1:8772/` on localhost (PID 35664 at handoff), displays the archived
+  map with a clear non-live label, subscribes read-only via SSH to ROS `/map` and `/scan`, and
+  can overlay recent scan points when TF gives `map -> laser`. Its Save button writes a local
+  PGM/YAML pair under
+  `%USERPROFILE%\.codex\visualizations\2026\10\28\01a18067-7e34-71b1-bf40-73435f41bd14\slam-live-captures\`
+  **only when a fresh live `/map` exists**. It does not publish ROS topics or connect to the
+  drive bridge. Claude in a cloud container cannot read the local prototype; use a local Claude
+  session or first move a reviewed version into a feature branch.
+- Verified: Python compilation, loading the latest saved PGM/YAML, a 2 x 2 occupancy-to-PGM
+  save round trip, localhost `/api/state` returning `source=archive`, and `/api/save` rejecting
+  the archive with HTTP 409. A true live `/map`, TF placement, real save, and the UI during
+  SLAM operation still need testing. The viewer currently shows the saved map and waits for ROS.
+- The robot's existing `~/slam_bringup.sh` explicitly expects `start_lidar.sh` and
+  `zlac_joystick_bridge.py` to provide `/odom` and `odom -> base_link`. Do not run that
+  bringup as a harmless viewer command: it depends on a bridge connected to the drive system.
+  Claude's next task is to review a mapping-only path with no wheel actuation, validate TF and
+  `/map` update behavior, and then test Save on a fresh map. Keep the viewer's archive/live
+  distinction and avoid claiming a complete map from the short saved scan. No motor command,
+  main merge or dashboard publication was authorized by this handoff.
 
 1. **T1** in `DISCUSSION.md`: Codex reviewed the branch restructure and role setup. Still open:
    Codex's model on `integration-hub` is now **GPT-6 Astra** (was Sol 6). Codex reported its runtime
