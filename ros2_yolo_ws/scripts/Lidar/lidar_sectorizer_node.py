@@ -21,11 +21,15 @@ class LidarSectorizer(Node):
         self.declare_parameter('fov_min_deg', -35.0)
         self.declare_parameter('fov_max_deg', 35.0)
         self.declare_parameter('angle_offset_deg', 180.0)  # ใช้ 180° ถ้าติด LiDAR กลับด้าน
+        self.declare_parameter('angle_sign', 1.0)  # -1.0 when raw negative angles are physically left
 
         self.N = int(self.get_parameter('num_sectors').value)
         self.fov_min = float(self.get_parameter('fov_min_deg').value)
         self.fov_max = float(self.get_parameter('fov_max_deg').value)
         self.angle_offset = math.radians(float(self.get_parameter('angle_offset_deg').value))
+        self.angle_sign = float(self.get_parameter('angle_sign').value)
+        if self.angle_sign not in (-1.0, 1.0):
+            raise ValueError('angle_sign must be -1.0 or 1.0')
 
         # ----------------------------
         # Subscriptions & Publishers
@@ -53,7 +57,7 @@ class LidarSectorizer(Node):
 
         # แปลงองศาเริ่มต้น–สิ้นสุด + ชดเชยมุมติดตั้ง
         angles = np.linspace(msg.angle_min, msg.angle_max, total_pts)
-        angles = angles + self.angle_offset
+        angles = self.angle_sign * angles + self.angle_offset
         angles = (angles + math.pi) % (2 * math.pi) - math.pi  # normalize ให้อยู่ในช่วง -π ถึง π
 
         selected_ranges = np.array(msg.ranges)
