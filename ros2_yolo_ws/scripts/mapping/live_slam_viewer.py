@@ -162,7 +162,8 @@ def archive_map(directory=None):
             continue
         try:
             raw = pgm.read_bytes()
-            header = re.match(rb"P5\s+(\d+)\s+(\d+)\s+255\s", raw)
+            # map_saver may put a "# CREATOR: ..." comment line after the magic number.
+            header = re.match(rb"P5\s+(?:#[^\n]*\n\s*)*(\d+)\s+(\d+)\s+255\s", raw)
             if not header:
                 continue
             width, height = map(int, header.group(1, 2))

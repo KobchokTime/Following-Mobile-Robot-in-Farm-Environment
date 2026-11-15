@@ -87,7 +87,27 @@ These defects were fixed in this copy:
 | 6 | Saved next to the script, with no provenance | Captures could be mixed up with the archive | Saves go to a separate `slam_live_captures/` folder with a `live_map_` prefix and a JSON sidecar (map stamp, age, cell counts) |
 | 7 | Fixed node name | Duplicate node names on the graph | The name now includes the PID |
 
+## Offline tests (`tests/test_live_slam_viewer.py`, 18 tests, no ROS and no SSH)
+
+| What | How |
+|---|---|
+| `/map` QoS | `REMOTE_CODE` runs against stubs of rclpy, the message types and tf2_ros. The `/map` subscription must be RELIABLE, TRANSIENT_LOCAL and depth 1 (so it gets slam_toolbox's latched map). `/scan` uses the sensor-data QoS. Only `/map` and `/scan` are subscribed, and there is no publisher |
+| Placing `/scan` through TF | Same stubs, with the 2026-11-15 mount (z 0.715, roll π, yaw 0.10821) and a robot at (1, 2) facing +y. Points in `base_link` must come out at bearing = −raw + 6.2°, and map points must land where hand geometry puts them. With no TF, the scan is sent raw and the map points and pose are null |
+| PGM orientation | Uses the real `map_saver` output `tests/fixtures/slam/map_20261115T115027` (126 × 120). It reads 254 occupied and 2,571 free cells. ROS row 0 must equal the **last** PGM row, and writing the grid back must give exactly the bytes `map_saver` wrote. A `# CREATOR` comment header must also parse |
+| Stale state | Save works on a fresh live map. With a map older than `LIVE_MAX_AGE_S` (which must be more than 5 s), Save returns 409. With the archive shown, Save returns 409 and nothing is written. Malformed maps are ignored |
+| PGM/YAML save | The trinary thresholds (65/25) and the top-down rows, plus the YAML and JSON sidecar. A live capture is never picked up as the archive |
+| Save hardening | No `X-Slam-Viewer` header returns 403. A foreign `Host` returns 403 |
+
+Still needs a live `/map`, and is not covered offline:
+- slam_toolbox's real QoS and its republish period on the running graph, and how the viewer behaves across an SSH reconnect.
+- The canvas drawing (JavaScript): map orientation on screen, the overlay and the pose arrow.
+- The map growing while the robot is moved by hand, and Save on that growing map.
+- How the robot side copes with the alternating 384/386 beam scans.
+
 ## Validation on the robot (2026-11-15 17:02–17:06, robot stationary, no motion)
+
+> Scope note: this one stationary run, with only the LiDAR spinning, happened *before* the user's
+> later instruction to work offline only. No further robot runs were made after that instruction.
 
 Evidence is in `experiments/hardware-runs/20261115-site01/slam_live_viewer/`.
 

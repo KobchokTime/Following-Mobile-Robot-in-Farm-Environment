@@ -1797,3 +1797,9 @@ Earlier history: `history-2026-10-16.md`.
 - Robot (stationary, LiDAR only, no drive bridge): lidar_health PASS 10.3 Hz / 80%; TF map→laser = [0,0,0.715] RPY [π,0,0.108]; /map every 2 s; viewer Save wrote `live_map_20261115T170447` (238×92, 28.4% known); stale map → 409, no header → 403, fake `zlac` process → script refused (exit 2). Evidence: `experiments/hardware-runs/20261115-site01/slam_live_viewer/`.
 - check.py: 257/257 PASS.
 - Follow-ups: map growth while moving the robot by hand is untested (needs operator OK); T-mini Pro alternates 384/386 beams so slam_toolbox drops about half the scans (scan normaliser); Codex's own viewer (PID 35664) still holds one robot subscriber; Codex to cross-review on the hub.
+
+### 2026-11-15 — robot — SLAM viewer: offline-only scope, more offline tests
+- What: the user's exact scope (relayed by the parent session) is offline-only, with no robot or motor operation. No robot command was run after it arrived. The earlier stationary LiDAR-only run (17:02–17:06) happened before it and is labelled that way in the README. Added offline tests: `REMOTE_CODE` run against rclpy/tf2 stubs (`/map` RELIABLE + TRANSIENT_LOCAL depth 1; `/scan` placed through the full TF with the 2026-11-15 mount), and PGM orientation and a byte-exact round trip on the real `map_saver` fixture `tests/fixtures/slam/map_20261115T115027`. `archive_map` now accepts a `# CREATOR` comment in the PGM header. 18 viewer tests pass.
+- Where: `claude/robot/slam-live-viewer`.
+- check.py: 264/264 PASS.
+- Robot leftovers (not removed, since that would mean acting on the robot): `~/slam_mapping_only/` (script, params, lidar_health, run log).
