@@ -544,6 +544,10 @@ Earlier history: `history-2026-10-16.md`.
 - On clean `codex/robot/t22-edge-gate`, confirmed draft PR #20 head `8be7763` and GitHub run 43691494521 completed successfully in all three jobs: `check`, `twin`, and `gazebo`. Locally `python scripts/check.py` passed 253/253; the two replay-parameter tests and four edge-conflict tests passed. `python -m sim.replay.replay_bag --help` exposed `--node-param`, measured E6 overrides parsed to their intended nodes, and an unknown node exited 2 before starting ROS.
 - Verified the E6 backup bag is the `20261115T060903Z_e6_session` directory itself (SQLite metadata at its root); the first-follow bag is its `recording` subdirectory. The Windows machine still lacks `rosbag2_py`, `rclpy`, and ROS 2 CLI, so neither full field-bag replay nor the 110-trial robot-day twin was run locally. CI's twin job is a smoke set, not that gate. No robot or motor command and no merge.
 
+### 2026-11-15 — integration — Verify SSH reachability only
+
+- From the isolated `codex/robot/t22-edge-gate` checkout, an ordinary sandbox SSH attempt to the previously used robot address was denied locally. With normal approved execution, a batch-mode, pinned-host-key, read-only `hostname` command connected and returned `yakgreen001-UPN-APL01`. This proves current SSH reachability only; no ROS, bridge, motor, or replay command ran on the robot.
+
 ### 2026-11-07 — integration — Merge camera freshness and E1 analysis into hub
 
 - GitHub PR #18 exact head `8501e38` passed all three jobs: `check`, `twin`, and `gazebo`. Under the HANDOFF lock claimed at `bac67d5`, merged the focused PR with `--no-ff` into `integration-hub` at `446122b`; GitHub reported PR #18 merged. Resolved only the append-only Codex log tail conflict, retaining both histories.
