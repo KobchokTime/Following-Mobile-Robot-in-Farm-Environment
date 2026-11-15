@@ -523,6 +523,12 @@ Earlier history: `history-2026-10-16.md`.
 - Claimed the HANDOFF lock at `a4d0447` to record the completed motor-free A/B and pending review. At 17:29 Thai time GitHub `check` and `gazebo` passed on PR head `8501e38`; `twin` remained in progress. Opened T21 for the remaining CI gate and Claude's later independent review. PR #18 was not merged, no robot checkout file was changed, and no motor bridge subscriber was present in the final live check.
 - On unchanged hub source, python scripts/check.py passed 244/244; released the lock after recording T21.
 
+### 2026-11-15 — robot / qa — Draft T22 edge conflict stop
+
+- In isolated `codex/robot/t22-edge-gate`, committed the LiDAR edge / camera disagreement stop (`795514a`), QA regressions and per-node bag replay parameter routing (`2f1e76d`), then combined them with a no-ff merge (`138927f`). The replay tools in `sim/` accompany QA coverage because no repository role owns that path explicitly.
+- `python scripts/check.py` passed 253/253, and `git diff --check` passed. Added a separate T22 twin scenario without changing the frozen 110-run baseline. Inspected the two-bag field handoff and E6 checker. The change has not been run against either field bag or the full twin: this Windows environment lacks ROS 2 packages; WSL was denied and Docker is unavailable. Therefore the T22 wrong-turn criterion and 106/110 twin gate remain unverified.
+- This is an offline draft only. No hub lock was claimed, no PR or main merge was made, and no robot or motor command was sent. Controller, identity, and fusion changes still need safety audit and Claude cross-review before integration.
+
 ### 2026-11-07 — integration — Merge camera freshness and E1 analysis into hub
 
 - GitHub PR #18 exact head `8501e38` passed all three jobs: `check`, `twin`, and `gazebo`. Under the HANDOFF lock claimed at `bac67d5`, merged the focused PR with `--no-ff` into `integration-hub` at `446122b`; GitHub reported PR #18 merged. Resolved only the append-only Codex log tail conflict, retaining both histories.
