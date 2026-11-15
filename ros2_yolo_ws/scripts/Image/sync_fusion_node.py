@@ -810,17 +810,16 @@ class SyncFusionNode(Node):
                 if camera_lidar_conflict(bearing, pb, self.edge_rad,
                                          math.radians(self.camera_hfov_deg / 2.0)):
                     self.camera_lidar_conflict = True
-            if self.camera_lidar_conflict:
-                return
             # another person, not the one being followed: remember them only if they are in the way
             # Only someone in the corridor and clearly nearer than the target is in the way
             if self.last_target is not None and in_path(bearing, dist, self.path_half_width) \
                     and dist < self.last_target[3] - self.path_min_gap:
-                self.path_block = (ty, dist)
-                # They may hide the target, so give way now instead of waiting to see the target again
-                cx_t, cy_t, sector_t, _ = self.last_target
-                self.publish_synced(cx_t, cy_t, max(self.path_floor, dist - self.path_margin), sector_t, best_dt)
-            return
+                self.path_block = (ty, dist)  # kept while latched, for the first fix after it clears
+                if not self.camera_lidar_conflict:
+                    # They may hide the target, so give way now instead of waiting to see the target again
+                    cx_t, cy_t, sector_t, _ = self.last_target
+                    self.publish_synced(cx_t, cy_t, max(self.path_floor, dist - self.path_margin), sector_t, best_dt)
+            return  # while latched nothing is published from any path: the controller stops
         self.last_target = (cx, cy, sector_id, dist)  # the target's own range, before any give-way
         self.recent_ranges = [(t0, r0) for t0, r0 in self.recent_ranges if ty - t0 <= 1.0] + [(ty, dist)]
         self.last_camera_fix = ty

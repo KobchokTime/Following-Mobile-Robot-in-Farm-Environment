@@ -149,6 +149,8 @@ class WalkUpTest(unittest.TestCase):
         node.buf_lidar.extend([(1.0, [1.0])])
         node.try_sync_from_yolo(1.0, self.W // 2, 240, 4)
         self.assertEqual(node.published, [])
+        self.assertIsNotNone(node.path_block)  # the person in the way is still remembered for after the latch
+        self.assertEqual(node.path_block[0], 1.0)
 
     def test_assist_does_not_refresh_gate_while_conflict_is_latched(self):
         def ready_node():
