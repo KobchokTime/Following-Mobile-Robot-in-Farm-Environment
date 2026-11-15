@@ -162,9 +162,9 @@ def parse_hist(values, bins=48):
     return [v / total for v in h] if total > 0 else None
 
 
-def camera_lidar_conflict(camera_bearing, lidar_prediction, edge_rad):
-    """An in-image camera box lies across the centre from a LiDAR prediction beyond an edge."""
-    return abs(camera_bearing) < edge_rad and abs(lidar_prediction) >= edge_rad \
+def camera_lidar_conflict(camera_bearing, lidar_prediction, edge_rad, camera_half_fov):
+    """An in-image box is across centre from a LiDAR prediction beyond the trackable edge."""
+    return abs(camera_bearing) < camera_half_fov and abs(lidar_prediction) >= edge_rad \
         and camera_bearing * lidar_prediction <= 0
 
 
@@ -630,6 +630,8 @@ class SyncFusionNode(Node):
         decides alone, as before. Not more than lidar_track_max_s after the last camera fix.
         Returns (bearing, range) of the cluster used, or None.
         """
+        if self.camera_lidar_conflict:
+            return None  # let the gate time out; assisted scans must not prolong a conflicted track
         if not (self.use_gate and self.lidar_assist and self.gate.locked and self.last_camera_fix is not None):
             return None
         now = self.now_sec()
@@ -803,9 +805,13 @@ class SyncFusionNode(Node):
                                        + (f" predicted range {pr:.2f} m" if occluded else ''))
                 self.occl_logged = occluded
         if self.use_gate and not self.gate.accept(ty, bearing, dist, chroma, hist):
-            pb, _ = self.gate._predict(ty)
-            if camera_lidar_conflict(bearing, pb, self.edge_rad):
-                self.camera_lidar_conflict = True
+            if self.gate.locked and self.gate.t is not None:
+                pb, _ = self.gate._predict(ty)
+                if camera_lidar_conflict(bearing, pb, self.edge_rad,
+                                         math.radians(self.camera_hfov_deg / 2.0)):
+                    self.camera_lidar_conflict = True
+            if self.camera_lidar_conflict:
+                return
             # another person, not the one being followed: remember them only if they are in the way
             # Only someone in the corridor and clearly nearer than the target is in the way
             if self.last_target is not None and in_path(bearing, dist, self.path_half_width) \

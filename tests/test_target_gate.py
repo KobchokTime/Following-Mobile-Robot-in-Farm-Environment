@@ -67,10 +67,13 @@ class TargetGateTest(unittest.TestCase):
         self.assertGreater(g._predict(0.9)[0], D(20))
         self.assertFalse(g.accept(0.9, D(0), 1.2, (110, 165)))
         self.assertFalse(g.accept(1.0, D(-25), 1.2, (110, 165)))
-        edge = D(32)
-        self.assertTrue(self.camera_lidar_conflict(D(-25), g._predict(1.0)[0], edge))
-        self.assertTrue(self.camera_lidar_conflict(D(0), g._predict(1.0)[0], edge))
-        self.assertFalse(self.camera_lidar_conflict(D(25), g._predict(1.0)[0], edge))
+        from test_walk_up import make_node
+        node = make_node()[1]
+        edge = node.edge_rad
+        half_fov = math.radians(node.camera_hfov_deg / 2.0)
+        self.assertTrue(self.camera_lidar_conflict(D(-25), g._predict(1.0)[0], edge, half_fov))
+        self.assertTrue(self.camera_lidar_conflict(D(0), g._predict(1.0)[0], edge, half_fov))
+        self.assertFalse(self.camera_lidar_conflict(D(25), g._predict(1.0)[0], edge, half_fov))
 
     @staticmethod
     def _blob(centre_deg, rng, width_m, step_deg=0.5):

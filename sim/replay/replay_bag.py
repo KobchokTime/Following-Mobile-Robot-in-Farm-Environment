@@ -23,8 +23,6 @@ import time
 from pathlib import Path
 from typing import Dict, List, Tuple
 
-import yaml
-
 from sim.twin.pipeline import ROOT, Processes, isolated_env
 
 DEFAULT_INPUTS = ["/scan", "/target_centroid_sector", "/target_centroid"]
@@ -46,6 +44,8 @@ def node_ros_params(values: List[str]) -> Dict[str, List[str]]:
 
 
 def storage_id(bag: Path) -> str:
+    import yaml
+
     meta = yaml.safe_load((bag / "metadata.yaml").read_text(encoding="utf-8"))
     return meta["rosbag2_bagfile_information"]["storage_identifier"]
 

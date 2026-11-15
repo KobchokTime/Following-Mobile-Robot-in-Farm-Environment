@@ -98,9 +98,104 @@ class WalkUpTest(unittest.TestCase):
         self.assertTrue(node.published, 'edge-track precondition should publish before the conflict latch')
         self.assertEqual(node.published[-1][0], 0.0)  # +35 deg is clamped to the left image edge
         node.published.clear()
-        node.camera_lidar_conflict = True
+        # Set the latch through the rejected camera path (opposite side of the predicted edge track).
+        node.gate.bearing = math.radians(35.0)
+        node.gate.range = 1.0
+        node.gate.bearing_rate = 0.0
+        node.gate.range_rate = 0.0
+        node.gate.t = 0.3
+        # the target's own scan returns at the box bearing, so the box has a finite range and reaches the gate
+        node.scan_points = scan(person(0.8 * math.cos(math.radians(-30.5)), 0.8 * math.sin(math.radians(-30.5))))
+        node.scan_time = 0.4
+        node.buf_lidar.clear()
+        node.buf_lidar.extend([(0.4, [0.8])])
+        cx = int(round(self.W / 2.0 - (self.W / 2.0 / math.tan(math.radians(self.HFOV) / 2.0))
+                       * math.tan(math.radians(-30.5))))
+        node.try_sync_from_yolo(0.4, cx, 240, 4)
+        self.assertTrue(node.camera_lidar_conflict)
+        node.published.clear()
         node.track_with_lidar()
         self.assertEqual(node.published, [])
+
+    def test_unlocked_rejection_does_not_predict_without_a_gate_time(self):
+        for t in (0.0, 6.0):
+            _, node = make_node()
+            if t:
+                node.gate.accept(t - 6.0, 0.0, 0.8)
+                node.gate.accept(t - 5.9, 0.0, 0.8)
+            node.scan_points = scan(person(1.3, 0.0))
+            node.scan_time = t
+            node.buf_lidar.clear()
+            node.buf_lidar.extend([(t, [1.3])])
+            node.try_sync_from_yolo(t, self.W // 2, 240, 4)
+            self.assertFalse(node.gate.locked)
+
+    def test_latched_give_way_publishes_nothing(self):
+        _, node = make_node()
+        node.gate.accept(0.0, 0.0, 0.8)
+        node.gate.accept(0.1, 0.0, 0.8)
+        node.last_target = (int(round(self.W / 2.0 - (self.W / 2.0 / math.tan(math.radians(35.0)))
+                                      * math.tan(math.radians(23.0)))), 240, 1, 1.4)
+        node.last_camera_bearing = math.radians(23.0)
+        node.gate.bearing = math.radians(35.0)
+        node.gate.range = 1.4
+        node.gate.bearing_rate = node.gate.range_rate = 0.0
+        node.gate.t = 0.9
+        node.camera_lidar_conflict = True
+        node.scan_points = scan(person(1.0, 0.0), person(1.4 * math.cos(math.radians(35.0)),
+                                                          1.4 * math.sin(math.radians(35.0))))
+        node.scan_time = 1.0
+        node.buf_lidar.clear()
+        node.buf_lidar.extend([(1.0, [1.0])])
+        node.try_sync_from_yolo(1.0, self.W // 2, 240, 4)
+        self.assertEqual(node.published, [])
+
+    def test_assist_does_not_refresh_gate_while_conflict_is_latched(self):
+        def ready_node():
+            # locked, past the 1 s lock-on ambiguity window, last camera fix 0.3 s ago, and a fresh scan with
+            # the target's own cluster slightly ahead of the prediction: the assist would move the track
+            _, node = make_node(lidar_assist=True)
+            self.assertTrue(node.gate.accept(0.0, 0.0, 0.8))
+            self.assertTrue(node.gate.accept(1.2, 0.0, 0.8))
+            node.last_camera_fix = 1.2
+            node.last_camera_bearing = 0.0
+            node.last_target = (320, 240, 4, 0.8)
+            node.scan_points = scan(person(0.85, 0.05))
+            node.scan_time = 1.5
+            node.now_sec = lambda: 1.5
+            self.assertGreaterEqual(1.5, node.gate.ambiguous_until)
+            return node
+
+        free = ready_node()
+        before = (free.gate.bearing, free.gate.t)
+        self.assertIsNotNone(free.assist_with_lidar())  # precondition: without the latch the assist acts
+        self.assertNotEqual((free.gate.bearing, free.gate.t), before)
+
+        latched = ready_node()
+        latched.camera_lidar_conflict = True
+        before = (latched.gate.bearing, latched.gate.t)
+        self.assertIsNone(latched.assist_with_lidar())
+        self.assertEqual((latched.gate.bearing, latched.gate.t), before)
+
+    def test_camera_box_inside_image_beyond_edge_latches(self):
+        _, node = make_node()
+        node.gate.accept(0.0, 0.0, 0.8)
+        node.gate.accept(0.1, 0.0, 0.8)
+        node.gate.bearing = math.radians(32.0)
+        node.gate.range = 1.0
+        node.gate.bearing_rate = node.gate.range_rate = 0.0
+        node.gate.t = 0.4
+        bearing = math.radians(-30.5)
+        node.scan_points = scan(person(0.8 * math.cos(bearing), 0.8 * math.sin(bearing)))  # returns at the box
+        node.scan_time = 0.5
+        node.buf_lidar.clear()
+        node.buf_lidar.extend([(0.5, [0.8])])
+        cx = int(round(self.W / 2.0 - (self.W / 2.0 / math.tan(math.radians(self.HFOV) / 2.0))
+                       * math.tan(bearing)))
+        node.try_sync_from_yolo(0.5, cx, 240, 4)
+        self.assertGreater(abs(bearing), node.edge_rad)
+        self.assertLess(abs(bearing), math.radians(node.camera_hfov_deg / 2.0))
+        self.assertTrue(node.camera_lidar_conflict)
 
     def frame(self, node, t, people):
         """One camera frame: a fresh scan of everyone, then one box per visible person, in list order."""

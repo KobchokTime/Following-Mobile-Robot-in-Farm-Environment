@@ -540,8 +540,8 @@ Earlier history: `history-2026-10-16.md`.
 - Renamed the twin scenario to `fast_side_step_left`: inspection confirmed it defines only the target and does not add a static object, so the prior name and description overstated the setup.
 - Tests were not run in this sandbox; Claude will run `scripts/check.py` with the venv. Changes remain uncommitted by instruction. No push, PR, robot contact, or integration-file edit.
 
-### 2026-11-15 — qa — Correct T22 edge-track fixtures
+### 2026-11-15 â€” qa â€” Correct T22 edge-track fixtures
 
-- Updated both T22 `track_with_lidar()` fixtures to model a +30° last camera sighting and a predicted track beyond `edge_rad`; added explicit edge eligibility, fresh scan, 0.15–0.8 m cluster width, 25° search window, 0.5 m range tolerance, and far-filter range assertions.
+- Updated both T22 `track_with_lidar()` fixtures to model a +30Â° last camera sighting and a predicted track beyond `edge_rad`; added explicit edge eligibility, fresh scan, 0.15â€“0.8 m cluster width, 25Â° search window, 0.5 m range tolerance, and far-filter range assertions.
 - The no-latch case now asserts that a publication occurs and maps to `cx=0` before asserting the conflict latch suppresses publication. The center-camera conflict test asserts its valid pre-latch publication, latch suppression, and clearing after an accepted camera fix.
 - Production code unchanged. Tests not run in this environment; Claude reported the existing suite result and requested fixture corrections. No robot, push, PR, or integration-file changes.
