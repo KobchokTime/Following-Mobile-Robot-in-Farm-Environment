@@ -60,10 +60,11 @@ class ReplayParamsTest(unittest.TestCase):
         class FakeProcesses:
             instance = None
 
-            def __init__(self, _out, _env):
+            def __init__(self, _out, env):
                 self.commands = {}
                 self.play = FakePlay()
                 self.stopped = False
+                self.env = env
                 FakeProcesses.instance = self
 
             def start_robot_nodes(self, node_params=None):
@@ -78,13 +79,14 @@ class ReplayParamsTest(unittest.TestCase):
 
         with tempfile.TemporaryDirectory() as directory, \
              mock.patch.object(replay_mod, 'Processes', FakeProcesses), \
-             mock.patch.object(replay_mod, 'isolated_env', return_value={}), \
+             mock.patch.object(replay_mod, 'isolated_env', return_value={'ROS_DOMAIN_ID': '188'}), \
              mock.patch.object(replay_mod, 'read_cmd_vel', return_value=[]), \
              mock.patch.object(replay_mod.time, 'sleep'), \
              mock.patch.object(replay_mod.os, 'killpg', create=True) as interrupt:
             replay_mod.replay(Path('bag'), Path(directory), replay_mod.DEFAULT_INPUTS, 1.0,
-                              start_offset=580.0, max_wall_s=40.0)
+                              start_offset=580.0, max_wall_s=40.0, domain_id=187)
             procs = FakeProcesses.instance
+            self.assertEqual(procs.env['ROS_DOMAIN_ID'], '187')
             self.assertIn('--start-offset', procs.commands['bag_play'])
             self.assertIn('580.0', procs.commands['bag_play'])
             self.assertIn('/yolo_frame', procs.commands['bag_record'])

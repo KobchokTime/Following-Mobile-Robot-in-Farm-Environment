@@ -102,9 +102,13 @@ def parse_node_params(items: List[str]) -> Dict[str, Dict[str, str]]:
 
 def replay(bag: Path, out: Path, inputs: List[str], rate: float,
            node_params: Dict[str, Dict[str, str]] | None = None,
-           start_offset: float = 0.0, max_wall_s: float | None = None) -> dict:
+           start_offset: float = 0.0, max_wall_s: float | None = None,
+           domain_id: int | None = None) -> dict:
     out.mkdir(parents=True, exist_ok=True)
-    procs = Processes(out, isolated_env())
+    env = isolated_env()
+    if domain_id is not None:
+        env["ROS_DOMAIN_ID"] = str(domain_id)
+    procs = Processes(out, env)
     try:
         procs.start_robot_nodes(node_params=node_params)
         procs.start("bag_record", ["ros2", "bag", "record", "-s", "sqlite3",
@@ -127,7 +131,8 @@ def replay(bag: Path, out: Path, inputs: List[str], rate: float,
     original = read_cmd_vel(bag)
     replayed = read_cmd_vel(out / "replay")
     result = {"bag": str(bag), "inputs": inputs, "rate": rate,
-              "start_offset": start_offset, "max_wall_s": max_wall_s, "node_params": node_params or {},
+              "start_offset": start_offset, "max_wall_s": max_wall_s,
+              "ros_domain_id": env["ROS_DOMAIN_ID"], "node_params": node_params or {},
               "original_cmd_vel": summarize(original), "replayed_cmd_vel": summarize(replayed)}
     if original and replayed:
         result["linear_x_rmse"] = aligned_linear_rmse(original, replayed)
@@ -145,17 +150,21 @@ def main() -> int:
                     help="Skip this many seconds from the beginning of a long bag")
     ap.add_argument("--max-wall-s", type=float,
                     help="Stop playback after this many wall-clock seconds, then flush the output bag")
+    ap.add_argument("--domain-id", type=int,
+                    help="Explicit isolated ROS domain (100-200), useful for checking it is empty before replay")
     ap.add_argument("--node-param", action="append", default=[], metavar="NODE.PARAM=VALUE",
                     help="Pass a ROS parameter only to the named replay node (repeatable)")
     args = ap.parse_args()
     if args.rate <= 0 or args.start_offset < 0 or (args.max_wall_s is not None and args.max_wall_s <= 0):
         ap.error("--rate must be positive, --start-offset non-negative, and --max-wall-s positive")
+    if args.domain_id is not None and not 100 <= args.domain_id <= 200:
+        ap.error("--domain-id must be in the isolated range 100-200")
     try:
         node_params = parse_node_params(args.node_param)
     except ValueError as error:
         ap.error(str(error))
     print(json.dumps(replay(args.bag, args.out, args.inputs, args.rate, node_params,
-                            args.start_offset, args.max_wall_s), indent=2))
+                            args.start_offset, args.max_wall_s, args.domain_id), indent=2))
     return 0
 
 
