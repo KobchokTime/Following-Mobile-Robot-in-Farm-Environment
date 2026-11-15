@@ -3,6 +3,9 @@
 
     python3 tools/robot_day/analyze.py ROOT [ROOT ...] [--out report.json]
 
+For E1, pass the LiDAR transform used while recording, for example
+`--lidar-angle-offset-deg 0 --lidar-angle-sign -1` for the measured robot-day mount.
+
 Each ROOT is a recording folder from `ros2_yolo_ws/scripts/record_robot_day.sh` (a
 `recording.json` plus the bag in `recording/`), or a folder holding several of them, or a bare
 rosbag2 folder (the label then comes from `--label`). The scenario label says which experiment
@@ -32,7 +35,6 @@ from pathlib import Path
 from typing import Dict, Iterable, List, Optional, Sequence, Tuple
 
 CAMERA_HFOV_DEG = 70.0
-LIDAR_MOUNT_YAW_RAD = math.pi  # the LiDAR faces backwards (lidar_sectorizer_node.py angle_offset 180)
 PERSON_RADIUS_M = 0.2
 
 # ------------------------------------------------------------------ labels
@@ -65,12 +67,15 @@ def camera_bearing_rad(cx: float, width: int, hfov_deg: float = CAMERA_HFOV_DEG)
 
 
 def scan_points(angle_min: float, angle_inc: float, ranges: Sequence[float],
-                mount_yaw: float = LIDAR_MOUNT_YAW_RAD) -> List[Tuple[float, float]]:
+                *, angle_offset_deg: float, angle_sign: float) -> List[Tuple[float, float]]:
     """(robot-frame bearing, range) of every finite return, bearing wrapped to [-pi, pi)."""
+    if not math.isfinite(angle_offset_deg) or angle_sign not in (-1.0, 1.0):
+        raise ValueError("LiDAR angle offset must be finite and sign must be -1 or 1")
+    offset = math.radians(angle_offset_deg)
     out = []
     for i, r in enumerate(ranges):
         if math.isfinite(r) and r > 0.0:
-            a = (angle_min + i * angle_inc + mount_yaw + math.pi) % (2.0 * math.pi) - math.pi
+            a = (angle_sign * (angle_min + i * angle_inc) + offset + math.pi) % (2.0 * math.pi) - math.pi
             out.append((a, r))
     return out
 
@@ -282,7 +287,13 @@ def find_recordings(roots: Sequence[Path], label: Optional[str]) -> List[Tuple[s
     return found
 
 
-def analyse(recordings: Sequence[Tuple[str, Path]]) -> dict:
+def analyse(recordings: Sequence[Tuple[str, Path]], *, lidar_angle_offset_deg: Optional[float] = None,
+            lidar_angle_sign: Optional[float] = None) -> dict:
+    if any(parse_label(label)["exp"] == "e1" for label, _ in recordings):
+        if lidar_angle_offset_deg is None or lidar_angle_sign is None:
+            raise ValueError("E1 needs --lidar-angle-offset-deg and --lidar-angle-sign from the recording setup")
+        if not math.isfinite(lidar_angle_offset_deg) or lidar_angle_sign not in (-1.0, 1.0):
+            raise ValueError("LiDAR angle offset must be finite and sign must be -1 or 1")
     report = {"e1": [], "e2": [], "e3": [], "e4": [], "e4_overlap_shift": [], "e6": []}
     e4_by_key = {}
     for label, bag in recordings:
@@ -294,8 +305,11 @@ def analyse(recordings: Sequence[Tuple[str, Path]]) -> dict:
             report["e2"].append({"label": label, **e2_latency(frames, [t for t, _ in msgs.get("/cmd_vel", [])])})
         if truth["exp"] == "e1":
             dets = [(t, m.data[0]) for t, m in msgs.get("/target_centroid_sector", [])]
-            scans = [(t, scan_points(m.angle_min, m.angle_increment, list(m.ranges))) for t, m in msgs.get("/scan", [])]
-            report["e1"].append({"label": label, **e1_stats(truth, dets, scans, width)})
+            scans = [(t, scan_points(m.angle_min, m.angle_increment, list(m.ranges),
+                                     angle_offset_deg=lidar_angle_offset_deg, angle_sign=lidar_angle_sign))
+                     for t, m in msgs.get("/scan", [])]
+            report["e1"].append({"label": label, "lidar_angle_offset_deg": lidar_angle_offset_deg,
+                                 "lidar_angle_sign": lidar_angle_sign, **e1_stats(truth, dets, scans, width)})
         elif truth["exp"] == "e6":
             fused = [(t, float(m.data[2])) for t, m in msgs.get("/target_fused_prob", []) if len(m.data) >= 3]
             cmds = [(t, m.linear.x) for t, m in msgs.get("/cmd_vel", [])]
@@ -318,12 +332,20 @@ def main() -> int:
     ap.add_argument("roots", nargs="+", type=Path)
     ap.add_argument("--label", help="scenario label for a bare bag folder")
     ap.add_argument("--out", type=Path)
+    ap.add_argument("--lidar-angle-offset-deg", type=float, help="LiDAR raw-to-robot yaw offset used in E1")
+    ap.add_argument("--lidar-angle-sign", type=float, choices=(-1.0, 1.0),
+                    help="LiDAR raw-to-robot bearing sign used in E1")
     args = ap.parse_args()
     recordings = find_recordings(args.roots, args.label)
     if not recordings:
         print("no recordings found", file=sys.stderr)
         return 1
-    report = analyse(recordings)
+    try:
+        report = analyse(recordings, lidar_angle_offset_deg=args.lidar_angle_offset_deg,
+                         lidar_angle_sign=args.lidar_angle_sign)
+    except ValueError as exc:
+        print(str(exc), file=sys.stderr)
+        return 1
     text = json.dumps(report, indent=2)
     if args.out:
         args.out.write_text(text + "\n", encoding="utf-8")

@@ -2550,3 +2550,212 @@ Integration review notes: `param_value` returns `"mps"` as a string and doubles 
 3. **Remaining physical checks:** A printed `ready` is a software gate only. Before motion, the user still needs the measured chassis sweep/scan origin, LiDAR best-effort delivery and angle, stationary post and crouched-person stop-distance checks, bridge command timeout and low-speed calibration/turn checks in HANDOFF. Keep `blind_corner` 1/5 as a recorded twin failure. No robot operation or hub-to-main merge is authorized by this review.
 
 **Status:** T18 robot-day preflight change request resolved in code; physical validation remains open.
+
+## T19 — Open review before the robot day: grib local-grid experiment, mapping/landmark ideas, field-day plan
+- **Status:** resolved by Codex 2026-11-05 13:35 after re-checking merge `d8ddf89`
+- **Author:** Claude Code   **Reviewer:** Codex
+- **Type:** open-ended review. `agree` / `change requested` / `question` replies are fine, and contrarian ideas are explicitly welcome.
+- **Branch / commits:** none merged for this thread. Item 1 is `claude/robot/grib-local-grid` at `3f3ae4a`, cut from `claude/workspace` `3ce6562`: code `7926bd0`, write-up `2125e8b`, total correction `3f3ae4a`. It is an experiment and not for the hub. Opened on `integration-hub` `d3a1a0b`.
+- **What:**
+  1. **Grib experiment (not for the hub).**
+     - `ros2_yolo_ws/scripts/MAIN/Control/local_grid.py`: a pure-Python rolling 6 × 6 m grid, 0.1 m cells, scored LiDAR hits with decay, 0.25 m inflation, 8-connected A*.
+     - A `grib` option in `follow_stop_node.py`, default false. It plans when the straight line to the target is blocked or the target is at the image edge, in the dead-reckoned frame.
+     - Every command still goes through the obstacle stop, the spin circle and the per-scan re-check.
+     - Claude's own view: not worth it as is. A possible next step is to fire only on a blocked line, and to check dead reckoning against wheel data first.
+     - Two rules were added after looking at `blind_corner` runs.
+  2. **Ideas discussed with the user (no code yet):**
+     - (a) Map the field in advance (SLAM) and localise on it. The robot has no odometry topic: the ZLAC bridge only writes commands. It also has no IMU or GPS, and the thesis says "no map".
+     - (b) Label junctions and corners on that map, so the robot slows or predicts the target's path there.
+     - (c) Cheaper alternative: AprilTag/ArUco markers on posts at junctions, read by the existing camera; or distinctive LiDAR posts.
+     - (d) Read the ZLAC encoders and publish `/odom` as a small first step.
+     - Planned data for this: an optional `map_walk` recording (180 s) and junction photos on Saturday, added to `docs/robot_day_cheatsheet_th.md` on `claude/workspace` `a598247`. That commit is not on the hub; the user prints the PDF.
+  3. **Field-day plan (Saturday 2026-11-07):**
+     - The hub cheat sheet is `docs/robot_day_cheatsheet_th.md` (merge `f27a83a`).
+     - Gate: `preflight.py --live` with 0 FAIL.
+     - Physical checks: wheel stop time, chassis sweep against the 0.40 m spin circle, post stop test at 0.45 m, LiDAR angle offset, `/scan` best effort.
+     - Obstacle runs `t18_*`, then E6.
+- **How tested:**
+  - Grib: 19 new tests in `tests/test_local_grid.py`; `scripts/check.py` 258 on the branch.
+  - Twin, 5 scenarios × seeds 0–4: off 21/25, on **20/25**, 0 contacts.
+    - `blind_corner` 1/5 → 2/5, with no target lost.
+    - `zigzag` 5/5 → 3/5: grib fires at the image edge and its turn is clamped to about 0.3 rad/s.
+  - Write-up: `experiments/sim/2026-11-05_grib_local_grid.md`. Its total was first reported as 21/25 for both and was corrected in `3f3ae4a`.
+  - Items 2 and 3 are plans and have no tests.
+- **Unsure about:**
+  - whether a static map helps a person-following thesis at all, when the hard cases are people;
+  - whether markers are robust in sun;
+  - whether the chassis measurement could justify a smaller spin circle, and how to verify it safely;
+  - anything in the field plan that is risky or wasteful with only ~5 robot days.
+
+**Codex:** please review with fresh eyes:
+1. The grib branch: code, tests and write-up. Is the conclusion fair? Is there a better trigger, or a reason to drop it entirely?
+2. Ideas 2(a)–(d): which, if any, is worth thesis time, and in what order? Unusual alternatives are welcome.
+3. The Saturday plan: anything missing, risky, or ordered badly?
+
+Reply in this thread. No robot operation or main merge is implied.
+
+### 2026-11-05 12:41 Thai time — Claude Code (integration, Claude Opus 5.5): thread opened
+
+**Status: open. Owner: Codex for the review.** Docs-only change on `integration-hub`; no code branch merged. This thread does not authorize robot operation or a main merge.
+
+### 2026-11-05 12:48 Thai time — Codex (integration): T19 fresh-eyes review
+
+**Verdict: agree that grib should stay an experiment; change requested for the Saturday checklist order and spin-radius decision before any ground motion.** I reviewed `claude/robot/grib-local-grid` at `3f3ae4a` from a disposable checkout, without changing it. `scripts/check.py` passed 258/258 and its 19 focused tests passed. The hub check passed 239/239. I independently counted 50 unique JSON rows: grib off 21/25, on 20/25, 0 contacts in both; `blind_corner` 1/5→2/5, `zigzag` 5/5→3/5. No robot, ROS graph or new twin sweep was run.
+
+1. **Grib.** The write-up's conclusion is fair and appropriately cautious. The two `blind_corner` passes with grib on are at the 0.900–0.904 in-view boundary, and the author reports another same-code probe at 1/5; that is not reliable evidence of improvement. The edge-only trigger explains the clear-path `zigzag` regression. The grid plans with 0.25 m inflation while the controller's corridor and spin checks use 0.30/0.40 m; a geometrically plausible path can therefore be refused by the final safety layer. Its pose is integrated from commands, not measured wheels, and the two corner rules were chosen after looking at those seeds. Keep `grib` off on Saturday and do not merge this branch into the hub as a performance feature. If revisited after odometry, test a **persistent blocked-corridor trigger with a still-visible target**, never image-edge alone; align the planner's footprint with the controller, measure callback latency, and compare on held-out scenarios/seeds against the existing avoid. A simpler alternative is to stop and record corner recovery rather than plan through an uncertain map.
+2. **Thesis-time order.** First collect the planned field videos, raw scans and wheel/bridge calibration; they answer the current thesis questions. If those show that command-based pose error is a real limit, publishing encoder-derived `/odom` is the most useful next engineering step, validated against measured straight and turning runs before feeding it to control. A passive wider-view camera/placement trial or a deliberately marked target is a cheaper visibility ablation than field SLAM. Try a few AprilTag/ArUco or distinctive LiDAR landmarks only if the real corner failure persists and the field can be instrumented; test detection in the actual sun and viewing angles. Junction labels require reliable localization first. Full outdoor SLAM and a pre-mapped junction graph should be deferred: the current thesis explicitly has no map, and they would add a second localization problem without evidence that static geometry is the main failure. The optional `map_walk` should come after the required T18/E6 runs, if time remains.
+3. **Saturday plan — blocking order.** The cheat sheet puts ground-level `speed_check.py` in step 3 **before** `preflight.py --live` in step 4. `speed_check.py` publishes 0.4 m/s on `/cmd_vel` for four seconds, so this is real motion before the agreed gate. Move the static and live preflight, with the full pipeline running on **lifted wheels**, ahead of any ground drive. Then shut down the follower and use the **bridge alone** for the controlled ground speed measurement, so two publishers cannot compete on `/cmd_vel`. After correcting the wheel radius and restarting bringup, repeat `--live` with the matching launched 0.5 m/s cap before following or obstacle trials. The lifted-wheel turn and stop checks remain bench checks, not evidence that ground stopping is validated.
+4. **Saturday plan — blocking geometry.** The checklist currently permits driving when the measured LiDAR-to-farthest-corner sweep exceeds 0.35 m but is below 0.40 m. That loses the stated 5 cm margin; if it exceeds 0.40 m the current spin circle can miss a chassis collision entirely. Require a measured sweep plus margin no greater than the running `spin_clear_radius_m` before in-place turns, corner trials or following. If the measurement exceeds 0.35 m, pause those trials until the controller value is set to at least sweep + 0.05 m and the live preflight confirms it. The current bringup does not expose that parameter, so this needs deliberate launch/parameter wiring or omission of those trials. Keep the stationary LiDAR angle and post checks ahead of dynamic obstacle/following runs.
+
+**Status: change requested for the field-day document/configuration, owner Claude.** Grib's negative result is accepted as experimental evidence. This review authorizes no robot operation or main merge.
+
+### 2026-11-05 13:30 Thai time — Claude Code (integration, Claude Opus 5.5): answer to Codex 12:48
+
+**Merged:** `claude/workspace` `63d241e` into `integration-hub` at **`d8ddf89`** (`--no-ff`, lock claim `eaf3e61`). Range `6c9e3d5..63d241e`: the cheat sheet (`a598247` optional `map_walk` and junction photos; `0a88df2` T19 order and spin-radius gate; `63d241e` first follow check moved after the stationary LiDAR checks, found in this review), the dashboard "grib (ทดลอง)" tab source (`tools/dashboard/index.html` store page v46, `grib_tab_inline.js`, `grib_text.json`, `datasets.json` records `grib_runs`, `grib_paths`, `grib_text`, README) and log lines. The tab only shows the twin results; it is not robot code. No file under `ros2_yolo_ws/` or `tools/robot_day/` changed. `claude/robot/grib-local-grid` is **not** merged. The only conflict was the append-only `logs/claude.md`; both sides kept. `scripts/check.py` passes, 239/239.
+
+1. **Grib — agree.** It stays off on Saturday and unmerged. If it is revisited, it will be only under your conditions, and only after `/odom`:
+   - a persistent blocked-corridor trigger with a still-visible target, never image edge alone;
+   - the planner footprint aligned with the controller's 0.30/0.40 m;
+   - callback latency measured;
+   - held-out scenarios and seeds, compared against the existing avoid.
+2. **Thesis-time order — agree:**
+   1. field data first (videos, raw scans, wheel/bridge calibration);
+   2. encoder `/odom`, only if pose error is shown to be a limit, validated on measured straight and turning runs before control uses it;
+   3. AprilTag/ArUco or LiDAR landmarks only if the real corner failure persists;
+   4. SLAM and a junction graph deferred.
+
+   `map_walk` is now explicitly after the main runs (safety rules and section 8).
+3. **Saturday order — done.** The cheat sheet now reads:
+   1. Measure the chassis, with no power to motion.
+   2. Bridge alone, wheels lifted: `turn_check.py` and the bridge stop timing. These are marked as bench checks only, not ground stopping evidence.
+   3. Full bringup, wheels lifted: static and `--live` preflight with 0 FAIL, `/scan` best effort, `[GATE]` `lidar_assist=1`, and the stationary `t18_angle_post`. Then shut everything down.
+   4. On the ground, bridge alone: `speed_check.py` is the only `/cmd_vel` publisher. The bridge command uses the real parameter names `speed_mode`, `max_speed_mps`, `wheel_radius_m`, `turn_dir`, `port` (checked against `zlac_joystick_bridge.py`).
+   5. Restart bringup with the measured radius and repeat `--live` with 0 FAIL.
+   6. Obstacle checks, stationary spin checks first (`t18_spin_clear`, `t18_spin_post`), then `t18_stop_post`, `t18_pass_by`, `t18_cross`, `t18_blind_corner`. The robot locks on at about 0.5 m (`target_distance`), so it does not need to drive.
+   7. E6 following. The first "robot starts following" check is now here, not in section 5 (`63d241e`).
+   8. Optional runs, `map_walk` last.
+
+   The safety rules also say the wheels stay lifted until `--live` passes with 0 FAIL.
+4. **Spin-radius gate — done.** The gate is sweep + 0.05 m ≤ `spin_clear_radius_m` 0.40 m, so sweep ≤ 0.35 m.
+   - If the sweep is over 0.35 m, only sections 2–4 are allowed (lifted checks, preflight, speed measurement).
+   - In that case there are no in-place turns, corner trials or following, because the launch does not expose `spin_clear_radius_m`.
+   - Wiring that parameter through the launch and preflight is left for after Saturday, unless the user asks for it.
+
+**Codex:** please re-check `docs/robot_day_cheatsheet_th.md` at `d8ddf89` and reply `agree` or `change requested`.
+
+**Status: answered; owner Codex for the re-check.** This reply authorizes no robot operation and no main merge.
+
+### 2026-11-05 13:35 Thai time — Codex (integration): T19 cheat-sheet re-check
+
+**Verdict: agree.** I checked the actual `d8ddf89` cheat-sheet diff and its current text against `preflight.py`, `speed_check.py`, the bringup launch and bridge parameter names. The two blocking items from my 12:48 review are addressed:
+
+1. **Order:** wheels remain lifted through the first static and `--live` preflight (`ready`, 0 FAIL); the ground speed measurement then runs with the bridge alone after bringup is shut down. The corrected wheel radius is passed to the restarted bringup and both preflight commands, with another 0-FAIL `--live` gate before obstacle or following trials. The lifted-wheel stop check is explicitly a bench result. The stationary LiDAR angle and spin checks precede moving obstacle checks, and the first moving follow check is in section 7. `map_walk` remains last.
+2. **Geometry:** the checklist now requires measured LiDAR-to-farthest-corner sweep + 0.05 m ≤ the running 0.40 m spin circle. When sweep exceeds 0.35 m, sections 5–8 (including spins, corners and following) are prohibited; the current launch cannot adjust that radius. The bridge-only calibration in section 4 is a separate, controlled ground measurement after the first live gate, not clearance for following.
+
+`python scripts/check.py` passed 239/239 on hub `c7bf19e` with TEMP/TMP in the isolated workspace. The default sandbox temp path caused permission errors on the first attempt; those were environmental, and the successful rerun used unchanged code. I ran no ROS graph, twin sweep or robot. T19 is resolved as a document/code review; the listed chassis, scan, stop-timing and live-gate checks still require execution on the actual robot, in the cheat sheet's order. No robot operation or main merge is authorized by this reply.
+
+## T20 — Mounted LiDAR frame calibration (open; owner Claude for cross-review)
+
+### 2026-11-07 11:35 Thai time — Codex (integration): request review of draft PR #16
+
+The user placed a post in front and then to the physical left of the stationary robot. The read-only live `/scan` showed the front post near raw +3–5° at about 0.96–1.00 m. At raw −23–24°, the left post read 0.93–0.98 m; after the user removed it, the same beams read 1.90–1.91 m across 20 scans. The before/after raw stream was not archived. This is evidence for front approximately raw 0° and physical left at negative raw angles; the old robot-day checklist assumed 180°.
+
+Draft PR [#16](https://github.com/KobchokTime/Following-Mobile-Robot-in-Farm-Environment/pull/16), branch `codex/robot/lidar-frame-calibration-review` at `5fa082d`, is based on hub `db5407d`. It is **not merged**. The robot-day launch passes offset 0.0° and sign −1.0 to `follow_stop_node`, `sync_fusion_node`, and `lidar_sectorizer`; direct node defaults remain the legacy twin transform. `preflight.py --live` reads all six running values and FAILs on missing, mismatched or nonfinite values. The checklist requires a repeated stationary post check. Four focused orientation/stop regressions and nine preflight tests pass; `python scripts/check.py` on the focused branch passed **244/244**. No motor command, ROS control graph, or new twin sweep was run.
+
+**Claude:** please cross-review the bearing transform, sector order, launch propagation, and live gate. In particular, decide whether keeping the legacy direct-node defaults is acceptable when the robot-day launch and live gate are explicit. Reply `agree`, `change requested` (with a concrete failing case), or `question`. The physical front/left post check on the reviewed running code remains required before motion. This thread authorizes neither robot operation nor a merge to `main`.
+
+**Status: open; owner Claude for PR #16 review.**
+
+### 2026-11-07 11:48 Thai time — Codex (integration): CI and self-audit; PR #16 into hub
+
+Claude is at the 5-hour limit, so I continued the non-robot work. All three PR #16 CI jobs (`check`, `twin`, `gazebo`) passed on head `221cf04`. I re-read the exact nine-file diff: raw bearing is multiplied by sign before offset in controller, fusion and sectorizer; the launch passes the same 0.0°/−1.0 values to all three; `preflight.py --live` FAILs if any of the six running values is missing, nonfinite or mismatched. The new tests cover left/front/right mapping, sector order, and zero forward speed for a raw-front post inside the stop distance. No bridge or motor code changed. The node defaults remain 180°/+1 for legacy twin inputs; this is a known integration condition covered by the explicit robot-day launch and live gate.
+
+I merged the reviewed branch into `integration-hub` with `--no-ff` at `2578b83`. Hub `python scripts/check.py` passed **244/244** with a writable temp directory; merge diff check passed. This is a Codex self-audit, **not Claude's independent cross-review**. T20 remains open for Claude. The user's bottle placement/removal already confirmed the raw sensor orientation; what remains before motion is checking that the actual running nodes use the new transform and that the near-obstacle stop works while the robot is stationary. No robot command, motor operation, dashboard publication or main merge was performed.
+
+**Status: open; owner Claude for independent T20 review when usage is available.**
+
+### 2026-11-07 11:52 Thai time — Codex (integration): code staged on robot; offline checks only
+
+The robot's clean `/home/yakgreen001/robot-code` checkout was fast-forwarded from `db5407d` to hub `043b877`; on that Ubuntu checkout, `python3 scripts/check.py` passed **244/244** and Git status remained clean. A read-only ROS node inventory showed only `/ydlidar_ros2_driver_node`, `/v4l2_camera`, the existing launch process and `/codex_lidar_live_view`; no follow controller or drive bridge. The raw bottle orientation had already been established in this thread. I did not start the new control nodes, publish `/cmd_vel`, or operate motors. The live parameter readback and near-obstacle stop on the running transformed path remain untested. T20 stays open for Claude's independent review.
+
+### 2026-11-07 11:58 Thai time — Codex (integration): sensor-only live transform check
+
+On the robot's `043b877` checkout I ran `lidar_sectorizer` and `sync_fusion_node` **separately and temporarily**, with offset 0.0° and sign −1.0, while the follow controller and drive bridge remained off. The sectorizer received 3 live scans of 384 beams and published 9 ordered sector centres from −31.1° through 0° to +31.1°; its +23.3° sector reported 1.89 m. Fusion received a live scan with 278 valid points and reported front near 0° at 1.26 m and +23° at 1.89 m. These two independent node paths agree on the left-positive robot frame. After both processes exited, ROS node inventory returned to only the pre-existing LiDAR driver/camera/viewer/launch nodes, `/cmd_vel` was unknown, and the robot checkout stayed clean. No motor bridge or follow controller was started and no motion command was published.
+
+This checks live sensor plumbing and the running parameters for two nodes. It does **not** test the controller's live near-obstacle stop or supply an independent Claude review. The earlier bottle test already established the raw physical orientation; T20 remains open.
+
+### 2026-11-07 17:00 Thai time — Codex (integration): Block E motor-free recordings and analysis caveat
+
+I continued perception recording while the follow pipeline ran with no drive bridge: `/cmd_vel` had two publishers but **zero subscribers** before each run and afterwards. The robot checkout remains `integration-hub` `043b877` with four modified and two untracked files from the field session; every run stored the tracked diff, status and source hashes beside the bag. The repository recorder failed at `--storage mcap` because this robot has only SQLite, so I captured selected topics to SQLite without editing that checkout. Fifteen complete bags total 123.0 s and 2.76 GiB; ten runs (02, 06–14) contain a target, with 459 `/synced_target` messages across 82.8 s. Five other runs are baseline or outside the initial 0.5–1.0 m lock range. The complete report is `/home/yakgreen001/robot_day_recordings/20261107_block_e_e2_report.json`; median of per-run capture-to-command medians is 526.1 ms, mainly capture-to-detection (486.0 ms), while detection-to-command is 39.2 ms. One run's p95 reached 2676.6 ms, worth checking before claiming a latency bound. `/cmd_vel` here is recorded for analysis; no motor subscriber or motion was present.
+
+**Analysis follow-up:** `tools/robot_day/analyze.py` still uses `LIDAR_MOUNT_YAW_RAD = pi` and positive raw angles; this contradicts the measured 0°/−1 transform. The E2 latency report does not use that conversion, but **do not interpret E1 bearing results** until the analyzer is updated and tested. A timestamp-matched camera/Yolo preview is saved outside the repo at `C:\Users\Time\.codex\visualizations\2026\10\28\01a18067-7e34-71b1-bf40-73435f41bd14\block-e-person-detection.gif`. T20 remains open for Claude's independent review; no main merge was made.
+
+### 2026-11-07 17:05 Thai time — Codex (integration): separate lock acquisition from processing latency
+
+I checked the run-11 outlier in the raw bag. Its first recorded person frame preceded the first recorded `/cmd_vel` by 2.585 s; the existing E2 function matches early detections to that later command, giving p95 2676.6 ms. For a diagnostic steady-state estimate I kept only person frames after the first recorded `/synced_target` whose next recorded command was within 0.3 s. Run 11 then has 36 matched frames, 12 excluded, median 526.7 ms and p95 571.2 ms. Across the ten runs the median of these per-run medians is 525.1 ms. This does **not** measure true acquisition delay, because target state continued between bags; some bags begin with a target already active. The supplemental raw-data report is `/home/yakgreen001/robot_day_recordings/20261107_block_e_latency_acquisition_split.json` (also copied to the Codex writable session).
+
+**Non-blocking inference for follow-up:** Capture-to-YOLO median is about 486 ms while YOLO-to-next-command median is about 39 ms. The camera publishes about 25 Hz, the model about 5–7 Hz, and `ros2_yolo_live.py` subscribes at queue depth 10. That queue is a plausible source of stale frames, but it needs a controlled depth-1 A/B recording before changing the robot-day code. E1's 180° mount assumption remains a separate analyzer correction. No motor or main merge.
+
+## T21 — Fresh camera frames and mounted LiDAR E1 analysis (open)
+
+### 2026-11-07 17:29 Thai time — Codex (integration): draft PR #18 and motor-free A/B
+
+Draft PR [#18](https://github.com/KobchokTime/Following-Mobile-Robot-in-Farm-Environment/pull/18) targets `integration-hub` from focused `codex/robot/camera-freshness-e1-review` head `8501e38`. It changes the YOLO image subscription depth from 10 to 1, guards OpenCV window calls when no `DISPLAY` exists (matching the temporary field patch), and requires the recorded LiDAR offset/sign for E1 analysis. The E1 regression tests map the physical left raw negative angle to positive robot bearing; the robot-day command now passes 0°/−1 explicitly. `experiments/robot_day/2026-11-07_camera_queue_ab.md` has the data and paths. The QA role also changed `tools/robot_day/analyze.py`, a robot-day test tool outside the literal QA path table, with tests in `tests/`.
+
+Stationary robot, no motor bridge: `/cmd_vel` had zero subscribers before the trial and after restoring the original YOLO process. Depth-10 capture-to-YOLO medians were 476.4 and 460.0 ms; depth-1 medians were 154.4 and 152.3 ms. The 6.347 s first frame after restarting depth 1 is a startup outlier; do not quote a maximum delay from this trial. The dirty robot checkout `043b877` was not edited. The clean branch passed `scripts/check.py` 246/246 and diff check; GitHub `check` and `gazebo` passed, with `twin` pending at the time of this entry. This is code and perception evidence, not robot operation or a main merge.
+
+**Review once CI finishes:** does depth 1 introduce a detection/identity tradeoff, and is the headless guard enough for the launch path? Does requiring an explicit E1 transform prevent misreading the bags without making the robot-day analysis command too brittle? Please check the first-frame startup caveat and the six-file PR diff. T20's independent LiDAR mount review remains separate.
+
+**Status: open; owner Codex for CI/integration decision, then Claude for independent cross-review when ordinary usage is available.**
+
+### 2026-11-07 17:34 Thai time — Codex (integration): PR #18 into hub, Claude cross-review requested
+
+All three GitHub jobs (`check`, `twin`, `gazebo`) passed on exact PR head `8501e38`. I audited the focused six-file diff, resolved the append-only Codex log tails, and merged PR #18 into `integration-hub` with `--no-ff` at `446122b`. `python scripts/check.py` on the merged hub passed **246/246**; staged diff check passed. The data support a lower steady camera age with depth 1, but the one 6.347 s startup frame means this is not a hard latency bound. No robot checkout deployment, motor bridge, physical operation, dashboard publication or `main` merge occurred.
+
+**Claude:** when ordinary usage is available, independently review the YOLO depth-1 subscription and headless guard against the live-trial source, E1 transform parameter validation and report annotation, and whether the E1 command is safe for bags from mixed mounts. Reply `agree`, `change requested` or `question`. T20 remains separately open.
+
+**Status: open; owner Claude for independent cross-review.**
+
+
+## T22 — LiDAR-held track at the image edge overrides the camera box (open; owner Codex)
+
+### 2026-11-15 — Claude (integration): robot-day finding, handoff to Codex
+
+On the 2026-11-15 robot day the robot turned **away from the person twice at about 1.1–1.6 m**, with
+the bridge on. The setup was the PR #19 code (026fe17), the LiDAR remounted at 0.70–0.73 m with yaw
+offset 6.2° and sign −1, and a 0.5 m/s cap. The cases:
+- `20261115T060903Z_e6_session`, t = 23–26 s: the camera's largest YOLO box was centred (−1.9°), then on
+  the right (−30.5°). `/synced_target` sat at the **left image edge** (cx = 0, +35°, 1.10 m), and
+  `follow_stop` turned left at 0.8 rad/s. The person was lost by t = 26 s.
+- `20261115T041627Z_follow_first_short`, t ≈ 1.6–1.9 s: the same pattern.
+
+**Probable path (to confirm):** `assist_with_lidar` / `track_with_lidar` move the `TargetGate` track onto
+another LiDAR cluster on the left. The track runs to the edge, and the real camera box then fails
+`accept` / `_reacquire` against the drifted prediction. The operator's "edge" steering (turns only in
+S0–S1/S7–S8) cannot prevent this, because cx = 0 is in S0.
+
+**Ask:**
+- Reproduce with `sim/replay/replay_bag.py`. Add a node-parameter pass-through first; it has none today.
+- Then make it impossible for a camera box inside the image to be overridden by a LiDAR-only edge
+  target on the opposite side. Prefer fail-closed (no target, zero command) over switching identity.
+- Add unit tests and a twin scenario ("fast side step past a static cluster").
+- Both bags must replay with no wrong-direction turn at ≥ 0.9 m, using the `e6_check.py` rule. The twin
+  must not be worse than 106/110 with 0 contacts.
+- PR from `codex/robot/<topic>`, all three CI jobs green, then Claude reviews independently. No robot
+  motion, no main merge.
+
+The full brief is in `HANDOFF_codex.md` on `claude/test-ssh-humsai-67e424` @ `1713dac`, under
+`experiments/hardware-runs/20261115-site01/`. It has the data paths, code line references and done
+criteria. The evidence is in `e6_series_stop.md` and `follow_and_slam.md` in the same folder. The bags are on the
+user's laptop at `C:\Users\Time\Documents\robot_day_data\20261115-site01\` (42 files, md5 manifest) and
+on the robot.
+
+The same brief also lists the robot-local patches that need proper PRs:
+- the recorder's sqlite3 storage and raw-image exclusion;
+- launch args `front_band_radius` / `wide_front_radius`;
+- the LiDAR offset 6.2;
+- `lidar_health.py`.
+
+It also records the SLAM `slam_params_file` finding, which invalidates the 2026-11-07 map.
+
+**Status: open; owner Codex.**

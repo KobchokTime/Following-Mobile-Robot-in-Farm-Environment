@@ -434,3 +434,102 @@ Earlier history: `history-2026-10-16.md`.
 - Reviewed `ada4077..3874129` from `codex/integration/t18-preflight-gate-review`, then claimed the integration-hub lock at `bb81b49`. Verified `avoid_trail=true` and nonfinite/nonzero `trail_hold_s` now FAIL, motion values are read from the actual controller/bridge ROS names, and the HANDOFF 0.5 m/s example matches a launch with `max_speed_mps:=0.5`.
 - Re-ran `scripts/check.py`: 239/239 passed, and `tests.test_preflight`: 8/8 passed with TEMP/TMP in the isolated workspace. Ran `preflight.py --live` offline without ROS Python packages: labelled FAIL, exit 1, no `ready`. No robot/ROS graph or new twin run.
 - Replied agree under T18 in DISCUSSION and updated HANDOFF: software preflight change request resolved, physical geometry/LiDAR/stop/bridge checks still outstanding. No code edit, main merge or robot operation.
+
+### 2026-11-05 — integration — T19 grib and field-day plan review
+
+- Reviewed T19 on `codex/integration/t19-grib-review`, `claude/robot/grib-local-grid` `3f3ae4a` in a clean disposable worktree, and the hub field cheat sheet. Claimed integration-hub lock at `29caa83`. Ran `scripts/check.py`: 258/258 on grib, 239/239 on hub; 19 focused grid tests passed. Recounted 50 unique twin rows: off 21/25, on 20/25, zero contacts. Removed the disposable worktree after checking it was clean and inside the isolated workspace.
+- Replied under T19: agree with keeping grib as an unmerged negative experiment; prioritize field evidence and then encoder `/odom` over junction maps or outdoor SLAM. Found that the cheat sheet orders ground `speed_check.py` before the agreed live preflight gate, and permits spinning with less than its stated 5 cm chassis margin. Requested a revised sequence and measured spin radius before ground following/corner trials. No code change, robot/ROS operation, main merge or new twin sweep.
+
+### 2026-11-05 — integration — T19 cheat-sheet re-check agreed
+
+- Fast-forwarded the isolated `integration-hub` clone to `c7bf19e`, claimed the HANDOFF lock at `ec2e5e3`, and reviewed Claude's answer and `d8ddf89` cheat-sheet diff against the preflight, launch, bridge and speed-check code. Confirmed the lifted-wheel live gate precedes ground calibration; the bridge runs alone; live preflight repeats after wheel-radius correction; and stationary LiDAR checks precede moving tests. The sweep + 0.05 m ≤ 0.40 m gate now stops turns, corners and following when the chassis is too large.
+- `py -3 scripts/check.py` could not find Python. `python scripts/check.py` first hit the sandbox's unwritable default TEMP directory; rerun with TEMP/TMP under the isolated workspace passed 239/239. No code or twin change, ROS graph or robot operation.
+- Replied `agree` in T19, marked it resolved and released the lock. Physical geometry, LiDAR, ground stop timing and live parameter checks remain for the user on the robot; no main merge or robot operation was authorized.
+
+### 2026-11-07 — robot — Calibrate the mounted LiDAR frame
+
+- Synced the isolated `codex/workspace` with `integration-hub` `db5407d` at merge `af29db4`, preserving both append-only log tails. Cut `codex/robot/lidar-frame-calibration` in a separate worktree; the user's main checkout and `claude/*` branches were untouched.
+- Read only the live `/scan` through the localhost viewer. A post directly ahead appeared near raw +3–5° at about 0.96–1.00 m. A post placed physically to the left appeared at raw −23–24° and 0.93–0.98 m; after removal, the same beams read 1.90–1.91 m over 20 frames. No motor command or robot movement was requested or sent.
+- Added a sign parameter to the controller, fusion and sectorizer bearing transforms. The robot bringup now passes offset 0.0° and sign −1.0 to all three nodes. Legacy node defaults remain available for existing offline twin inputs. Follow-up: QA regression tests, preflight live-parameter checks, static front/left post verification on the running ROS graph, and independent cross-review before motion.
+
+### 2026-11-07 — qa — Verify LiDAR frame calibration and live parameters
+
+- On `codex/qa/lidar-frame-calibration`, added offline left/front/right scan regressions for controller, fusion and sectorizer, plus launch propagation and live preflight checks for all three nodes' angle offset/sign. The robot-day preflight tool is included with the QA harness so a missing or mismatched running value is a FAIL.
+- Focused calibration tests passed 3/3. Focused preflight tests passed 9/9 after setting TEMP/TMP to the isolated writable worktree; the first preflight run hit only the sandbox's unwritable default temp path. `python scripts/check.py` passed 243/243, including compile and thesis JSON checks. No ROS graph, bridge or motor was operated.
+- Still required: static post verification against the running ROS nodes with the new launch and independent review before any ground motion. Existing twin runs use their legacy node defaults and do not validate this physical mount.
+
+### 2026-11-07 — research — Correct the robot-day LiDAR orientation checklist
+
+- On `codex/research/lidar-mount-calibration`, updated the lifted-wheel bringup and live preflight commands to show the measured offset 0.0° and sign −1.0. Replaced the obsolete 180° post instruction with stationary front/left/removal checks and a readback of all three running nodes.
+- Evidence is the read-only `/scan` post-placement and removal comparison in this Codex session; a raw before/after scan file was not retained, so the checklist requires repeating the physical check on the reviewed running code. No robot motion was performed.
+
+### 2026-11-07 — qa — Check front obstacle after mount calibration
+
+- Added a focused regression on `codex/qa/lidar-frame-calibration`: a raw 0° post inside the 0.45 m stop distance must cap the controller's forward command to zero with the measured mount transform. The four focused calibration tests passed; no hardware or ROS graph was used.
+
+### 2026-11-07 — integration — Submit mounted LiDAR frame for review
+
+- Built focused `codex/robot/lidar-frame-calibration-review` from `integration-hub` `db5407d` with only the robot, QA and research commits. `python scripts/check.py` passed 244/244 on its head `6e6c8e0`, and the diff contains only nine LiDAR calibration, preflight, checklist and Codex log paths.
+- Pushed the branch and opened draft PR #16 targeting `integration-hub`, requesting independent bearing-transform and live-gate review. No hub/main merge, robot motion or motor command.
+
+### 2026-11-07 — integration — Open T20 for LiDAR mount cross-review
+
+- Under the HANDOFF lock claimed at `98902aa`, opened T20 on `integration-hub` for Claude's independent review of draft PR #16 (`codex/robot/lidar-frame-calibration-review` `5fa082d`). The PR has no hub or main merge; the focused branch passed `scripts/check.py` 244/244 and carries the stationary scan evidence and limits.
+- Updated HANDOFF with the pending review and physical post check. No motor command, ROS control graph or dashboard publication was performed.
+- `python scripts/check.py` on the unchanged hub code passed 239/239 with TEMP/TMP in the isolated worktree; `git diff --check` passed. Released the lock after the review request.
+
+### 2026-11-07 — integration — Merge CI-passing LiDAR mount calibration into hub
+
+- With Claude at the 5-hour limit, audited the exact PR #16 diff and current remote heads under the HANDOFF lock claimed at `5b9c605`. All three GitHub CI jobs (`check`, `twin`, `gazebo`) succeeded on head `221cf04`. The changed robot paths transform bearings consistently and no motor/bridge source changed.
+- Merged PR #16 into `integration-hub` with `--no-ff` at `2578b83`; `python scripts/check.py` passed 244/244 on the merged hub and `git diff --check` passed. This is Codex's own audit; T20 remains open for Claude's independent review. No main merge, robot command or dashboard publication.
+- Updated DISCUSSION and HANDOFF with the self-audit, the already-completed raw bottle test, and the remaining running-node/near-stop checks; released the integration lock.
+
+### 2026-11-07 — integration — Validate updated checkout on robot without operation
+
+- Under the HANDOFF lock claimed at `a5c6acf`, verified the robot had only the LiDAR driver, camera and read-only viewer running. The `/home/yakgreen001/robot-code` checkout was clean on `integration-hub` `db5407d` and was fast-forwarded to `043b877`; no controller or bridge was launched.
+- `python3 scripts/check.py` on the robot passed 244/244; `git status --short` remained empty. Recorded this in HANDOFF and T20. No `/cmd_vel` publication, motor command, physical motion, main merge, or dashboard publication.
+- Released the HANDOFF lock after the read-only/offline validation record.
+
+### 2026-11-07 — integration — Check live LiDAR transform without a drive node
+
+- Under the HANDOFF lock claimed at `1f2e595`, confirmed the robot checkout `043b877` was clean, the follow controller/bridge were absent, and `/cmd_vel` was unknown. Ran only temporary `lidar_sectorizer` and `sync_fusion_node` instances with offset 0.0° and sign −1.0 against the existing `/scan`; each exited normally.
+- Sectorizer saw 3 scans of 384 beams and produced 9 ordered sectors; fusion saw 278 valid points, with its +23° return at 1.89 m matching the sectorizer's +23.3° sector at 1.89 m. Final ROS inventory again had only the original driver/camera/viewer/launch nodes, `/cmd_vel` remained unknown, and the checkout stayed clean. No controller, bridge or motor command; the live controller stop remains untested.
+
+### 2026-11-07 — integration — Check live preflight fails closed with control graph absent
+
+- Under the HANDOFF lock claimed at `5ce22b5`, ran the robot's `tools/robot_day/preflight.py --live --seconds 2 --max-speed 0.5` read-only on checkout `043b877`. An unsourced shell gave a labelled ROS import FAIL; rerunning after sourcing `/opt/ros/humble/setup.bash` returned exit 1 with 7 FAIL and no `ready` line. Camera 28.4 Hz, LiDAR 10.3 Hz and 70% valid scan rays passed. Missing YOLO/sector topics, `/cmd_vel` publisher/subscriber, and running controller/fusion/sectorizer/bridge parameters correctly failed. No node or motor command was started; this is a fail-closed check, not readiness for motion.
+- Released the integration lock after recording this result; T20 remains open for Claude's independent review and controller near-stop remains untested on the running graph.
+
+### 2026-11-07 — integration — Record Block E perception with bridge absent
+
+- Under the HANDOFF lock claimed at `e42282b`, inspected the live graph: camera, LiDAR, YOLO, fusion and follow controller ran; `/cmd_vel` had two publishers and zero subscribers, with no ZLAC bridge process. The robot checkout was `integration-hub` `043b877` with four modified and two untracked paths from the field session; I did not change or reset it.
+- The repository recorder could not use MCAP on this robot (plugin unavailable). Recorded 15 complete selected-topic SQLite bags, with 10 target-bearing runs (02, 06–14): 82.8 s, 467 YOLO frames, 459 synced targets and 717 scans. The other five are baseline or out of the initial target-lock range. Each run has a manifest, code hashes and a patch snapshot. No motor command was delivered; the bridge subscriber count remained zero.
+- Ran `tools/robot_day/analyze.py` on the 10 target-bearing bags and saved `/home/yakgreen001/robot_day_recordings/20261107_block_e_e2_report.json`. Median of per-run capture-to-command medians was 526.1 ms; capture-to-detection 486.0 ms and detection-to-command 39.2 ms. Run 11 had a 2676.6 ms p95, so this is evidence, not a latency guarantee. Rendered a timestamp-matched camera preview and GIF in the writable session workspace. Noted in T20 that E1's analyzer still assumes a 180° LiDAR mount, so its bearing results are invalid until corrected.
+- Released the integration lock. No main merge, dashboard publication or robot motion.
+
+### 2026-11-07 — integration — Diagnose Block E latency outlier
+
+- Under the HANDOFF lock claimed at `4c69366`, read run 11's recorded `/yolo_frame`, `/synced_target` and `/cmd_vel` timestamps. The first recorded person frame preceded the first command by 2.585 s; the E2 report's 2676.6 ms p95 includes this target-lock wait. A supplemental diagnostic retaining only post-target frames with the next command within 0.3 s gave run 11 p95 571.2 ms (36 matched, 12 excluded) and a ten-run median of per-run medians of 525.1 ms. Saved `/home/yakgreen001/robot_day_recordings/20261107_block_e_latency_acquisition_split.json` and a copy in the writable session workspace. Target state persists between bags, so the report does not claim a true acquisition-time measurement.
+- Source inspection found camera subscription depth 10 against about 25 Hz camera input and 5–7 Hz YOLO output; buffering is a hypothesis for the ~486 ms capture-to-YOLO median, to test with a controlled A/B run before code changes. No robot operation or code change. Released the integration lock.
+
+### 2026-11-07 — integration — Camera freshness A/B and E1 analyzer correction
+
+- On the robot's running perception graph with no motor bridge (`/cmd_vel` zero subscribers), recorded two depth-10 baselines and two depth-1 trials. The depth-1 source was a one-line temporary copy outside the dirty robot checkout; the original YOLO process was restored. Capture-to-YOLO medians were 476.4 and 460.0 ms for depth 10, versus 154.4 and 152.3 ms for depth 1. Each bag had person boxes on every YOLO frame; one 6.347 s startup frame occurred in the first depth-1 trial. No physical motion or main merge.
+- Merged `codex/robot/fresh-camera-frames` (`9c1c1d4`), `codex/qa/e1-mounted-lidar-frame` (`6b2bb31`), and `codex/research/camera-freshness-e1` (`6c8a723`) into `codex/workspace` with `--no-ff`. The QA branch also changes the robot-day analyzer under `tools/robot_day/`, a test tool outside the literal QA role path table; it is paired with the QA regression tests. E1 now requires the transform used for the recording instead of silently applying the old 180 degree mount.
+- `python scripts/check.py` passed 246/246 on the combined workspace; `git diff --check` passed. The complete A/B method and caveats are in `experiments/robot_day/2026-11-07_camera_queue_ab.md`. The live trial used dirty robot-day source `043b877` plus field modifications, so the clean branch still needs review and deployment through the ordinary workflow. No bridge, robot command, dashboard publication, or main merge.
+### 2026-11-07 — integration — Open focused camera freshness PR and T21
+
+- Pushed focused `codex/robot/camera-freshness-e1-review` at `8501e38` and opened draft PR #18 against `integration-hub`. It contains only six changed files: YOLO depth-1/headless behavior, E1 analyzer and tests, robot-day command, A/B write-up, and Codex log. The clean branch passed `python scripts/check.py` 246/246 and `git diff --check`.
+- Claimed the HANDOFF lock at `a4d0447` to record the completed motor-free A/B and pending review. At 17:29 Thai time GitHub `check` and `gazebo` passed on PR head `8501e38`; `twin` remained in progress. Opened T21 for the remaining CI gate and Claude's later independent review. PR #18 was not merged, no robot checkout file was changed, and no motor bridge subscriber was present in the final live check.
+- On unchanged hub source, python scripts/check.py passed 244/244; released the lock after recording T21.
+
+### 2026-11-07 — integration — Merge camera freshness and E1 analysis into hub
+
+- GitHub PR #18 exact head `8501e38` passed all three jobs: `check`, `twin`, and `gazebo`. Under the HANDOFF lock claimed at `bac67d5`, merged the focused PR with `--no-ff` into `integration-hub` at `446122b`; GitHub reported PR #18 merged. Resolved only the append-only Codex log tail conflict, retaining both histories.
+- `python scripts/check.py` passed 246/246 on the merged hub and `git diff --check` passed. T21 asks Claude for independent cross-review when ordinary usage returns. The robot's dirty checkout was not edited, no motor bridge or robot command was used, and `main` remains unchanged. Released the HANDOFF lock.
+
+### 2026-11-15 — integration — Hand off live SLAM map viewer
+
+- Fresh remote `integration-hub` was `804f935`; claimed the free HANDOFF lock at `d4de735`, documented the 2026-11-15 live-map status for Claude at `f8e4ee9`, and release the lock in the next commit. No feature code was added to the hub.
+- The Windows-only viewer prototype is under the local `lidar-live-view/live_slam_viewer.py` path recorded in HANDOFF (SHA-256 `D3CE8FDEF1EA765754D1DA0884CAB90DC06C78B8990341422386DC64FF2790BA`). It shows the archived map at localhost:8772, waits for `/map` and `/scan`, and rejects saving without a fresh live map. Robot SSH checks found ROS 2 Humble, slam_toolbox and nav2_map_server installed, with no live ROS nodes. The existing SLAM bringup depends on the ZLAC joystick bridge, so no bringup or motor command was started.
+- Local viewer checks: Python compile, archived PGM/YAML load, 2x2 map-to-PGM save round trip, localhost archive response, and HTTP 409 for archive save. Hub `scripts/check.py` first hit 20 sandbox TEMP permission errors; with writable TEMP/TMP it passed 246/246. `git diff --check` passed. Live `/map`, TF overlay and live Save remain unverified and are assigned to Claude in HANDOFF. No main merge or dashboard publication.
