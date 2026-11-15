@@ -1,5 +1,6 @@
 #!/bin/bash
-# usage: start_follow.sh off|on   (off = no drive bridge; on = bridge with the 2026-11-07 tested limits)
+# usage: start_follow.sh off|on [sector|bearing]
+#   off = no drive bridge; on = bridge with the 2026-11-07 tested limits. Steering defaults to sector.
 source /opt/ros/humble/setup.bash
 source ~/ydlidar_ros2_ws/install/setup.bash
 source ~/openvino_env/bin/activate
@@ -9,9 +10,11 @@ LID="ros2 launch ydlidar_ros2_driver x3_ydlidar_launch.py params_file:=/home/yak
 L=ros2_yolo_ws/launch/follow_bringup.launch.py
 # LiDAR remounted at 0.70-0.73 m on 2026-11-15; camera vs LiDAR person bearing differed by 6.2 deg at 1.6 m and 3.8 m
 LIDAR_TF="lidar_angle_offset_deg:=6.2 lidar_angle_sign:=-1.0"
+STEER="${2:-sector}"
+case "$STEER" in sector|bearing) ;; *) echo "steer must be sector or bearing"; exit 2 ;; esac
 case "$1" in
-  off) exec ros2 launch $L bridge:=false $LIDAR_TF camera_cmd:="$CAM" lidar_cmd:="$LID" ;;
+  off) exec ros2 launch $L bridge:=false $LIDAR_TF steer_mode:=$STEER camera_cmd:="$CAM" lidar_cmd:="$LID" ;;
   on)  exec ros2 launch $L max_speed_mps:=0.5 wheel_radius_m:=0.085 forward_dir:=-1.0 turn_dir:=1.0 $LIDAR_TF \
-            camera_cmd:="$CAM" lidar_cmd:="$LID" ;;
-  *)   echo "usage: $0 off|on"; exit 2 ;;
+            steer_mode:=$STEER camera_cmd:="$CAM" lidar_cmd:="$LID" ;;
+  *)   echo "usage: $0 off|on [sector|bearing]"; exit 2 ;;
 esac
