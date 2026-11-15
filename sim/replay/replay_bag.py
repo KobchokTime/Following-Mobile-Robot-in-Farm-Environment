@@ -17,7 +17,10 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import os
+import signal
 import statistics
+import subprocess
 import sys
 import time
 from pathlib import Path
@@ -25,8 +28,8 @@ from typing import Dict, List, Tuple
 
 from sim.twin.pipeline import ROOT, ROBOT_NODES, Processes, isolated_env
 
-DEFAULT_INPUTS = ["/scan", "/target_centroid_sector", "/target_centroid"]
-OUTPUTS = ["/lidar_sector_dists", "/synced_target", "/target_fused_prob", "/cmd_vel"]
+DEFAULT_INPUTS = ["/scan", "/target_centroid_sector", "/target_centroid", "/yolo_frame"]
+OUTPUTS = ["/yolo_frame", "/lidar_sector_dists", "/synced_target", "/target_fused_prob", "/cmd_vel"]
 
 
 def storage_id(bag: Path) -> str:
@@ -98,7 +101,8 @@ def parse_node_params(items: List[str]) -> Dict[str, Dict[str, str]]:
 
 
 def replay(bag: Path, out: Path, inputs: List[str], rate: float,
-           node_params: Dict[str, Dict[str, str]] | None = None) -> dict:
+           node_params: Dict[str, Dict[str, str]] | None = None,
+           start_offset: float = 0.0, max_wall_s: float | None = None) -> dict:
     out.mkdir(parents=True, exist_ok=True)
     procs = Processes(out, isolated_env())
     try:
@@ -106,16 +110,24 @@ def replay(bag: Path, out: Path, inputs: List[str], rate: float,
         procs.start("bag_record", ["ros2", "bag", "record", "-s", "sqlite3",
                                    "-o", str(out / "replay"), *OUTPUTS], ROOT)
         time.sleep(2.0)
-        play = procs.start("bag_play", ["ros2", "bag", "play", str(bag), "--rate", str(rate),
-                                        "--topics", *inputs], ROOT)
-        play.wait()
+        play_cmd = ["ros2", "bag", "play", str(bag), "--rate", str(rate),
+                    "--disable-keyboard-controls", "--topics", *inputs]
+        if start_offset:
+            play_cmd.extend(("--start-offset", str(start_offset)))
+        play = procs.start("bag_play", play_cmd, ROOT)
+        try:
+            play.wait(timeout=max_wall_s)
+        except subprocess.TimeoutExpired:
+            os.killpg(play.pid, signal.SIGINT)
+            play.wait(timeout=10)
         time.sleep(1.5)  # let the chain flush the last frames
     finally:
         procs.stop()
 
     original = read_cmd_vel(bag)
     replayed = read_cmd_vel(out / "replay")
-    result = {"bag": str(bag), "inputs": inputs, "rate": rate, "node_params": node_params or {},
+    result = {"bag": str(bag), "inputs": inputs, "rate": rate,
+              "start_offset": start_offset, "max_wall_s": max_wall_s, "node_params": node_params or {},
               "original_cmd_vel": summarize(original), "replayed_cmd_vel": summarize(replayed)}
     if original and replayed:
         result["linear_x_rmse"] = aligned_linear_rmse(original, replayed)
@@ -129,14 +141,21 @@ def main() -> int:
     ap.add_argument("--out", default=Path("replay_out"), type=Path)
     ap.add_argument("--inputs", nargs="+", default=DEFAULT_INPUTS)
     ap.add_argument("--rate", default=1.0, type=float)
+    ap.add_argument("--start-offset", default=0.0, type=float,
+                    help="Skip this many seconds from the beginning of a long bag")
+    ap.add_argument("--max-wall-s", type=float,
+                    help="Stop playback after this many wall-clock seconds, then flush the output bag")
     ap.add_argument("--node-param", action="append", default=[], metavar="NODE.PARAM=VALUE",
                     help="Pass a ROS parameter only to the named replay node (repeatable)")
     args = ap.parse_args()
+    if args.rate <= 0 or args.start_offset < 0 or (args.max_wall_s is not None and args.max_wall_s <= 0):
+        ap.error("--rate must be positive, --start-offset non-negative, and --max-wall-s positive")
     try:
         node_params = parse_node_params(args.node_param)
     except ValueError as error:
         ap.error(str(error))
-    print(json.dumps(replay(args.bag, args.out, args.inputs, args.rate, node_params), indent=2))
+    print(json.dumps(replay(args.bag, args.out, args.inputs, args.rate, node_params,
+                            args.start_offset, args.max_wall_s), indent=2))
     return 0
 
 
