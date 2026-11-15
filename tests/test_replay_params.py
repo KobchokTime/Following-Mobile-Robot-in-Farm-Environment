@@ -89,6 +89,8 @@ class ReplayParamsTest(unittest.TestCase):
             self.assertEqual(procs.env['ROS_DOMAIN_ID'], '187')
             self.assertIn('--start-offset', procs.commands['bag_play'])
             self.assertIn('580.0', procs.commands['bag_play'])
+            self.assertIn('--delay', procs.commands['bag_play'])
+            self.assertIn('3.0', procs.commands['bag_play'])
             self.assertIn('/yolo_frame', procs.commands['bag_record'])
             self.assertIn('/yolo_frame', procs.commands['bag_play'])
             self.assertNotIn('zlac_drive_bridge', procs.commands)

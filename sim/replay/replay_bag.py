@@ -4,7 +4,7 @@
     python3 -m sim.replay.replay_bag BAG_DIR --out replay_out
 
 Plays only the sensor inputs (`--inputs`, default `/scan /target_centroid_sector
-/target_centroid`) into the perception -> fusion -> controller chain, records what
+/target_centroid /yolo_frame`) into the perception -> fusion -> controller chain, records what
 the chain publishes, and compares the new `/cmd_vel` with the `/cmd_vel` stored in
 the original bag (when there is one). Works with sqlite3 bags out of the box and
 with MCAP bags (from `record_robot_day.sh`) when the MCAP storage plugin is installed.
@@ -103,7 +103,7 @@ def parse_node_params(items: List[str]) -> Dict[str, Dict[str, str]]:
 def replay(bag: Path, out: Path, inputs: List[str], rate: float,
            node_params: Dict[str, Dict[str, str]] | None = None,
            start_offset: float = 0.0, max_wall_s: float | None = None,
-           domain_id: int | None = None) -> dict:
+           domain_id: int | None = None, play_delay_s: float = 3.0) -> dict:
     out.mkdir(parents=True, exist_ok=True)
     env = isolated_env()
     if domain_id is not None:
@@ -115,7 +115,7 @@ def replay(bag: Path, out: Path, inputs: List[str], rate: float,
                                    "-o", str(out / "replay"), *OUTPUTS], ROOT)
         time.sleep(2.0)
         play_cmd = ["ros2", "bag", "play", str(bag), "--rate", str(rate),
-                    "--disable-keyboard-controls", "--topics", *inputs]
+                    "--delay", str(play_delay_s), "--disable-keyboard-controls", "--topics", *inputs]
         if start_offset:
             play_cmd.extend(("--start-offset", str(start_offset)))
         play = procs.start("bag_play", play_cmd, ROOT)
@@ -131,7 +131,7 @@ def replay(bag: Path, out: Path, inputs: List[str], rate: float,
     original = read_cmd_vel(bag)
     replayed = read_cmd_vel(out / "replay")
     result = {"bag": str(bag), "inputs": inputs, "rate": rate,
-              "start_offset": start_offset, "max_wall_s": max_wall_s,
+              "start_offset": start_offset, "max_wall_s": max_wall_s, "play_delay_s": play_delay_s,
               "ros_domain_id": env["ROS_DOMAIN_ID"], "node_params": node_params or {},
               "original_cmd_vel": summarize(original), "replayed_cmd_vel": summarize(replayed)}
     if original and replayed:
@@ -152,11 +152,15 @@ def main() -> int:
                     help="Stop playback after this many wall-clock seconds, then flush the output bag")
     ap.add_argument("--domain-id", type=int,
                     help="Explicit isolated ROS domain (100-200), useful for checking it is empty before replay")
+    ap.add_argument("--play-delay-s", type=float, default=3.0,
+                    help="Wait for ROS subscriptions before playing; included in max wall time")
     ap.add_argument("--node-param", action="append", default=[], metavar="NODE.PARAM=VALUE",
                     help="Pass a ROS parameter only to the named replay node (repeatable)")
     args = ap.parse_args()
-    if args.rate <= 0 or args.start_offset < 0 or (args.max_wall_s is not None and args.max_wall_s <= 0):
-        ap.error("--rate must be positive, --start-offset non-negative, and --max-wall-s positive")
+    if (args.rate <= 0 or args.start_offset < 0 or args.play_delay_s < 0
+            or (args.max_wall_s is not None and args.max_wall_s <= args.play_delay_s)):
+        ap.error("--rate must be positive, --start-offset and --play-delay-s non-negative, "
+                 "and --max-wall-s greater than play delay")
     if args.domain_id is not None and not 100 <= args.domain_id <= 200:
         ap.error("--domain-id must be in the isolated range 100-200")
     try:
@@ -164,7 +168,8 @@ def main() -> int:
     except ValueError as error:
         ap.error(str(error))
     print(json.dumps(replay(args.bag, args.out, args.inputs, args.rate, node_params,
-                            args.start_offset, args.max_wall_s, args.domain_id), indent=2))
+                            args.start_offset, args.max_wall_s, args.domain_id,
+                            args.play_delay_s), indent=2))
     return 0
 
 
