@@ -464,3 +464,50 @@ CI jobs pass.
   reached view shares of 0.897 and 0.893, just under the 0.9 rule. s3 and s4 lost the target, as in
   earlier rounds. This is the scenario's usual variation between runs, not an effect of round 8.
 - **The only latch** is in `fast_side_step_left` s1.
+
+## Independent safety audit of round 8 (18ec4bc, 2026-11-19)
+
+**Verdict:**
+- **18ec4bc:** approve with changes, offline only.
+- **Robot motion:** NO-GO.
+- **Read-only hardware run with the drive disabled:** nothing in the code stands in its way. This is not
+  an authorisation.
+
+Round 8 closes the earlier audit's findings 1, 2, 4 and 7 against the robot-day evidence. The auditor's
+fine sweeps (420 timings each) give 0 wrong turns with no boxes dropped and with the last one or the last
+two dropped. Claude reran the auditor's `r8_probe.py` and confirmed finding 1.
+
+1. **High, a new fail-open path.** A newer box near the drifted track demotes the real contradiction.
+   - **Mechanism:** `newest_time` is taken over all remembered boxes, before the image and separation
+     filters (`sync_fusion_node.py:788`). A newer rejected box within 20° of the LiDAR cluster
+     therefore becomes "newest" and is then skipped. That box may be a false positive, a bystander the
+     track drifted onto, or the target's own box at +10°. The real contradicting box then falls back to
+     the walk timer.
+   - **Probes:** the robot-day boxes plus a box at +22° (ranged at 1.6 m, or unranged) publish the far
+     edge 0.195 s later. With the extra box in the same frame, the result depends on message order:
+     after the real box, it publishes at 0.345 s; before it, the track stays blocked.
+   - **Fix, checked by the auditor (mutation q6):** take the newest only over boxes that contradict,
+     meaning boxes in the image and more than the separation away. This blocks every probe. One test,
+     `test_older_box_uses_turn_allowance_but_still_requires_separation`, relies on the demotion and has to
+     be rewritten.
+2. **Medium. Three missed detections reopen T22.** This is known limit P4, now measured. With the boxes in
+   587.38–587.80 s dropped, 2 of 420 timings turn the wrong way (d55 p85 and d60 p90). The −6.9° box is
+   accepted and clears the memory, and nothing contradicts the track after that. A possible guard: refuse
+   an edge track more than the separation away from the last accepted camera bearing, with the covered
+   branch exempt. Its cost in `blind_corner` would have to be measured. Gaps over 0.4 s are under 1% of
+   box gaps in the bag.
+3. **Medium, availability (fails closed).** A stop can last about 61 s, until the person re-enters the lock
+   window (0.5–1.0 m, ±15°). The first command after recovery is the existing give-way reverse at
+   −0.75 m/s. The operator has to be able to see `[CONFLICT]`, the recovery has to be documented, and the
+   reverse has to be reviewed before motion.
+4. **Low-medium.** The assist uses the full rule, so it over-skips when a bystander is on the other side.
+   That costs availability only. The q6 fix also closes the remaining assist drag.
+5. **Low.** An isolated unranged newest box is skipped, after which older boxes age as usual. The turn
+   allowance is still a constant, though it now applies only to older boxes.
+
+No crash paths were found. The mutation tests caught q1, q2, q3, q4, q5, q8 and q9; q7 survived (low
+impact).
+
+**What the evidence supports:** the T22 wrong turn is not reproduced offline on the E6 bag with up to two
+missed frames (0 of 420 timings). It does not cover three missed frames, or a second person or false
+positive near the drifted track.
