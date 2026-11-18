@@ -785,7 +785,12 @@ class SyncFusionNode(Node):
                                       if entry[0] >= self.last_camera_fix
                                       and now - entry[0] <= self.lidar_max]
         entries = [entry for entry in self.rejected_camera_boxes if entry[0] != exclude_time]
-        newest_time = max((entry[0] for entry in entries), default=None)
+        # newest among the boxes that contradict this bearing: a newer box near the (drifted) track, such as a
+        # false positive or a bystander the track drifted onto, must not demote the real contradiction to the
+        # walk timer (round-8 audit, finding 1)
+        newest_time = max((t_box for t_box, box_bearing, _ in entries
+                           if abs(box_bearing) < half_fov
+                           and abs(box_bearing - lidar_bearing) > self.lidar_conflict_sep), default=None)
         for t_box, box_bearing, box_range in entries:
             if t_box == exclude_time:
                 continue

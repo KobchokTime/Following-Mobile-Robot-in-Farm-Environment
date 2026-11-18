@@ -346,19 +346,46 @@ class WalkUpTest(unittest.TestCase):
                 self.assertIn('newest=1', line)
 
     def test_older_box_uses_turn_allowance_but_still_requires_separation(self):
+        # The older-box walk rule applies only when the newest contradicting box is skipped: here an unranged
+        # box at -30 deg with no confirming box within 20 deg (the +5 deg box is 35 deg away).
         _, node = make_node(lidar_assist=False)
         node.last_camera_fix = 0.0
         node.last_target = (320, 240, 4, 0.95)
-        node.rejected_camera_boxes = [(1.0, math.radians(-10), 0.95),
-                                      (1.1, math.radians(30), 0.95)]
-        # The old box is 40 deg away and 0.65 m from the cluster. Turn allowance makes it feasible.
-        self.assertIsNone(node._rejected_box_conflicts(1.25, math.radians(30), lidar_range=0.95))
+        node.rejected_camera_boxes = [(1.15, math.radians(5), 0.95),
+                                      (1.2, math.radians(-30), math.inf)]
+        # +5 deg is 25 deg from the +30 deg cluster and about 0.41 m from it, 0.15 s old: feasible only with
+        # the turn allowance (1.5 + 0.8 * 0.95) * 0.15 + 0.1 = 0.44 m
+        self.assertIsNone(node._rejected_box_conflicts(1.3, math.radians(30), lidar_range=0.95))
         node.lidar_conflict_turn_rate = 0.0
-        self.assertIsNotNone(node._rejected_box_conflicts(1.25, math.radians(30), lidar_range=0.95))
+        conflict = node._rejected_box_conflicts(1.3, math.radians(30), lidar_range=0.95)
+        self.assertIsNotNone(conflict)
+        self.assertAlmostEqual(math.degrees(conflict[0]), 5.0)
+        self.assertFalse(conflict[4])  # decided by the older-box walk rule, not as the newest box
+        node.lidar_conflict_sep = math.radians(26)  # +5 deg no longer contradicts +30 deg
+        self.assertIsNone(node._rejected_box_conflicts(1.3, math.radians(30), lidar_range=0.95))
 
-        node.lidar_conflict_turn_rate = 0.8
-        node.lidar_conflict_sep = math.radians(41)
-        self.assertIsNone(node._rejected_box_conflicts(1.11, math.radians(30), lidar_range=0.95))
+    def test_newer_box_near_the_drifted_track_does_not_demote_the_real_contradiction(self):
+        # Round-8 audit finding 1: robot-day boxes, then a newer rejected box near the drifted +27.9 deg track
+        # (a false positive, a bystander the track drifted onto, or the target's own box at +10 deg).
+        t0 = 1.2
+        real = [(t0, -6.9, 0.92), (t0 + 0.165, -17.3, 0.89), (t0 + 0.367, -26.6, 0.89), (t0 + 0.521, -30.5, 0.87)]
+        for label, extra in (('later frame, ranged', (t0 + 0.6, 22.0, 1.6)),
+                             ('later frame, unranged', (t0 + 0.6, 22.0, math.inf)),
+                             ('same frame, after', (t0 + 0.522, 22.0, 1.6)),
+                             ('same frame, before', (t0 + 0.520, 22.0, 1.6)),
+                             ('own box at +10 deg', (t0 + 0.6, 10.0, 0.95))):
+            with self.subTest(label):
+                _, node = make_node(lidar_assist=False)
+                node.last_camera_fix = t0
+                node.last_target = (320, 240, 4, 0.92)
+                node.rejected_camera_boxes = [(t, math.radians(b), r) for t, b, r in real + [extra]]
+                self.assertLessEqual(abs(math.radians(extra[1]) - math.radians(27.9)), node.lidar_conflict_sep)
+                for age_after_extra in (0.195, 0.4, 0.8):
+                    now = extra[0] + age_after_extra
+                    conflict = node._rejected_box_conflicts(now, math.radians(27.9), lidar_range=0.92)
+                    self.assertIsNotNone(conflict, f'{label} at +{age_after_extra} s')
+                    self.assertAlmostEqual(math.degrees(conflict[0]), -30.5)
+                    self.assertTrue(conflict[4])  # the real -30.5 deg box is still the newest contradiction
 
     def test_background_ranged_box_is_remembered_unranged_and_requires_confirmation(self):
         _, node = make_node(lidar_assist=False)
