@@ -188,3 +188,56 @@ The rows and summaries are in `twin_full_rows_<code>.json` and `twin_full_summar
   obstacle case.
 
 **CI on PR #21 at b6d1862:** `check`, `twin` and `gazebo` all pass.
+
+## Correction (2026-11-18, after the safety audit)
+
+The full-twin section says that in `fast_side_step_left` "every published target is the real target". That
+is not exactly right. On b6d1862, s3 published 1 of its 152 messages as someone other than the target;
+the other seeds had none. Across all runs, `published_other > 0` appears in 46 of 115 runs on b6d1862 and
+62 of 115 on 05bb929. This has not been explained yet. The conclusion that the stop comes from the
+obstacle stop, triggered by the clutter at 0.45 m, still holds. The stop is still not a fusion fault.
+
+## Independent safety audit of round 4 (safety-auditor, 2026-11-18)
+
+**Verdict:**
+- **PR #21 at b6d1862, offline:** approve with changes.
+- **"T22 fixed":** needs evidence. What the evidence supports is "not reproduced offline on the E6 bag".
+- **Robot motion:** NO-GO.
+
+**Auditor's own checks:**
+- `check.py`: 260/260.
+- A finer sweep, 420 timings: b6d1862 0/420; 05bb929 7/420, all at 587.86–588.06 s.
+- A mutation test of each new guard.
+
+Claude re-ran the auditor's probes (`audit_tools/probes.py` in the session scratchpad) against b6d1862
+and confirmed 1, 2, 6 and 7 below.
+
+1. **Fails open, range tolerance.** A rejected opposite-side box is not remembered when its range differs
+   from the prediction by more than 0.5 m. Two cases were tested: 0.6 m beyond, and 0.40 m against a
+   predicted 0.95 m. A box with no LiDAR range returns before the gate and is never remembered. In both
+   cases the node publishes the left edge, cx 0. In a fast side step, the box range often points at
+   background: in this same bag, the target's own boxes read 2.85 m against a predicted 1.0 m.
+2. **Fails open, sign-only side test.** Boxes rejected at −1.5 to −2.5°, a person straight ahead, do
+   not block a track that drifted to the right edge. The node publishes cx 639.
+3. **`pass_by` s0 unexplained, and the latch is not logged.** A `[CONFLICT]` log line is needed, then a
+   `pass_by` rerun.
+4. **Availability.** In the replay at delay 20 ms and phase 75 ms, the robot stays stopped for 61 s, until
+   the next lock-on. The first command after recovery is the existing give-way reverse at −0.75 m/s.
+5. **Over-trigger.** The assist latches before its other filters. This costs availability only.
+6. **Bad tolerance values.** A negative or NaN tolerance silently turns the memory off, and the value is
+   not in the `[GATE]` log. Remembered bearings are not corrected for the robot's own rotation.
+7. **Pre-existing.** The give-way path ignores the memory. A probe published the stale camera column,
+   cx 107 at 0.5 m, while opposite boxes were remembered.
+
+**Test quality.** All four new tests fail on 05bb929, but only with an AttributeError. Several
+behaviours are not pinned by any test:
+- where the assist check sits;
+- `<=` against `<` for a centred box;
+- expiry of the memory after `lidar_max`;
+- the order of boxes within one frame;
+- give-way with remembered boxes.
+
+**Before any robot test:**
+- fix 1–3, or accept them in writing;
+- do a read-only hardware run with the drive disabled and the latch logged;
+- then the full motion gate.
