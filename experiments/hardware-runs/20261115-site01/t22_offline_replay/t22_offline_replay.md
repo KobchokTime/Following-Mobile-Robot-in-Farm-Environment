@@ -279,3 +279,38 @@ contacts.
 - **B.** Replace the centre band and the sign rule with an angular separation rule. A box contradicts a
   LiDAR bearing only when |box − LiDAR| is more than X°, for example 15–20°. P1, with the box at −2° and
   the track at −31°, is still caught. The same person, with the box at −7° and the cluster at −13°, is not.
+
+## Round 6: ba53ed2 (2026-11-18)
+
+The user chose to make both changes, A and B, in this round:
+- **A:** the memory now blocks only a LiDAR-only publication in `track_with_lidar`. It no longer latches
+  from `assist_with_lidar`.
+- **B:** a box contradicts a bearing only when the two are more than `lidar_conflict_sep_deg` apart
+  (default 20°). This replaces the centre band and the sign rule.
+
+Claude corrected the fixtures of two of the new tests.
+
+**Offline results:**
+- `scripts/check.py` passes 272/272.
+- The new tests fail on 2105e58.
+- The auditor's probes still fail closed.
+- The E6 sweep gives 0/24.
+
+**Full twin (run 44330591298): 104/110 on the baseline set, 0 contacts.** All three PR CI jobs pass.
+
+| Code | Baseline set | Runs with `[CONFLICT]` | `blind_corner` | `zigzag` |
+| --- | --- | --- | --- | --- |
+| 05bb929 | 107/110 | (not logged) | 2/5 | 5/5 |
+| b6d1862 | 106/110 | (not logged) | 2/5 | 5/5 |
+| 2105e58 | 104/110 | 94/115 | 0/5 | 4/5 |
+| **ba53ed2** | **104/110** | **5/115** | 0/5 | 4/5 (s3) |
+
+- **The over-trigger is gone.** There are 5 `memory-track` latches and 1 `edge` latch, in 5 runs:
+  `blind_corner` s0, s2 and s4, `zigzag` s3, and `fast_side_step_left` s4.
+- **`blind_corner` is 0/5,** but s1 and s3 failed without any latch. `blind_corner` already varies
+  between runs (1, 2, 2, 0 and 0 out of 5 across the five commits). That the latch is the cause in s0,
+  s2 and s4 has not been shown.
+- **`zigzag` s3 fails because of round 6.** It is a single-person scenario. The target's own rejected box
+  was more than 20° from the LiDAR bearing during a fast swing, so `memory-track` latched twice. The robot
+  stopped, and the view share fell to 0.745. The separation rule cannot tell the target's own box from
+  another person's.
