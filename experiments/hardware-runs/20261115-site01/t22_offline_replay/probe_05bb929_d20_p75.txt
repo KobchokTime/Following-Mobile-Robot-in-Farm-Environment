@@ -1,0 +1,14 @@
+586.041 | yolo | cx=119 b=+23.7 | pred +15.6deg 1.12m gate.t-age 0.05s box_range 1.2029999494552612 edge 27 | latch False->False | locked True | pub [[119.0, 237.0, 1.2029999494552612]]
+586.289 | yolo | cx=117 b=+24.0 | pred +22.4deg 1.11m gate.t-age 0.09s box_range 1.0820000171661377 edge 27 | latch False->False | locked True | pub [[117.0, 236.0, 1.0820000171661377]]
+586.442 | yolo | cx=115 b=+24.2 | pred +21.2deg 1.01m gate.t-age 0.05s box_range 1.0470000505447388 edge 27 | latch False->False | locked True | pub [[115.0, 237.0, 1.0470000505447388]]
+586.621 | yolo | cx=136 b=+21.9 | pred +27.1deg 1.02m gate.t-age 0.18s box_range 2.865000009536743 edge 27 | latch False->False | locked True | pub []
+586.791 | yolo | cx=180 b=+17.0 | pred +31.0deg 1.00m gate.t-age 0.35s box_range 2.8489999771118164 edge 27 | latch False->False | locked True | pub []
+586.946 | yolo | cx=245 b=+9.3 | pred +34.5deg 0.99m gate.t-age 0.50s box_range 2.8389999866485596 edge 27 | latch False->False | locked True | pub []
+587.087 | yolo | cx=296 b=+3.0 | pred +37.7deg 0.98m gate.t-age 0.65s box_range 0.9459999799728394 edge 27 | latch False->False | locked True | pub [[296.0, 238.0, 0.9459999799728394]]
+587.256 | yolo | cx=375 b=-6.9 | pred +18.9deg 0.94m gate.t-age 0.17s box_range 0.9210000038146973 edge 27 | latch False->False | locked True | pub []
+587.421 | yolo | cx=462 b=-17.3 | pred +20.9deg 0.93m gate.t-age 0.33s box_range 0.8859999775886536 edge 27 | latch False->False | locked True | pub []
+587.623 | yolo | cx=549 b=-26.6 | pred +23.4deg 0.91m gate.t-age 0.54s box_range 0.8889999985694885 edge 27 | latch False->False | locked True | pub []
+587.777 | yolo | cx=589 b=-30.5 | pred +25.2deg 0.90m gate.t-age 0.69s box_range 0.871999979019165 edge 27 | latch False->False | locked True | pub []
+587.995 | track | assisted=False |  | latch False | locked True | pub [[0.0, 238.0, 0.9210000038146973]] since_fix 0.91s pred_before +27.9 last_cam_b +3.0 covered False
+588.095 | track | assisted=False |  | latch False | locked True | pub [[75.0, 238.0, 0.9100000262260437]] since_fix 1.01s pred_before +31.7 last_cam_b +3.0 covered False
+588.195 | track | assisted=False |  | latch False | locked True | pub [[147.0, 238.0, 0.8830000162124634]] since_fix 1.11s pred_before +30.2 last_cam_b +3.0 covered False
