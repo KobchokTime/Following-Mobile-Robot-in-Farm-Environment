@@ -112,3 +112,35 @@ Re-run, from this folder, using a Python environment with `rosbags` and `numpy`:
 python sweep.py <bag dir> <code>/ros2_yolo_ws/scripts e6 <out dir>
 python probe_d20_p75.py <code>/ros2_yolo_ws/scripts
 ```
+
+## Round 4: b6d1862 (2026-11-18)
+
+Codex's round 4 implements the suggested direction:
+- `sync_fusion` remembers in-image camera boxes that the gate rejected since the last accepted camera fix.
+  It keeps only boxes within `lidar_track_max_s` of that fix, and within the new parameter
+  `lidar_conflict_range_tolerance_m` (default 0.5 m) of the predicted range.
+- Before `track_with_lidar` publishes, or `assist_with_lidar` moves the gate, a remembered box on the
+  opposite side, or in the centre, sets the fail-closed latch.
+
+Claude's changes on top:
+- **Guard.** The memory now consults the gate only when it is locked and has a time. Without the guard,
+  `_predict` raises after an unlock whenever `lidar_track_max_s` is longer than `unlock_after_s`. A new
+  test covers this.
+- **Test fixtures.** The fixtures now use the plain gate while someone is beside the target, as in the
+  bag. The tests count publications per call, and an out-of-range box is not remembered.
+
+All four new tests fail on 05bb929. `scripts/check.py` passes 260/260. The commit is pushed to PR #21.
+
+| Bag (24 timings each) | 026fe17 | 05bb929 | **b6d1862** |
+| --- | --- | --- | --- |
+| `e6_session`, timings with a wrong turn | 9 | 1 | **0** |
+| `e6_session`, `/synced_target` summed over 24 runs | — | 4490 | 4436 (−1.2 %) |
+| `follow_first_short` (cold start, inconclusive) | 0 | 0 | 0 |
+
+At the timing that used to fail (delay 20 ms, phase 75 ms), the robot now stops (0, 0) at 587.40 s and stays stopped. It no longer turns left at 587.995 s; see `trace_e6_b6d1862_d20_p75.csv`.
+The rows are in `sweep_e6_b6d1862.json` and `sweep_first_b6d1862.json`.
+
+**Still to do:** the full twin in the robot-day configuration, with a target of at least 106/110 and
+0 contacts. The new memory can stop a legitimate LiDAR edge track. The scenarios at risk are
+`blind_corner`, `crossing`, `pass_by`, `fast_side_step_left` and `walk_up_same`. This needs ROS in
+Docker, which this laptop does not have.
