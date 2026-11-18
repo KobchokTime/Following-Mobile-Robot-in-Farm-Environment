@@ -1,0 +1,85 @@
+name: twin-full
+
+# The full twin protocol of experiments/sim/scripts/run_baseline.sh (every scenario, seeds 0-4, realism,
+# mps bridge, robot-day node defaults), one job per seed, scored with experiments/sim/scripts/collect_runs.py
+# and compared with the robot-day baseline experiments/sim/2026-11-01_twin_robot_day_settings.json
+# (6a64669: 106/110, 0 contacts). Runs only on a push to claude/twin-full/** or by hand, never on PRs.
+
+on:
+  push:
+    branches: ["claude/twin-full/**"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  seed:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 75
+    strategy:
+      fail-fast: false
+      matrix:
+        seed: [0, 1, 2, 3, 4]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build twin image (as run_baseline.sh)
+        run: docker build -q --build-arg INSTALL_MCAP=0 -f sim/docker/Dockerfile -t twin-full .
+      - name: Every scenario, seed ${{ matrix.seed }}
+        run: bash experiments/sim/scripts/run_baseline.sh "twin_full/s${{ matrix.seed }}" twin-full ${{ matrix.seed }} ${{ matrix.seed }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: twin_full_s${{ matrix.seed }}
+          path: twin_full/s${{ matrix.seed }}
+
+  score:
+    needs: seed
+    if: always()
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: twin_full_s*
+          path: twin_full
+      - name: Score against the robot-day baseline
+        run: |
+          mkdir -p all
+          for d in twin_full/twin_full_s*; do cp -r "$d"/*/ all/ 2>/dev/null || true; cp "$d/IMAGE_ID" "all/IMAGE_ID_$(basename "$d")" 2>/dev/null || true; done
+          python3 experiments/sim/scripts/collect_runs.py all > rows.json
+          python3 - <<'EOF'
+          import json, collections
+          rows = json.load(open("rows.json"))
+          base = {(r["scenario"], r["seed"]): r for r in json.load(open("experiments/sim/2026-11-01_twin_robot_day_settings.json"))["runs"]}
+          per = collections.defaultdict(list)
+          for r in rows:
+              per[r["scenario"]].append(r)
+          common = [r for r in rows if (r["scenario"], r["seed"]) in base]
+          lines = ["# Full twin, robot-day configuration", "",
+                   f"All runs: {sum(r['pass_'] for r in rows)}/{len(rows)} passed, {sum(r['contact'] for r in rows)} contacts.",
+                   f"Baseline set (22 scenarios x 5 seeds, 6a64669 = 106/110, 0 contacts): "
+                   f"{sum(r['pass_'] for r in common)}/{len(common)} passed, {sum(r['contact'] for r in common)} contacts.", "",
+                   "| scenario | passed | contacts | baseline | changed seeds |", "| --- | --- | --- | --- | --- |"]
+          for sc in sorted(per):
+              rs = sorted(per[sc], key=lambda r: r["seed"])
+              b = [base.get((sc, r["seed"])) for r in rs]
+              bp = f"{sum(x['passed'] for x in b if x)}/{sum(1 for x in b if x)}" if any(b) else "new"
+              ch = [f"s{r['seed']} {'pass' if r['pass_'] else 'FAIL'} (gap {r['final_gap_m']}, view {r['target_visible_share']})"
+                    for r, x in zip(rs, b) if x and x["passed"] != r["pass_"]]
+              lines.append(f"| {sc} | {sum(r['pass_'] for r in rs)}/{len(rs)} | {sum(r['contact'] for r in rs)} | {bp} | {'; '.join(ch)} |")
+          fails = [r for r in rows if not r["pass_"]]
+          lines += ["", "Failed runs:", ""] + [f"- {r['scenario']} s{r['seed']}: gap {r['final_gap_m']} m, view {r['target_visible_share']}, "
+                                               f"fov_end {r['target_in_camera_fov_end']}, contact {r['contact']}" for r in fails]
+          open("twin_full_summary.md", "w").write("\n".join(lines) + "\n")
+          EOF
+          cat twin_full_summary.md >> "$GITHUB_STEP_SUMMARY"
+          cat twin_full_summary.md
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: twin_full_score
+          path: |
+            rows.json
+            twin_full_summary.md
+            all/IMAGE_ID_*
