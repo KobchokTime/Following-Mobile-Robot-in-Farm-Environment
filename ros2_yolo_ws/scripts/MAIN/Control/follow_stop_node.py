@@ -218,8 +218,9 @@ class FollowStopNode(Node):
         self.declare_parameter('bearing_deadband_deg', 3.0)
         self.declare_parameter('camera_hfov_deg', 70.0)
         self.declare_parameter('image_width', 640)
-        # bearing mode only: publish a stop when target messages stop for this long, instead of leaving
-        # the bridge to repeat the last turn until its own 1 s timeout (Codex, T12)
+        # publish a stop when target messages stop for this long, instead of leaving the bridge to repeat
+        # the last turn until its own 1 s timeout (Codex, T12). Both steer modes: in sector mode a fusion
+        # that stops publishing (T22 camera/LiDAR conflict) otherwise left a 0.8 rad/s turn running ~1 s
         self.declare_parameter('target_timeout_s', 0.3)
         # obstacle stop: anything the LiDAR sees in the corridor ahead (or behind when reversing), other than
         # the target, caps the speed so the robot stops stop_m short of it. No physical E-stop exists.
@@ -288,7 +289,7 @@ class FollowStopNode(Node):
         self.prev_bearing      = None
         self.prev_bearing_time = None
         self.bearing_rate      = 0.0
-        self.target_timeout    = float(self.get_parameter('target_timeout_s').value) if self.steer_mode == 'bearing' else 0.0
+        self.target_timeout    = float(self.get_parameter('target_timeout_s').value)
         self.last_msg_time     = None
         self.stale_stopped     = False
         self.obstacle_stop     = bool(self.get_parameter('obstacle_stop').value)

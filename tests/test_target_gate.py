@@ -50,12 +50,30 @@ class TargetGateTest(unittest.TestCase):
         cls.bearing_to_cx = staticmethod(module.bearing_to_cx)
         cls.scan_is_fresh = staticmethod(module.scan_is_fresh)
         cls.parse_hist = staticmethod(module.parse_hist)
+        cls.camera_lidar_conflict = staticmethod(module.camera_lidar_conflict)
 
     def test_old_or_missing_scans_are_not_used(self):
         self.assertTrue(self.scan_is_fresh(10.0, 9.9, 0.3))
         self.assertFalse(self.scan_is_fresh(10.0, 6.0, 0.3))   # Codex's 4 s old scan
         self.assertFalse(self.scan_is_fresh(10.0, None, 0.3))  # never received
         self.assertFalse(self.scan_is_fresh(10.0, 10.5, 0.3))  # clock went backwards
+
+    def test_lidar_edge_drift_rejects_camera_boxes_and_conflict_is_detected(self):
+        # A static left-side cluster repeatedly updates a locked track after the person steps right.
+        g = self.Gate()
+        self.assertTrue(g.accept(0.0, 0.0, 0.85, (110, 165)))
+        for t in (0.2, 0.4, 0.6, 0.8):
+            g.accept_lidar(t, D(35), 1.2)
+        self.assertGreater(g._predict(0.9)[0], D(20))
+        self.assertFalse(g.accept(0.9, D(0), 1.2, (110, 165)))
+        self.assertFalse(g.accept(1.0, D(-25), 1.2, (110, 165)))
+        from test_walk_up import make_node
+        node = make_node()[1]
+        edge = node.edge_rad
+        half_fov = math.radians(node.camera_hfov_deg / 2.0)
+        self.assertTrue(self.camera_lidar_conflict(D(-25), g._predict(1.0)[0], edge, half_fov))
+        self.assertTrue(self.camera_lidar_conflict(D(0), g._predict(1.0)[0], edge, half_fov))
+        self.assertFalse(self.camera_lidar_conflict(D(25), g._predict(1.0)[0], edge, half_fov))
 
     @staticmethod
     def _blob(centre_deg, rng, width_m, step_deg=0.5):

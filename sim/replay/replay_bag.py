@@ -23,15 +23,29 @@ import time
 from pathlib import Path
 from typing import Dict, List, Tuple
 
-import yaml
-
 from sim.twin.pipeline import ROOT, Processes, isolated_env
 
 DEFAULT_INPUTS = ["/scan", "/target_centroid_sector", "/target_centroid"]
 OUTPUTS = ["/lidar_sector_dists", "/synced_target", "/target_fused_prob", "/cmd_vel"]
 
 
+def node_ros_params(values: List[str]) -> Dict[str, List[str]]:
+    """Route repeatable NODE:NAME:=VALUE overrides to the named robot node."""
+    result: Dict[str, List[str]] = {}
+    for value in values:
+        colon = value.find(":")
+        if colon >= 0 and value[colon + 1:colon + 2] != "=":
+            node, param = value[:colon], value[colon + 1:]
+            result.setdefault(node, []).extend(("-p", param))
+        else:
+            # A bare ROS override is intentionally broadcast to all robot nodes.
+            result.setdefault("*", []).extend(("-p", value))
+    return result
+
+
 def storage_id(bag: Path) -> str:
+    import yaml
+
     meta = yaml.safe_load((bag / "metadata.yaml").read_text(encoding="utf-8"))
     return meta["rosbag2_bagfile_information"]["storage_identifier"]
 
@@ -85,11 +99,12 @@ def aligned_linear_rmse(a, b, step: float = 0.1) -> float:
     return math.sqrt(statistics.fmean((hold(a, t) - hold(b, t)) ** 2 for t in ts))
 
 
-def replay(bag: Path, out: Path, inputs: List[str], rate: float) -> dict:
+def replay(bag: Path, out: Path, inputs: List[str], rate: float, params: Dict[str, List[str]] = None) -> dict:
     out.mkdir(parents=True, exist_ok=True)
     procs = Processes(out, isolated_env())
     try:
-        procs.start_robot_nodes()
+        ros_params = params or []
+        procs.start_robot_nodes(ros_params)
         procs.start("bag_record", ["ros2", "bag", "record", "-s", "sqlite3",
                                    "-o", str(out / "replay"), *OUTPUTS], ROOT)
         time.sleep(2.0)
@@ -116,8 +131,11 @@ def main() -> int:
     ap.add_argument("--out", default=Path("replay_out"), type=Path)
     ap.add_argument("--inputs", nargs="+", default=DEFAULT_INPUTS)
     ap.add_argument("--rate", default=1.0, type=float)
+    ap.add_argument("--param", action="append", default=[], metavar="NODE:NAME:=VALUE",
+                    help="ROS parameter override for one robot node (repeatable), e.g. follow_stop:target_distance:=1.0")
     args = ap.parse_args()
-    print(json.dumps(replay(args.bag, args.out, args.inputs, args.rate), indent=2))
+    params = node_ros_params(args.param)
+    print(json.dumps(replay(args.bag, args.out, args.inputs, args.rate, params), indent=2))
     return 0
 
 
