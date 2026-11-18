@@ -359,3 +359,61 @@ PR CI jobs pass.
   the clutter in its path, as on every commit.
 - **`blind_corner`:** s1 and s2 fail with no latch, at view shares of 0.845 and 0.886 against the 0.9 rule.
   That is the same near-miss this recorded failure has shown before.
+
+## Independent safety audit of rounds 5–7 (bddb041, 2026-11-18)
+
+**Verdict:**
+- **bddb041 as the T22 fix:** block.
+- **Robot motion:** NO-GO.
+- **Read-only hardware run with the drive physically disabled:** nothing in this code stands in its way.
+  This is not an authorisation.
+
+Claude reran the auditor's drop-one-frame replay (`audit_tools/replay_drop.py`) and confirmed finding 1.
+
+1. **High. One missed detection brings T22 back.** The walk-speed rule makes the memory a timer. Once
+   the person has left the image on the far side, no new box arrives, so `age` only grows. After about
+   (d − 0.1)/(1.5 + 0.8r) seconds, any far-side edge track can publish; for the robot-day geometry that
+   is 0.345 s. The track in the bag ran at an age of 0.218 s, so the margin is 0.127 s, about one
+   camera frame: the bag's box cadence is about 7 Hz, with a median gap of 0.143 s.
+
+   The test drops only the last box (587.757 s) and replays the E6 bag:
+
+   | Timing (delay, phase) | bddb041 | b6d1862 |
+   | --- | --- | --- |
+   | d20 p75 | wrong turn at 588.0 s | stopped |
+   | d15 p70 | wrong turn at 587.99 s | stopped |
+   | d0 p0 | stopped | stopped |
+
+   On the auditor's 420-timing sweep with the last box dropped, bddb041 fails 4 timings and b6d1862 none.
+2. **Medium, fails open. The P1 case is open again as short turns.** The smallest box age at which an
+   edge track publishes:
+   - person straight ahead (−2° at 0.95 m) with the track at −31°: 0.17 s while turning, 0.255 s while
+     still;
+   - the T22 boxes: 0.20–0.33 s.
+
+   About 17% of box gaps are longer than 0.17 s. Each such gap leaks a turn of about 0.2–0.5 s (10–23°).
+3. **Medium. The constant turn allowance.** The 0.8 rad/s term shortens the detection window by 25–50%
+   while the robot is actually still. It should come from measured yaw (odometry, or bearings rotated by
+   the integrated yaw) before any motion test. Removing the term passes every test.
+4. **Medium, fails open. Background-ranged boxes are dropped.** A box with range > pr + 1.5 m is never
+   remembered, not even as an unranged box. The target's own side-step boxes read 2.85 m against a
+   prediction of 1.0 m. They should be recorded as unranged instead.
+5. **Medium. The two-frame rule for unranged boxes.** A real person with no range, seen once at the
+   image edge, is ignored, which fails open. A phantom seen twice confirms itself, which costs
+   availability only.
+6. **Medium. Assist can drag the gate again.** Since round 6, the assist moves the gate onto the drifting
+   cluster; only publication is guarded, and only inside the walk window. A box that matches the dragged
+   prediction can then be accepted, which clears the latch.
+7. **Low.** The `memory-track` log line prints the prediction, not the cluster bearing that was tested.
+   No crash path was found.
+
+**Test quality.** Mutation testing caught 13 of 16 mutants. Three changes went uncaught: removing the
+turn term, removing the separation rule, and dropping the box range from d.
+
+**Evidence.** A single bag passing with a 0.127 s margin does not support "T22 fixed offline". The twin
+cannot exercise T22 either: `fast_side_step_left` is 0/5 on every commit, and 113 of 115 runs never latch.
+
+**Before a read-only hardware run:**
+- add a drop-one-frame replay case and a measured-cadence test;
+- log the cluster bearing;
+- record `/target_centroid_sector`, `/scan`, `/cmd_vel` and odom yaw.
