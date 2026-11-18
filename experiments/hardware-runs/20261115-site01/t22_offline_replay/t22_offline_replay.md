@@ -144,3 +144,47 @@ The rows are in `sweep_e6_b6d1862.json` and `sweep_first_b6d1862.json`.
 0 contacts. The new memory can stop a legitimate LiDAR edge track. The scenarios at risk are
 `blind_corner`, `crossing`, `pass_by`, `fast_side_step_left` and `walk_up_same`. This needs ROS in
 Docker, which this laptop does not have.
+
+## Full twin, robot-day configuration (2026-11-18)
+
+**Protocol.** This uses `experiments/sim/scripts/run_baseline.sh`, the same protocol as the 6a64669
+baseline:
+- every scenario in `SCENARIO_LOOKUP`, seeds 0–4;
+- the realism profile and the mps bridge;
+- the node defaults, which are the robot-day settings;
+- scoring with the pass rule in `experiments/sim/scripts/collect_runs.py`.
+
+**How it ran.** It ran on GitHub Actions with the workflow `.github/workflows/twin-full.yml`, one job
+per seed. Each job builds its own image, so each seed has its own image id; the ids are in the run
+artifacts. The workflow runs only on a push to `claude/twin-full/**`, never on PRs, and it is not part of
+PR #21. There were two runs:
+- `claude/twin-full/t22-b6d1862`: run 44312067240;
+- `claude/twin-full/t22-05bb929`: run 44314564394.
+
+| Code | Baseline set (22 scenarios × 5) | Contacts | All 23 scenarios | `blind_corner` | `pass_by` | `fast_side_step_left` |
+| --- | --- | --- | --- | --- | --- | --- |
+| 6a64669 (2026-11-01 baseline) | 106/110 | 0 | — | 1/5 | 5/5 | — |
+| 05bb929 (round 3) | 107/110 | 0 | 107/115 | 2/5 (s2, s3) | 5/5 | 0/5 |
+| **b6d1862 (round 4)** | **106/110** | **0** | 106/115 | 2/5 (s1, s4) | 4/5 | 0/5 |
+
+The rows and summaries are in `twin_full_rows_<code>.json` and `twin_full_summary_<code>.md`.
+
+- **T22 twin criterion met.** The criterion is "not worse than 106/110 with 0 contacts", and b6d1862 scores
+  106/110 with 0 contacts.
+- **`blind_corner`:** 2/5 on both commits, on different seeds. This was already a recorded failure, and
+  the result on any given seed changes from run to run. On 2026-11-01, repeating `bdae2c1` gave
+  110 and then 109.
+- **`pass_by` s0, b6d1862 only:** the view share is 0.874 against the 0.9 rule, the final gap is 0.539 m,
+  and there was no contact. At t = 12.1–12.6 s the robot stood still next to the hidden worker, who was at
+  0.63 m and +58°, until the target was more than 2 m away. The worker is never detected by the camera,
+  so no rejected box exists, and the round-4 memory is unlikely to be the cause. A stop near the worker
+  looks more likely, but this is not proven. One rerun of `pass_by` on both commits would settle it.
+- **`fast_side_step_left`, the T22 scenario: 0/5 on both commits.** This is not a fusion fault. The
+  target's path, from (2.4, 1.4) to (4.0, 2.2), passes between two realism clutter objects: the post at
+  (3.0, 1.4, r 0.06) and the bush at (2.5, 2.2, r 0.3). The robot stops at (2.45, 1.31) with LiDAR
+  clearance 0.41–0.46 m, which is `obstacle_stop_m` 0.45. It backs off slowly, and the target walks
+  out to 4.2 m. Every published target is the real target. The obstacle stop is right to stop here; the
+  scenario's path needs to be moved clear of the clutter, or the scenario needs to be marked as an
+  obstacle case.
+
+**CI on PR #21 at b6d1862:** `check`, `twin` and `gazebo` all pass.
