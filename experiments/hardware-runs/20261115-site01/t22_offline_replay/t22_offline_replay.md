@@ -417,3 +417,50 @@ cannot exercise T22 either: `fast_side_step_left` is 0/5 on every commit, and 11
 - add a drop-one-frame replay case and a measured-cadence test;
 - log the cluster bearing;
 - record `/target_centroid_sector`, `/scan`, `/cmd_vel` and odom yaw.
+
+## Round 8: 18ec4bc (2026-11-19)
+
+The user chose to make the newest box never age:
+- **Newest box blocks at any age.** The newest remembered in-image box since the last fix blocks a LiDAR
+  bearing on the separation rule alone, at any age within `lidar_track_max_s`. Older boxes keep both the
+  separation rule and the walk rule.
+- **Background-ranged boxes.** These are now remembered as unranged instead of being dropped.
+- **Assist.** The assist skips a cluster that the newest box contradicts. It neither moves the gate nor
+  latches.
+- **Logging.** `[CONFLICT]` logs the bearing that was tested, plus `newest=1/0`.
+
+Claude corrected five test fixtures. One of them had flipped a 24° newest-box case to expect a
+publication.
+
+**Offline results:**
+- `scripts/check.py` passes 282/282.
+- The missed-frame tests, with one or two boxes missing, fail on bddb041.
+- The auditor's probes P1, P2, P2b, P5 and P6 fail closed again. P4 remains a known limit.
+
+**E6 bag replay:**
+
+| Replay | bddb041 | **18ec4bc** |
+| --- | --- | --- |
+| 24 timings | 0 | 0 |
+| 420 timings (delay 0–100 ms, phase 0–95 ms) | 0 | **0** (`/synced_target` total 78091) |
+| Last box dropped, 420 timings | **4** | **0** (77640) |
+| Last box dropped, the 4 failing timings | 4 | 0 |
+| Last two boxes dropped, 5 timings | — | 0 |
+
+The rows are in `fine_sweep_18ec4bc_nodrop.json` and `fine_sweep_18ec4bc_drop1.json`.
+
+**Full twin (run 44352152144): 106/110 on the baseline set, 0 contacts, 106/115 overall.** All three PR
+CI jobs pass.
+
+| Code | Baseline set | Runs with `[CONFLICT]` | `blind_corner` | `pass_by` |
+| --- | --- | --- | --- | --- |
+| 6a64669 (baseline) | 106/110 | — | 1/5 | 5/5 |
+| 05bb929 | 107/110 | — | 2/5 | 5/5 |
+| bddb041 | 108/110 | 2/115 | 3/5 | 5/5 |
+| **18ec4bc** | **106/110** | **1/115** | 1/5 | 5/5 |
+
+- **T22 twin criterion met** (at least 106/110 with 0 contacts).
+- **Every failure in the baseline set is `blind_corner`,** and none of those runs latched. s0 and s1
+  reached view shares of 0.897 and 0.893, just under the 0.9 rule. s3 and s4 lost the target, as in
+  earlier rounds. This is the scenario's usual variation between runs, not an effect of round 8.
+- **The only latch** is in `fast_side_step_left` s1.
