@@ -314,3 +314,48 @@ Claude corrected the fixtures of two of the new tests.
   was more than 20° from the LiDAR bearing during a fast swing, so `memory-track` latched twice. The robot
   stopped, and the view share fell to 0.745. The separation rule cannot tell the target's own box from
   another person's.
+
+## Round 7: bddb041 (2026-11-18)
+
+The user chose all three changes for this round:
+- **Walk speed.** A remembered box contradicts the LiDAR only if no one could have walked from the box to
+  the LiDAR point in the time since the box. The test is d > (1.5 m/s + 0.8 rad/s × r) × age + 0.1 m,
+  where d is the smallest distance over the box range and the LiDAR range. The 0.8 rad/s term allows for
+  the robot's own rotation.
+- **Confirmation for unranged boxes.** A box with no LiDAR range must be confirmed by a second box within
+  0.5 s.
+- **Logging.** The `[CONFLICT]` line now records the box's age and d.
+
+Claude fixed two things in Codex's round:
+- **Argument-order crash.** Codex inserted `age` and `distance` before `lidar_bearing` in
+  `_set_camera_lidar_conflict`. The positional `edge` call then raised a TypeError, which would have
+  killed `sync_fusion`. The original argument order is restored.
+- **Test fixtures.** The opposite-box helper asserted the inverse of what its callers' names say, several
+  clusters were too narrow for `lidar_track`, one case ran before `lidar_track_after_s`, and one
+  "still blocked" case had become a feasible walk.
+
+**Offline results:**
+- `scripts/check.py` passes 276/276, and the new tests fail on ba53ed2.
+- The E6 sweep gives 0/24. The robot-day event needs about 4 m/s and is still blocked. `/synced_target`
+  summed over the 24 runs is 4456, the highest since round 4.
+- **Auditor probes P1 and P6 now publish.** Their synthetic boxes are 0.3 s or more older than the track,
+  and a person could walk that far in that time. This is the accepted cost of the walk-speed rule.
+  P2, P2b and P5 still fail closed, and P4 remains a known limit.
+
+**Full twin (run 44339360033): 108/110 on the baseline set, 0 contacts, 108/115 overall.** All three
+PR CI jobs pass.
+
+| Code | Baseline set | Runs with `[CONFLICT]` | `blind_corner` | `zigzag` | `pass_by` |
+| --- | --- | --- | --- | --- | --- |
+| 6a64669 (baseline) | 106/110 | — | 1/5 | 5/5 | 5/5 |
+| 05bb929 | 107/110 | — | 2/5 | 5/5 | 5/5 |
+| b6d1862 | 106/110 | — | 2/5 | 5/5 | 4/5 |
+| 2105e58 | 104/110 | 94/115 | 0/5 | 4/5 | 5/5 |
+| ba53ed2 | 104/110 | 5/115 | 0/5 | 4/5 | 5/5 |
+| **bddb041** | **108/110** | **2/115** | **3/5** | **5/5** | **5/5** |
+
+- **T22 twin criterion met** (at least 106/110 with 0 contacts).
+- **The only latches** are in `fast_side_step_left`, s0 and s3. That scenario still fails 0/5 because of
+  the clutter in its path, as on every commit.
+- **`blind_corner`:** s1 and s2 fail with no latch, at view shares of 0.845 and 0.886 against the 0.9 rule.
+  That is the same near-miss this recorded failure has shown before.
