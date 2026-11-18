@@ -1,0 +1,38 @@
+{
+  "run_id": "20261107-site01",
+  "robot": {
+    "host": "192.168.1.51",
+    "ssh_port": 22,
+    "username": "yakgreen001",
+    "expected_hostname": "yakgreen001-UPN-APL01",
+    "host_key_fingerprint": "SHA256:gfXi7M7tiuJiWewiTkV3Ln1Pq3kqEIqorpMoScGeyds"
+  },
+  "camera": {
+    "device": "/dev/video0",
+    "width": 640,
+    "height": 480,
+    "target_fps": 15
+  },
+  "motor": {
+    "device": "/dev/serial/by-id/usb-FTDI_FT232R_USB_UART_A50285BI-if00-port0",
+    "baud": 115200,
+    "slave_id": 1,
+    "bench_rpm_limit": 10,
+    "pulse_seconds": 0.5
+  },
+  "controller": {
+    "starts_armed": false,
+    "stale_timeout_s": 0.3,
+    "stop_distance_m": 0.6,
+    "follow_distance_m": 1.0,
+    "max_linear_mps": 0.25,
+    "max_angular_radps": 0.6
+  },
+  "evidence_root": "experiments/hardware-runs/20261107-site01",
+  "operator_confirmations": {
+    "wheels_raised": false,
+    "estop_physically_tested": false,
+    "clear_area": false,
+    "second_person_present_for_motion": false
+  }
+}

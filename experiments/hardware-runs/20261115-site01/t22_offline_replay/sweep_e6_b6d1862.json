@@ -1,0 +1,242 @@
+[
+ {
+  "yolo_delay_ms": 0,
+  "timer_phase_ms": 0,
+  "wrong": 0,
+  "wrong_t": [],
+  "cmd_vel": 217,
+  "synced": 210,
+  "turn_msgs": 59,
+  "max_abs_wz": 0.8
+ },
+ {
+  "yolo_delay_ms": 0,
+  "timer_phase_ms": 25,
+  "wrong": 0,
+  "wrong_t": [],
+  "cmd_vel": 210,
+  "synced": 202,
+  "turn_msgs": 44,
+  "max_abs_wz": 0.8
+ },
+ {
+  "yolo_delay_ms": 0,
+  "timer_phase_ms": 50,
+  "wrong": 0,
+  "wrong_t": [],
+  "cmd_vel": 216,
+  "synced": 210,
+  "turn_msgs": 59,
+  "max_abs_wz": 0.8
+ },
+ {
+  "yolo_delay_ms": 0,
+  "timer_phase_ms": 75,
+  "wrong": 0,
+  "wrong_t": [],
+  "cmd_vel": 157,
+  "synced": 154,
+  "turn_msgs": 6,
+  "max_abs_wz": 0.8
+ },
+ {
+  "yolo_delay_ms": 20,
+  "timer_phase_ms": 0,
+  "wrong": 0,
+  "wrong_t": [],
+  "cmd_vel": 160,
+  "synced": 157,
+  "turn_msgs": 10,
+  "max_abs_wz": 0.8
+ },
+ {
+  "yolo_delay_ms": 20,
+  "timer_phase_ms": 25,
+  "wrong": 0,
+  "wrong_t": [],
+  "cmd_vel": 215,
+  "synced": 208,
+  "turn_msgs": 59,
+  "max_abs_wz": 0.8
+ },
+ {
+  "yolo_delay_ms": 20,
+  "timer_phase_ms": 50,
+  "wrong": 0,
+  "wrong_t": [],
+  "cmd_vel": 156,
+  "synced": 153,
+  "turn_msgs": 6,
+  "max_abs_wz": 0.8
+ },
+ {
+  "yolo_delay_ms": 20,
+  "timer_phase_ms": 75,
+  "wrong": 0,
+  "wrong_t": [],
+  "cmd_vel": 154,
+  "synced": 151,
+  "turn_msgs": 3,
+  "max_abs_wz": 0.8
+ },
+ {
+  "yolo_delay_ms": 40,
+  "timer_phase_ms": 0,
+  "wrong": 0,
+  "wrong_t": [],
+  "cmd_vel": 155,
+  "synced": 151,
+  "turn_msgs": 4,
+  "max_abs_wz": 0.8
+ },
+ {
+  "yolo_delay_ms": 40,
+  "timer_phase_ms": 25,
+  "wrong": 0,
+  "wrong_t": [],
+  "cmd_vel": 159,
+  "synced": 156,
+  "turn_msgs": 10,
+  "max_abs_wz": 0.8
+ },
+ {
+  "yolo_delay_ms": 40,
+  "timer_phase_ms": 50,
+  "wrong": 0,
+  "wrong_t": [],
+  "cmd_vel": 214,
+  "synced": 206,
+  "turn_msgs": 58,
+  "max_abs_wz": 0.8
+ },
+ {
+  "yolo_delay_ms": 40,
+  "timer_phase_ms": 75,
+  "wrong": 0,
+  "wrong_t": [],
+  "cmd_vel": 213,
+  "synced": 206,
+  "turn_msgs": 58,
+  "max_abs_wz": 0.8
+ },
+ {
+  "yolo_delay_ms": 60,
+  "timer_phase_ms": 0,
+  "wrong": 0,
+  "wrong_t": [],
+  "cmd_vel": 214,
+  "synced": 208,
+  "turn_msgs": 59,
+  "max_abs_wz": 0.8
+ },
+ {
+  "yolo_delay_ms": 60,
+  "timer_phase_ms": 25,
+  "wrong": 0,
+  "wrong_t": [],
+  "cmd_vel": 214,
+  "synced": 208,
+  "turn_msgs": 59,
+  "max_abs_wz": 0.8
+ },
+ {
+  "yolo_delay_ms": 60,
+  "timer_phase_ms": 50,
+  "wrong": 0,
+  "wrong_t": [],
+  "cmd_vel": 215,
+  "synced": 208,
+  "turn_msgs": 59,
+  "max_abs_wz": 0.8
+ },
+ {
+  "yolo_delay_ms": 60,
+  "timer_phase_ms": 75,
+  "wrong": 0,
+  "wrong_t": [],
+  "cmd_vel": 154,
+  "synced": 151,
+  "turn_msgs": 2,
+  "max_abs_wz": 0.8
+ },
+ {
+  "yolo_delay_ms": 80,
+  "timer_phase_ms": 0,
+  "wrong": 0,
+  "wrong_t": [],
+  "cmd_vel": 211,
+  "synced": 205,
+  "turn_msgs": 53,
+  "max_abs_wz": 0.8
+ },
+ {
+  "yolo_delay_ms": 80,
+  "timer_phase_ms": 25,
+  "wrong": 0,
+  "wrong_t": [],
+  "cmd_vel": 213,
+  "synced": 207,
+  "turn_msgs": 59,
+  "max_abs_wz": 0.8
+ },
+ {
+  "yolo_delay_ms": 80,
+  "timer_phase_ms": 50,
+  "wrong": 0,
+  "wrong_t": [],
+  "cmd_vel": 157,
+  "synced": 154,
+  "turn_msgs": 7,
+  "max_abs_wz": 0.8
+ },
+ {
+  "yolo_delay_ms": 80,
+  "timer_phase_ms": 75,
+  "wrong": 0,
+  "wrong_t": [],
+  "cmd_vel": 214,
+  "synced": 207,
+  "turn_msgs": 59,
+  "max_abs_wz": 0.8
+ },
+ {
+  "yolo_delay_ms": 100,
+  "timer_phase_ms": 0,
+  "wrong": 0,
+  "wrong_t": [],
+  "cmd_vel": 213,
+  "synced": 207,
+  "turn_msgs": 60,
+  "max_abs_wz": 0.8
+ },
+ {
+  "yolo_delay_ms": 100,
+  "timer_phase_ms": 25,
+  "wrong": 0,
+  "wrong_t": [],
+  "cmd_vel": 213,
+  "synced": 207,
+  "turn_msgs": 60,
+  "max_abs_wz": 0.8
+ },
+ {
+  "yolo_delay_ms": 100,
+  "timer_phase_ms": 50,
+  "wrong": 0,
+  "wrong_t": [],
+  "cmd_vel": 157,
+  "synced": 155,
+  "turn_msgs": 8,
+  "max_abs_wz": 0.8
+ },
+ {
+  "yolo_delay_ms": 100,
+  "timer_phase_ms": 75,
+  "wrong": 0,
+  "wrong_t": [],
+  "cmd_vel": 157,
+  "synced": 155,
+  "turn_msgs": 8,
+  "max_abs_wz": 0.8
+ }
+]
