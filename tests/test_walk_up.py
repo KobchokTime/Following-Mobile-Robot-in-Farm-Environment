@@ -99,8 +99,8 @@ class WalkUpTest(unittest.TestCase):
         # and the boxes of the person stepping right are rejected; it ends before the LiDAR track call.
         node.gate.ambiguous_until = 1.75
         # Rejected boxes are all recorded while the prediction remains within the edge threshold.
-        for k, deg in enumerate((-6.9, -17.3, -26.6, -30.5), 1):
-            t = 1.3 + k * 0.1
+        for offset, deg in ((0.0, -6.9), (0.165, -17.3), (0.367, -26.6), (0.521, -30.5)):
+            t = 1.3 + offset
             node.gate.bearing = math.radians(20.0)
             node.gate.t = t
             self.assertLess(abs(node.gate._predict(t)[0]), node.edge_rad)
@@ -109,10 +109,10 @@ class WalkUpTest(unittest.TestCase):
             self.assertFalse(node.camera_lidar_conflict)  # the round-3 latch alone misses this sequence
         self.assertEqual(len(node.rejected_camera_boxes), 4)
         node.gate.bearing = math.radians(31.0)
-        node.gate.t = 1.8
-        now = 1.9
+        node.gate.t = 1.3 + 0.739
+        now = 1.3 + 0.739
         node.now_sec = lambda: now
-        node.scan_points = [(math.radians(b), 0.95) for b in range(42, 56)]
+        node.scan_points = [(math.radians(b), 0.92) for b in range(21, 36)]  # one 0.24 m cluster near +28 deg
         node.scan_time = now
         predicted, pr = node.gate._predict(now)
         self.assertGreaterEqual(abs(predicted), node.edge_rad)
@@ -225,8 +225,8 @@ class WalkUpTest(unittest.TestCase):
         self.assertIsNotNone(_load().lidar_track(node.scan_points, predicted, pr, math.radians(25), 0.5))
         before = len(node.published)
         node.track_with_lidar()
-        self.assertEqual(len(node.published), before)
-        self.assertTrue(node.camera_lidar_conflict)
+        self.assertEqual(len(node.published), before + 1)
+        self.assertFalse(node.camera_lidar_conflict)
 
     def test_nearer_opposite_box_range_mismatch_blocks_edge_track(self):
         self._assert_opposite_box_blocks_edge_track(0.40)
@@ -251,6 +251,9 @@ class WalkUpTest(unittest.TestCase):
         node.try_sync_from_yolo(1.3, cx, 240, 4)
         self.assertEqual(node.last_camera_fix, 1.2)
         self.assertTrue(node.rejected_camera_boxes)
+        # Keep this contradiction outside the configured walking-speed envelope.
+        node.rejected_camera_boxes[0] = (1.75, node.rejected_camera_boxes[0][1],
+                                         node.rejected_camera_boxes[0][2])
         node.gate.bearing, node.gate.t = math.radians(31), 1.4
         node.now_sec = lambda: 1.8
         node.scan_points = [(math.radians(deg), 0.95) for deg in range(42, 56)]
@@ -261,7 +264,7 @@ class WalkUpTest(unittest.TestCase):
         self.assertIsNotNone(_load().lidar_track(node.scan_points, predicted, pr, math.radians(25), 0.5))
         before = len(node.published)
         node.track_with_lidar()
-        self.assertEqual(len(node.published), before)
+        self.assertEqual(len(node.published), before)  # 0.05 s old box, about 1 m away: no one walks that fast
         self.assertTrue(node.camera_lidar_conflict)
 
     def test_conflict_separation_parameter_requires_positive_finite_below_hfov(self):
@@ -271,6 +274,74 @@ class WalkUpTest(unittest.TestCase):
         for value in (-1.0, float('nan')):
             with self.subTest(behind=value), self.assertRaises(ValueError):
                 make_node(lidar_conflict_behind_m=value)
+
+    def test_new_conflict_parameters_require_finite_nonnegative_values(self):
+        for name in ('lidar_conflict_speed_mps', 'lidar_conflict_turn_rate',
+                     'lidar_conflict_margin_m', 'lidar_conflict_confirm_s'):
+            for value in (-0.01, float('nan'), float('inf')):
+                with self.subTest(name=name, value=value), self.assertRaises(ValueError):
+                    make_node(**{name: value})
+
+    def test_walk_speed_feasibility_allows_zigzag_swing_after_0_3_seconds(self):
+        _, node = make_node(lidar_assist=False)
+        node.gate.accept(0.0, 0.0, 1.0)
+        node.gate.accept(1.0, 0.0, 1.0)
+        node.gate.bearing, node.gate.range, node.gate.t = math.radians(29.1), 0.85, 1.3
+        node.gate.bearing_rate = node.gate.range_rate = 0.0
+        # last camera fix 0.7 s: the LiDAR track is allowed (more than lidar_track_after_s ago); box at 1.0 s
+        node.last_camera_fix, node.last_camera_bearing = 0.7, math.radians(-5.0)
+        node.last_target = (320, 240, 4, 1.0)
+        node.recent_ranges = [(0.7, 1.0)]
+        node.rejected_camera_boxes = [(1.0, math.radians(-7.2), 1.66)]
+        node.now_sec = lambda: 1.3
+        node.scan_points = [(math.radians(deg), 0.85) for deg in range(22, 37)]
+        node.scan_time = 1.3
+        self.assertGreaterEqual(1.3 - node.last_camera_fix, node.lidar_after)
+        self.assertGreaterEqual(abs(node.gate._predict(1.3)[0]), node.edge_rad)
+        self.assertIsNotNone(_load().lidar_track(node.scan_points, math.radians(29.1), 0.85,
+                                                 math.radians(25), 0.5))
+        before = len(node.published)
+        node.track_with_lidar()
+        self.assertEqual(len(node.published), before + 1)
+        self.assertFalse(node.camera_lidar_conflict)
+
+    def test_walk_speed_feasibility_blocks_same_zigzag_geometry_after_0_1_seconds(self):
+        _, node = make_node(lidar_assist=False)
+        node.gate.accept(0.0, 0.0, 1.0)
+        node.gate.accept(1.0, 0.0, 1.0)
+        node.gate.bearing, node.gate.range, node.gate.t = math.radians(29.1), 0.85, 1.1
+        node.gate.bearing_rate = node.gate.range_rate = 0.0
+        # last camera fix 0.7 s: the LiDAR track is allowed (more than lidar_track_after_s ago); box at 1.0 s
+        node.last_camera_fix, node.last_camera_bearing = 0.7, math.radians(-5.0)
+        node.last_target = (320, 240, 4, 1.0)
+        node.recent_ranges = [(0.7, 1.0)]
+        node.rejected_camera_boxes = [(1.0, math.radians(-7.2), 1.66)]
+        node.now_sec = lambda: 1.1
+        node.scan_points = [(math.radians(deg), 0.85) for deg in range(22, 37)]
+        node.scan_time = 1.1
+        self.assertGreaterEqual(1.1 - node.last_camera_fix, node.lidar_after)
+        self.assertGreaterEqual(abs(node.gate._predict(1.1)[0]), node.edge_rad)
+        self.assertIsNotNone(_load().lidar_track(node.scan_points, math.radians(29.1), 0.85,
+                                                 math.radians(25), 0.5))
+        before = len(node.published)
+        node.track_with_lidar()
+        self.assertEqual(len(node.published), before)
+        self.assertTrue(node.camera_lidar_conflict)
+        conflict_line = next(line for line in node.logs if line.startswith('[CONFLICT] on'))
+        self.assertIn('age=', conflict_line)
+        self.assertIn(' d=', conflict_line)
+
+    def test_single_unranged_box_does_not_latch_but_second_nearby_frame_does(self):
+        _, node = make_node(lidar_assist=False)
+        node.gate.accept(0.0, 0.0, 1.0)
+        node.gate.accept(1.0, 0.0, 1.0)
+        node.last_camera_fix = 1.0
+        node.last_target = (320, 240, 4, 1.0)
+        box = (1.1, math.radians(-20.8), math.inf)
+        node.rejected_camera_boxes = [box]
+        self.assertIsNone(node._rejected_box_conflicts(1.4, math.radians(47.1), lidar_range=0.95))
+        node.rejected_camera_boxes.append((1.3, math.radians(-20.0), 0.9))
+        self.assertIsNotNone(node._rejected_box_conflicts(1.4, math.radians(47.1), lidar_range=0.95))
 
     def test_rejected_opposite_box_without_lidar_range_blocks_edge_track(self):
         _, node = make_node(box_range_from_scan=True)
@@ -292,6 +363,11 @@ class WalkUpTest(unittest.TestCase):
         node.now_sec = lambda: 1.8
         node.scan_points = [(math.radians(deg), 0.95) for deg in range(42, 56)]
         node.scan_time = 1.8
+        before = len(node.published)
+        node.track_with_lidar()
+        self.assertEqual(len(node.published), before + 1)
+        self.assertFalse(node.camera_lidar_conflict)
+        node.rejected_camera_boxes.append((1.75, b, math.inf))
         before = len(node.published)
         node.track_with_lidar()
         self.assertEqual(len(node.published), before)
@@ -427,14 +503,16 @@ class WalkUpTest(unittest.TestCase):
         self.assertNotEqual((node.gate.bearing, node.gate.t), before)
         self.assertFalse(node.camera_lidar_conflict)
 
-        # A later edge track 24 deg from the remembered box is still blocked.
-        node.gate.bearing, node.gate.t = math.radians(-31), 1.6
-        node.now_sec = lambda: 1.8
-        node.scan_points = [(math.radians(deg), 1.67) for deg in range(-38, -24)]
-        node.scan_time = 1.8
-        predicted, pr = node.gate._predict(1.8)
+        # A later edge track far from the remembered box (-45 deg, about 1.1 m away 0.3 s later: faster than
+        # anyone walks, with the turn allowance) is still blocked.
+        node.gate.bearing, node.gate.t = math.radians(-45), 1.5
+        node.now_sec = lambda: 1.6
+        node.scan_points = [(math.radians(deg), 1.67) for deg in range(-52, -38)]
+        node.scan_time = 1.6
+        predicted, pr = node.gate._predict(1.6)
         self.assertGreaterEqual(abs(predicted), node.edge_rad)
-        self.assertLessEqual(abs(1.8 - node.scan_time), node.scan_max_age)
+        self.assertLessEqual(abs(1.6 - node.scan_time), node.scan_max_age)
+        self.assertGreaterEqual(1.6 - node.last_camera_fix, node.lidar_after)
         self.assertIsNotNone(_load().lidar_track(node.scan_points, predicted, pr, math.radians(25), 0.5))
         before_published = len(node.published)
         node.track_with_lidar()
@@ -467,6 +545,9 @@ class WalkUpTest(unittest.TestCase):
 
         edge_bearing = math.radians(31)
         node.gate.bearing, node.gate.t = edge_bearing, 1.6
+        # The evidence is recent enough that this geometry cannot be explained by walking.
+        node.rejected_camera_boxes[0] = (1.75, node.rejected_camera_boxes[0][1],
+                                         node.rejected_camera_boxes[0][2])
         node.now_sec = lambda: 1.8
         node.scan_points = [(math.radians(deg), 1.0) for deg in range(24, 38)]
         node.scan_time = 1.8

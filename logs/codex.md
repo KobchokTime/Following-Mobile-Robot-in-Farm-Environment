@@ -576,3 +576,10 @@ Earlier history: `history-2026-10-16.md`.
 - Updated `tests/test_walk_up.py`: replaced center-band coverage with 13-degree publish / 24-degree block separation coverage; replaced assist-latch coverage with rejected -7.1-degree / 1.67 m box, -12.7-degree assist update, then blocked edge-track publication. Added a distant-memory assist case and invalid separation parameter cases (negative, zero, NaN, and HFOV); retained negative/NaN validation for the behind limit.
 - Known limits: an edge can publish before any contradicting box is observed; a second person within the configured separation of the drifted LiDAR bearing is not distinguished; bearings are not corrected for the robot's own rotation. Real robot behavior still needs testing.
 - Checks were not run. Changes remain uncommitted; no push, PR, integration-file edit, or robot check.
+
+### 2026-11-18 - robot - Add walk-speed feasibility to T22 memory conflicts
+
+- Added walking-speed feasibility to remembered-box conflict decisions, using the most favorable box range and the LiDAR range. Give-way checks use the target column and `last_target` range. `[CONFLICT] on` memory lines include age and separation distance.
+- Added validated `[GATE]` parameters `lidar_conflict_speed_mps` (1.5), `lidar_conflict_turn_rate` (0.8), `lidar_conflict_margin_m` (0.1), and `lidar_conflict_confirm_s` (0.5). A no-range box now requires a second nearby rejected frame within the confirmation window.
+- Updated the robot-day test to its observed box and LiDAR times; added zigzag feasibility, un-ranged confirmation, and new-parameter validation cases in `tests/test_walk_up.py`. Adjusted remembered-box contradiction fixtures where their prior delays made movement feasible.
+- Known limits: a fast enough contradiction is indistinguishable from a person walking; an edge publish can happen before a contradictory box is seen; the turn allowance is constant rather than measured yaw rate. Checks and real robot tests were not run. Changes remain uncommitted; no push, PR, integration-file edit, or robot check.
