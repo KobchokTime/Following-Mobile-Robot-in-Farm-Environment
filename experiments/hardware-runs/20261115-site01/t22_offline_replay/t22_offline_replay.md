@@ -511,3 +511,61 @@ impact).
 **What the evidence supports:** the T22 wrong turn is not reproduced offline on the E6 bag with up to two
 missed frames (0 of 420 timings). It does not cover three missed frames, or a second person or false
 positive near the drifted track.
+
+## Round 9: 33d4a0e (2026-11-19, applied by Claude at the user's request)
+
+**Change.** This is the auditor's mutation q6. `newest_time` is now taken only over boxes that
+contradict the tested bearing: boxes in the image and more than `lidar_conflict_sep_deg` away. The
+older-box walk rule now matters only when the newest contradicting box is skipped, which happens when it
+is an unconfirmed unranged box.
+
+**Tests.**
+- `test_older_box_uses_turn_allowance_but_still_requires_separation` is rewritten for the new rule.
+- The new test `test_newer_box_near_the_drifted_track_does_not_demote_the_real_contradiction` has five
+  cases. Four of them fail on 18ec4bc. The fifth, a same-frame box arriving before the real one, already
+  passed.
+- `scripts/check.py` passes 283/283.
+
+**Probes.** Every probe from the auditor's `r8_probe.py` is now blocked, except a single unconfirmed
+unranged box or a single background box with nothing before it (finding 5, a known low limit).
+P1, P2, P2b, P5 and P6 fail closed. P4 remains a known limit.
+
+**E6 bag, 420 timings each** (delay 0–100 ms, phase 0–95 ms):
+
+| Boxes dropped | 18ec4bc (auditor) | **33d4a0e** | `/synced_target` total, 33d4a0e |
+| --- | --- | --- | --- |
+| none | 0 | **0** | 79379 |
+| last one (587.70–587.80) | 0 | **0** | 78928 |
+| last two (587.55–587.80) | 0 | **0** | 78408 |
+| last three (587.38–587.80) | **2** (d55 p85, d60 p90) | **0** | 76902 |
+
+The two three-drop timings were rerun with Claude's copy of the harness. 18ec4bc turned the wrong way at
+588.01 s in both; 33d4a0e did not. Why q6 also closes the three-drop case has not been analysed. It is
+probably because the assist uses the same function and so no longer moves the gate toward the drifting
+cluster. This needs a probe before it is relied on. The rows are in
+`fine_sweep_33d4a0e_{nodrop,drop1,drop2,drop3}.json`.
+
+**Full twin (run 44368013150): 107/110 on the baseline set, 0 contacts, 107/115 overall.** All three PR
+CI jobs pass.
+- Every failure is in `blind_corner` (s1, s3 and s4 lost the target). Latches appeared in four runs:
+  - the round-3 `edge` rule in `blind_corner` s1 and s4, and in `side_step` s0;
+  - `memory-track` in `side_step` s1.
+
+  Both `side_step` runs passed.
+- `fast_side_step_left` is 0/5, the clutter-path issue, as on every commit.
+
+| Code | Baseline set | `blind_corner` |
+| --- | --- | --- |
+| 6a64669 | 106/110 | 1/5 |
+| 18ec4bc | 106/110 | 1/5 |
+| **33d4a0e** | **107/110** | 2/5 |
+
+**Still open from the audit:**
+- **Before a read-only hardware run:** make `[CONFLICT]` visible to the operator, and document the
+  recovery. The recovery is to step back into 0.5–1.0 m, centred; until then a stop can last about 61 s.
+- **Before any motion test:**
+  - measured yaw in place of the constant turn allowance;
+  - a decision on the last-accepted-bearing guard (finding 2);
+  - a review of the −0.75 m/s reverse after a re-lock;
+  - a read-only run with a person side-stepping and leaving the image;
+  - the full motion gate.
