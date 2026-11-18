@@ -241,3 +241,41 @@ behaviours are not pinned by any test:
 - fix 1–3, or accept them in writing;
 - do a read-only hardware run with the drive disabled and the latch logged;
 - then the full motion gate.
+
+## Round 5: 2105e58 (2026-11-18)
+
+Round 5 is Codex's answer to the audit, plus Claude's fixes:
+- **Unlock crash:** the gate is checked again after `accept()`.
+- **Memory bug:** the give-way check had been deleting the box it skips from the memory.
+- **Fixtures:** three test fixtures were corrected.
+
+**Offline results:**
+- `scripts/check.py` passes 271/271.
+- The auditor's probes P1, P2, P2b, P5 and P6 now publish nothing and latch. P4 remains a known limit.
+- The E6 sweep gives 0/24; `/synced_target` summed over the 24 runs is 4426.
+
+**Full twin (run 44323782326): 104/110 on the baseline set, 0 contacts, 104/115 overall.** This is
+below the T22 criterion of 106/110.
+
+| Code | Baseline set | `blind_corner` | `pass_by` | `zigzag` |
+| --- | --- | --- | --- | --- |
+| 05bb929 | 107/110 | 2/5 | 5/5 | 5/5 |
+| b6d1862 | 106/110 | 2/5 | 4/5 | 5/5 |
+| **2105e58** | **104/110** | **0/5** | 5/5 | **4/5** (s4: gap 3.84 m, view 0.247) |
+
+**Cause: the memory over-triggers.** `[CONFLICT] on` appears in 94 of 115 runs: 528 times with
+`memory-assist` and only 3 with `memory-track`. It appears in single-person scenarios too (`straight`,
+`walk_1p0`, `zigzag`). The counts are in `conflict_counts_2105e58.txt`. When the gate rejects the
+target's own box near the image centre for one frame, that box is remembered. The ±10° centre band then
+latches the next LiDAR assist, even onto the same person: in `zigzag` s4, a box at −7.1° and 1.67 m
+latched a cluster at −12.7°. Each latch cuts the LiDAR assist until the next accepted camera box. That
+costs the robot the cases that need the LiDAR, `blind_corner` and fast turns. There are still no
+contacts.
+
+**Design options for round 6 (not yet implemented):**
+- **A.** Use the memory only to stop a LiDAR-only publication, in `track_with_lidar`, which already checks
+  before it publishes. Do not use it to latch from `assist_with_lidar`. The auditor judged the assist
+  check to be an availability matter, not a safety one.
+- **B.** Replace the centre band and the sign rule with an angular separation rule. A box contradicts a
+  LiDAR bearing only when |box − LiDAR| is more than X°, for example 15–20°. P1, with the box at −2° and
+  the track at −31°, is still caught. The same person, with the box at −7° and the cluster at −13°, is not.
