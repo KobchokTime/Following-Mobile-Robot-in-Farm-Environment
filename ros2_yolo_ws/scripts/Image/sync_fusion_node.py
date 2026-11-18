@@ -455,6 +455,9 @@ class SyncFusionNode(Node):
         self.declare_parameter('lidar_angle_sign', 1.0)  # physical mount may reverse left/right
         self.declare_parameter('lidar_track_after_s', 0.3)  # camera silent this long -> use the LiDAR
         self.declare_parameter('lidar_track_max_s', 5.0)    # give up after this long without the camera
+        # Remember only rejected boxes near the predicted target range; distant bystanders should not
+        # suppress a legitimate LiDAR edge track.
+        self.declare_parameter('lidar_conflict_range_tolerance_m', 0.5)
         self.declare_parameter('lidar_edge_deg', 8.0)  # only when last seen this close to the image edge
         self.declare_parameter('lidar_scan_max_age_s', 0.3)  # older scans are never used to track
         # a box's range from the LiDAR cluster centred on it, not the nearest return in its sector
@@ -510,6 +513,9 @@ class SyncFusionNode(Node):
             raise ValueError('lidar_angle_sign must be -1.0 or 1.0')
         self.lidar_after = float(self.get_parameter('lidar_track_after_s').value)
         self.lidar_max = float(self.get_parameter('lidar_track_max_s').value)
+        self.lidar_conflict_range_tolerance = float(
+            self.get_parameter('lidar_conflict_range_tolerance_m').value)
+        self.rejected_camera_boxes = []  # (time, bearing, range), since the last accepted camera fix
         self.scan_points = []     # latest scan as (robot-frame bearing, range)
         self.covered_fix = None   # the last camera fix after which someone nearer covered the target
         self.recent_ranges = []   # (time, range) of the camera fixes in the last second
@@ -651,6 +657,9 @@ class SyncFusionNode(Node):
         if found is None:
             return None
         bearing, rng = found
+        if self._rejected_box_conflicts(now, bearing):
+            self.camera_lidar_conflict = True
+            return None
         px, py = pr * math.cos(pb), pr * math.sin(pb)
         if math.hypot(rng * math.cos(bearing) - px, rng * math.sin(bearing) - py) > self.assist_dist:
             return None
@@ -720,6 +729,10 @@ class SyncFusionNode(Node):
             if found is None:
                 return
             bearing, rng = found
+        if self._rejected_box_conflicts(now, bearing):
+            self.camera_lidar_conflict = True
+            return
+        if assisted is None:
             self.gate.accept_lidar(now, bearing, rng)
         # the image edge on the target's side: the controller turns that way at its full turn rate. A target
         # covered inside the image (blind_corner) is given at its own column instead: sent to the edge at 6 deg,
@@ -732,6 +745,17 @@ class SyncFusionNode(Node):
             sector = 0 if bearing > 0 else 8
         _, cy, _, _ = self.last_target
         self.publish_synced(cx, cy, rng, sector, 0.0)
+
+    def _rejected_box_conflicts(self, now, lidar_bearing):
+        """Whether a recent rejected in-image box contradicts this LiDAR bearing."""
+        if self.last_camera_fix is None:
+            return False
+        half_fov = math.radians(self.camera_hfov_deg / 2.0)
+        self.rejected_camera_boxes = [entry for entry in self.rejected_camera_boxes
+                                      if entry[0] >= self.last_camera_fix
+                                      and now - entry[0] <= self.lidar_max]
+        return any(abs(box_bearing) < half_fov and box_bearing * lidar_bearing <= 0
+                   for _, box_bearing, _ in self.rejected_camera_boxes)
 
     def cb_angles(self, msg):
         self.lidar_angles = list(msg.data)
@@ -805,6 +829,13 @@ class SyncFusionNode(Node):
                                        + (f" predicted range {pr:.2f} m" if occluded else ''))
                 self.occl_logged = occluded
         if self.use_gate and not self.gate.accept(ty, bearing, dist, chroma, hist):
+            # only against a live track: after an unlock gate.t is None and _predict would raise (T22 round 3)
+            if self.gate.locked and self.gate.t is not None and self.last_camera_fix is not None \
+                    and ty - self.last_camera_fix <= self.lidar_max:
+                _, pr = self.gate._predict(ty)
+                if abs(bearing) < math.radians(self.camera_hfov_deg / 2.0) \
+                        and abs(dist - pr) <= self.lidar_conflict_range_tolerance:
+                    self.rejected_camera_boxes.append((ty, bearing, dist))
             if self.gate.locked and self.gate.t is not None:
                 pb, _ = self.gate._predict(ty)
                 if camera_lidar_conflict(bearing, pb, self.edge_rad,
@@ -824,6 +855,7 @@ class SyncFusionNode(Node):
         self.recent_ranges = [(t0, r0) for t0, r0 in self.recent_ranges if ty - t0 <= 1.0] + [(ty, dist)]
         self.last_camera_fix = ty
         self.last_camera_bearing = bearing
+        self.rejected_camera_boxes.clear()
         self.camera_lidar_conflict = False
         if self.path_block is not None and ty - self.path_block[0] <= self.path_hold:
             dist = min(dist, max(self.path_floor, self.path_block[1] - self.path_margin))  # give way to whoever is in it

@@ -72,6 +72,154 @@ def make_node(**overrides):
 class WalkUpTest(unittest.TestCase):
     W, HFOV = 640, 70.0
 
+    def test_remembered_opposite_boxes_block_edge_track_and_clear_on_camera_fix(self):
+        _, node = make_node()
+        node.gate.accept(0.0, 0.0, 0.95)
+        node.gate.accept(1.2, 0.0, 0.95)
+        node.gate.bearing = math.radians(3.0)
+        node.gate.range = 0.95
+        node.gate.bearing_rate = node.gate.range_rate = 0.0
+        node.gate.t = 1.2
+        node.last_target = (320, 240, 4, 0.95)
+        node.recent_ranges = [(1.2, 0.95)]
+        f = (self.W / 2.0) / math.tan(math.radians(self.HFOV) / 2.0)
+
+        def camera(t, deg, rng):
+            b = math.radians(deg)
+            node.scan_points = scan(person(rng * math.cos(b), rng * math.sin(b)))
+            node.scan_time = t
+            node.buf_lidar.clear()
+            node.buf_lidar.append((t, [rng]))
+            cx = int(round(self.W / 2.0 - f * math.tan(b)))
+            node.try_sync_from_yolo(t, cx, 240, 4)
+
+        camera(1.3, 3.0, 0.95)
+        self.assertEqual(node.last_camera_fix, 1.3)
+        # As on the robot (E6 bag, [CROWD] on): someone was just beside the target, so the plain gate applies
+        # and the boxes of the person stepping right are rejected; it ends before the LiDAR track call.
+        node.gate.ambiguous_until = 1.75
+        # Rejected boxes are all recorded while the prediction remains within the edge threshold.
+        for k, deg in enumerate((-6.9, -17.3, -26.6, -30.5), 1):
+            t = 1.3 + k * 0.1
+            node.gate.bearing = math.radians(20.0)
+            node.gate.t = t
+            self.assertLess(abs(node.gate._predict(t)[0]), node.edge_rad)
+            camera(t, deg, 0.9)
+            self.assertEqual(node.last_camera_fix, 1.3)
+            self.assertFalse(node.camera_lidar_conflict)  # the round-3 latch alone misses this sequence
+        self.assertEqual(len(node.rejected_camera_boxes), 4)
+        node.gate.bearing = math.radians(31.0)
+        node.gate.t = 1.8
+        now = 1.9
+        node.now_sec = lambda: now
+        node.scan_points = [(math.radians(b), 0.95) for b in range(42, 56)]
+        node.scan_time = now
+        predicted, pr = node.gate._predict(now)
+        self.assertGreaterEqual(abs(predicted), node.edge_rad)
+        self.assertTrue(node.scan_time is not None and abs(now - node.scan_time) <= node.scan_max_age)
+        self.assertTrue(any(abs(b - predicted) < math.radians(25) and abs(r - pr) <= 0.5
+                            for b, r, _ in _load().lidar_clusters(node.scan_points)))
+        before = len(node.published)
+        node.track_with_lidar()
+        self.assertTrue(node.camera_lidar_conflict)
+        self.assertEqual(len(node.published), before)  # nothing from the LiDAR track
+
+        # A camera-accepted fix clears both the latch and remembered boxes; the next edge track resumes.
+        node.gate.bearing = math.radians(3.0)
+        node.gate.t = 2.0
+        camera(2.0, 3.0, 0.95)
+        self.assertFalse(node.camera_lidar_conflict)
+        self.assertEqual(node.rejected_camera_boxes, [])
+        node.gate.bearing = math.radians(31.0)
+        node.gate.t = 2.0
+        node.now_sec = lambda: 2.4
+        node.scan_points = [(math.radians(b), 0.95) for b in range(42, 56)]  # the left cluster again
+        node.scan_time = 2.4
+        before = len(node.published)
+        node.track_with_lidar()
+        self.assertEqual(len(node.published), before + 1)
+        self.assertEqual(node.published[-1][0], 0.0)
+
+    def test_rejected_opposite_box_out_of_range_does_not_block_edge_track(self):
+        _, node = make_node()
+        node.gate.accept(0.0, 0.0, 0.9)
+        node.gate.accept(1.2, 0.0, 0.9)
+        node.gate.bearing = math.radians(3.0)
+        node.gate.range = 0.9
+        node.gate.bearing_rate = node.gate.range_rate = 0.0
+        node.gate.t = 1.2
+        node.last_target = (320, 240, 4, 0.9)
+        node.last_camera_fix = 1.2
+        node.last_camera_bearing = math.radians(3.0)
+        node.recent_ranges = [(1.2, 0.9)]
+        b = math.radians(-20.0)
+        node.scan_points = scan(person(2.0 * math.cos(b), 2.0 * math.sin(b)))
+        node.scan_time = 1.3
+        node.buf_lidar.clear()
+        node.buf_lidar.append((1.3, [2.0]))
+        cx = int(round(self.W / 2.0 - (self.W / 2.0 / math.tan(math.radians(self.HFOV) / 2.0))
+                       * math.tan(b)))
+        node.gate.ambiguous_until = 1.35  # plain gate for this frame, as in the bag
+        node.try_sync_from_yolo(1.3, cx, 240, 4)
+        self.assertEqual(node.last_camera_fix, 1.2)  # rejected
+        self.assertGreater(abs(2.0 - node.gate._predict(1.3)[1]), node.lidar_conflict_range_tolerance)
+        self.assertEqual(node.rejected_camera_boxes, [])  # too far from the target's range to count
+        node.gate.bearing = math.radians(31.0)
+        node.gate.range = 0.9
+        node.gate.t = 1.4
+        node.now_sec = lambda: 1.8
+        node.scan_points = [(math.radians(deg), 0.9) for deg in range(42, 56)]
+        node.scan_time = 1.8
+        self.assertGreaterEqual(abs(node.gate._predict(1.8)[0]), node.edge_rad)
+        node.track_with_lidar()
+        self.assertFalse(node.camera_lidar_conflict)
+        self.assertTrue(node.published)
+        self.assertEqual(node.published[-1][0], 0.0)
+
+    def test_remembered_opposite_box_blocks_assist_without_advancing_gate(self):
+        _, node = make_node(lidar_assist=True)
+        node.gate.accept(0.0, 0.0, 0.9)
+        node.gate.accept(1.2, 0.0, 0.9)
+        node.gate.bearing = math.radians(3.0)
+        node.gate.range = 0.9
+        node.gate.bearing_rate = node.gate.range_rate = 0.0
+        node.gate.t = 1.2
+        node.last_target = (320, 240, 4, 0.9)
+        node.last_camera_fix = 1.2
+        node.last_camera_bearing = math.radians(3.0)
+        node.recent_ranges = [(1.2, 0.9)]
+        b = math.radians(-20.0)
+        node.scan_points = scan(person(0.9 * math.cos(b), 0.9 * math.sin(b)))
+        node.scan_time = 1.3
+        node.buf_lidar.clear()
+        node.buf_lidar.append((1.3, [0.9]))
+        cx = int(round(self.W / 2.0 - (self.W / 2.0 / math.tan(math.radians(self.HFOV) / 2.0))
+                       * math.tan(b)))
+        node.gate.ambiguous_until = 1.35  # plain gate for this frame, as in the bag; over before the assist
+        node.try_sync_from_yolo(1.3, cx, 240, 4)
+        self.assertEqual(node.last_camera_fix, 1.2)  # rejected
+        self.assertFalse(node.camera_lidar_conflict)
+        self.assertEqual(len(node.rejected_camera_boxes), 1)
+        node.gate.bearing = math.radians(31.0)
+        node.gate.range = 0.9
+        node.gate.t = 1.4
+        node.now_sec = lambda: 1.8
+        node.scan_points = scan(person(0.9 * math.cos(math.radians(31.0)),
+                                       0.9 * math.sin(math.radians(31.0))))
+        node.scan_time = 1.8
+        node.assist_scan_time = None
+        predicted, pr = node.gate._predict(1.8)
+        self.assertGreaterEqual(abs(predicted), node.edge_rad)
+        self.assertTrue(abs(1.8 - node.scan_time) <= node.scan_max_age)
+        assist_candidate = _load().lidar_track(node.scan_points, predicted, pr,
+                                               math.atan2(node.assist_dist, max(pr, 0.3)),
+                                               node.assist_dist, width_m=(0.05, 0.8))
+        self.assertIsNotNone(assist_candidate)
+        before = (node.gate.bearing, node.gate.t)
+        self.assertIsNone(node.assist_with_lidar())
+        self.assertTrue(node.camera_lidar_conflict)
+        self.assertEqual((node.gate.bearing, node.gate.t), before)
+
     def test_camera_lidar_conflict_stops_edge_track_publication(self):
         _, node = make_node()
         camera_bearing = math.radians(30.0)
@@ -129,6 +277,21 @@ class WalkUpTest(unittest.TestCase):
             node.buf_lidar.extend([(t, [1.3])])
             node.try_sync_from_yolo(t, self.W // 2, 240, 4)
             self.assertFalse(node.gate.locked)
+
+    def test_rejection_after_an_unlock_with_a_recent_camera_fix_does_not_raise(self):
+        # lidar_track_max_s longer than unlock_after_s: the box memory must not ask an unlocked gate
+        _, node = make_node(lidar_track_max_s=8.0)
+        node.gate.accept(0.0, 0.0, 0.8)
+        node.gate.accept(0.1, 0.0, 0.8)
+        node.last_camera_fix = 0.1
+        node.scan_points = scan(person(1.3, 0.0))
+        node.scan_time = 6.0
+        node.buf_lidar.clear()
+        node.buf_lidar.extend([(6.0, [1.3])])
+        self.assertLessEqual(6.0 - node.last_camera_fix, node.lidar_max)
+        node.try_sync_from_yolo(6.0, self.W // 2, 240, 4)  # 1.3 m: outside the lock window, rejected
+        self.assertFalse(node.gate.locked)
+        self.assertEqual(node.rejected_camera_boxes, [])
 
     def test_latched_give_way_publishes_nothing(self):
         _, node = make_node()

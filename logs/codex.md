@@ -551,3 +551,10 @@ Earlier history: `history-2026-10-16.md`.
 - Updated both T22 `track_with_lidar()` fixtures to model a +30° last camera sighting and a predicted track beyond `edge_rad`; added explicit edge eligibility, fresh scan, 0.15–0.8 m cluster width, 25° search window, 0.5 m range tolerance, and far-filter range assertions.
 - The no-latch case now asserts that a publication occurs and maps to `cx=0` before asserting the conflict latch suppresses publication. The center-camera conflict test asserts its valid pre-latch publication, latch suppression, and clearing after an accepted camera fix.
 - Production code unchanged. Tests not run in this environment; Claude reported the existing suite result and requested fixture corrections. No robot, push, PR, or integration-file changes.
+
+### 2026-11-18 - robot - Remember rejected boxes for T22 edge tracking
+
+- In `sync_fusion_node.py`, remember in-image camera boxes rejected since the last accepted camera fix. Before LiDAR assist changes the gate or LiDAR tracking publishes, compare remembered boxes against the candidate bearing; an opposite-side or centered box sets the existing fail-closed latch. Accepted camera fixes clear the history and latch.
+- Added ROS parameter `lidar_conflict_range_tolerance_m`, default 0.5 m. A rejected box enters the history only within `lidar_track_max_s` of the accepted fix and within this range tolerance of the predicted target. This limits false stops from distant bystanders while retaining near-target evidence.
+- Added `test_remembered_opposite_boxes_block_edge_track_and_clear_on_camera_fix`, `test_rejected_opposite_box_out_of_range_does_not_block_edge_track`, and `test_remembered_opposite_box_blocks_assist_without_advancing_gate` in `tests/test_walk_up.py`. Tests and replay were not run here; Claude will run them and the twin.
+- Known limits: same-side boxes and frames with no detected box do not block LiDAR following. Range consistency can exclude a genuinely contradictory box whose measured range differs from the predicted target by more than 0.5 m. No robot check, commit, or push was performed.
